@@ -1,0 +1,333 @@
+<title>이력서 빌더 대시보드 — 구조 설계</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<style>
+:root{
+  --bg:#F5F6F7; --surface:#FFFFFF; --panel:#FAFAFB; --ink:#17191C; --muted:#5E646D; --faint:#8B919A;
+  --border:#E4E7EA; --line:#EDEFF1; --accent:#2F6FED; --accent-soft:#EAF1FE; --ok:#16A34A; --ok-soft:#E7F6EC;
+  --radius:12px; --sans:system-ui,-apple-system,"Segoe UI",Roboto,"Apple SD Gothic Neo","Malgun Gothic",sans-serif;
+  --mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+}
+@media(prefers-color-scheme:dark){:root{
+  --bg:#0C0E10; --surface:#151719; --panel:#1B1E21; --ink:#E9ECEF; --muted:#9AA1A9; --faint:#6D747C;
+  --border:rgba(255,255,255,.10); --line:rgba(255,255,255,.06); --accent:#6E9BF6; --accent-soft:rgba(110,155,246,.14);
+  --ok:#4ADE80; --ok-soft:rgba(74,222,128,.14);
+}}
+:root[data-theme="dark"]{
+  --bg:#0C0E10; --surface:#151719; --panel:#1B1E21; --ink:#E9ECEF; --muted:#9AA1A9; --faint:#6D747C;
+  --border:rgba(255,255,255,.10); --line:rgba(255,255,255,.06); --accent:#6E9BF6; --accent-soft:rgba(110,155,246,.14);
+  --ok:#4ADE80; --ok-soft:rgba(74,222,128,.14);
+}
+:root[data-theme="light"]{
+  --bg:#F5F6F7; --surface:#FFFFFF; --panel:#FAFAFB; --ink:#17191C; --muted:#5E646D; --faint:#8B919A;
+  --border:#E4E7EA; --line:#EDEFF1; --accent:#2F6FED; --accent-soft:#EAF1FE; --ok:#16A34A; --ok-soft:#E7F6EC;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);line-height:1.6;-webkit-font-smoothing:antialiased;letter-spacing:-.01em}
+.wrap{max-width:1080px;margin:0 auto;padding:0 22px}
+.mono{font-family:var(--mono);font-variant-numeric:tabular-nums}
+.eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--faint)}
+h1,h2,h3{margin:0;letter-spacing:-.03em;line-height:1.15}
+
+header.top{position:sticky;top:0;z-index:20;background:color-mix(in srgb,var(--bg) 84%,transparent);
+  backdrop-filter:blur(10px);border-bottom:1px solid var(--border)}
+.top .wrap{display:flex;align-items:center;gap:12px;height:54px}
+.top b{font-size:14px}.top .s{font-size:12px;color:var(--faint)}
+.tbtn{margin-left:auto;width:34px;height:34px;border:1px solid var(--border);border-radius:8px;background:var(--surface);cursor:pointer;color:var(--ink);display:grid;place-items:center}
+
+.intro{padding:56px 0 26px}
+.intro h1{font-size:clamp(28px,4.6vw,44px);font-weight:800;text-wrap:balance;margin-top:12px}
+.intro p{color:var(--muted);max-width:620px;font-size:16px;margin:18px 0 0}
+
+/* flow */
+.flow{display:flex;align-items:stretch;gap:0;margin:30px 0 8px;flex-wrap:wrap}
+.flow .step{flex:1;min-width:150px;border:1px solid var(--border);background:var(--surface);border-radius:12px;padding:14px 15px}
+.flow .step .k{font-family:var(--mono);font-size:10px;color:var(--accent);letter-spacing:.1em}
+.flow .step h4{font-size:14px;font-weight:650;margin:7px 0 3px}
+.flow .step p{font-size:12px;color:var(--muted);margin:0}
+.flow .arr{display:grid;place-items:center;color:var(--faint);font-size:18px;padding:0 8px}
+@media(max-width:720px){.flow .arr{transform:rotate(90deg);padding:4px 0}.flow{flex-direction:column}}
+
+.section{padding:34px 0;border-top:1px solid var(--border);margin-top:34px}
+.section > .wrap > .eyebrow{margin-bottom:6px}
+.section h2{font-size:22px;font-weight:750;margin-bottom:6px}
+.section .lead{color:var(--muted);font-size:14px;margin:0 0 22px;max-width:600px}
+
+/* ===== app mockup ===== */
+.win{border:1px solid var(--border);border-radius:16px;overflow:hidden;box-shadow:0 24px 60px -28px rgba(0,0,0,.4);background:var(--surface)}
+.winbar{height:34px;display:flex;align-items:center;gap:6px;padding:0 12px;background:var(--panel);border-bottom:1px solid var(--line)}
+.winbar i{width:9px;height:9px;border-radius:50%;background:#00000022}
+.winbar .url{margin-left:12px;font-family:var(--mono);font-size:11px;color:var(--faint);background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:3px 10px}
+.appgrid{display:grid;grid-template-columns:180px 1fr}
+/* left rail */
+.rail{background:var(--panel);border-right:1px solid var(--line);padding:16px 12px;min-height:440px}
+.rail .brand{display:flex;align-items:center;gap:8px;padding:2px 8px 16px;font-weight:700;font-size:13px}
+.rail .brand .lg{width:24px;height:24px;border-radius:7px;background:var(--ink);color:var(--surface);display:grid;place-items:center;font-size:12px}
+.rail .ri{display:flex;align-items:center;gap:9px;font-size:13px;color:var(--muted);padding:8px 10px;border-radius:8px;margin-bottom:2px}
+.rail .ri.on{background:var(--accent-soft);color:var(--accent);font-weight:600}
+.rail .ri .d{width:15px;height:15px;border-radius:4px;border:1.6px solid currentColor;opacity:.8}
+.rail .sep{height:1px;background:var(--line);margin:12px 4px}
+/* builder 3-pane */
+.builder{display:grid;grid-template-columns:1fr 1.15fr 0.95fr;min-height:440px}
+.pane{padding:14px 14px;border-right:1px solid var(--line);min-width:0}
+.pane:last-child{border-right:none}
+.paneh{display:flex;align-items:center;gap:6px;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--faint);margin-bottom:12px}
+.paneh .tagn{margin-left:auto;font-family:var(--mono);font-size:10px;color:var(--faint);font-weight:500;letter-spacing:0;text-transform:none}
+/* block chips */
+.blk{display:flex;align-items:center;gap:8px;padding:8px 9px;border:1px solid var(--border);border-radius:9px;background:var(--surface);margin-bottom:7px;font-size:12.5px}
+.blk .grip{color:var(--faint);font-size:12px;cursor:grab;letter-spacing:-2px}
+.blk .nm{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.blk .sw{width:26px;height:15px;border-radius:999px;background:var(--accent);position:relative;flex-shrink:0}
+.blk .sw::after{content:"";position:absolute;top:2px;right:2px;width:11px;height:11px;border-radius:50%;background:#fff}
+.blk.off{opacity:.55}
+.blk.off .sw{background:#c7cbd1}
+.blk.off .sw::after{right:auto;left:2px}
+.blk.cat{background:var(--panel);font-weight:600;color:var(--muted);border-style:dashed}
+/* preview */
+.pv{border:1px solid var(--line);border-radius:8px;background:#fff;color:#111;padding:14px;font-size:9px;line-height:1.5;min-height:390px}
+:root[data-theme="dark"] .pv{background:#0f1113;color:#e6e8ea;border-color:rgba(255,255,255,.08)}
+.pv .nm{font-size:16px;font-weight:800;letter-spacing:-.02em}
+.pv .rl{font-size:9px;color:#2f6fed;font-weight:600;margin-top:2px}
+.pv .lbl{font-family:var(--mono);font-size:7px;letter-spacing:.12em;text-transform:uppercase;color:#2f6fed;margin:12px 0 5px;border-bottom:1px solid #eee;padding-bottom:3px}
+:root[data-theme="dark"] .pv .lbl{border-color:rgba(255,255,255,.08)}
+.pv .co{font-weight:700;font-size:10px}
+.pv .mut{color:#8a8f97}
+.pv .bar{height:5px;border-radius:3px;background:#eef0f2;margin:4px 0}
+:root[data-theme="dark"] .pv .bar{background:rgba(255,255,255,.08)}
+.pv .bar.s{width:70%}.pv .bar.m{width:88%}
+/* settings pane */
+.field{margin-bottom:14px}
+.field .fl{font-size:11px;font-weight:600;color:var(--muted);margin-bottom:6px;display:block}
+.tplrow{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+.tpl{border:1px solid var(--border);border-radius:9px;padding:9px 10px;font-size:11.5px;cursor:pointer;background:var(--surface)}
+.tpl .t{font-weight:650}.tpl .d{font-size:10px;color:var(--faint)}
+.tpl.sel{border-color:var(--accent);background:var(--accent-soft)}
+.inp{border:1px solid var(--border);border-radius:8px;background:var(--surface);padding:8px 10px;font-size:12px;color:var(--ink);font-family:var(--mono)}
+.inp.full{width:100%}
+.urlbox{display:flex;align-items:center;border:1px solid var(--border);border-radius:8px;overflow:hidden;font-family:var(--mono);font-size:11px}
+.urlbox .p{background:var(--panel);color:var(--faint);padding:8px 9px;border-right:1px solid var(--border)}
+.urlbox .s{padding:8px 9px;color:var(--ink)}
+.pubbtn{margin-top:12px;width:100%;background:var(--accent);color:#fff;border:none;border-radius:8px;padding:11px;font-size:13px;font-weight:600;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:7px}
+.hintline{font-size:10.5px;color:var(--faint);margin-top:8px;text-align:center}
+/* builder topbar */
+.btop{grid-column:1/-1;display:flex;align-items:center;gap:10px;padding:11px 14px;border-bottom:1px solid var(--line);background:var(--surface)}
+.btop .ttl{font-size:13px;font-weight:650}
+.btop .save{font-size:11px;color:var(--ok);display:flex;align-items:center;gap:5px}
+.btop .save .dot{width:6px;height:6px;border-radius:50%;background:var(--ok)}
+.btop .sp{flex:1}
+.btop .gh{font-size:12px;border:1px solid var(--border);border-radius:7px;padding:7px 11px;color:var(--muted)}
+
+.caption{font-size:12px;color:var(--faint);margin-top:12px;text-align:center}
+
+/* IA tiles */
+.tiles{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
+@media(max-width:680px){.tiles{grid-template-columns:1fr}.builder{grid-template-columns:1fr}.appgrid{grid-template-columns:1fr}.rail{display:none}}
+.tile{border:1px solid var(--border);border-radius:12px;background:var(--surface);padding:18px}
+.tile .n{font-family:var(--mono);font-size:11px;color:var(--accent)}
+.tile h3{font-size:15px;font-weight:700;margin:8px 0 6px}
+.tile p{font-size:13px;color:var(--muted);margin:0}
+
+/* data model */
+.model{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media(max-width:680px){.model{grid-template-columns:1fr}}
+.mbox{border:1px solid var(--border);border-radius:12px;background:var(--surface);overflow:hidden}
+.mbox .mh{background:var(--panel);border-bottom:1px solid var(--line);padding:10px 14px;font-weight:650;font-size:13px;display:flex;align-items:center;gap:8px}
+.mbox .mh .tag{margin-left:auto;font-family:var(--mono);font-size:10px;color:var(--faint)}
+.mbox pre{margin:0;padding:14px;font-family:var(--mono);font-size:11.5px;line-height:1.7;color:var(--muted);overflow-x:auto}
+.mbox pre .k{color:var(--ink);font-weight:600}
+
+/* scope */
+.scope{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media(max-width:680px){.scope{grid-template-columns:1fr}}
+.opt{border:1px solid var(--border);border-radius:14px;background:var(--surface);padding:20px}
+.opt.rec{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent)}
+.opt .badge{display:inline-block;font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);background:var(--accent-soft);border-radius:6px;padding:3px 8px;margin-bottom:10px}
+.opt h3{font-size:16px;font-weight:750;margin-bottom:4px}
+.opt .sub{font-size:12px;color:var(--faint);margin-bottom:12px}
+.opt ul{margin:0;padding-left:16px}
+.opt li{font-size:12.5px;color:var(--muted);margin-bottom:5px}
+.opt li b{color:var(--ink);font-weight:600}
+footer{padding:30px 0 60px;color:var(--faint);font-size:12px}
+</style>
+
+<header class="top"><div class="wrap">
+  <b>이력서 빌더 대시보드</b><span class="s">· 구조 설계안</span>
+  <button class="tbtn" id="tbtn" aria-label="테마 전환"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M4.9 4.9l1.4 1.4m11.4 11.4 1.4 1.4M2 12h2m16 0h2M4.9 19.1l1.4-1.4m11.4-11.4 1.4-1.4"/></svg></button>
+</div></header>
+
+<section class="intro"><div class="wrap">
+  <div class="eyebrow">Concept</div>
+  <h1>콘텐츠는 한 번,<br>이력서는 여러 벌.</h1>
+  <p>내용(경력·프로젝트·스킬)을 <b style="color:var(--ink)">라이브러리에 한 번만</b> 넣어두고, 대시보드에서 필요한 블록만 골라 조립한 뒤, 템플릿(원티드·리멤버·웹 포폴)을 입혀 <b style="color:var(--ink)">각각의 URL로 발행</b>하는 도구입니다. 지원하는 회사마다 다른 버전을 몇 초 만에.</p>
+
+  <div class="flow">
+    <div class="step"><div class="k">01 LIBRARY</div><h4>콘텐츠 라이브러리</h4><p>경력·프로젝트·스킬을 블록으로 저장. 단일 원본.</p></div>
+    <div class="arr">→</div>
+    <div class="step"><div class="k">02 BUILD</div><h4>조립</h4><p>넣을 블록 선택·순서·강조. 지원처별 맞춤.</p></div>
+    <div class="arr">→</div>
+    <div class="step"><div class="k">03 TEMPLATE</div><h4>템플릿 입히기</h4><p>원티드 / 리멤버 / 웹 포폴 / 미니멀.</p></div>
+    <div class="arr">→</div>
+    <div class="step"><div class="k">04 PUBLISH</div><h4>URL 발행</h4><p>공유 링크 + PDF. 공개/비공개.</p></div>
+  </div>
+</div></section>
+
+<section class="section"><div class="wrap">
+  <div class="eyebrow">Main screen</div>
+  <h2>핵심 화면 — 빌더(조립기)</h2>
+  <p class="lead">대시보드의 심장. 왼쪽에서 블록을 켜고/끄고/순서 잡고, 가운데서 실시간 미리보기를 보고, 오른쪽에서 템플릿·URL을 정해 발행합니다.</p>
+
+  <div class="win">
+    <div class="winbar"><i></i><i></i><i></i><span class="url">builder.jinsookim.com / build / 핸디즈-지원</span></div>
+    <div class="appgrid">
+      <!-- left rail -->
+      <div class="rail">
+        <div class="brand"><span class="lg">JK</span> Resume Studio</div>
+        <div class="ri"><span class="d"></span> 홈</div>
+        <div class="ri"><span class="d"></span> 콘텐츠 라이브러리</div>
+        <div class="ri on"><span class="d"></span> 빌더</div>
+        <div class="ri"><span class="d"></span> 내보낸 이력서</div>
+        <div class="sep"></div>
+        <div class="ri"><span class="d"></span> 설정</div>
+      </div>
+      <!-- builder -->
+      <div class="builder">
+        <div class="btop">
+          <span class="ttl">핸디즈 지원 — 원티드형</span>
+          <span class="save"><span class="dot"></span> 자동 저장됨</span>
+          <span class="sp"></span>
+          <span class="gh">미리보기</span>
+          <span class="gh" style="background:var(--accent);color:#fff;border-color:var(--accent)">발행</span>
+        </div>
+
+        <!-- pane 1: blocks -->
+        <div class="pane">
+          <div class="paneh">블록 <span class="tagn">끌어서 순서</span></div>
+          <div class="blk"><span class="grip">⋮⋮</span><span class="nm">프로필 · 자기소개</span><span class="sw"></span></div>
+          <div class="blk cat"><span class="grip">⋮⋮</span><span class="nm">경력</span></div>
+          <div class="blk"><span class="grip">⋮⋮</span><span class="nm">핸디즈 (Handys)</span><span class="sw"></span></div>
+          <div class="blk"><span class="grip">⋮⋮</span><span class="nm">바비톡 (Babitalk)</span><span class="sw"></span></div>
+          <div class="blk off"><span class="grip">⋮⋮</span><span class="nm">영상 제작 (Agency)</span><span class="sw"></span></div>
+          <div class="blk cat"><span class="grip">⋮⋮</span><span class="nm">프로젝트</span></div>
+          <div class="blk"><span class="grip">⋮⋮</span><span class="nm">sandbox-mkt</span><span class="sw"></span></div>
+          <div class="blk"><span class="grip">⋮⋮</span><span class="nm">plott-life-frontend</span><span class="sw"></span></div>
+          <div class="blk off"><span class="grip">⋮⋮</span><span class="nm">Urbanstay</span><span class="sw"></span></div>
+          <div class="blk"><span class="grip">⋮⋮</span><span class="nm">스킬 · 학력 · 수상</span><span class="sw"></span></div>
+        </div>
+
+        <!-- pane 2: preview -->
+        <div class="pane">
+          <div class="paneh">미리보기 <span class="tagn">원티드형 · A4</span></div>
+          <div class="pv">
+            <div class="nm">김진수</div>
+            <div class="rl">마케팅 × AI 프로덕트 빌더</div>
+            <div class="bar m"></div><div class="bar s"></div>
+            <div class="lbl">경력사항</div>
+            <div class="co">핸디즈 (Handys) <span class="mut">· 2025.06–</span></div>
+            <div class="bar m"></div><div class="bar s"></div>
+            <div class="co">바비톡 (Babitalk) <span class="mut">· 2019–2024</span></div>
+            <div class="bar m"></div><div class="bar m"></div>
+            <div class="lbl">프로젝트</div>
+            <div class="co">sandbox-mkt <span class="mut">· 단독개발</span></div>
+            <div class="bar m"></div><div class="bar s"></div>
+            <div class="lbl">스킬</div>
+            <div class="bar m"></div>
+          </div>
+        </div>
+
+        <!-- pane 3: settings/publish -->
+        <div class="pane">
+          <div class="paneh">템플릿 · 발행</div>
+          <div class="field">
+            <span class="fl">템플릿</span>
+            <div class="tplrow">
+              <div class="tpl sel"><div class="t">원티드형</div><div class="d">경력기술 A4</div></div>
+              <div class="tpl"><div class="t">리멤버형</div><div class="d">프로필 A4</div></div>
+              <div class="tpl"><div class="t">웹 포폴</div><div class="d">03 사이드바</div></div>
+              <div class="tpl"><div class="t">미니멀</div><div class="d">원페이지</div></div>
+            </div>
+          </div>
+          <div class="field">
+            <span class="fl">공개 URL 주소</span>
+            <div class="urlbox"><span class="p">.../r/</span><span class="s">handys-2026</span></div>
+          </div>
+          <div class="field">
+            <span class="fl">공개 범위</span>
+            <input class="inp full" value="🔒 링크 있는 사람만" readonly>
+          </div>
+          <button class="pubbtn">🚀 URL로 발행하기</button>
+          <div class="hintline">발행 후: 링크 공유 · PDF 저장 · 언제든 재편집</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="caption">↑ 실제 동작 UI가 아니라 구조를 보여주는 목업입니다. 회색 블록은 이 버전에서 끈 항목(예: 개발직 지원이라 '영상 제작' OFF).</div>
+</div></section>
+
+<section class="section"><div class="wrap">
+  <div class="eyebrow">Screens</div>
+  <h2>대시보드를 이루는 4개 화면</h2>
+  <p class="lead">빌더를 중심으로, 앞뒤로 라이브러리와 발행 관리가 붙습니다.</p>
+  <div class="tiles">
+    <div class="tile"><div class="n">SCREEN 01</div><h3>🏠 홈 · 내보낸 이력서</h3><p>발행한 이력서 카드 목록(제목·템플릿·URL·공개상태·최근수정). "새 이력서 만들기" 버튼. 여기서 링크 복사·PDF·삭제.</p></div>
+    <div class="tile"><div class="n">SCREEN 02</div><h3>📚 콘텐츠 라이브러리</h3><p>프로필·경력·프로젝트·스킬·학력·수상을 블록으로 CRUD하는 <b style="color:var(--ink)">단일 원본</b>. 한 번 잘 써두면 모든 이력서가 여기서 나옴.</p></div>
+    <div class="tile"><div class="n">SCREEN 03</div><h3>🧩 빌더 (위 목업)</h3><p>블록 선택·순서·강조 + 템플릿 + URL. 지원처별 맞춤 이력서를 조립하는 핵심 화면.</p></div>
+    <div class="tile"><div class="n">SCREEN 04</div><h3>🌐 공개 뷰 (발행 결과)</h3><p>방문자가 URL로 보는 페이지. 템플릿에 따라 웹 포폴(03)이거나 A4 이력서. 인쇄→PDF 지원.</p></div>
+  </div>
+</div></section>
+
+<section class="section"><div class="wrap">
+  <div class="eyebrow">Data model</div>
+  <h2>데이터는 딱 두 덩어리</h2>
+  <p class="lead">"내용(라이브러리)"과 "조립본(문서)"을 분리하는 게 핵심. 그래서 내용 한 번 고치면 모든 문서가 갱신됩니다.</p>
+  <div class="model">
+    <div class="mbox"><div class="mh">📚 Library <span class="tag">내용 원본 · 1개</span></div>
+<pre><span class="k">profile</span>   : 이름 · 소개 · 연락처
+<span class="k">experiences[]</span> : {회사, 역할, 기간, 성과[]}
+<span class="k">projects[]</span>    : {이름, 설명, KPI[], 스택[]}
+<span class="k">skills[]</span> · <span class="k">education[]</span> · <span class="k">awards[]</span></pre></div>
+    <div class="mbox"><div class="mh">🧩 Documents <span class="tag">조립본 · N개</span></div>
+<pre><span class="k">id</span>       : "handys-2026"
+<span class="k">title</span>    : "핸디즈 지원 — 원티드형"
+<span class="k">template</span> : wanted | remember | web03…
+<span class="k">blocks[]</span> : 포함한 블록 id + 순서
+<span class="k">slug</span> · <span class="k">visibility</span> : URL · 공개범위</pre></div>
+  </div>
+</div></section>
+
+<section class="section"><div class="wrap">
+  <div class="eyebrow">Decision</div>
+  <h2>이제 정할 것 — 어디까지 만들까</h2>
+  <p class="lead">"URL로 발행 + 편집 + 관리"를 어떻게 구현하느냐가 갈림길입니다. 이 PC엔 Node가 없어서, 그 점도 고려한 두 갈래.</p>
+  <div class="scope">
+    <div class="opt rec">
+      <span class="badge">추천 · 지금 가능</span>
+      <h3>A. 정적 빌더</h3>
+      <div class="sub">브라우저 안에서 도는 대시보드 (백엔드 없음)</div>
+      <ul>
+        <li>편집 내용은 <b>브라우저 저장(localStorage)</b> + 파일로 내보내기/가져오기</li>
+        <li>발행 = 조립본을 <b>URL에 인코딩</b>하거나, 정적 파일로 Vercel에 올림</li>
+        <li><b>Node·서버·Supabase 불필요</b> — 지금 바로 제작·배포 가능, 무료</li>
+        <li>한계: 여러 기기 동기화·깔끔한 짧은 URL·중앙관리엔 약함</li>
+      </ul>
+    </div>
+    <div class="opt">
+      <span class="badge" style="color:var(--muted);background:var(--panel)">본격 제품</span>
+      <h3>B. 풀 앱</h3>
+      <div class="sub">Next.js + Supabase + Vercel</div>
+      <ul>
+        <li>DB에 문서 저장 → <b>깔끔한 슬러그 URL</b>(/r/handys), 어디서나 로그인 편집</li>
+        <li>공개/비공개·조회수·버전관리까지 "진짜 서비스"급</li>
+        <li>이 경우 <b>Supabase가 비로소 필요</b>해짐 (지금까진 불필요했던 이유가 이것)</li>
+        <li>필요: <b>Node 설치</b> 또는 클라우드 빌드. 제작 비용 ↑</li>
+      </ul>
+    </div>
+  </div>
+  <p class="lead" style="margin-top:18px">제 추천: <b style="color:var(--ink)">A로 뼈대(라이브러리·빌더·미리보기·템플릿 전환)를 먼저 완성</b>해서 흐름을 확정한 뒤, 필요해지면 B로 승격(같은 데이터 모델이라 이전이 쉬움). 지금 만든 3개 파일이 그대로 "템플릿"으로 들어갑니다.</p>
+</div></section>
+
+<footer><div class="wrap">구조 설계안 · 실제 동작 UI 아님 · 톤은 이후 shadcn neutral + Inter로 통일 예정</div></footer>
+
+<script>
+(function(){var r=document.documentElement,b=document.getElementById('tbtn'),s=localStorage.getItem('dbtheme');
+if(s)r.setAttribute('data-theme',s);else if(matchMedia('(prefers-color-scheme:dark)').matches)r.setAttribute('data-theme','dark');
+b.addEventListener('click',function(){var n=r.getAttribute('data-theme')==='dark'?'light':'dark';r.setAttribute('data-theme',n);localStorage.setItem('dbtheme',n);});})();
+</script>

@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>이력서</title>
+<style>
+  html,body{margin:0;height:100%;background:#e9eaec;font-family:ui-sans-serif,system-ui,"Malgun Gothic",sans-serif}
+  #frame{border:0;width:100%;height:100vh;display:block;background:#e9eaec}
+  .bar{position:fixed;top:14px;right:14px;display:flex;gap:8px;z-index:10}
+  .bar button{font:inherit;font-size:13px;font-weight:600;border:1px solid #d3d4d8;background:#fff;color:#1b1c1f;
+    border-radius:8px;padding:9px 13px;cursor:pointer;box-shadow:0 4px 14px -6px rgba(0,0,0,.3)}
+  .bar .prim{background:#2f6fed;color:#fff;border-color:#2f6fed}
+  .empty{display:grid;place-items:center;height:100vh;color:#888;font-size:15px;padding:24px;text-align:center}
+</style>
+</head>
+<body>
+<div class="bar" id="bar" style="display:none">
+  <button class="prim" onclick="printDoc()">🖨 PDF로 저장</button>
+</div>
+<iframe id="frame" title="이력서"></iframe>
+<div class="empty" id="empty" style="display:none">
+  열 문서가 없습니다.<br>스튜디오에서 이력서를 발행한 뒤 생성된 링크로 접속하세요.
+</div>
+
+<script src="templates.js"></script>
+<script>
+function decodeDoc(s){return JSON.parse(decodeURIComponent(escape(atob(s.replace(/-/g,'+').replace(/_/g,'/')))));}
+function printDoc(){var f=document.getElementById('frame');if(f&&f.contentWindow){f.contentWindow.focus();f.contentWindow.print();}}
+
+(function(){
+  var raw = location.hash.slice(1);
+  var frame = document.getElementById('frame');
+  if(!raw){ frame.style.display='none'; document.getElementById('empty').style.display='grid'; return; }
+  try{
+    var d = decodeDoc(raw);
+    document.title = (d.profile && d.profile.nameKo ? d.profile.nameKo+' — ' : '') + (d.title || '이력서');
+    var html = window.TEMPLATES.render(d);
+    frame.setAttribute('srcdoc', html);
+    document.getElementById('bar').style.display='flex';
+  }catch(e){
+    frame.style.display='none';
+    var el=document.getElementById('empty'); el.style.display='grid'; el.textContent='링크가 손상되었어요. 스튜디오에서 다시 발행해 주세요.';
+  }
+})();
+</script>
+</body>
+</html>

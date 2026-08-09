@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>김진수 — 원티드형 이력서</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--ink:#18181b;--sub:#52525b;--faint:#8a8a94;--line:#e5e5ea;--accent:#2f6fed;--bg:#f4f5f7;
+  --font:"Inter",ui-sans-serif,system-ui,"Apple SD Gothic Neo","Malgun Gothic",sans-serif}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--font);line-height:1.6;-webkit-font-smoothing:antialiased}
+.page{width:210mm;min-height:297mm;margin:24px auto;background:#fff;padding:18mm 16mm 16mm;
+  box-shadow:0 10px 40px -12px rgba(0,0,0,.25)}
+h1,h2,h3{margin:0;letter-spacing:-.02em;line-height:1.2}
+.mono{font-variant-numeric:tabular-nums}
+
+/* toolbar (screen only) */
+.bar{position:fixed;top:16px;right:16px;display:flex;gap:8px;z-index:10}
+.bar button,.bar a{font-family:inherit;font-size:13px;font-weight:600;border:1px solid var(--line);background:#fff;
+  color:var(--ink);border-radius:8px;padding:9px 14px;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:6px}
+.bar .prim{background:var(--accent);color:#fff;border-color:var(--accent)}
+
+/* header */
+.head{display:flex;justify-content:space-between;align-items:flex-start;gap:20px;padding-bottom:16px;border-bottom:2px solid var(--ink)}
+.head .name{font-size:30px;font-weight:800}
+.head .name span{color:var(--faint);font-weight:600;font-size:19px;margin-left:6px}
+.head .role{font-size:14px;color:var(--accent);font-weight:600;margin-top:5px}
+.head .contact{font-size:12px;color:var(--sub);text-align:right;line-height:1.9}
+.head .contact a{color:var(--sub);text-decoration:none}
+
+/* intro */
+.intro{font-size:13px;color:var(--sub);margin:16px 0 4px;line-height:1.7}
+
+/* section */
+section{margin-top:22px}
+.slabel{font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);
+  padding-bottom:7px;margin-bottom:12px;border-bottom:1px solid var(--line)}
+.exp{margin-bottom:16px}
+.exp:last-child{margin-bottom:0}
+.exp .r1{display:flex;align-items:baseline;gap:8px}
+.exp .co{font-size:15px;font-weight:700}
+.exp .rl{font-size:12.5px;color:var(--sub)}
+.exp .dt{margin-left:auto;font-size:12px;color:var(--faint)}
+.exp .sm{font-size:12.5px;color:var(--sub);margin:4px 0 2px;font-style:italic}
+.exp ul{margin:6px 0 0;padding-left:16px}
+.exp li{font-size:12.5px;color:#2f2f36;margin-bottom:3px;line-height:1.55}
+.tags{margin-top:7px;font-size:11px;color:var(--faint)}
+
+/* projects */
+.prj{margin-bottom:14px}
+.prj .r1{display:flex;align-items:baseline;gap:8px}
+.prj .nm{font-size:14px;font-weight:700}
+.prj .kind{font-size:10.5px;color:var(--accent);border:1px solid var(--accent);border-radius:999px;padding:1px 7px}
+.prj .dt{margin-left:auto;font-size:11.5px;color:var(--faint)}
+.prj .rl{font-size:12px;color:var(--sub);margin-top:3px}
+.prj .ds{font-size:12.5px;color:#2f2f36;margin:5px 0 5px;line-height:1.55}
+.prj .kp{font-size:11.5px;color:var(--sub)}
+.prj .kp b{color:var(--ink)}
+.prj .st{font-size:11px;color:var(--faint);margin-top:4px}
+
+/* skills */
+.skrow{display:flex;gap:10px;font-size:12.5px;margin-bottom:7px}
+.skrow .g{min-width:120px;font-weight:600;color:var(--ink)}
+.skrow .v{color:var(--sub)}
+/* misc lists */
+.li2{display:flex;justify-content:space-between;font-size:12.5px;padding:5px 0;border-bottom:1px dashed var(--line)}
+.li2 .r{color:var(--faint)}
+
+@media print{
+  @page{size:A4;margin:14mm 14mm}
+  body{background:#fff}
+  .bar{display:none}
+  .page{width:auto;min-height:0;margin:0;padding:0;box-shadow:none}
+  .exp,.prj{break-inside:avoid}
+  section{break-inside:avoid-page}
+}
+</style>
+</head>
+<body>
+<div class="bar">
+  <a class="" href="index.html">← 사이트</a>
+  <a class="" href="remember.html">리멤버형</a>
+  <button class="prim" onclick="window.print()">🖨 PDF로 저장 (인쇄)</button>
+</div>
+
+<div class="page" id="page"></div>
+
+<script src="resume.data.js"></script>
+<script>
+const R=window.RESUME,P=R.profile;
+const esc=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+const contactBits=[
+  P.email?`<div><a href="mailto:${esc(P.email)}">${esc(P.email)}</a></div>`:'',
+  P.phone?`<div class="mono">${esc(P.phone)}</div>`:'',
+  P.location?`<div>${esc(P.location)}</div>`:'',
+  ...P.links.filter(l=>!/pdf/i.test(l.label)).map(l=>`<div><a href="${esc(l.url)}">${esc(l.label)}</a></div>`)
+].join('');
+
+document.getElementById('page').innerHTML=`
+  <div class="head">
+    <div>
+      <div class="name">${esc(P.nameKo)}<span>${esc(P.nameEn)}</span></div>
+      <div class="role">${esc(P.title)}</div>
+    </div>
+    <div class="contact">${contactBits}</div>
+  </div>
+
+  <div class="intro">${esc(P.summary)}</div>
+
+  <section>
+    <div class="slabel">경력사항 · Experience</div>
+    ${R.experiences.map(e=>`
+      <div class="exp">
+        <div class="r1"><span class="co">${esc(e.company)}</span><span class="rl">${esc(e.role)}</span><span class="dt mono">${esc(e.period)}</span></div>
+        ${e.summary?`<div class="sm">${esc(e.summary)}</div>`:''}
+        <ul>${e.bullets.map(b=>`<li>${esc(b)}</li>`).join('')}</ul>
+        ${e.tags?`<div class="tags">${e.tags.join(' · ')}</div>`:''}
+      </div>`).join('')}
+  </section>
+
+  <section>
+    <div class="slabel">프로젝트 · Projects</div>
+    ${R.projects.map(p=>`
+      <div class="prj">
+        <div class="r1"><span class="nm">${esc(p.name)}</span><span class="kind">${esc(p.kind)}</span><span class="dt mono">${esc(p.period)}</span></div>
+        <div class="rl">${esc(p.role)}</div>
+        <div class="ds">${esc(p.desc)}</div>
+        ${p.kpis&&p.kpis.length?`<div class="kp">${p.kpis.map(k=>`<b>${esc(k.n)}</b> ${esc(k.l)}`).join('&nbsp;&nbsp;·&nbsp;&nbsp;')}</div>`:''}
+        <div class="st">${p.stack.join(' · ')}</div>
+      </div>`).join('')}
+  </section>
+
+  <section>
+    <div class="slabel">스킬 · Skills</div>
+    ${R.skills.map(s=>`<div class="skrow"><span class="g">${esc(s.group)}</span><span class="v">${s.items.join(' · ')}</span></div>`).join('')}
+  </section>
+
+  <section>
+    <div class="slabel">기타활동 · 수상</div>
+    ${R.awards.map(a=>`<div class="li2"><span>${esc(a.title)} <span style="color:var(--faint)">· ${esc(a.org)}</span></span><span class="r mono">${esc(a.date)}</span></div>`).join('')}
+  </section>
+
+  <section>
+    <div class="slabel">학력 · Education</div>
+    ${R.education.map(e=>`<div class="li2"><span>${esc(e.school)} · ${esc(e.degree)}</span><span class="r mono">${esc(e.period)}</span></div>`).join('')}
+  </section>
+`;
+</script>
+</body>
+</html>

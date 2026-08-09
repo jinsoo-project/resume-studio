@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>김진수 — 리멤버형 이력서</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--ink:#1b1c1f;--sub:#55565b;--faint:#8b8c92;--line:#e8e8ec;--brand:#1f5fdb;--soft:#eef3fd;
+  --font:"Inter",ui-sans-serif,system-ui,"Apple SD Gothic Neo","Malgun Gothic",sans-serif}
+*{box-sizing:border-box}
+body{margin:0;background:#eceef1;color:var(--ink);font-family:var(--font);line-height:1.6;-webkit-font-smoothing:antialiased}
+.page{width:210mm;min-height:297mm;margin:24px auto;background:#fff;padding:0 0 16mm;
+  box-shadow:0 10px 40px -12px rgba(0,0,0,.25);overflow:hidden}
+h1,h2,h3{margin:0;letter-spacing:-.02em;line-height:1.2}
+.mono{font-variant-numeric:tabular-nums}
+
+.bar{position:fixed;top:16px;right:16px;display:flex;gap:8px;z-index:10}
+.bar button,.bar a{font-family:inherit;font-size:13px;font-weight:600;border:1px solid #d8d8dd;background:#fff;
+  color:var(--ink);border-radius:8px;padding:9px 14px;cursor:pointer;text-decoration:none}
+.bar .prim{background:var(--brand);color:#fff;border-color:var(--brand)}
+
+/* header card */
+.hero{background:var(--soft);padding:22mm 16mm 16px;border-bottom:1px solid var(--line)}
+.hero .name{font-size:28px;font-weight:800}
+.hero .name span{font-size:16px;color:var(--faint);font-weight:600;margin-left:8px}
+.hero .role{font-size:14px;color:var(--brand);font-weight:600;margin-top:6px}
+.hero .pills{display:flex;flex-wrap:wrap;gap:7px;margin-top:12px}
+.hero .pill{font-size:11.5px;background:#fff;border:1px solid #d7e2f8;color:var(--brand);border-radius:999px;padding:3px 11px;font-weight:600}
+.hero .contact{margin-top:12px;font-size:12px;color:var(--sub);display:flex;flex-wrap:wrap;gap:14px}
+.hero .contact a{color:var(--sub);text-decoration:none}
+
+.body{padding:20px 16mm 0}
+/* two-column section: label | content */
+.sec{display:grid;grid-template-columns:130px 1fr;gap:16px;padding:18px 0;border-bottom:1px solid var(--line)}
+.sec:last-child{border-bottom:none}
+.sec .lab{font-size:13px;font-weight:700;color:var(--ink)}
+.sec .lab small{display:block;font-size:10px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--faint);margin-top:3px}
+.about{font-size:13px;color:var(--sub);line-height:1.75}
+
+.exp{margin-bottom:15px}
+.exp:last-child{margin-bottom:0}
+.exp .r1{display:flex;align-items:baseline;gap:8px}
+.exp .co{font-size:14.5px;font-weight:700}
+.exp .dt{margin-left:auto;font-size:11.5px;color:var(--faint)}
+.exp .rl{font-size:12px;color:var(--brand);font-weight:600;margin-top:2px}
+.exp ul{margin:6px 0 0;padding-left:16px}
+.exp li{font-size:12.5px;color:#2f2f36;margin-bottom:3px;line-height:1.55}
+
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{font-size:11.5px;background:#f3f4f6;border-radius:6px;padding:3px 9px;color:var(--sub)}
+.li2{display:flex;justify-content:space-between;font-size:12.5px;padding:5px 0}
+.li2 .r{color:var(--faint)}
+.grp{font-size:12px;font-weight:600;margin:10px 0 5px}
+.grp:first-child{margin-top:0}
+
+@media print{
+  @page{size:A4;margin:0}
+  body{background:#fff}
+  .bar{display:none}
+  .page{width:auto;min-height:0;margin:0;padding:0 0 12mm;box-shadow:none}
+  .hero{padding:16mm 16mm 14px;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .body{padding:16px 16mm 0}
+  .sec{break-inside:avoid}
+  .exp{break-inside:avoid}
+}
+</style>
+</head>
+<body>
+<div class="bar">
+  <a href="index.html">← 사이트</a>
+  <a href="wanted.html">원티드형</a>
+  <button class="prim" onclick="window.print()">🖨 PDF로 저장 (인쇄)</button>
+</div>
+
+<div class="page" id="page"></div>
+
+<script src="resume.data.js"></script>
+<script>
+const R=window.RESUME,P=R.profile;
+const esc=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+
+// 대표 직무(최대 5개) — 스킬 그룹명 + 핵심을 직무 태그로
+const roleTags=["퍼포먼스 마케팅","마케팅 데이터 분석","그로스 엔지니어링","브랜딩/콘텐츠","프론트엔드"];
+
+const contact=[
+  P.email?`<a href="mailto:${esc(P.email)}">✉ ${esc(P.email)}</a>`:'',
+  P.phone?`<span class="mono">☎ ${esc(P.phone)}</span>`:'',
+  P.location?`<span>◎ ${esc(P.location)}</span>`:'',
+  ...P.links.filter(l=>!/pdf/i.test(l.label)).map(l=>`<a href="${esc(l.url)}">${esc(l.label)}</a>`)
+].filter(Boolean).join('');
+
+document.getElementById('page').innerHTML=`
+  <div class="hero">
+    <div class="name">${esc(P.nameKo)}<span>${esc(P.nameEn)}</span></div>
+    <div class="role">${esc(P.title)}</div>
+    <div class="pills">
+      <span class="pill">총 경력 ${esc(P.totalYears)}</span>
+      ${roleTags.slice(0,5).map(t=>`<span class="pill">${esc(t)}</span>`).join('')}
+    </div>
+    <div class="contact">${contact}</div>
+  </div>
+
+  <div class="body">
+    <div class="sec">
+      <div class="lab">자기소개<small>About</small></div>
+      <div class="about">${esc(P.summary)}</div>
+    </div>
+
+    <div class="sec">
+      <div class="lab">경력<small>Career</small></div>
+      <div>${R.experiences.map(e=>`
+        <div class="exp">
+          <div class="r1"><span class="co">${esc(e.company)}</span><span class="dt mono">${esc(e.period)}</span></div>
+          <div class="rl">${esc(e.role)}</div>
+          <ul>${e.bullets.map(b=>`<li>${esc(b)}</li>`).join('')}</ul>
+        </div>`).join('')}</div>
+    </div>
+
+    <div class="sec">
+      <div class="lab">주요 프로젝트<small>Projects</small></div>
+      <div>${R.projects.map(p=>`
+        <div class="exp">
+          <div class="r1"><span class="co">${esc(p.name)}</span><span class="dt mono">${esc(p.period)} · ${esc(p.kind)}</span></div>
+          <div class="rl">${esc(p.role)}</div>
+          <ul><li>${esc(p.desc)}</li>${p.kpis&&p.kpis.length?`<li>${p.kpis.map(k=>esc(k.n)+' '+esc(k.l)).join(', ')}</li>`:''}</ul>
+        </div>`).join('')}</div>
+    </div>
+
+    <div class="sec">
+      <div class="lab">스킬<small>Skills</small></div>
+      <div>${R.skills.map(s=>`<div class="grp">${esc(s.group)}</div><div class="chips">${s.items.map(i=>`<span class="chip">${esc(i)}</span>`).join('')}</div>`).join('')}</div>
+    </div>
+
+    <div class="sec">
+      <div class="lab">학력<small>Education</small></div>
+      <div>${R.education.map(e=>`<div class="li2"><span>${esc(e.school)} · ${esc(e.degree)}</span><span class="r mono">${esc(e.period)}</span></div>`).join('')}</div>
+    </div>
+
+    <div class="sec">
+      <div class="lab">수상<small>Awards</small></div>
+      <div>${R.awards.map(a=>`<div class="li2"><span>${esc(a.title)} <span style="color:var(--faint)">· ${esc(a.org)}</span></span><span class="r mono">${esc(a.date)}</span></div>`).join('')}</div>
+    </div>
+  </div>
+`;
+</script>
+</body>
+</html>

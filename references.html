@@ -1,0 +1,402 @@
+<title>포트폴리오 / CV 사이트 — 톤별 레퍼런스</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<style>
+:root{
+  --bg:#F6F7F8; --surface:#FFFFFF; --ink:#16191D; --muted:#5F656E; --faint:#8A9099;
+  --border:#E4E7EA; --accent:#3B5BDB; --accent-soft:#EDF0FD;
+  --sans:system-ui,-apple-system,"Segoe UI",Roboto,"Apple SD Gothic Neo","Malgun Gothic",sans-serif;
+  --serif:"Iowan Old Style","Apple Garamond",Georgia,"Times New Roman",serif;
+  --mono:ui-monospace,"SF Mono","Cascadia Code",Menlo,Consolas,monospace;
+  --max:960px;
+}
+@media (prefers-color-scheme:dark){
+  :root{
+    --bg:#0D0F11; --surface:#16191C; --ink:#E8EBEE; --muted:#99A0A8; --faint:#6B727A;
+    --border:rgba(255,255,255,.10); --accent:#8AA0F7; --accent-soft:rgba(124,147,245,.14);
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0D0F11; --surface:#16191C; --ink:#E8EBEE; --muted:#99A0A8; --faint:#6B727A;
+  --border:rgba(255,255,255,.10); --accent:#8AA0F7; --accent-soft:rgba(124,147,245,.14);
+}
+:root[data-theme="light"]{
+  --bg:#F6F7F8; --surface:#FFFFFF; --ink:#16191D; --muted:#5F656E; --faint:#8A9099;
+  --border:#E4E7EA; --accent:#3B5BDB; --accent-soft:#EDF0FD;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);line-height:1.6;
+  -webkit-font-smoothing:antialiased;letter-spacing:-.01em}
+.wrap{max-width:var(--max);margin:0 auto;padding:0 22px}
+a{color:inherit;text-decoration:none}
+.mono{font-family:var(--mono);font-variant-numeric:tabular-nums}
+.eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--faint)}
+
+/* header */
+header.top{position:sticky;top:0;z-index:20;background:color-mix(in srgb,var(--bg) 84%,transparent);
+  backdrop-filter:saturate(180%) blur(10px);border-bottom:1px solid var(--border)}
+.top .wrap{display:flex;align-items:center;gap:14px;height:54px}
+.top b{font-weight:700;font-size:14px;letter-spacing:-.02em}
+.top .sub{font-size:12px;color:var(--faint)}
+.tbtn{margin-left:auto;width:34px;height:34px;border:1px solid var(--border);border-radius:8px;background:var(--surface);
+  cursor:pointer;color:var(--ink);display:grid;place-items:center}
+
+/* intro */
+.intro{padding:64px 0 34px}
+.intro h1{font-size:clamp(30px,5.2vw,50px);font-weight:800;letter-spacing:-.035em;line-height:1.08;
+  text-wrap:balance;margin:14px 0 0}
+.intro p{color:var(--muted);max-width:620px;font-size:16px;margin:20px 0 0}
+.struct{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:32px}
+.struct .s{border:1px solid var(--border);border-radius:12px;background:var(--surface);padding:16px}
+.struct .s .k{font-family:var(--mono);font-size:11px;color:var(--accent);letter-spacing:.06em}
+.struct .s h4{margin:8px 0 4px;font-size:15px;font-weight:650}
+.struct .s p{margin:0;font-size:13px;color:var(--muted);max-width:none}
+@media(max-width:680px){.struct{grid-template-columns:1fr}}
+
+/* tone section */
+.tones{padding:20px 0 10px;display:flex;flex-direction:column;gap:20px}
+.tone{border:1px solid var(--border);border-radius:16px;background:var(--surface);overflow:hidden;
+  display:grid;grid-template-columns:minmax(0,44%) 1fr}
+.tone .demo{border-right:1px solid var(--border);padding:20px;display:grid;place-items:center;min-height:230px}
+.tone .body{padding:24px 26px}
+.tone .num{font-family:var(--mono);font-size:12px;color:var(--faint)}
+.tone h3{margin:6px 0 2px;font-size:21px;font-weight:750;letter-spacing:-.02em}
+.tone .en{font-family:var(--mono);font-size:12px;color:var(--accent);letter-spacing:.04em}
+.tone .desc{color:var(--muted);font-size:14.5px;margin:12px 0 0}
+.tone .fit{font-size:13px;margin:14px 0 4px;color:var(--ink)}
+.tone .fit b{color:var(--accent);font-weight:600}
+.links{display:flex;flex-wrap:wrap;gap:7px;margin-top:14px}
+.links a{display:inline-flex;align-items:center;gap:5px;font-size:12.5px;color:var(--muted);
+  border:1px solid var(--border);border-radius:999px;padding:5px 11px;transition:.15s;background:var(--bg)}
+.links a:hover{border-color:var(--accent);color:var(--accent);background:var(--accent-soft)}
+.links a .ar{font-size:10px;opacity:.6}
+.note{font-size:12px;color:var(--faint);margin-top:9px}
+@media(max-width:720px){.tone{grid-template-columns:1fr}.tone .demo{border-right:none;border-bottom:1px solid var(--border)}}
+
+/* ===== mini browser frame ===== */
+.frame{width:100%;max-width:340px;border-radius:11px;overflow:hidden;border:1px solid rgba(0,0,0,.14);
+  box-shadow:0 10px 26px -12px rgba(0,0,0,.35);font-size:12px}
+.frame .bar{height:22px;display:flex;align-items:center;gap:5px;padding:0 9px}
+.frame .bar i{width:7px;height:7px;border-radius:50%;background:#00000022;display:block}
+.frame .screen{padding:18px 16px;min-height:150px}
+
+/* T1 editorial minimal */
+.d1 .frame{background:#fff;color:#111}
+.d1 .bar{background:#f3f3f3}
+.d1 .screen{font-family:var(--sans)}
+.d1 .lbl{font-family:var(--mono);font-size:9px;letter-spacing:.14em;color:#999;text-transform:uppercase}
+.d1 .h{font-size:26px;font-weight:800;letter-spacing:-.04em;line-height:1.05;margin:10px 0 8px}
+.d1 .p{font-size:10.5px;color:#8a8a8a;line-height:1.5}
+.d1 .rule{height:1px;background:#ececec;margin:14px 0 10px}
+.d1 .row{display:flex;justify-content:space-between;font-size:10px;color:#666}
+
+/* T2 dark technical */
+.d2 .frame{background:#0a192f;color:#ccd6f6;border-color:#0a192f}
+.d2 .bar{background:#0e2440}
+.d2 .h{font-size:22px;font-weight:800;letter-spacing:-.03em;color:#e6f1ff;margin:4px 0 6px}
+.d2 .teal{color:#64ffda;font-family:var(--mono);font-size:10px}
+.d2 .p{font-size:10px;color:#8892b0;line-height:1.5;margin-top:6px}
+.d2 .nav{margin-top:14px;display:flex;flex-direction:column;gap:6px}
+.d2 .nav span{font-family:var(--mono);font-size:9px;color:#8892b0;display:flex;align-items:center;gap:8px}
+.d2 .nav span i{width:22px;height:1px;background:#64ffda;display:block}
+.d2 .nav span.on i{width:40px}
+.d2 .nav span.on{color:#e6f1ff}
+
+/* T3 app sidebar */
+.d3 .frame{background:#fff;color:#1a1a1a}
+.d3 .bar{background:#f3f3f3}
+.d3 .screen{padding:0;display:grid;grid-template-columns:96px 1fr;min-height:150px}
+.d3 .side{background:#fafafa;border-right:1px solid #eee;padding:12px 10px}
+.d3 .side .av{width:22px;height:22px;border-radius:50%;background:#d9d9d9;margin-bottom:10px}
+.d3 .side .nm{font-size:9px;font-weight:600}
+.d3 .side .rl{font-size:8px;color:#999;margin-bottom:12px}
+.d3 .side .it{font-size:9px;color:#777;padding:4px 6px;border-radius:6px;margin-bottom:2px}
+.d3 .side .it.on{background:#111;color:#fff}
+.d3 .main{padding:14px 14px}
+.d3 .main .h{font-size:14px;font-weight:750;letter-spacing:-.02em}
+.d3 .main .p{font-size:9px;color:#999;margin-top:6px;line-height:1.5}
+.d3 .main .card{margin-top:10px;border:1px solid #eee;border-radius:8px;height:34px}
+
+/* T4 warm serif */
+.d4 .frame{background:#f4efe6;color:#3a2f28;border-color:#e6ddce}
+.d4 .bar{background:#ece4d6}
+.d4 .screen{font-family:var(--serif)}
+.d4 .lbl{font-family:var(--mono);font-size:9px;letter-spacing:.12em;color:#a99a86;text-transform:uppercase}
+.d4 .h{font-family:var(--serif);font-size:27px;font-weight:600;letter-spacing:-.01em;line-height:1.06;margin:10px 0 8px;font-style:italic}
+.d4 .p{font-size:11px;color:#8a7d6e;line-height:1.55}
+.d4 .dot{color:#b5541f}
+
+/* T5 playful branded */
+.d5 .frame{background:#faf9ff;color:#1c1330}
+.d5 .bar{background:#efeaff}
+.d5 .chip{display:inline-block;background:linear-gradient(90deg,#7c3aed,#db2777);color:#fff;
+  font-size:9px;font-weight:600;padding:4px 9px;border-radius:999px}
+.d5 .h{font-size:23px;font-weight:800;letter-spacing:-.03em;line-height:1.05;margin:12px 0 8px}
+.d5 .h em{font-style:normal;background:linear-gradient(90deg,#7c3aed,#db2777);-webkit-background-clip:text;background-clip:text;color:transparent}
+.d5 .p{font-size:10px;color:#6b5f82;line-height:1.5}
+.d5 .btns{display:flex;gap:6px;margin-top:12px}
+.d5 .btns b{font-size:9px;font-weight:600;padding:6px 10px;border-radius:8px;background:#1c1330;color:#fff}
+.d5 .btns i{font-size:9px;font-weight:600;padding:6px 10px;border-radius:8px;border:1px solid #d8ccf5;color:#6b5f82;font-style:normal}
+
+/* T6 bold creative */
+.d6 .frame{background:#0c0c0d;color:#f2f2f2;border-color:#0c0c0d}
+.d6 .bar{background:#1a1a1c}
+.d6 .tag{font-family:var(--mono);font-size:8px;letter-spacing:.2em;color:#8f8f8f;text-transform:uppercase}
+.d6 .h{font-size:30px;font-weight:800;letter-spacing:-.05em;line-height:.92;margin:8px 0}
+.d6 .h .out{color:transparent;-webkit-text-stroke:1px #f2f2f2}
+.d6 .p{font-size:9px;color:#8f8f8f;letter-spacing:.02em}
+.d6 .float{margin-top:12px;display:flex;justify-content:space-between;align-items:center}
+.d6 .float span{font-family:var(--mono);font-size:8px;color:#8f8f8f}
+.d6 .float b{font-size:9px;background:#f2f2f2;color:#0c0c0d;border-radius:999px;padding:4px 9px}
+
+/* generic sections */
+.block{padding:44px 0;border-top:1px solid var(--border)}
+.block h2{font-size:22px;font-weight:750;letter-spacing:-.025em;margin:0 0 6px}
+.block .lead{color:var(--muted);font-size:14px;margin:0 0 20px;max-width:560px}
+.gal{display:flex;flex-wrap:wrap;gap:8px}
+.gal a{display:inline-flex;flex-direction:column;gap:2px;border:1px solid var(--border);border-radius:11px;
+  background:var(--surface);padding:12px 14px;min-width:150px;transition:.15s}
+.gal a:hover{border-color:var(--accent);transform:translateY(-2px)}
+.gal a .t{font-size:13px;font-weight:600}
+.gal a .d{font-size:11px;color:var(--faint)}
+
+/* recommendation */
+.rec{border:1px solid var(--accent);border-radius:16px;background:var(--accent-soft);padding:24px 26px;margin-top:8px}
+.rec .eyebrow{color:var(--accent)}
+.rec h2{font-size:20px;font-weight:750;margin:8px 0 10px;letter-spacing:-.02em}
+.rec p{margin:0 0 10px;font-size:14.5px;color:var(--ink)}
+.rec .pill{display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:12px;
+  background:var(--surface);border:1px solid var(--border);border-radius:999px;padding:5px 11px;margin:2px 4px 2px 0}
+
+footer{padding:34px 0 60px;color:var(--faint);font-size:12px;border-top:1px solid var(--border);margin-top:36px}
+</style>
+
+<header class="top"><div class="wrap">
+  <b>포트폴리오 / CV 레퍼런스</b>
+  <span class="sub">김진수 · 톤 고르기용</span>
+  <button class="tbtn" id="tbtn" aria-label="테마 전환">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M4.9 4.9l1.4 1.4m11.4 11.4 1.4 1.4M2 12h2m16 0h2M4.9 19.1l1.4-1.4m11.4-11.4 1.4-1.4"/></svg>
+  </button>
+</div></header>
+
+<section class="intro"><div class="wrap">
+  <div class="eyebrow">Reference / UI · UX</div>
+  <h1>"소개 한 판 + 탭 상세"<br>포트폴리오 사이트 톤 6갈래</h1>
+  <p>노션처럼 URL 하나로 <b style="color:var(--ink)">개인 소개 랜딩 → 상세 이력 → 프로젝트별 포트폴리오</b>를 담는 개인 사이트 레퍼런스입니다. 왼쪽은 각 톤을 흉내 낸 미니 시안, 오른쪽은 실제로 열어볼 수 있는 사이트 링크예요. 하나 골라서 "이 톤으로 가자" 해주시면 그 방향으로 님 콘텐츠를 입힙니다.</p>
+
+  <div class="struct">
+    <div class="s"><div class="k">LAYER 1</div><h4>랜딩 한 판</h4><p>이름·한 줄 정체성·핵심 숫자·CTA. 3초 안에 "누구인지" 전달되는 첫 화면.</p></div>
+    <div class="s"><div class="k">LAYER 2</div><h4>탭 / 섹션</h4><p>상세 이력(CV) · 프로젝트 · AX 스토리 · 스킬. 사이드바나 상단 탭으로 이동.</p></div>
+    <div class="s"><div class="k">LAYER 3</div><h4>프로젝트 상세</h4><p>프로젝트 1개당 문제·역할·성과·스택. 필요하면 개별 페이지로 확장.</p></div>
+  </div>
+</div></section>
+
+<section class="tones"><div class="wrap" style="display:flex;flex-direction:column;gap:20px">
+
+  <!-- T1 -->
+  <div class="tone d1">
+    <div class="demo"><div class="frame"><div class="bar"><i></i><i></i><i></i></div>
+      <div class="screen">
+        <div class="lbl">Product Builder</div>
+        <div class="h">김진수<br>Jinsoo Kim</div>
+        <div class="p">마케팅의 문제를 AI와 코드로 푸는 빌더. 기획부터 배포까지.</div>
+        <div class="rule"></div>
+        <div class="row"><span>Selected Work</span><span>2019 — 2026</span></div>
+      </div></div></div>
+    <div class="body">
+      <div class="num">01</div>
+      <h3>에디토리얼 미니멀</h3>
+      <div class="en">Editorial Minimal · 모노크롬 타이포</div>
+      <p class="desc">흰 배경 · 잉크 블랙 · 큰 타이포 · 넉넉한 여백. 색을 거의 안 쓰고 글자와 간격으로 승부하는 톤. <b style="color:var(--ink)">님이 고른 shadcn neutral + Inter가 바로 이 계열</b>이라 가장 자연스럽게 이어집니다.</p>
+      <div class="fit">👤 <b>잘 맞는 사람:</b> 콘텐츠·역량을 담백하게 신뢰감 있게 보여주고 싶은 경우. 실무형 CV.</div>
+      <div class="links">
+        <a href="https://leerob.io" target="_blank" rel="noopener">leerob.io <span class="ar">↗</span></a>
+        <a href="https://rauno.me" target="_blank" rel="noopener">rauno.me <span class="ar">↗</span></a>
+        <a href="https://paco.me" target="_blank" rel="noopener">paco.me <span class="ar">↗</span></a>
+        <a href="https://samuelkraft.com" target="_blank" rel="noopener">samuelkraft.com <span class="ar">↗</span></a>
+      </div>
+    </div>
+  </div>
+
+  <!-- T2 -->
+  <div class="tone d2">
+    <div class="demo"><div class="frame"><div class="bar"><i></i><i></i><i></i></div>
+      <div class="screen">
+        <div class="teal">$ hi, my name is</div>
+        <div class="h">Jinsoo Kim.</div>
+        <div class="p">I build marketing products with data & AI.</div>
+        <div class="nav">
+          <span class="on"><i></i>ABOUT</span>
+          <span><i></i>EXPERIENCE</span>
+          <span><i></i>PROJECTS</span>
+        </div>
+      </div></div></div>
+    <div class="body">
+      <div class="num">02</div>
+      <h3>다크 테크니컬</h3>
+      <div class="en">Dark Technical · 개발자 감성</div>
+      <p class="desc">딥 네이비/슬레이트 배경 + 포인트 컬러 1개(틸/그린) + 모노 폰트. 스크롤 스파이 섹션 내비. "엔지니어" 시그널이 강하게 박히는 클래식한 개발자 포트폴리오.</p>
+      <div class="fit">👤 <b>잘 맞는 사람:</b> 기술 역량을 전면에 세우고 싶은 경우. 개발/데이터 직군 어필.</div>
+      <div class="links">
+        <a href="https://brittanychiang.com" target="_blank" rel="noopener">brittanychiang.com <span class="ar">↗</span></a>
+        <a href="https://delba.dev" target="_blank" rel="noopener">delba.dev <span class="ar">↗</span></a>
+      </div>
+    </div>
+  </div>
+
+  <!-- T3 -->
+  <div class="tone d3">
+    <div class="demo"><div class="frame"><div class="bar"><i></i><i></i><i></i></div>
+      <div class="screen">
+        <div class="side">
+          <div class="av"></div>
+          <div class="nm">김진수</div>
+          <div class="rl">Growth Builder</div>
+          <div class="it on">소개</div>
+          <div class="it">상세 이력</div>
+          <div class="it">프로젝트</div>
+          <div class="it">글</div>
+        </div>
+        <div class="main">
+          <div class="h">프로젝트</div>
+          <div class="p">단독 개발 · 팀 기여 · 참여</div>
+          <div class="card"></div>
+          <div class="card"></div>
+        </div>
+      </div></div></div>
+    <div class="body">
+      <div class="num">03</div>
+      <h3>앱형 · 사이드바 탭</h3>
+      <div class="en">App / Sidebar Tabs · 구조형</div>
+      <p class="desc">왼쪽 고정 사이드바(아바타+메뉴) + 오른쪽 콘텐츠. 소개/이력/프로젝트/글을 <b style="color:var(--ink)">탭처럼 오가는</b> 대시보드 감성. <b style="color:var(--ink)">님이 말한 "탭으로 상세 이력·프로젝트" 구조에 가장 정확히 맞습니다.</b></p>
+      <div class="fit">👤 <b>잘 맞는 사람:</b> 담을 게 많고(이력+포폴+글) 구획을 또렷이 나누고 싶은 경우.</div>
+      <div class="links">
+        <a href="https://brianlovin.com" target="_blank" rel="noopener">brianlovin.com <span class="ar">↗</span></a>
+        <a href="https://leerob.io" target="_blank" rel="noopener">leerob.io <span class="ar">↗</span></a>
+      </div>
+    </div>
+  </div>
+
+  <!-- T4 -->
+  <div class="tone d4">
+    <div class="demo"><div class="frame"><div class="bar"><i></i><i></i><i></i></div>
+      <div class="screen">
+        <div class="lbl">Portfolio — 2026</div>
+        <div class="h">Jinsoo<br>Kim<span class="dot">.</span></div>
+        <div class="p">Marketer turned product builder. Selected work &amp; writing.</div>
+      </div></div></div>
+    <div class="body">
+      <div class="num">04</div>
+      <h3>따뜻한 세리프 에디토리얼</h3>
+      <div class="en">Warm Serif · 아날로그 감성</div>
+      <p class="desc">웜톤 종이 배경 + 세리프 디스플레이 + 흙빛 포인트. 인간적이고 브랜디드한 인상. 다만 요즘 AI가 자주 뽑는 톤이라, 갈 거면 세리프 선택과 여백을 확실히 다듬어야 차별화됩니다.</p>
+      <div class="fit">👤 <b>잘 맞는 사람:</b> 콘텐츠/브랜딩·크리에이티브 색을 더 내고 싶은 경우.</div>
+      <div class="links">
+        <a href="https://onepagelove.com/inspiration/personal" target="_blank" rel="noopener">onepagelove(personal) <span class="ar">↗</span></a>
+        <a href="https://godly.website" target="_blank" rel="noopener">godly.website <span class="ar">↗</span></a>
+      </div>
+      <div class="note">이 톤은 특정 인물 사이트보다 갤러리에서 감을 잡는 게 빠릅니다.</div>
+    </div>
+  </div>
+
+  <!-- T5 -->
+  <div class="tone d5">
+    <div class="demo"><div class="frame"><div class="bar"><i></i><i></i><i></i></div>
+      <div class="screen">
+        <span class="chip">✦ Available for work</span>
+        <div class="h">Hi, I'm Jinsoo —<br>I make <em>marketing</em> work.</div>
+        <div class="p">Growth builder blending marketing &amp; AI engineering.</div>
+        <div class="btns"><b>See projects</b><i>Resume</i></div>
+      </div></div></div>
+    <div class="body">
+      <div class="num">05</div>
+      <h3>플레이풀 · 브랜디드 컬러</h3>
+      <div class="en">Playful Branded · 개성/모션</div>
+      <p class="desc">밝은 배경 + 대담한 포인트 컬러/그라디언트 1개 + 마이크로 인터랙션. 따뜻하고 기억에 남는 톤. 색은 딱 한 군데에만 강하게, 나머지는 조용하게 두는 게 핵심.</p>
+      <div class="fit">👤 <b>잘 맞는 사람:</b> 개성·친근함을 드러내 기억되고 싶은 경우.</div>
+      <div class="links">
+        <a href="https://www.joshwcomeau.com" target="_blank" rel="noopener">joshwcomeau.com <span class="ar">↗</span></a>
+        <a href="https://emilkowalski.com" target="_blank" rel="noopener">emilkowalski.com <span class="ar">↗</span></a>
+        <a href="https://cassidoo.co" target="_blank" rel="noopener">cassidoo.co <span class="ar">↗</span></a>
+      </div>
+    </div>
+  </div>
+
+  <!-- T6 -->
+  <div class="tone d6">
+    <div class="demo"><div class="frame"><div class="bar"><i></i><i></i><i></i></div>
+      <div class="screen">
+        <div class="tag">Interactive · 2026</div>
+        <div class="h">JIN<span class="out">SOO</span></div>
+        <div class="p">SCROLL / DRAG TO EXPLORE</div>
+        <div class="float"><span>01 — WORK</span><b>Enter ↗</b></div>
+      </div></div></div>
+    <div class="body">
+      <div class="num">06</div>
+      <h3>볼드 크리에이티브 · 인터랙티브</h3>
+      <div class="en">Bold / Awwwards · 강한 인상</div>
+      <p class="desc">블랙 배경 + 초대형 타이포/아웃라인 + 3D·스크롤 애니메이션. 임팩트는 최고지만 제작·유지 비용이 크고, 콘텐츠보다 연출이 앞설 위험. 포트폴리오가 "작품"인 직군에 적합.</p>
+      <div class="fit">👤 <b>잘 맞는 사람:</b> 비주얼 임팩트 자체가 실력 증명인 경우. (지금 님엔 과할 수 있음)</div>
+      <div class="links">
+        <a href="https://bruno-simon.com" target="_blank" rel="noopener">bruno-simon.com <span class="ar">↗</span></a>
+        <a href="https://www.awwwards.com/websites/portfolio/" target="_blank" rel="noopener">awwwards(portfolio) <span class="ar">↗</span></a>
+      </div>
+    </div>
+  </div>
+
+</div></section>
+
+<section class="block"><div class="wrap">
+  <div class="eyebrow">Browse</div>
+  <h2>직접 더 둘러볼 갤러리</h2>
+  <p class="lead">"한 판" 원페이지부터 최신 웹디자인까지, 실제 사이트를 대량으로 스캔하기 좋은 곳들.</p>
+  <div class="gal">
+    <a href="https://onepagelove.com" target="_blank" rel="noopener"><span class="t">One Page Love ↗</span><span class="d">한 판 원페이지 사이트 모음</span></a>
+    <a href="https://godly.website" target="_blank" rel="noopener"><span class="t">Godly ↗</span><span class="d">엄선된 최신 웹디자인</span></a>
+    <a href="https://land-book.com" target="_blank" rel="noopener"><span class="t">Land-book ↗</span><span class="d">랜딩페이지 갤러리</span></a>
+    <a href="https://www.navbar.gallery/style/portfolio" target="_blank" rel="noopener"><span class="t">Navbar Gallery ↗</span><span class="d">내비/탭 디자인 사례</span></a>
+    <a href="https://vercel.com/templates/portfolio" target="_blank" rel="noopener"><span class="t">Vercel Templates ↗</span><span class="d">배포까지 바로 되는 포폴 템플릿</span></a>
+    <a href="https://astro.build/themes/?search=portfolio" target="_blank" rel="noopener"><span class="t">Astro Themes ↗</span><span class="d">가벼운 포폴/CV 테마</span></a>
+    <a href="https://www.awwwards.com/websites/portfolio/" target="_blank" rel="noopener"><span class="t">Awwwards ↗</span><span class="d">하이엔드 인터랙티브</span></a>
+    <a href="https://www.framer.com/templates/" target="_blank" rel="noopener"><span class="t">Framer Templates ↗</span><span class="d">노코드 고퀄 템플릿</span></a>
+  </div>
+</div></section>
+
+<section class="block"><div class="wrap">
+  <div class="eyebrow">No-code</div>
+  <h2>"노션처럼" 코드 없이 만들려면</h2>
+  <p class="lead">지금 노션을 쓰고 계시니, 코드 없이 URL·디자인만 업그레이드하는 경로도 있습니다. (다만 커스텀 자유도·차별화는 직접 코딩 &gt; 노코드)</p>
+  <div class="gal">
+    <a href="https://super.so" target="_blank" rel="noopener"><span class="t">Super.so ↗</span><span class="d">노션 → 빠른 웹사이트 + 커스텀 도메인</span></a>
+    <a href="https://potion.so" target="_blank" rel="noopener"><span class="t">Potion.so ↗</span><span class="d">노션 → 웹사이트</span></a>
+    <a href="https://popsy.co" target="_blank" rel="noopener"><span class="t">Popsy ↗</span><span class="d">노션식 심플 사이트 빌더</span></a>
+    <a href="https://www.framer.com" target="_blank" rel="noopener"><span class="t">Framer ↗</span><span class="d">디자인 자유도 높은 노코드</span></a>
+    <a href="https://bento.me" target="_blank" rel="noopener"><span class="t">Bento.me ↗</span><span class="d">카드형 링크·프로필 한 판</span></a>
+    <a href="https://standardresume.co" target="_blank" rel="noopener"><span class="t">Standard Resume ↗</span><span class="d">CV 특화 호스팅</span></a>
+  </div>
+</div></section>
+
+<section class="block"><div class="wrap">
+  <div class="rec">
+    <div class="eyebrow">My pick for you</div>
+    <h2>제 추천: 01 스킨 × 03 구조</h2>
+    <p>님이 이미 <b>shadcn neutral + Inter</b>를 고르셨으니 — <b>01 에디토리얼 미니멀</b>의 담백한 톤에, <b>03 앱형 사이드바 탭</b>의 구조를 얹는 조합이 가장 잘 맞습니다. 즉 "겉은 rauno·read.cv처럼 조용하게, 뼈대는 brianlovin·leerob처럼 탭으로 나눠서."</p>
+    <p style="margin-bottom:14px">이렇게 하면 랜딩 한 판(소개+AX 요약) → 사이드바로 <b>상세 이력 / 프로젝트 / 스킬</b> 탭 이동 → 프로젝트별 상세, 라는 님 요구가 그대로 구현됩니다.</p>
+    <div>
+      <span class="pill">스킨 · leerob.io</span>
+      <span class="pill">스킨 · rauno.me</span>
+      <span class="pill">구조 · brianlovin.com</span>
+      <span class="pill">색/폰트 · shadcn neutral + Inter</span>
+    </div>
+  </div>
+</div></section>
+
+<footer><div class="wrap">
+  각 톤 왼쪽 미니 시안은 실제 사이트가 아니라, 그 톤을 설명하려고 직접 만든 예시입니다. 링크(↗)를 눌러 진짜 사이트를 확인하세요. · read.cv는 현재 유료 전환/정리 단계라 제외했습니다.
+</div></footer>
+
+<script>
+(function(){var r=document.documentElement,b=document.getElementById('tbtn'),s=localStorage.getItem('reftheme');
+if(s)r.setAttribute('data-theme',s);else if(matchMedia('(prefers-color-scheme:dark)').matches)r.setAttribute('data-theme','dark');
+b.addEventListener('click',function(){var n=r.getAttribute('data-theme')==='dark'?'light':'dark';r.setAttribute('data-theme',n);localStorage.setItem('reftheme',n);});})();
+</script>

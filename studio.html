@@ -1,0 +1,458 @@
+<!doctype html>
+<html lang="ko" data-theme="light">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Resume Studio — 이력서 빌더</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:oklch(0.985 0 0);--surface:oklch(1 0 0);--fg:oklch(0.145 0 0);--muted:oklch(0.556 0 0);
+  --card:oklch(1 0 0);--panel:oklch(0.97 0 0);--border:oklch(0.922 0 0);--ring:oklch(0.708 0 0);
+  --primary:oklch(0.205 0 0);--primary-fg:oklch(0.985 0 0);--acc:#2f6fed;--acc-soft:#eaf1fe;--ok:#16a34a;
+  --radius:10px;--rail:220px;--font:"Inter",ui-sans-serif,system-ui,"Apple SD Gothic Neo","Malgun Gothic",sans-serif;
+}
+:root[data-theme="dark"]{
+  --bg:oklch(0.145 0 0);--surface:oklch(0.185 0 0);--fg:oklch(0.985 0 0);--muted:oklch(0.708 0 0);
+  --card:oklch(0.205 0 0);--panel:oklch(0.235 0 0);--border:oklch(1 0 0 / 12%);--ring:oklch(0.556 0 0);
+  --primary:oklch(0.922 0 0);--primary-fg:oklch(0.205 0 0);--acc:#6e9bf6;--acc-soft:rgba(110,155,246,.14);--ok:#4ade80;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font-family:var(--font);line-height:1.55;-webkit-font-smoothing:antialiased;letter-spacing:-.01em}
+a{color:inherit}
+.mono{font-variant-numeric:tabular-nums;font-family:ui-monospace,Menlo,Consolas,monospace}
+button{font-family:inherit}
+input,textarea,select{font-family:inherit}
+
+.app{display:grid;grid-template-columns:var(--rail) 1fr;min-height:100vh}
+/* rail */
+aside{position:sticky;top:0;height:100vh;background:var(--surface);border-right:1px solid var(--border);padding:18px 12px;display:flex;flex-direction:column;gap:3px;overflow-y:auto}
+.brand{display:flex;align-items:center;gap:9px;padding:4px 8px 16px;font-weight:700;font-size:14px}
+.brand .lg{width:26px;height:26px;border-radius:7px;background:var(--primary);color:var(--primary-fg);display:grid;place-items:center;font-size:12px;font-weight:700}
+.nv{display:flex;align-items:center;gap:10px;padding:9px 11px;border-radius:8px;font-size:13.5px;color:var(--muted);border:none;background:none;width:100%;text-align:left;cursor:pointer}
+.nv:hover{background:var(--panel);color:var(--fg)}
+.nv.on{background:var(--panel);color:var(--fg);font-weight:600}
+.nv svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2}
+.rail-sp{flex:1}
+.railfoot{border-top:1px solid var(--border);padding-top:10px;font-size:11px;color:var(--muted)}
+.railfoot .row{display:flex;gap:6px;margin-top:8px}
+.mini{flex:1;font-size:11px;border:1px solid var(--border);background:var(--card);color:var(--muted);border-radius:7px;padding:7px;cursor:pointer;text-align:center}
+.mini:hover{color:var(--fg)}
+
+main{min-width:0}
+.mtop{position:sticky;top:0;z-index:5;background:color-mix(in oklch,var(--bg) 86%,transparent);backdrop-filter:blur(8px);border-bottom:1px solid var(--border);padding:14px 26px;display:flex;align-items:center;gap:12px}
+.mtop h1{font-size:17px;font-weight:700;margin:0}
+.mtop .sp{flex:1}
+.mwrap{padding:24px 26px 80px;max-width:1160px}
+
+/* buttons */
+.btn{display:inline-flex;align-items:center;gap:7px;height:36px;padding:0 14px;border-radius:8px;font-size:13.5px;font-weight:500;border:1px solid var(--border);background:var(--card);cursor:pointer;color:var(--fg)}
+.btn:hover{background:var(--panel)}
+.btn.p{background:var(--primary);color:var(--primary-fg);border-color:var(--primary)}
+.btn.a{background:var(--acc);color:#fff;border-color:var(--acc)}
+.btn.sm{height:30px;padding:0 10px;font-size:12.5px}
+.btn svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:2}
+.icon{width:32px;height:32px;padding:0;justify-content:center}
+
+/* cards / docs */
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px}
+.doc{border:1px solid var(--border);border-radius:12px;background:var(--card);padding:16px 17px}
+.doc .tt{font-size:15px;font-weight:650}
+.doc .badge{display:inline-block;font-size:11px;color:var(--acc);background:var(--acc-soft);border-radius:6px;padding:2px 8px;margin-top:7px}
+.doc .meta{font-size:11.5px;color:var(--muted);margin-top:8px}
+.doc .acts{display:flex;flex-wrap:wrap;gap:6px;margin-top:13px}
+.newcard{border:1.5px dashed var(--border);border-radius:12px;display:grid;place-items:center;min-height:130px;color:var(--muted);cursor:pointer;font-size:13.5px}
+.newcard:hover{border-color:var(--acc);color:var(--acc)}
+
+/* library forms */
+.sec{margin-bottom:26px}
+.sec > h2{font-size:13px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:0 0 12px;display:flex;align-items:center;gap:8px}
+.sec > h2 .add{margin-left:auto;font-size:12px;color:var(--acc);cursor:pointer;letter-spacing:0;text-transform:none;font-weight:500}
+.blockcard{border:1px solid var(--border);border-radius:11px;background:var(--card);padding:15px;margin-bottom:11px}
+.blockcard .bh{display:flex;align-items:center;gap:8px;margin-bottom:10px}
+.blockcard .bh .t{font-weight:600;font-size:13px;color:var(--muted)}
+.blockcard .bh .rm{margin-left:auto;color:var(--muted);cursor:pointer;font-size:12px;border:1px solid var(--border);border-radius:6px;padding:3px 8px}
+.blockcard .bh .rm:hover{color:#dc2626;border-color:#dc2626}
+.f{margin-bottom:10px}
+.f:last-child{margin-bottom:0}
+.f label{display:block;font-size:11px;font-weight:600;color:var(--muted);margin-bottom:4px}
+.f input,.f textarea,.f select{width:100%;border:1px solid var(--border);background:var(--surface);color:var(--fg);border-radius:8px;padding:8px 10px;font-size:13px}
+.f textarea{resize:vertical;line-height:1.5}
+.f .hint{font-size:10.5px;color:var(--muted);margin-top:3px}
+.frow{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.frow3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+@media(max-width:620px){.frow,.frow3{grid-template-columns:1fr}}
+
+/* builder */
+.buildwrap{display:grid;grid-template-columns:380px 1fr;gap:0;height:calc(100vh - 58px)}
+.bcol{overflow-y:auto;padding:20px 22px}
+.bcol.left{border-right:1px solid var(--border)}
+.bcol.right{background:var(--panel);padding:18px}
+.blabel{font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:20px 0 10px}
+.blabel:first-child{margin-top:0}
+.tplrow{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+.tpl{border:1px solid var(--border);border-radius:9px;padding:10px;cursor:pointer;background:var(--card);text-align:center}
+.tpl .t{font-size:12.5px;font-weight:650}.tpl .d{font-size:10.5px;color:var(--muted)}
+.tpl.sel{border-color:var(--acc);background:var(--acc-soft);color:var(--acc)}
+.tgl{display:flex;align-items:center;gap:9px;padding:8px 10px;border:1px solid var(--border);border-radius:9px;background:var(--card);margin-bottom:6px;font-size:13px}
+.tgl .grip{color:var(--muted);cursor:grab;font-size:11px;letter-spacing:-2px;user-select:none}
+.tgl .nm{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tgl .mv{color:var(--muted);cursor:pointer;font-size:12px;padding:0 3px}
+.tgl .mv:hover{color:var(--fg)}
+.sw{width:34px;height:20px;border-radius:999px;background:var(--acc);position:relative;cursor:pointer;flex-shrink:0;border:none}
+.sw::after{content:"";position:absolute;top:2px;right:2px;width:16px;height:16px;border-radius:50%;background:#fff;transition:.15s}
+.sw.off{background:#c7cbd1}
+.sw.off::after{right:auto;left:2px}
+:root[data-theme="dark"] .sw.off{background:#3a3d42}
+.previewframe{width:100%;height:100%;border:1px solid var(--border);border-radius:10px;background:#fff;display:block}
+.pubbox{border:1px solid var(--border);border-radius:10px;background:var(--card);padding:13px;margin-top:14px}
+.urlline{display:flex;align-items:center;border:1px solid var(--border);border-radius:8px;overflow:hidden;margin-top:8px;font-size:11.5px}
+.urlline input{flex:1;border:none;background:var(--surface);color:var(--fg);padding:8px 9px;font-family:ui-monospace,Menlo,monospace;min-width:0}
+.hidden{display:none!important}
+.empty{color:var(--muted);font-size:14px;padding:40px 0;text-align:center}
+.toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%);background:var(--primary);color:var(--primary-fg);padding:10px 18px;border-radius:9px;font-size:13px;z-index:50;opacity:0;transition:.2s;pointer-events:none}
+.toast.show{opacity:1}
+@media(max-width:860px){.app{grid-template-columns:1fr}aside{display:none}.buildwrap{grid-template-columns:1fr;height:auto}.bcol.left{border-right:none;border-bottom:1px solid var(--border)}.previewframe{height:70vh}}
+</style>
+</head>
+<body>
+<div class="app">
+  <aside>
+    <div class="brand"><span class="lg">JK</span> Resume Studio</div>
+    <button class="nv on" data-view="home"><svg viewBox="0 0 24 24"><path d="M3 9.5 12 3l9 6.5V20a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1z"/></svg> 내보낸 이력서</button>
+    <button class="nv" data-view="library"><svg viewBox="0 0 24 24"><path d="M4 5h11a2 2 0 0 1 2 2v13M4 5v13a2 2 0 0 0 2 2h11M4 5a2 2 0 0 1 2-2h9"/></svg> 콘텐츠 라이브러리</button>
+    <button class="nv" data-view="builder"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 17h7M17.5 14v7"/></svg> 빌더</button>
+    <div class="rail-sp"></div>
+    <div class="railfoot">
+      정적 빌더 · localStorage 저장
+      <div class="row">
+        <button class="mini" id="exportBtn">내보내기(JSON)</button>
+        <button class="mini" id="importBtn">가져오기</button>
+        <button class="mini icon" id="themeBtn" title="테마" style="flex:0 0 auto;width:32px">◐</button>
+      </div>
+    </div>
+  </aside>
+
+  <main>
+    <!-- HOME -->
+    <section id="v-home">
+      <div class="mtop"><h1>내보낸 이력서</h1><div class="sp"></div><button class="btn p" id="newDocTop">+ 새 이력서</button></div>
+      <div class="mwrap"><div class="grid" id="docGrid"></div></div>
+    </section>
+
+    <!-- LIBRARY -->
+    <section id="v-library" class="hidden">
+      <div class="mtop"><h1>콘텐츠 라이브러리</h1><div class="sp"></div><span class="mono" style="font-size:12px;color:var(--muted)" id="libSaved">저장됨</span></div>
+      <div class="mwrap" id="libBody"></div>
+    </section>
+
+    <!-- BUILDER -->
+    <section id="v-builder" class="hidden">
+      <div class="mtop">
+        <h1 id="bTitle">빌더</h1><div class="sp"></div>
+        <button class="btn sm" id="bViewOpen">새 탭에서 열기</button>
+        <button class="btn a sm" id="bPublish">🚀 발행 / 링크복사</button>
+      </div>
+      <div id="bEmpty" class="empty hidden">문서를 선택하거나 <b>새 이력서</b>를 만들어 주세요.</div>
+      <div class="buildwrap" id="bWrap">
+        <div class="bcol left" id="bLeft"></div>
+        <div class="bcol right"><iframe class="previewframe" id="preview" title="미리보기"></iframe></div>
+      </div>
+    </section>
+  </main>
+</div>
+<div class="toast" id="toast"></div>
+
+<script src="resume.data.js"></script>
+<script src="templates.js"></script>
+<script>
+/* ============ storage & state ============ */
+const LS_LIB='rs_lib_v1', LS_DOCS='rs_docs_v1';
+const $=s=>document.querySelector(s);
+const uid=()=>Math.random().toString(36).slice(2,8);
+const clone=o=>JSON.parse(JSON.stringify(o));
+const esc=s=>String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+function save(){localStorage.setItem(LS_LIB,JSON.stringify(LIB));localStorage.setItem(LS_DOCS,JSON.stringify(DOCS));flash();}
+function flash(){const el=$('#libSaved');if(el){el.textContent='저장됨 · '+new Date().toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit'});}}
+function toast(m){const t=$('#toast');t.textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),1900);}
+
+function seed(){
+  const R=window.RESUME||{};
+  return {
+    profile: clone(R.profile||{nameKo:'',nameEn:'',title:'',tagline:'',totalYears:'',email:'',phone:'',location:'',summary:'',links:[]}),
+    highlights: clone(R.highlights||[]),
+    ax: clone(R.ax||[]),
+    experiences: clone(R.experiences||[]),
+    projects: clone(R.projects||[]),
+    skills: clone(R.skills||[]),
+    education: clone(R.education||[]),
+    awards: clone(R.awards||[]),
+    roleTags: ["퍼포먼스 마케팅","마케팅 데이터 분석","그로스 엔지니어링","브랜딩/콘텐츠","프론트엔드"]
+  };
+}
+let LIB = JSON.parse(localStorage.getItem(LS_LIB)||'null') || seed();
+let DOCS = JSON.parse(localStorage.getItem(LS_DOCS)||'null') || [];
+let curDocId = null;
+
+/* ============ doc config ============ */
+function newDoc(){
+  const d={id:uid(),title:'새 이력서',template:'wanted',slug:'resume-'+uid(),visibility:'unlisted',
+    summaryOn:true,axOn:true,highlightsOn:true,skillsOn:true,educationOn:true,awardsOn:true,
+    lists:{experiences:LIB.experiences.map((_,i)=>({i,on:true})),projects:LIB.projects.map((_,i)=>({i,on:true}))},
+    updated:Date.now()};
+  DOCS.unshift(d); save(); return d;
+}
+function reconcile(d){ // keep lists in sync with LIB length
+  ['experiences','projects'].forEach(k=>{
+    const have=new Set(d.lists[k].map(x=>x.i));
+    d.lists[k]=d.lists[k].filter(x=>x.i<LIB[k].length);
+    LIB[k].forEach((_,i)=>{if(!have.has(i))d.lists[k].push({i,on:true});});
+  });
+  return d;
+}
+function resolve(d){
+  reconcile(d);
+  return {
+    template:d.template,title:d.title,slug:d.slug,visibility:d.visibility,
+    profile:LIB.profile, summaryOn:d.summaryOn,
+    highlights:d.highlightsOn?LIB.highlights:[],
+    ax:d.axOn?LIB.ax:[],
+    experiences:d.lists.experiences.filter(x=>x.on).map(x=>LIB.experiences[x.i]).filter(Boolean),
+    projects:d.lists.projects.filter(x=>x.on).map(x=>LIB.projects[x.i]).filter(Boolean),
+    skills:d.skillsOn?LIB.skills:[],
+    education:d.educationOn?LIB.education:[],
+    awards:d.awardsOn?LIB.awards:[],
+    roleTags:LIB.roleTags
+  };
+}
+
+/* ============ encode / URL ============ */
+function encodeDoc(o){return btoa(unescape(encodeURIComponent(JSON.stringify(o)))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');}
+function viewURL(d){
+  const base=location.href.replace(/studio\.html.*$/,'').replace(/[^/]*$/,'');
+  return base+'view.html#'+encodeDoc(resolve(d));
+}
+
+/* ============ nav ============ */
+function show(view){
+  ['home','library','builder'].forEach(v=>$('#v-'+v).classList.toggle('hidden',v!==view));
+  document.querySelectorAll('.nv').forEach(b=>b.classList.toggle('on',b.dataset.view===view));
+  if(view==='home')renderHome();
+  if(view==='library')renderLibrary();
+  if(view==='builder')renderBuilder();
+}
+document.querySelectorAll('.nv').forEach(b=>b.addEventListener('click',()=>show(b.dataset.view)));
+
+/* ============ HOME ============ */
+function renderHome(){
+  const g=$('#docGrid');
+  const cards=DOCS.map(d=>{
+    const tpl=TEMPLATES.list.find(t=>t.id===d.template)||{name:d.template};
+    return `<div class="doc" data-id="${d.id}">
+      <div class="tt">${esc(d.title)}</div>
+      <span class="badge">${esc(tpl.name)}</span>
+      <div class="meta">/${esc(d.slug)} · ${new Date(d.updated).toLocaleDateString('ko-KR')}</div>
+      <div class="acts">
+        <button class="btn sm" data-act="edit">편집</button>
+        <button class="btn sm" data-act="link">🔗 링크</button>
+        <button class="btn sm" data-act="pdf">PDF</button>
+        <button class="btn sm" data-act="del">삭제</button>
+      </div></div>`;
+  }).join('');
+  g.innerHTML=`<div class="newcard" id="newCard">+ 새 이력서 만들기</div>`+cards;
+}
+$('#docGrid').addEventListener('click',e=>{
+  if(e.target.id==='newCard'){const d=newDoc();openBuilder(d.id);return;}
+  const card=e.target.closest('.doc'); if(!card)return;
+  const d=DOCS.find(x=>x.id===card.dataset.id); const act=e.target.dataset.act; if(!d||!act)return;
+  if(act==='edit')openBuilder(d.id);
+  else if(act==='link'){navigator.clipboard.writeText(viewURL(d)).then(()=>toast('공개 링크 복사됨'));}
+  else if(act==='pdf'){window.open(viewURL(d),'_blank');toast('열린 창에서 PDF로 저장을 누르세요');}
+  else if(act==='del'){if(confirm('삭제할까요?')){DOCS=DOCS.filter(x=>x.id!==d.id);save();renderHome();}}
+});
+$('#newDocTop').addEventListener('click',()=>{const d=newDoc();openBuilder(d.id);});
+
+/* ============ BUILDER ============ */
+function openBuilder(id){curDocId=id;show('builder');}
+function renderBuilder(){
+  const d=DOCS.find(x=>x.id===curDocId)||DOCS[0]; curDocId=d?d.id:null;
+  $('#bWrap').classList.toggle('hidden',!d); $('#bEmpty').classList.toggle('hidden',!!d);
+  if(!d)return;
+  $('#bTitle').textContent=d.title||'빌더';
+  const tpls=TEMPLATES.list.map(t=>`<div class="tpl ${d.template===t.id?'sel':''}" data-tpl="${t.id}"><div class="t">${t.name}</div><div class="d">${t.desc}</div></div>`).join('');
+  const expRows=d.lists.experiences.map((x,pos)=>rowTgl('experiences',pos,x.on,LIB.experiences[x.i]?.company||'(삭제됨)')).join('');
+  const prjRows=d.lists.projects.map((x,pos)=>rowTgl('projects',pos,x.on,LIB.projects[x.i]?.name||'(삭제됨)')).join('');
+  const secTgl=(k,label)=>`<div class="tgl"><span class="nm">${label}</span><button class="sw ${d[k]?'':'off'}" data-flag="${k}"></button></div>`;
+  $('#bLeft').innerHTML=`
+    <div class="blabel">문서</div>
+    <div class="f"><label>제목</label><input id="bDocTitle" value="${esc(d.title)}"></div>
+    <div class="blabel">템플릿</div>
+    <div class="tplrow">${tpls}</div>
+    <div class="blabel">자기소개 / 하이라이트</div>
+    ${secTgl('summaryOn','자기소개')}
+    ${d.template==='web'?secTgl('highlightsOn','핵심 지표(숫자)')+secTgl('axOn','AX 하이라이트'):''}
+    <div class="blabel">경력 <span style="color:var(--muted);font-weight:400;text-transform:none;letter-spacing:0">· 켜기/순서</span></div>
+    ${expRows||'<div class="empty" style="padding:10px">경력 없음</div>'}
+    <div class="blabel">프로젝트</div>
+    ${prjRows||'<div class="empty" style="padding:10px">프로젝트 없음</div>'}
+    <div class="blabel">기타 섹션</div>
+    ${secTgl('skillsOn','스킬')}${secTgl('educationOn','학력')}${secTgl('awardsOn','수상')}
+    <div class="pubbox">
+      <div class="blabel" style="margin:0 0 8px">발행 설정</div>
+      <div class="f"><label>URL 주소(슬러그)</label><input id="bSlug" value="${esc(d.slug)}"></div>
+      <div class="f"><label>공개 범위</label><select id="bVis"><option value="unlisted"${d.visibility==='unlisted'?' selected':''}>링크 있는 사람만</option><option value="public"${d.visibility==='public'?' selected':''}>공개</option></select></div>
+      <div class="urlline"><input id="bURL" readonly value=""><button class="btn sm" id="bCopy" style="border:none;border-radius:0">복사</button></div>
+    </div>`;
+  updatePreview();
+}
+function rowTgl(list,pos,on,name){
+  return `<div class="tgl" data-list="${list}" data-pos="${pos}">
+    <span class="grip">⋮⋮</span>
+    <span class="mv" data-mv="up">▲</span><span class="mv" data-mv="dn">▼</span>
+    <span class="nm">${esc(name)}</span>
+    <button class="sw ${on?'':'off'}" data-toggle="1"></button></div>`;
+}
+function curDoc(){return DOCS.find(x=>x.id===curDocId);}
+function touch(){const d=curDoc();if(d){d.updated=Date.now();save();}}
+let pvTimer=null;
+function updatePreview(){
+  const d=curDoc(); if(!d)return;
+  $('#bURL').value=viewURL(d);
+  clearTimeout(pvTimer);
+  pvTimer=setTimeout(()=>{$('#preview').setAttribute('srcdoc',TEMPLATES.render(resolve(d)));},180);
+}
+
+// builder interactions (delegated)
+$('#bLeft').addEventListener('click',e=>{
+  const d=curDoc(); if(!d)return;
+  const tpl=e.target.closest('[data-tpl]'); if(tpl){d.template=tpl.dataset.tpl;touch();renderBuilder();return;}
+  const flag=e.target.closest('[data-flag]'); if(flag){d[flag.dataset.flag]=!d[flag.dataset.flag];flag.classList.toggle('off');touch();updatePreview();return;}
+  const row=e.target.closest('[data-list]');
+  if(row){
+    const list=row.dataset.list, pos=+row.dataset.pos, arr=d.lists[list];
+    if(e.target.dataset.toggle){arr[pos].on=!arr[pos].on;e.target.classList.toggle('off');touch();updatePreview();return;}
+    const mv=e.target.dataset.mv;
+    if(mv==='up'&&pos>0){[arr[pos-1],arr[pos]]=[arr[pos],arr[pos-1]];touch();renderBuilder();}
+    if(mv==='dn'&&pos<arr.length-1){[arr[pos+1],arr[pos]]=[arr[pos],arr[pos+1]];touch();renderBuilder();}
+    return;
+  }
+  if(e.target.id==='bCopy'){navigator.clipboard.writeText($('#bURL').value).then(()=>toast('링크 복사됨'));}
+});
+$('#bLeft').addEventListener('input',e=>{
+  const d=curDoc(); if(!d)return;
+  if(e.target.id==='bDocTitle'){d.title=e.target.value;$('#bTitle').textContent=d.title;touch();}
+  if(e.target.id==='bSlug'){d.slug=e.target.value.replace(/[^a-zA-Z0-9-_가-힣]/g,'-');e.target.value=d.slug;touch();updatePreview();}
+});
+$('#bLeft').addEventListener('change',e=>{
+  const d=curDoc(); if(!d)return;
+  if(e.target.id==='bVis'){d.visibility=e.target.value;touch();}
+});
+$('#bPublish').addEventListener('click',()=>{const d=curDoc();if(!d)return;navigator.clipboard.writeText(viewURL(d)).then(()=>toast('발행됨 · 공개 링크 복사 완료'));});
+$('#bViewOpen').addEventListener('click',()=>{const d=curDoc();if(d)window.open(viewURL(d),'_blank');});
+
+/* ============ LIBRARY ============ */
+function fInput(b,i,field,val,label,type){
+  return `<div class="f"><label>${label}</label><input data-b="${b}" data-i="${i}" data-f="${field}" data-t="${type||'str'}" value="${esc(val)}"></div>`;
+}
+function fArea(b,i,field,val,label,type,rows,hint){
+  return `<div class="f"><label>${label}</label><textarea rows="${rows||3}" data-b="${b}" data-i="${i}" data-f="${field}" data-t="${type}">${esc(val)}</textarea>${hint?`<div class="hint">${hint}</div>`:''}</div>`;
+}
+function renderLibrary(){
+  const p=LIB.profile;
+  const linkStr=(p.links||[]).map(l=>l.label+' | '+l.url).join('\n');
+  let h=`
+  <div class="sec"><h2>프로필</h2>
+   <div class="blockcard">
+    <div class="frow">${fInput('profile',0,'nameKo',p.nameKo,'이름(한글)')}${fInput('profile',0,'nameEn',p.nameEn,'이름(영문)')}</div>
+    <div class="frow">${fInput('profile',0,'title',p.title,'타이틀')}${fInput('profile',0,'totalYears',p.totalYears,'총 경력')}</div>
+    <div class="f"><label>한 줄 태그라인</label><input data-b="profile" data-i="0" data-f="tagline" data-t="str" value="${esc(p.tagline)}"></div>
+    <div class="frow3">${fInput('profile',0,'email',p.email,'이메일')}${fInput('profile',0,'phone',p.phone,'전화')}${fInput('profile',0,'location',p.location,'지역')}</div>
+    ${fArea('profile',0,'summary',p.summary,'자기소개','str',4)}
+    ${fArea('profile',0,'links',linkStr,'링크 (한 줄에 하나: 라벨 | URL)','links',2,'예: GitHub | https://github.com/...')}
+   </div>
+  </div>`;
+
+  h+=libList('경력','experiences',LIB.experiences,(e,i)=>`
+    <div class="frow">${fInput('experiences',i,'company',e.company,'회사')}${fInput('experiences',i,'period',e.period,'기간')}</div>
+    ${fInput('experiences',i,'role',e.role,'역할/직무')}
+    ${fArea('experiences',i,'summary',e.summary,'한 줄 요약','str',2)}
+    ${fArea('experiences',i,'bullets',(e.bullets||[]).join('\n'),'상세 (한 줄에 하나)','lines',5)}
+    ${fArea('experiences',i,'tags',(e.tags||[]).join(', '),'태그 (쉼표)','csv',1)}`,
+    ()=>({company:'회사명',role:'',period:'',summary:'',bullets:[],tags:[]}));
+
+  h+=libList('프로젝트','projects',LIB.projects,(pr,i)=>`
+    <div class="frow3">${fInput('projects',i,'name',pr.name,'이름')}${fInput('projects',i,'kind',pr.kind,'성격')}${fInput('projects',i,'period',pr.period,'기간')}</div>
+    ${fInput('projects',i,'role',pr.role,'역할')}
+    ${fArea('projects',i,'desc',pr.desc,'설명','str',3)}
+    ${fArea('projects',i,'kpis',(pr.kpis||[]).map(k=>k.n+' | '+k.l).join('\n'),'KPI (한 줄: 수치 | 설명)','kpis',3)}
+    ${fArea('projects',i,'stack',(pr.stack||[]).join(', '),'스택 (쉼표)','csv',2)}`,
+    ()=>({name:'프로젝트',kind:'',period:'',role:'',desc:'',kpis:[],stack:[]}));
+
+  h+=libList('스킬','skills',LIB.skills,(s,i)=>`
+    ${fInput('skills',i,'group',s.group,'그룹명')}
+    ${fArea('skills',i,'items',(s.items||[]).join(', '),'항목 (쉼표)','csv',2)}`,
+    ()=>({group:'그룹',items:[]}));
+
+  h+=libList('학력','education',LIB.education,(e,i)=>`
+    <div class="frow3">${fInput('education',i,'school',e.school,'학교/전공')}${fInput('education',i,'degree',e.degree,'학위')}${fInput('education',i,'period',e.period,'기간')}</div>`,
+    ()=>({school:'',degree:'',period:''}));
+
+  h+=libList('수상 · 기타','awards',LIB.awards,(a,i)=>`
+    <div class="frow3">${fInput('awards',i,'title',a.title,'제목')}${fInput('awards',i,'org',a.org,'주최/설명')}${fInput('awards',i,'date',a.date,'날짜')}</div>`,
+    ()=>({title:'',org:'',date:''}));
+
+  h+=libList('AX 하이라이트 (웹용)','ax',LIB.ax,(a,i)=>`
+    ${fInput('ax',i,'title',a.title,'제목')}
+    ${fArea('ax',i,'desc',a.desc,'설명','str',2)}`,
+    ()=>({title:'',desc:''}));
+
+  h+=libList('핵심 지표 (웹용)','highlights',LIB.highlights,(x,i)=>`
+    <div class="frow">${fInput('highlights',i,'n',x.n,'수치')}${fInput('highlights',i,'l',x.l,'설명')}</div>`,
+    ()=>({n:'',l:''}));
+
+  $('#libBody').innerHTML=h;
+}
+function libList(title,key,arr,fields,factory){
+  window['_fac_'+key]=factory;
+  return `<div class="sec"><h2>${title}<span class="add" data-add="${key}">+ 추가</span></h2>
+    ${arr.map((it,i)=>`<div class="blockcard"><div class="bh"><span class="t">${title} ${i+1}</span><span class="rm" data-rm="${key}" data-i="${i}">삭제</span></div>${fields(it,i)}</div>`).join('')||'<div class="empty" style="padding:14px">없음 · + 추가</div>'}</div>`;
+}
+$('#libBody').addEventListener('input',e=>{
+  const t=e.target; if(!t.dataset.b)return;
+  const b=t.dataset.b, i=+t.dataset.i, f=t.dataset.f, ty=t.dataset.t, v=t.value;
+  const tgt = b==='profile'?LIB.profile:LIB[b][i]; if(!tgt)return;
+  if(ty==='lines')tgt[f]=v.split('\n').map(s=>s.trim()).filter(Boolean);
+  else if(ty==='csv')tgt[f]=v.split(',').map(s=>s.trim()).filter(Boolean);
+  else if(ty==='kpis')tgt[f]=v.split('\n').map(s=>s.trim()).filter(Boolean).map(l=>{const [n,...r]=l.split('|');return {n:(n||'').trim(),l:r.join('|').trim()};});
+  else if(ty==='links')tgt[f]=v.split('\n').map(s=>s.trim()).filter(Boolean).map(l=>{const [la,...r]=l.split('|');return {label:(la||'').trim(),url:r.join('|').trim()};});
+  else tgt[f]=v;
+  save();
+});
+$('#libBody').addEventListener('click',e=>{
+  const add=e.target.dataset.add;
+  if(add){LIB[add].push(window['_fac_'+add]());save();renderLibrary();return;}
+  const rm=e.target.dataset.rm;
+  if(rm){LIB[rm].splice(+e.target.dataset.i,1);save();renderLibrary();}
+});
+
+/* ============ import / export / theme ============ */
+$('#exportBtn').addEventListener('click',()=>{
+  const blob=new Blob([JSON.stringify({LIB,DOCS},null,2)],{type:'application/json'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='resume-studio-backup.json';a.click();
+});
+$('#importBtn').addEventListener('click',()=>{
+  const inp=document.createElement('input');inp.type='file';inp.accept='.json';
+  inp.onchange=()=>{const fr=new FileReader();fr.onload=()=>{try{const o=JSON.parse(fr.result);if(o.LIB)LIB=o.LIB;if(o.DOCS)DOCS=o.DOCS;save();toast('가져오기 완료');show('home');}catch(err){toast('파일 오류');}};fr.readAsText(inp.files[0]);};
+  inp.click();
+});
+(function(){var r=document.documentElement,s=localStorage.getItem('studio_theme');
+if(s)r.setAttribute('data-theme',s);else if(matchMedia('(prefers-color-scheme:dark)').matches)r.setAttribute('data-theme','dark');
+$('#themeBtn').addEventListener('click',()=>{var n=r.getAttribute('data-theme')==='dark'?'light':'dark';r.setAttribute('data-theme',n);localStorage.setItem('studio_theme',n);if(curDoc())updatePreview();});})();
+
+/* ============ boot ============ */
+renderHome();
+</script>
+</body>
+</html>
