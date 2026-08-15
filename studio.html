@@ -84,6 +84,11 @@ main{min-width:0}
 .frow{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .frow3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
 @media(max-width:620px){.frow,.frow3{grid-template-columns:1fr}}
+.worksec{margin-top:12px;border-top:1px solid var(--border);padding-top:10px}
+.workhd{font-size:12px;font-weight:700;color:var(--muted);display:flex;align-items:center;margin-bottom:8px}
+.workhd .add{margin-left:auto}
+.workcard{border:1px solid var(--border);border-radius:9px;background:var(--panel);padding:12px;margin-bottom:8px}
+.featlbl{font-size:12px;color:var(--muted);display:flex;align-items:center;gap:6px;margin-top:6px;cursor:pointer}
 
 /* builder */
 .buildwrap{display:grid;grid-template-columns:380px 1fr;gap:0;height:calc(100vh - 58px)}
@@ -211,10 +216,14 @@ function seed(){
     skills: clone(R.skills||[]),
     education: clone(R.education||[]),
     awards: clone(R.awards||[]),
+    companies: clone(R.companies||[]),
     roleTags: ["퍼포먼스 마케팅","마케팅 데이터 분석","그로스 엔지니어링","브랜딩/콘텐츠","프론트엔드"]
   };
 }
+function derive(){ if(window.deriveFromCompanies) window.deriveFromCompanies(LIB); }
 let LIB = JSON.parse(localStorage.getItem(LS_LIB)||'null') || seed();
+if(!LIB.companies){ LIB.companies = clone((window.RESUME||{}).companies||[]); }  // v2 마이그레이션
+derive();
 let DOCS = JSON.parse(localStorage.getItem(LS_DOCS)||'null') || [];
 let curDocId = null;
 
@@ -387,6 +396,34 @@ function fInput(b,i,field,val,label,type){
 function fArea(b,i,field,val,label,type,rows,hint){
   return `<div class="f"><label>${label}</label><textarea rows="${rows||3}" data-b="${b}" data-i="${i}" data-f="${field}" data-t="${type}">${esc(val)}</textarea>${hint?`<div class="hint">${hint}</div>`:''}</div>`;
 }
+function cField(ci,f,val,label){return `<div class="f"><label>${label}</label><input data-co="${ci}" data-cf="${f}" value="${esc(val)}"></div>`;}
+function cArea(ci,f,val,label,rows){return `<div class="f"><label>${label}</label><textarea rows="${rows||2}" data-co="${ci}" data-cf="${f}">${esc(val)}</textarea></div>`;}
+function wField(ci,wi,f,val,label){return `<div class="f"><label>${label}</label><input data-wc="${ci}:${wi}" data-wf="${f}" data-wt="str" value="${esc(val)}"></div>`;}
+function wArea(ci,wi,f,val,label,type,rows,hint){return `<div class="f"><label>${label}</label><textarea rows="${rows||2}" data-wc="${ci}:${wi}" data-wf="${f}" data-wt="${type||'str'}">${esc(val)}</textarea>${hint?`<div class="hint">${hint}</div>`:''}</div>`;}
+function renderCompanies(){
+  return `<div class="sec"><h2>경력 · 회사 <span class="add" data-addco="1">+ 회사 추가</span></h2>
+   ${(LIB.companies||[]).map((c,ci)=>`
+    <div class="blockcard">
+      <div class="bh"><span class="t">🏢 회사 ${ci+1}</span><span class="rm" data-rmco="${ci}">회사 삭제</span></div>
+      <div class="frow">${cField(ci,'name',c.name,'회사명')}${cField(ci,'period',c.period,'기간')}</div>
+      ${cField(ci,'role',c.role,'직무/역할')}
+      ${cArea(ci,'summary',c.summary,'회사 한 줄 요약',2)}
+      <div class="worksec">
+        <div class="workhd">작업 (프로젝트·캠페인)<span class="add" data-addwork="${ci}">+ 작업 추가</span></div>
+        ${(c.works||[]).map((w,wi)=>`
+          <div class="workcard">
+            <div class="bh"><span class="t">📦 ${esc(w.title||'작업')}</span><span class="rm" data-rmwork="${ci}:${wi}">삭제</span></div>
+            <div class="frow3">${wField(ci,wi,'title',w.title,'제목')}${wField(ci,wi,'category',w.category,'카테고리')}${wField(ci,wi,'period',w.period,'기간')}</div>
+            ${wArea(ci,wi,'summary',w.summary,'요약 (이력서용, 짧게)','str',2)}
+            ${wArea(ci,wi,'detail',w.detail,'상세 (포트폴리오용)','str',3)}
+            ${wArea(ci,wi,'links',(w.links||[]).map(l=>l.label+' | '+l.url).join('\n'),'링크 (라벨 | URL, 한 줄에 하나)','links',2,'예: YouTube | https://youtu.be/...')}
+            ${wArea(ci,wi,'images',(w.images||[]).join('\n'),'이미지 URL (한 줄에 하나)','lines',2)}
+            <label class="featlbl"><input type="checkbox" data-feat="${ci}:${wi}" ${w.featured?'checked':''}> 이력서 '프로젝트' 섹션에 표시</label>
+          </div>`).join('')||'<div class="empty" style="padding:8px;font-size:12px">작업 없음 · + 작업 추가</div>'}
+      </div>
+    </div>`).join('')||'<div class="empty" style="padding:14px">회사 없음 · + 회사 추가</div>'}
+  </div>`;
+}
 function renderLibrary(){
   const p=LIB.profile;
   const linkStr=(p.links||[]).map(l=>l.label+' | '+l.url).join('\n');
@@ -402,21 +439,7 @@ function renderLibrary(){
    </div>
   </div>`;
 
-  h+=libList('경력','experiences',LIB.experiences,(e,i)=>`
-    <div class="frow">${fInput('experiences',i,'company',e.company,'회사')}${fInput('experiences',i,'period',e.period,'기간')}</div>
-    ${fInput('experiences',i,'role',e.role,'역할/직무')}
-    ${fArea('experiences',i,'summary',e.summary,'한 줄 요약','str',2)}
-    ${fArea('experiences',i,'bullets',(e.bullets||[]).join('\n'),'상세 (한 줄에 하나)','lines',5)}
-    ${fArea('experiences',i,'tags',(e.tags||[]).join(', '),'태그 (쉼표)','csv',1)}`,
-    ()=>({company:'회사명',role:'',period:'',summary:'',bullets:[],tags:[]}));
-
-  h+=libList('프로젝트','projects',LIB.projects,(pr,i)=>`
-    <div class="frow3">${fInput('projects',i,'name',pr.name,'이름')}${fInput('projects',i,'kind',pr.kind,'성격')}${fInput('projects',i,'period',pr.period,'기간')}</div>
-    ${fInput('projects',i,'role',pr.role,'역할')}
-    ${fArea('projects',i,'desc',pr.desc,'설명','str',3)}
-    ${fArea('projects',i,'kpis',(pr.kpis||[]).map(k=>k.n+' | '+k.l).join('\n'),'KPI (한 줄: 수치 | 설명)','kpis',3)}
-    ${fArea('projects',i,'stack',(pr.stack||[]).join(', '),'스택 (쉼표)','csv',2)}`,
-    ()=>({name:'프로젝트',kind:'',period:'',role:'',desc:'',kpis:[],stack:[]}));
+  h+=renderCompanies();
 
   h+=libList('스킬','skills',LIB.skills,(s,i)=>`
     ${fInput('skills',i,'group',s.group,'그룹명')}
@@ -447,8 +470,16 @@ function libList(title,key,arr,fields,factory){
   return `<div class="sec"><h2>${title}<span class="add" data-add="${key}">+ 추가</span></h2>
     ${arr.map((it,i)=>`<div class="blockcard"><div class="bh"><span class="t">${title} ${i+1}</span><span class="rm" data-rm="${key}" data-i="${i}">삭제</span></div>${fields(it,i)}</div>`).join('')||'<div class="empty" style="padding:14px">없음 · + 추가</div>'}</div>`;
 }
+function parseLinks(v){return v.split('\n').map(s=>s.trim()).filter(Boolean).map(l=>{const[la,...r]=l.split('|');return{label:(la||'').trim(),url:r.join('|').trim()};});}
 $('#libBody').addEventListener('input',e=>{
-  const t=e.target; if(!t.dataset.b)return;
+  const t=e.target;
+  if(t.dataset.co!==undefined&&t.dataset.cf){const c=LIB.companies[+t.dataset.co];if(c){c[t.dataset.cf]=t.value;derive();save();}return;}
+  if(t.dataset.wc){const[ci,wi]=t.dataset.wc.split(':').map(Number);const w=LIB.companies[ci]&&LIB.companies[ci].works[wi];if(w){const ty=t.dataset.wt,v=t.value;
+    if(ty==='links')w[t.dataset.wf]=parseLinks(v);
+    else if(ty==='lines')w[t.dataset.wf]=v.split('\n').map(s=>s.trim()).filter(Boolean);
+    else w[t.dataset.wf]=v;
+    derive();save();}return;}
+  if(!t.dataset.b)return;
   const b=t.dataset.b, i=+t.dataset.i, f=t.dataset.f, ty=t.dataset.t, v=t.value;
   const tgt = b==='profile'?LIB.profile:LIB[b][i]; if(!tgt)return;
   if(ty==='lines')tgt[f]=v.split('\n').map(s=>s.trim()).filter(Boolean);
@@ -459,6 +490,12 @@ $('#libBody').addEventListener('input',e=>{
   save();
 });
 $('#libBody').addEventListener('click',e=>{
+  const ds=e.target.dataset;
+  if(ds.addco){LIB.companies.push({id:'c'+Date.now().toString(36),name:'새 회사',role:'',period:'',summary:'',works:[]});derive();save();renderLibrary();return;}
+  if(ds.rmco!==undefined){if(confirm('회사를 삭제할까요? (하위 작업 포함)')){LIB.companies.splice(+ds.rmco,1);derive();save();renderLibrary();}return;}
+  if(ds.addwork!==undefined){LIB.companies[+ds.addwork].works.push({id:'w'+Date.now().toString(36),title:'새 작업',category:'',period:'',summary:'',detail:'',links:[],images:[],featured:false});derive();save();renderLibrary();return;}
+  if(ds.rmwork){const[ci,wi]=ds.rmwork.split(':').map(Number);LIB.companies[ci].works.splice(wi,1);derive();save();renderLibrary();return;}
+  if(ds.feat){const[ci,wi]=ds.feat.split(':').map(Number);LIB.companies[ci].works[wi].featured=e.target.checked;derive();save();return;}
   const add=e.target.dataset.add;
   if(add){LIB[add].push(window['_fac_'+add]());save();renderLibrary();return;}
   const rm=e.target.dataset.rm;
@@ -493,6 +530,8 @@ async function syncFromCloud(){
   try{
     const r=await CLOUD.pull(); if(!r)return;
     if(r.library) LIB=r.library; else await CLOUD.pushLibrary(LIB);
+    if(!LIB.companies){ LIB.companies=clone((window.RESUME||{}).companies||[]); }  // v2 마이그레이션
+    derive();
     if(r.docs&&r.docs.length) DOCS=r.docs;
     else if(DOCS.length){ for(const d of DOCS) await CLOUD.pushDoc(d,resolve(d)); }
     localStorage.setItem(LS_LIB,JSON.stringify(LIB));

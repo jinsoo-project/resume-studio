@@ -1,0 +1,370 @@
+<title>Resume Studio — v2 아키텍처 & UI/UX 뼈대</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<style>
+:root{
+  --blue:#3182F6; --blue-weak:#EAF2FE; --blue-strong:#1B64DA;
+  --bg:#F9FAFB; --surface:#FFFFFF; --panel:#F2F4F6;
+  --ink:#191F28; --sub:#4E5968; --faint:#8B95A1; --border:#E5E8EB; --line:#EFF1F4;
+  --ok:#12B886; --amber:#F59F00;
+  --r:16px; --r2:12px;
+  --font:-apple-system,BlinkMacSystemFont,"Pretendard","Apple SD Gothic Neo",system-ui,Roboto,"Segoe UI","Malgun Gothic",sans-serif;
+  --mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme:dark){:root{
+  --blue:#4593FC; --blue-weak:rgba(69,147,252,.14); --blue-strong:#6BA5FF;
+  --bg:#16181D; --surface:#1E2127; --panel:#23262D;
+  --ink:#ECEFF3; --sub:#A7AEB8; --faint:#6B7280; --border:rgba(255,255,255,.10); --line:rgba(255,255,255,.06);
+}}
+:root[data-theme="dark"]{
+  --blue:#4593FC; --blue-weak:rgba(69,147,252,.14); --blue-strong:#6BA5FF;
+  --bg:#16181D; --surface:#1E2127; --panel:#23262D;
+  --ink:#ECEFF3; --sub:#A7AEB8; --faint:#6B7280; --border:rgba(255,255,255,.10); --line:rgba(255,255,255,.06);
+}
+:root[data-theme="light"]{
+  --blue:#3182F6; --blue-weak:#EAF2FE; --blue-strong:#1B64DA;
+  --bg:#F9FAFB; --surface:#FFFFFF; --panel:#F2F4F6;
+  --ink:#191F28; --sub:#4E5968; --faint:#8B95A1; --border:#E5E8EB; --line:#EFF1F4;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--font);line-height:1.55;-webkit-font-smoothing:antialiased;letter-spacing:-.02em}
+.wrap{max-width:1000px;margin:0 auto;padding:0 20px}
+.mono{font-family:var(--mono);font-variant-numeric:tabular-nums}
+h1,h2,h3,h4{margin:0;letter-spacing:-.03em;line-height:1.25}
+.eyebrow{font-size:12px;font-weight:700;letter-spacing:.02em;color:var(--blue)}
+
+header.top{position:sticky;top:0;z-index:20;background:color-mix(in srgb,var(--bg) 82%,transparent);backdrop-filter:blur(12px);border-bottom:1px solid var(--border)}
+.top .wrap{display:flex;align-items:center;gap:10px;height:56px}
+.top .logo{width:26px;height:26px;border-radius:8px;background:var(--blue);color:#fff;display:grid;place-items:center;font-weight:800;font-size:13px}
+.top b{font-size:15px;font-weight:700}.top .s{font-size:12px;color:var(--faint)}
+.tbtn{margin-left:auto;width:36px;height:36px;border:1px solid var(--border);border-radius:10px;background:var(--surface);cursor:pointer;color:var(--ink);display:grid;place-items:center}
+
+.hero{padding:52px 0 20px}
+.hero .eyebrow{margin-bottom:12px}
+.hero h1{font-size:clamp(28px,5vw,42px);font-weight:800;text-wrap:balance}
+.hero p{color:var(--sub);font-size:16px;margin:16px 0 0;max-width:640px}
+
+section{padding:30px 0}
+.stitle{display:flex;align-items:center;gap:10px;margin-bottom:6px}
+.stitle .num{width:26px;height:26px;border-radius:8px;background:var(--blue-weak);color:var(--blue);font-weight:800;font-size:13px;display:grid;place-items:center}
+.stitle h2{font-size:20px;font-weight:800}
+.slead{color:var(--sub);font-size:14px;margin:0 0 20px 36px}
+
+/* mental model diagram */
+.mm{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:22px}
+.mmflow{display:flex;align-items:stretch;gap:12px;flex-wrap:wrap}
+.mmcol{flex:1;min-width:150px}
+.mmbox{border:1px solid var(--border);border-radius:var(--r2);padding:14px;background:var(--bg)}
+.mmbox.blue{border-color:var(--blue);background:var(--blue-weak)}
+.mmbox .t{font-weight:700;font-size:14px}
+.mmbox .d{font-size:12px;color:var(--sub);margin-top:4px}
+.mmbox .sub{margin-top:8px;padding-left:12px;border-left:2px solid var(--border)}
+.mmbox .sub div{font-size:12px;color:var(--sub);padding:2px 0}
+.arrow{align-self:center;color:var(--faint);font-size:20px;font-weight:700}
+.split{display:flex;gap:8px;margin-top:10px}
+.split .p{flex:1;border-radius:10px;padding:9px 11px;font-size:12px;font-weight:600}
+.split .r{background:var(--blue-weak);color:var(--blue-strong)}
+.split .f{background:color-mix(in srgb,var(--ok) 14%,transparent);color:var(--ok)}
+@media(max-width:640px){.arrow{transform:rotate(90deg)}.mmflow{flex-direction:column}}
+
+/* table cards (schema) */
+.tables{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+@media(max-width:820px){.tables{grid-template-columns:1fr 1fr}}
+@media(max-width:560px){.tables{grid-template-columns:1fr}}
+.tbl{border:1px solid var(--border);border-radius:var(--r2);background:var(--surface);overflow:hidden}
+.tbl .h{display:flex;align-items:center;gap:8px;padding:11px 13px;border-bottom:1px solid var(--line);font-weight:800;font-size:13.5px}
+.tbl .h .ico{width:20px;height:20px;border-radius:6px;background:var(--blue-weak);color:var(--blue);display:grid;place-items:center;font-size:11px}
+.tbl.grp-c .h .ico{background:var(--blue);color:#fff}
+.tbl.grp-o .h .ico{background:color-mix(in srgb,var(--ok) 18%,transparent);color:var(--ok)}
+.tbl.grp-p .h .ico{background:color-mix(in srgb,var(--amber) 20%,transparent);color:var(--amber)}
+.tbl ul{margin:0;padding:9px 13px;list-style:none}
+.tbl li{font-size:12px;color:var(--sub);padding:2px 0;font-family:var(--mono)}
+.tbl li b{color:var(--ink);font-weight:600}
+.tbl .rel{font-size:11px;color:var(--faint);padding:0 13px 11px}
+.legend{display:flex;gap:14px;flex-wrap:wrap;margin:0 0 16px 36px;font-size:12px;color:var(--sub)}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.dot{width:10px;height:10px;border-radius:3px}
+.dot.c{background:var(--blue)}.dot.o{background:var(--ok)}.dot.p{background:var(--amber)}
+
+/* dashboard mock */
+.mock{border:1px solid var(--border);border-radius:var(--r);overflow:hidden;box-shadow:0 20px 50px -24px rgba(0,0,0,.3);background:var(--surface)}
+.mockbar{height:32px;background:var(--panel);border-bottom:1px solid var(--line);display:flex;align-items:center;gap:6px;padding:0 12px}
+.mockbar i{width:9px;height:9px;border-radius:50%;background:#00000018}
+.mockbar .u{margin-left:10px;font-family:var(--mono);font-size:11px;color:var(--faint)}
+.appgrid{display:grid;grid-template-columns:190px 1fr}
+.rail{background:var(--panel);border-right:1px solid var(--line);padding:14px 10px}
+.rail .brand{display:flex;align-items:center;gap:8px;font-weight:800;font-size:13px;padding:4px 8px 14px}
+.rail .brand .lg{width:22px;height:22px;border-radius:7px;background:var(--blue);color:#fff;display:grid;place-items:center;font-size:11px}
+.lr{display:flex;align-items:center;gap:9px;padding:9px 10px;border-radius:10px;font-size:13px;color:var(--sub)}
+.lr .i{width:16px;height:16px;border-radius:5px;border:1.6px solid currentColor;opacity:.7}
+.lr.on{background:var(--surface);color:var(--ink);font-weight:700;box-shadow:0 1px 3px rgba(0,0,0,.06)}
+.lr.on .i{border-color:var(--blue);background:var(--blue);opacity:1}
+.content{padding:16px 18px;min-height:440px}
+.ctitle{display:flex;align-items:center;gap:8px;margin-bottom:4px}
+.ctitle h3{font-size:16px;font-weight:800}
+.ctitle .badge{font-size:11px;font-weight:700;color:var(--blue);background:var(--blue-weak);border-radius:6px;padding:2px 8px}
+.csub{font-size:12px;color:var(--faint);margin-bottom:14px}
+/* company listrow */
+.company{border:1px solid var(--border);border-radius:12px;background:var(--bg);margin-bottom:10px;overflow:hidden}
+.company .ch{display:flex;align-items:center;gap:10px;padding:12px 13px}
+.company .logo{width:34px;height:34px;border-radius:9px;background:var(--blue-weak);color:var(--blue);display:grid;place-items:center;font-weight:800;font-size:13px}
+.company .ci{flex:1}
+.company .cn{font-weight:700;font-size:14px}
+.company .cm{font-size:11.5px;color:var(--faint)}
+.company .cnt{font-size:11px;color:var(--blue);font-weight:700;background:var(--blue-weak);border-radius:20px;padding:3px 9px}
+.works{border-top:1px solid var(--line);padding:10px 13px 12px;background:var(--surface)}
+.work{display:flex;gap:10px;padding:9px 0;border-bottom:1px solid var(--line)}
+.work:last-child{border-bottom:none}
+.work .thumb{width:44px;height:44px;border-radius:8px;background:linear-gradient(135deg,#cdd8ff,#eaf2fe);flex-shrink:0;display:grid;place-items:center;font-size:15px}
+:root[data-theme="dark"] .work .thumb{background:linear-gradient(135deg,#2a3550,#1e2733)}
+.work .wi{flex:1;min-width:0}
+.work .wt{font-size:13px;font-weight:700}
+.work .wd{font-size:11.5px;color:var(--sub);margin:2px 0 5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.work .chips{display:flex;gap:5px;flex-wrap:wrap}
+.chip{font-size:10.5px;padding:2px 7px;border-radius:6px;background:var(--panel);color:var(--sub)}
+.chip.url{background:var(--blue-weak);color:var(--blue-strong)}
+.chip.cat{background:color-mix(in srgb,var(--ok) 14%,transparent);color:var(--ok)}
+.addwork{margin-top:8px;border:1.5px dashed var(--border);border-radius:9px;padding:9px;text-align:center;font-size:12px;color:var(--blue);font-weight:600}
+.bottomcta{margin-top:14px;background:var(--blue);color:#fff;border-radius:12px;padding:12px;text-align:center;font-weight:700;font-size:13px}
+
+/* small mock tiles */
+.tiles{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:14px}
+@media(max-width:640px){.tiles{grid-template-columns:1fr}.appgrid{grid-template-columns:1fr}.rail{display:none}}
+.tile{border:1px solid var(--border);border-radius:12px;background:var(--surface);padding:14px}
+.tile .tt{font-weight:800;font-size:13.5px;margin-bottom:8px;display:flex;align-items:center;gap:7px}
+.tile .tt .k{font-size:10px;background:var(--panel);color:var(--faint);border-radius:5px;padding:2px 6px;font-weight:700}
+.tile p{font-size:12px;color:var(--sub);margin:0}
+.miniflow{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-top:8px;font-size:11px}
+.miniflow .s{background:var(--bg);border:1px solid var(--border);border-radius:7px;padding:4px 8px;color:var(--sub)}
+.miniflow .a{color:var(--faint)}
+
+/* url map */
+.urls{display:flex;flex-direction:column;gap:8px}
+.url{display:flex;align-items:center;gap:12px;border:1px solid var(--border);border-radius:12px;background:var(--surface);padding:12px 14px}
+.url .path{font-family:var(--mono);font-size:13px;font-weight:700;color:var(--blue-strong);min-width:170px}
+.url .desc{font-size:12.5px;color:var(--sub)}
+.url .tag{margin-left:auto;font-size:10.5px;font-weight:700;border-radius:6px;padding:2px 8px}
+.url .tag.pub{background:color-mix(in srgb,var(--ok) 14%,transparent);color:var(--ok)}
+.url .tag.priv{background:var(--panel);color:var(--faint)}
+
+/* palette */
+.pal{display:flex;gap:8px;flex-wrap:wrap}
+.sw{width:70px}
+.sw .c{height:44px;border-radius:10px;border:1px solid var(--line)}
+.sw .n{font-size:10px;color:var(--faint);margin-top:4px;font-family:var(--mono)}
+.comp{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+.comp span{font-size:12px;border:1px solid var(--border);border-radius:8px;padding:6px 11px;color:var(--sub);background:var(--surface)}
+
+/* review */
+.rev{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media(max-width:640px){.rev{grid-template-columns:1fr}}
+.revcard{border:1px solid var(--border);border-radius:12px;background:var(--surface);padding:16px}
+.revcard h4{font-size:13px;font-weight:800;margin-bottom:10px}
+.revcard li{font-size:12.5px;color:var(--sub);margin-bottom:6px;list-style:none;padding-left:20px;position:relative}
+.revcard li::before{position:absolute;left:0;top:0}
+.revcard.done li::before{content:"✓";color:var(--ok);font-weight:800}
+.revcard.todo li::before{content:"→";color:var(--blue);font-weight:800}
+.phase{border:1px solid var(--border);border-radius:12px;background:var(--surface);padding:14px 16px;margin-bottom:10px;display:flex;gap:14px;align-items:flex-start}
+.phase .p{font-size:11px;font-weight:800;color:#fff;background:var(--blue);border-radius:7px;padding:4px 9px;white-space:nowrap;margin-top:2px}
+.phase .p.gray{background:var(--faint)}
+.phase h4{font-size:13.5px;font-weight:800;margin-bottom:3px}
+.phase p{font-size:12.5px;color:var(--sub);margin:0}
+footer{padding:30px 0 60px;color:var(--faint);font-size:12px}
+</style>
+
+<header class="top"><div class="wrap">
+  <div class="logo">R</div><b>Resume Studio</b><span class="s">v2 아키텍처 & UI/UX 뼈대</span>
+  <button class="tbtn" id="tbtn" aria-label="테마"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M4.9 4.9l1.4 1.4m11.4 11.4 1.4 1.4M2 12h2m16 0h2M4.9 19.1l1.4-1.4m11.4-11.4 1.4-1.4"/></svg></button>
+</div></header>
+
+<div class="hero wrap">
+  <div class="eyebrow">TOSS 톤 · 회사(사업자) 중심 구조</div>
+  <h1>한 번 넣으면,<br>이력서와 포트폴리오가 나온다.</h1>
+  <p>경험을 <b style="color:var(--ink)">회사(사업자) 단위</b>로 밀어넣으면 — 짧은 요약은 <b style="color:var(--ink)">원티드·리멤버 이력서</b>로, 이미지·URL·노션 링크가 붙은 풍부한 버전은 <b style="color:var(--ink)">포트폴리오 페이지(별도 URL)</b>로 나오는 대시보드.</p>
+</div>
+
+<!-- 1. 멘탈모델 -->
+<section class="wrap">
+  <div class="stitle"><span class="num">1</span><h2>핵심 멘탈모델 — "회사 → 작업 → 두 갈래 출력"</h2></div>
+  <p class="slead">모든 콘텐츠는 회사 밑에 쌓이고, 각 작업(work)은 이력서용 '요약'과 포트폴리오용 '미디어·URL'을 동시에 가집니다.</p>
+  <div class="mm">
+    <div class="mmflow">
+      <div class="mmcol"><div class="mmbox blue">
+        <div class="t">🏢 회사 (사업자)</div>
+        <div class="d">핸디즈 · 바비톡 · 에이전시…</div>
+        <div class="sub"><div>회사명 · 기간 · 직무 · 로고</div></div>
+      </div></div>
+      <div class="arrow">→</div>
+      <div class="mmcol"><div class="mmbox">
+        <div class="t">📦 작업 (Works)</div>
+        <div class="d">그 회사에서 한 프로젝트·캠페인들</div>
+        <div class="sub">
+          <div>제목 · 카테고리 · 성과</div>
+          <div>🖼 이미지 · 🔗 URL · 📝 노션</div>
+        </div>
+        <div class="split"><div class="p r">→ 요약 = 이력서</div><div class="p f">→ 미디어 = 포트폴리오</div></div>
+      </div></div>
+      <div class="arrow">→</div>
+      <div class="mmcol"><div class="mmbox">
+        <div class="t">🚀 두 갈래 출력</div>
+        <div class="d">골라 담아 발행</div>
+        <div class="sub">
+          <div style="color:var(--blue-strong)">/r/slug · 원티드·리멤버 이력서</div>
+          <div style="color:var(--ok)">/p/slug · 포트폴리오 페이지</div>
+        </div>
+      </div></div>
+    </div>
+  </div>
+</section>
+
+<!-- 2. 데이터 모델 -->
+<section class="wrap">
+  <div class="stitle"><span class="num">2</span><h2>데이터 모델 (Supabase 테이블)</h2></div>
+  <p class="slead">회사 중심으로 정규화. 이미지는 Supabase Storage, URL·성과는 각 작업에 붙습니다.</p>
+  <div class="legend">
+    <span><span class="dot c"></span> 콘텐츠(입력)</span>
+    <span><span class="dot o"></span> 이력서 출력</span>
+    <span><span class="dot p"></span> 포트폴리오 출력</span>
+  </div>
+  <div class="tables">
+    <div class="tbl grp-c"><div class="h"><span class="ico">C</span>companies</div>
+      <ul><li><b>id</b> · user_id</li><li><b>name</b> 회사명</li><li>role · period</li><li>summary · logo_url</li><li>sort</li></ul>
+      <div class="rel">↑ user · ↓ works 1:N</div></div>
+    <div class="tbl grp-c"><div class="h"><span class="ico">C</span>works ★</div>
+      <ul><li><b>id</b> · company_id</li><li><b>title</b> · category</li><li>period · role</li><li>summary <span style="color:var(--ok)">(이력서용)</span></li><li>detail · metrics</li><li>links[] <span style="color:var(--blue)">(URL·노션)</span></li><li>cover_url · sort</li></ul>
+      <div class="rel">회사 밑 프로젝트/캠페인</div></div>
+    <div class="tbl grp-c"><div class="h"><span class="ico">C</span>media</div>
+      <ul><li><b>id</b> · user_id</li><li>work_id (nullable)</li><li><b>url</b> · storage_path</li><li>type · alt · sort</li></ul>
+      <div class="rel">Storage 버킷 이미지</div></div>
+    <div class="tbl grp-c"><div class="h"><span class="ico">C</span>profile</div>
+      <ul><li><b>user_id</b> PK</li><li>name · title · summary</li><li>email · phone · links[]</li><li>avatar_url · total_years</li></ul>
+      <div class="rel">상단 정보 1행</div></div>
+    <div class="tbl grp-c"><div class="h"><span class="ico">C</span>skills / education / awards</div>
+      <ul><li><b>id</b> · user_id</li><li>group·items / school·degree</li><li>title·org·date</li><li>sort</li></ul>
+      <div class="rel">보조 콘텐츠</div></div>
+    <div class="tbl grp-o"><div class="h"><span class="ico">R</span>resume_docs</div>
+      <ul><li><b>id</b> · user_id</li><li><b>slug</b> · title · template</li><li>config <span style="color:var(--faint)">(담은 회사·작업)</span></li><li>snapshot · visibility</li></ul>
+      <div class="rel">원티드/리멤버/웹 조립본</div></div>
+    <div class="tbl grp-p"><div class="h"><span class="ico">P</span>portfolio_pages</div>
+      <ul><li><b>id</b> · user_id</li><li><b>slug</b> · title · subtitle</li><li>cover_url · theme</li><li>visibility · published_at</li></ul>
+      <div class="rel">↓ blocks 1:N</div></div>
+    <div class="tbl grp-p"><div class="h"><span class="ico">P</span>portfolio_blocks</div>
+      <ul><li><b>id</b> · page_id</li><li><b>type</b> hero/text/image</li><li>&nbsp;&nbsp;/gallery/video/link</li><li>&nbsp;&nbsp;/work_ref/metric</li><li>content · sort</li></ul>
+      <div class="rel">페이지 내 리치 블록</div></div>
+    <div class="tbl"><div class="h" style="color:var(--faint)"><span class="ico" style="background:var(--panel);color:var(--faint)">?</span>기존 → 이관</div>
+      <ul><li style="color:var(--faint)">현재: library(jsonb)</li><li style="color:var(--faint)">→ companies/works로</li><li style="color:var(--faint)">1회 마이그레이션</li></ul>
+      <div class="rel">3단계에서 처리</div></div>
+  </div>
+</section>
+
+<!-- 3. 대시보드 UI/UX -->
+<section class="wrap">
+  <div class="stitle"><span class="num">3</span><h2>대시보드 UI/UX (핵심 화면)</h2></div>
+  <p class="slead">Toss ListRow 스타일. 가장 중요한 "회사 단위로 밀어넣는" 화면을 중심으로.</p>
+  <div class="mock">
+    <div class="mockbar"><i></i><i></i><i></i><span class="u">studio.jinsoo.dev / 경력 관리</span></div>
+    <div class="appgrid">
+      <div class="rail">
+        <div class="brand"><span class="lg">R</span>Resume Studio</div>
+        <div class="lr"><span class="i"></span>홈</div>
+        <div class="lr on"><span class="i"></span>경력·회사</div>
+        <div class="lr"><span class="i"></span>프로필·스킬</div>
+        <div class="lr"><span class="i"></span>이력서 내보내기</div>
+        <div class="lr"><span class="i"></span>포트폴리오</div>
+        <div class="lr"><span class="i"></span>미디어</div>
+      </div>
+      <div class="content">
+        <div class="ctitle"><h3>경력 · 회사</h3><span class="badge">회사 단위로 밀어넣기</span></div>
+        <div class="csub">회사를 열고 그 밑에 작업(프로젝트·캠페인)을 이미지·URL과 함께 추가하세요.</div>
+
+        <div class="company">
+          <div class="ch"><div class="logo">H</div><div class="ci"><div class="cn">핸디즈 (Handys)</div><div class="cm">퍼포먼스 마케팅 매니저 · 2025.06~</div></div><span class="cnt">작업 4</span></div>
+          <div class="works">
+            <div class="work"><div class="thumb">📊</div><div class="wi"><div class="wt">사내 마케팅 성과 대시보드</div><div class="wd">KPI·예산-성과 자동 집계 대시보드 구축</div><div class="chips"><span class="chip cat">성과</span><span class="chip url">🔗 노션</span><span class="chip">🖼 3</span></div></div></div>
+            <div class="work"><div class="thumb">🤖</div><div class="wi"><div class="wt">AI 마케팅 에이전트</div><div class="wd">SEO·카피·퍼포먼스 에이전트 도입</div><div class="chips"><span class="chip cat">운영</span><span class="chip url">🔗 URL</span></div></div></div>
+            <div class="addwork">＋ 이 회사에 작업 추가 (이미지 드래그·URL 붙여넣기)</div>
+          </div>
+        </div>
+
+        <div class="company">
+          <div class="ch"><div class="logo">B</div><div class="ci"><div class="cn">바비톡 (Babitalk)</div><div class="cm">퍼포먼스·브랜딩·커머스 · 2019~2024</div></div><span class="cnt">작업 9</span></div>
+          <div class="works">
+            <div class="work"><div class="thumb">🎬</div><div class="wi"><div class="wt">부작용 알리기 캠페인</div><div class="wd">기획·콘텐츠·운영 A to Z</div><div class="chips"><span class="chip cat">브랜딩</span><span class="chip url">▶ YouTube</span><span class="chip">🖼 2</span></div></div></div>
+            <div class="addwork">＋ 이 회사에 작업 추가</div>
+          </div>
+        </div>
+
+        <div class="bottomcta">＋ 새 회사 추가</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="tiles">
+    <div class="tile"><div class="tt">📄 이력서 내보내기 <span class="k">/r/slug</span></div>
+      <p>회사·작업을 체크로 담고 순서 잡기 → 템플릿(원티드/리멤버/웹) → 발행.</p>
+      <div class="miniflow"><span class="s">회사·작업 선택</span><span class="a">→</span><span class="s">템플릿</span><span class="a">→</span><span class="s">URL·PDF</span></div>
+    </div>
+    <div class="tile"><div class="tt">🎨 포트폴리오 빌더 <span class="k">/p/slug</span></div>
+      <p>작업을 골라 리치 페이지로. 이미지 갤러리·영상 임베드·URL 카드 블록 조합.</p>
+      <div class="miniflow"><span class="s">작업 선택</span><span class="a">→</span><span class="s">블록 배치</span><span class="a">→</span><span class="s">공개 URL</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- 4. URL 구조 -->
+<section class="wrap">
+  <div class="stitle"><span class="num">4</span><h2>URL 구조</h2></div>
+  <p class="slead">하나의 대시보드에서 두 종류의 공개물을 발행.</p>
+  <div class="urls">
+    <div class="url"><span class="path">/studio</span><span class="desc">대시보드 (본인 전용, 로그인)</span><span class="tag priv">비공개</span></div>
+    <div class="url"><span class="path">/r/&lt;slug&gt;</span><span class="desc">원티드·리멤버·웹 이력서 → 인쇄로 PDF</span><span class="tag pub">공개</span></div>
+    <div class="url"><span class="path">/p/&lt;slug&gt;</span><span class="desc">포트폴리오 페이지 (이미지·영상·URL)</span><span class="tag pub">공개</span></div>
+    <div class="url"><span class="path">/&lt;me&gt;</span><span class="desc">허브 — 이력서·포트폴리오 모음 (선택)</span><span class="tag pub">공개</span></div>
+  </div>
+</section>
+
+<!-- 5. 디자인 톤 -->
+<section class="wrap">
+  <div class="stitle"><span class="num">5</span><h2>디자인 톤 — Toss (TDS)</h2></div>
+  <p class="slead">Primary 블루 + 그레이스케일, Pretendard, 둥근 모서리, ListRow·BottomCTA. (이 페이지가 그 톤 미리보기)</p>
+  <div class="pal">
+    <div class="sw"><div class="c" style="background:#3182F6"></div><div class="n">Blue 500</div></div>
+    <div class="sw"><div class="c" style="background:#EAF2FE"></div><div class="n">Blue weak</div></div>
+    <div class="sw"><div class="c" style="background:#191F28"></div><div class="n">Grey 900</div></div>
+    <div class="sw"><div class="c" style="background:#4E5968"></div><div class="n">Grey 700</div></div>
+    <div class="sw"><div class="c" style="background:#8B95A1"></div><div class="n">Grey 500</div></div>
+    <div class="sw"><div class="c" style="background:#E5E8EB"></div><div class="n">Grey 200</div></div>
+    <div class="sw"><div class="c" style="background:#F2F4F6"></div><div class="n">Grey 100</div></div>
+  </div>
+  <div class="comp"><span>Button</span><span>ListRow</span><span>Tab</span><span>Badge</span><span>BottomCTA</span><span>Navigation</span><span>Border · 16px radius</span></div>
+</section>
+
+<!-- 6. 리뷰 + 플랜 -->
+<section class="wrap">
+  <div class="stitle"><span class="num">6</span><h2>현 상태 리뷰 & 단계별 플랜</h2></div>
+  <p class="slead">이미 있는 것 위에 얹습니다. 무너뜨리지 않고 확장.</p>
+  <div class="rev" style="margin-bottom:20px">
+    <div class="revcard done"><h4>이미 된 것</h4>
+      <li>정적 빌더 + 3종 이력서 템플릿</li>
+      <li>Supabase 연결·인증·RLS·slug 공개뷰</li>
+      <li>GitHub · Vercel 배포 파이프라인</li>
+    </div>
+    <div class="revcard todo"><h4>더 필요한 것</h4>
+      <li>회사→작업 데이터 구조 (정규화)</li>
+      <li>이미지 업로드 (Supabase Storage)</li>
+      <li>포트폴리오 페이지 빌더 + /p/slug</li>
+      <li>URL·노션 링크, 영상 임베드</li>
+    </div>
+  </div>
+  <div class="phase"><span class="p">1단계</span><div><h4>회사·작업 콘텐츠 구조</h4><p>companies·works·media 테이블 + Storage 버킷. 대시보드 "경력·회사" 화면(위 목업)으로 밀어넣기 가능하게.</p></div></div>
+  <div class="phase"><span class="p">2단계</span><div><h4>이력서 내보내기 재연결</h4><p>기존 3종 템플릿을 회사·작업 선택 방식으로 전환. 원티드·리멤버 출력 유지.</p></div></div>
+  <div class="phase"><span class="p">3단계</span><div><h4>포트폴리오 빌더</h4><p>작업을 골라 리치 블록(이미지·영상·URL) 페이지 구성 → /p/slug 발행.</p></div></div>
+  <div class="phase"><span class="p gray">4단계</span><div><h4>Toss 톤 UI 리스킨 + 허브</h4><p>TDS 컴포넌트 톤으로 대시보드·공개뷰 정리, /&lt;me&gt; 허브 페이지.</p></div></div>
+</section>
+
+<footer class="wrap">Resume Studio v2 뼈대 · 실제 동작 UI 아님(설계 목업) · 디자인 톤: Toss TDS 참고</footer>
+
+<script>
+(function(){var r=document.documentElement,b=document.getElementById('tbtn'),s=localStorage.getItem('abp_theme');
+if(s)r.setAttribute('data-theme',s);else if(matchMedia('(prefers-color-scheme:dark)').matches)r.setAttribute('data-theme','dark');
+b.addEventListener('click',function(){var n=r.getAttribute('data-theme')==='dark'?'light':'dark';r.setAttribute('data-theme',n);localStorage.setItem('abp_theme',n);});})();
+</script>

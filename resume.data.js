@@ -1,7 +1,7 @@
 /* =========================================================================
    resume.data.js — 단일 원본 (Single Source of Truth)
-   이 파일 하나만 수정하면 index / wanted / remember 세 페이지가 모두 갱신됩니다.
-   TODO(진수): [작성필요] 표시된 곳(정량 성과 등)을 채워주세요.
+   v2: 회사(사업자) 중심 구조. companies[].works[] 가 원본이고,
+       experiences / projects 는 맨 아래 deriveFromCompanies()로 자동 파생됩니다.
    ========================================================================= */
 window.RESUME = {
   profile: {
@@ -10,15 +10,13 @@ window.RESUME = {
     title: "마케팅 × AI 프로덕트 빌더",
     tagline: "마케팅의 문제를 AI와 코드로 푸는 그로스 빌더",
     totalYears: "9년+",
-    email: "steadyant@naver.com",      // TODO: 공개용 이메일 확정
-    phone: "010-9214-0450",            // 이력서(PDF)에만 노출, 웹에서는 숨김
+    email: "steadyant@naver.com",
+    phone: "010-9214-0450",
     location: "Seoul, KR",
-    avatar: "",                        // 프로필 이미지 URL (또는 업로드) — 스튜디오에서 입력
+    avatar: "",
     links: [
       { label: "이력서 PDF", url: "김진수_이력서.pdf" }
-      // TODO: GitHub / LinkedIn / 노션 등 추가 { label:"GitHub", url:"https://..." }
     ],
-    // 웹 히어로 & 이력서 상단 소개글 (원티드 후킹 문단)
     summary:
       "콘텐츠 기획·제작부터 브랜딩 캠페인, 퍼포먼스 마케팅, 커머스까지 인하우스 마케팅 전 과정을 경험한 풀스택 마케터입니다. " +
       "매체·캠페인별 KPI와 목적에 맞춰 성과 지향의 방법론을 분석·적용하며 퍼포먼스 마케팅에 깊게 관여해 왔습니다. " +
@@ -29,7 +27,6 @@ window.RESUME = {
       "단기 성과에 그치지 않고 서비스와 구성원이 장기적·안정적으로 성장하는, 더 가치 있는 성과를 만들고자 합니다."
   },
 
-  // 웹 히어로 상단 지표
   highlights: [
     { n: "9년+", l: "마케팅 경력" },
     { n: "5억", l: "월 최대 광고예산 운영" },
@@ -37,118 +34,88 @@ window.RESUME = {
     { n: "AI 8종", l: "멀티프로바이더 에이전트 운영" }
   ],
 
-  // AX 스토리 카드 (웹 전용)
   ax: [
-    {
-      title: "MCP 활용",
-      desc: "MCP로 데이터·툴을 AI에 직접 연결, 마케팅 데이터 조회·분석·실행을 대화형으로 자동화."
-    },
-    {
-      title: "성과 대시보드 자동화 (매체 API 연동)",
-      desc: "GA4·BigQuery·네이버 검색광고 등 매체 API를 연결해 광고 성과·매출·퍼널을 자동 집계·대시보드화."
-    },
-    {
-      title: "콘텐츠 생성 자동화",
-      desc: "SEO·카피·퍼포먼스 AI 마케팅 에이전트로 콘텐츠 초안 생성·검수를 자동화 (경쟁사 브랜드 누출 자동 검사 포함)."
-    },
-    {
-      title: "Spec 주도 · Git 병렬 개발",
-      desc: "가이드라인·스펙 기반으로 AI와 협업, git worktree 병렬 작업으로 여러 기능을 동시에 개발·배포."
-    },
-    {
-      title: "멀티 AI 오케스트레이션",
-      desc: "Anthropic·OpenAI·Google·Vertex를 설정으로 스위칭하고 전 실행을 로그로 관리하는 프로바이더 추상화."
-    }
+    { title: "MCP 활용", desc: "MCP로 데이터·툴을 AI에 직접 연결, 마케팅 데이터 조회·분석·실행을 대화형으로 자동화." },
+    { title: "성과 대시보드 자동화 (매체 API 연동)", desc: "GA4·BigQuery·네이버 검색광고 등 매체 API를 연결해 광고 성과·매출·퍼널을 자동 집계·대시보드화." },
+    { title: "콘텐츠 생성 자동화", desc: "SEO·카피·퍼포먼스 AI 마케팅 에이전트로 콘텐츠 초안 생성·검수를 자동화 (경쟁사 브랜드 누출 자동 검사 포함)." },
+    { title: "Spec 주도 · Git 병렬 개발", desc: "가이드라인·스펙 기반으로 AI와 협업, git worktree 병렬 작업으로 여러 기능을 동시에 개발·배포." },
+    { title: "멀티 AI 오케스트레이션", desc: "Anthropic·OpenAI·Google·Vertex를 설정으로 스위칭하고 전 실행을 로그로 관리하는 프로바이더 추상화." }
   ],
 
-  experiences: [
+  /* ===== 회사(사업자) → 작업(works) : 단일 원본 ===== */
+  companies: [
     {
-      company: "핸디즈 (Handys)",
+      id: "handys",
+      name: "핸디즈 (Handys)",
       role: "퍼포먼스 마케팅 매니저 · 마케팅 엔지니어링",
       period: "2025.06 – 현재",
-      summary: "Plott Life / Urbanstay 프로덕트의 퍼포먼스 마케팅과, 마케팅 실무를 제품화하는 사내 대시보드 개발을 병행.",
-      bullets: [
-        "Meta·Google 광고 운영/최적화 — 타겟 확장·CPC 절감을 위한 소구/메시지 테스트 주도",
-        "Airbridge–Meta 연동, 구매·뷰 이벤트 구조 설계 및 MMP 데이터 검증",
-        "Apps Script·SQL(Redash/Metabase)로 예약·매출·재구매 코호트·LTV·퍼널 자동 집계 + 대시보드화",
-        "외부 API(Redash·Airbridge) → 시트 적재 → 로그 관리 자동화 파이프라인 구축",
-        "사내 마케팅 대시보드 sandbox-mkt를 기획·개발·데이터파이프라인·배포·운영까지 단독 수행"
-      ],
-      tags: ["Meta/Google Ads", "Airbridge", "GA4/BigQuery", "SQL", "Next.js", "Supabase"]
+      summary: "Plott Life / Urbanstay 프로덕트의 퍼포먼스 마케팅과, 마케팅 실무를 제품화하는 사내 도구 개발을 병행.",
+      works: [
+        { id: "w-dashboard", title: "사내 마케팅 성과 대시보드", category: "성과", featured: true, period: "2026",
+          summary: "전사 KPI·매체별 예산-성과 지표를 자동 집계·대시보드화, 데이터 기반 의사결정 환경 마련.",
+          detail: "GA4(BigQuery)·Metabase 데이터를 Supabase로 자동 적재, 예약·매출·재구매 코호트·LTV·퍼널을 SQL로 자동 집계. 수작업 없이 성과가 갱신되는 구조 확립.",
+          metrics: [{ n: "20+", l: "기능 탭" }], stack: ["SQL", "Metabase", "GA4", "Supabase"], links: [], images: [] },
+        { id: "w-sandbox", title: "사내 마케팅 운영 자동화 (AI 에이전트)", category: "운영", featured: true, period: "2026.03–08",
+          summary: "광고·리드·뉴스레터 운영을 자동화하는 사내 도구 단독 제작, AI 마케팅 에이전트 도입.",
+          detail: "SEO·카피·퍼포먼스 AI 에이전트, 멀티 프로바이더 추상화, git worktree 병렬 개발.",
+          metrics: [{ n: "764", l: "단독 커밋" }], stack: ["Next.js", "AI SDK", "Vercel"], links: [], images: [] },
+        { id: "w-plott", title: "Plott Life 마케팅·콘텐츠 기능", category: "서비스", featured: true, period: "2026.04–07",
+          summary: "블로그 콘텐츠 운영(CMS)·SEO·네이버 전환추적 구축.",
+          detail: "마케터가 직접 발행하는 블로그 CMS, GA4·GTM 이벤트 체계, 네이버 CTS 전환추적, 구조화 데이터.",
+          metrics: [], stack: ["Next.js", "Strapi"], links: [], images: [] },
+        { id: "w-wavve", title: "Urbanstay × wavve 제휴 랜딩", category: "제휴", featured: true, period: "2026.04~",
+          summary: "wavve 제휴 랜딩페이지 단독 기획·구현, 제휴 캠페인 랜딩 접점 마련.",
+          detail: "제휴사 커뮤니케이션·브랜드 톤 반영, 라이브 서비스 컨벤션 준수 배포.",
+          metrics: [], stack: [], links: [], images: [] },
+        { id: "w-urban-perf", title: "어반스테이 퍼포먼스 마케팅 최적화", category: "퍼포먼스", featured: false, period: "2025.06–2026.03",
+          summary: "Meta·Google 광고 운영/최적화, Airbridge–Meta 연동·MMP 검증, 예약·매출·LTV 대시보드화.",
+          detail: "", metrics: [], stack: ["Meta Ads", "Airbridge"], links: [], images: [] }
+      ]
     },
     {
-      company: "바비톡 (Babitalk)",
+      id: "babitalk",
+      name: "바비톡 (Babitalk)",
       role: "퍼포먼스 · 브랜딩 · 커머스 마케팅",
       period: "2019.06 – 2024.12",
-      summary: "월 최대 5억 규모 매체 예산을 운영하며 퍼포먼스·브랜딩·신사업 커머스를 아우름.",
-      bullets: [
-        "월 최대 5억 paid 매체 예산 운영 (Meta/Google/Kakao Moment/NAVER GFA/Criteo/Apple Search Ads)",
-        "어트리뷰션(Amplitude·Airbridge) 이벤트 택소노미·QA, 퍼널 구축 및 성과 분석·모니터링",
-        "브랜딩 캠페인 기획·제작 (모델 협업, 부작용 알리기·기부런 등) — 굿즈 1,000개 3분 완판, 기부 2,000만원",
-        "제휴 세일즈 프로모션(와그×유니버설 스튜디오 재팬 등) 기획·운영, 조기 완판",
-        "신사업 커머스(뷰티기기·특가전) A to Z — 네이버쇼핑 핫딜 1위, 재고 소진",
-        "대시보드 자동화·매체별 예산-성과 효율화, 숏폼 소재 기획·제작 템플릿화"
-      ],
-      tags: ["퍼포먼스", "브랜딩", "커머스", "Amplitude", "Airbridge", "네이버쇼핑"]
+      summary: "월 최대 5억 매체 예산을 운영하며 퍼포먼스·브랜딩·신사업 커머스를 아우름.",
+      works: [
+        { id: "b-perf-dash", title: "전사·마케팅 성과 대시보드 & 데이터 자동화", category: "성과", featured: true, period: "2022–2024",
+          summary: "전사 KPI·매체별 예산-성과 대시보드 구축, MMP 연동 자동화, 코호트·LTV·퍼널 성과 집계.",
+          detail: "이벤트 택소노미·QA로 데이터 신뢰도 확보, 매체별 예산-성과 비교로 예산 효율화 의사결정 지원.",
+          metrics: [{ n: "5억", l: "월 최대 예산" }], stack: ["Amplitude", "Airbridge", "SQL"], links: [], images: [] },
+        { id: "b-purfly", title: "퍼플라이 기부런 캠페인", category: "브랜딩", featured: true, period: "2021",
+          summary: "굿즈 기획~판매 A to Z. 판매 3분 만에 1,000개 완판, 2,000만원 기부.",
+          detail: "마라톤 굿즈 전액을 암환우에 기부하는 캠페인. 인지 확장·긍정 이미지 형성.",
+          metrics: [{ n: "3분", l: "1,000개 완판" }, { n: "2천만원", l: "기부" }],
+          stack: [], links: [{ label: "기사", url: "https://www.insight.co.kr/news/361050" }, { label: "YouTube", url: "https://youtu.be/x_hQDxX6DXo" }], images: [] },
+        { id: "b-buzak", title: "부작용 알리기 캠페인", category: "브랜딩", featured: false, period: "2021",
+          summary: "부작용 위험성을 알리고 유저 재건을 돕는 캠페인. 기획·커뮤니케이션·콘텐츠·운영 A to Z, 서비스 신뢰도 제고.",
+          detail: "", metrics: [], stack: [], links: [{ label: "YouTube", url: "https://youtu.be/g1jv4YEiVyA" }], images: [] },
+        { id: "b-hada", title: "'바비톡하다' 브랜딩 캠페인", category: "브랜딩", featured: false, period: "2021.04–12",
+          summary: "브랜드 캠페인 콘텐츠 아이데이션·제작.",
+          detail: "", metrics: [], stack: [],
+          links: [{ label: "YouTube 1", url: "https://youtu.be/76CyIN47pMM" }, { label: "YouTube 2", url: "https://youtu.be/qoYLnpZAP-Q" }], images: [] },
+        { id: "b-teuga", title: "바비톡 특가 (커머스)", category: "커머스", featured: false, period: "2020.07–2021.06",
+          summary: "주1회 특가 총 36회, 매주 단시간 완판·재고 소진, 앱 체류시간·유입 증가.",
+          detail: "명품 화장품+타사 제휴 특가.", metrics: [], stack: [],
+          links: [{ label: "상세", url: "https://babitalk.co.kr/post/hotdeal/21apr_1/index.html" }], images: [] },
+        { id: "b-galvanic", title: "앱솔브랩 갈바닉 (신사업 커머스)", category: "커머스", featured: false, period: "2019.09–2020.05",
+          summary: "뷰티기기 커머스 프로젝트, 네이버쇼핑 뷰티 핫딜 1위, 킥오프 8개월 만에 재고 소진.",
+          detail: "티몬·위메프 특가 병행.", metrics: [{ n: "1위", l: "네이버쇼핑 핫딜" }], stack: [],
+          links: [{ label: "스토어", url: "https://smartstore.naver.com/absorb_store/products/4641342424" }], images: [] }
+      ]
     },
     {
-      company: "영상 제작 (Agency)",
+      id: "agency",
+      name: "영상 제작 (Agency)",
       role: "기획 · 촬영 · 편집",
       period: "2017.08 – 2019.01",
-      summary: "클라이언트 요구에 따른 영상 기획·촬영·편집 전반.",
-      bullets: [
-        "LG Display, 다이소, 본죽&본도시락, KOTRA, 창의재단 등 클라이언트 영상 제작",
-        "기획–촬영–편집 전 과정 담당"
-      ],
-      tags: ["영상기획", "촬영", "편집"]
-    }
-  ],
-
-  projects: [
-    {
-      name: "sandbox-mkt",
-      kind: "단독 개발",
-      period: "2026.04 – 2026.08",
-      role: "1인 개발 (기획·개발·데이터·배포·운영)",
-      desc:
-        "마케팅팀이 직접 만들어 실운영 중인 사내 마케팅 플랫폼. AI 마케팅 에이전트 + 블로그 자동화에서 출발해 " +
-        "KPI·리서치·리드·뉴스레터·광고·모델링까지 20+ 기능 탭의 웹앱으로 성장. 전 과정 단독 수행.",
-      kpis: [
-        { n: "313", l: "TS 파일 · ~73,100줄" },
-        { n: "65", l: "Supabase SQL 마이그레이션" },
-        { n: "41", l: "API 라우트 · 28 페이지" },
-        { n: "405", l: "PR · 60+ 피처 브랜치" }
-      ],
-      stack: ["Next.js 16 (RSC)", "React 19", "TypeScript", "Tailwind v4", "shadcn/ui", "Supabase(RLS)", "Auth.js + Keycloak SSO", "GA4 / BigQuery", "GenAI SDK", "Vercel"],
-      links: []
-    },
-    {
-      name: "plott-life-frontend",
-      kind: "팀 기여",
-      period: "2026.04 – 2026.07",
-      role: "마케팅/콘텐츠/트래킹 도메인 담당 (71커밋)",
-      desc:
-        "장기체류 임대 플랫폼 Plott Life의 프로덕션 모노레포(게스트·호스트·어드민 3개 앱). " +
-        "블로그 CMS 구축, GA4 이벤트 택소노미 도구, 네이버 CTS 전환추적, SEO·마케팅 랜딩을 담당.",
-      kpis: [
-        { n: "CMS", l: "TipTap 리치에디터 구축" },
-        { n: "GA4", l: "트래킹 스펙 코드 버전관리" },
-        { n: "CTS", l: "네이버 전환추적 E2E" }
-      ],
-      stack: ["Turborepo", "Next.js 16", "React 19", "Radix UI", "SWR · zod", "Strapi CMS", "GCP (Cloud Run)", "i18n 5개 언어"],
-      links: []
-    },
-    {
-      name: "plott-stay-client · Urbanstay",
-      kind: "참여",
-      period: "2026.04 – 현재",
-      role: "wavve 제휴 가이드 페이지 개발 등",
-      desc:
-        "숙박 브랜드 Urbanstay의 고객용 클라이언트 — 웹+iOS+Android를 하나의 저장소에서 운영하는 WebView 하이브리드. " +
-        "3년+ 운영된 대규모 코드베이스(8,660커밋)에서 컨벤션을 준수하며 신규 페이지를 배포.",
-      kpis: [],
-      stack: ["Next.js 15 (Pages)", "React 18", "Emotion", "Zustand · React Query", "멀티 PG 결제", "Native Bridge", "AWS ECS"],
-      links: []
+      summary: "클라이언트 요구에 따른 영상 기획·촬영·편집.",
+      works: [
+        { id: "a-video", title: "클라이언트 영상 제작", category: "콘텐츠", featured: false, period: "2017–2019",
+          summary: "LG Display·다이소·본죽&본도시락·KOTRA 등 클라이언트 영상 기획·제작.",
+          detail: "", metrics: [], stack: [], links: [], images: [] }
+      ]
     }
   ],
 
@@ -160,7 +127,7 @@ window.RESUME = {
   ],
 
   education: [
-    { school: "언론정보학과", degree: "학사 졸업", period: "~ 2016" } // TODO: 학교명/전공/연도 확정
+    { school: "언론정보학과", degree: "학사 졸업", period: "~ 2016" }
   ],
 
   awards: [
@@ -168,5 +135,31 @@ window.RESUME = {
     { title: "졸업작품전 — 우수상", org: "언론정보학과 (페이크 다큐 출품)", date: "2016.05" },
     { title: "크리노베이션 영상전 — 대상", org: "미디어인재역량강화 프로젝트", date: "2016.09" },
     { title: "방송프로듀서 실무과정 수료", org: "KBS인재개발원", date: "2015.03" }
-  ]
+  ],
+
+  roleTags: ["퍼포먼스 마케팅", "마케팅 데이터 분석", "그로스 엔지니어링", "브랜딩/콘텐츠", "프론트엔드"]
 };
+
+/* ===== 회사 → experiences / projects 자동 파생 =====
+   companies[].works[] 를 이력서용 배열로 변환. 회사=경력, featured 작업=프로젝트. */
+window.deriveFromCompanies = function (R) {
+  R.experiences = (R.companies || []).map(function (c) {
+    return {
+      company: c.name, role: c.role, period: c.period, summary: c.summary,
+      bullets: (c.works || []).map(function (w) { return w.summary; }).filter(Boolean),
+      tags: []
+    };
+  });
+  R.projects = [];
+  (R.companies || []).forEach(function (c) {
+    (c.works || []).forEach(function (w) {
+      if (w.featured) R.projects.push({
+        name: w.title, kind: w.category, period: w.period, role: "",
+        desc: w.detail || w.summary, kpis: w.metrics || [], stack: w.stack || [],
+        links: w.links || [], images: w.images || []
+      });
+    });
+  });
+  return R;
+};
+window.deriveFromCompanies(window.RESUME);
