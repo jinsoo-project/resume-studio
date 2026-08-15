@@ -114,6 +114,9 @@ main{min-width:0}
 .empty{color:var(--muted);font-size:14px;padding:40px 0;text-align:center}
 .toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%);background:var(--primary);color:var(--primary-fg);padding:10px 18px;border-radius:9px;font-size:13px;z-index:50;opacity:0;transition:.2s;pointer-events:none}
 .toast.show{opacity:1}
+.modalbg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:60;place-items:center;padding:20px}
+.modalcard{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:22px;width:340px;max-width:100%}
+.modalcard input{width:100%;border:1px solid var(--border);background:var(--bg);color:var(--fg);border-radius:8px;padding:10px;font-size:14px;margin-bottom:8px}
 @media(max-width:860px){.app{grid-template-columns:1fr}aside{display:none}.buildwrap{grid-template-columns:1fr;height:auto}.bcol.left{border-right:none;border-bottom:1px solid var(--border)}.previewframe{height:70vh}}
 </style>
 </head>
@@ -126,7 +129,8 @@ main{min-width:0}
     <button class="nv" data-view="builder"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 17h7M17.5 14v7"/></svg> 빌더</button>
     <div class="rail-sp"></div>
     <div class="railfoot">
-      정적 빌더 · localStorage 저장
+      <div id="authBox" style="margin-bottom:10px"></div>
+      정적 빌더 · 클라우드 동기화
       <div class="row">
         <button class="mini" id="exportBtn">내보내기(JSON)</button>
         <button class="mini" id="importBtn">가져오기</button>
@@ -165,6 +169,24 @@ main{min-width:0}
 </div>
 <div class="toast" id="toast"></div>
 
+<div class="modalbg" id="authModal">
+  <div class="modalcard">
+    <h3 style="margin:0 0 4px;font-size:16px">클라우드 로그인</h3>
+    <p style="margin:0 0 14px;font-size:12px;color:var(--muted)">로그인하면 클라우드에 저장되고, 어느 기기에서나 이어서 편집·발행할 수 있어요.</p>
+    <input id="authEmail" type="email" placeholder="이메일" autocomplete="username">
+    <input id="authPw" type="password" placeholder="비밀번호 (6자 이상)" autocomplete="current-password">
+    <div id="authErr" style="font-size:12px;color:#dc2626;min-height:16px;margin:6px 0"></div>
+    <div style="display:flex;gap:8px">
+      <button class="btn a" id="authLogin" style="flex:1">로그인</button>
+      <button class="btn" id="authSignup" style="flex:1">가입</button>
+    </div>
+    <button class="btn" id="authClose" style="width:100%;margin-top:8px">닫기</button>
+  </div>
+</div>
+
+<script src="config.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="cloud.js"></script>
 <script src="resume.data.js"></script>
 <script src="templates.js"></script>
 <script>
@@ -174,7 +196,7 @@ const $=s=>document.querySelector(s);
 const uid=()=>Math.random().toString(36).slice(2,8);
 const clone=o=>JSON.parse(JSON.stringify(o));
 const esc=s=>String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-function save(){localStorage.setItem(LS_LIB,JSON.stringify(LIB));localStorage.setItem(LS_DOCS,JSON.stringify(DOCS));flash();}
+function save(){localStorage.setItem(LS_LIB,JSON.stringify(LIB));localStorage.setItem(LS_DOCS,JSON.stringify(DOCS));flash();cloudSync();}
 function flash(){const el=$('#libSaved');if(el){el.textContent='저장됨 · '+new Date().toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit'});}}
 function toast(m){const t=$('#toast');t.textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),1900);}
 
@@ -232,6 +254,8 @@ function resolve(d){
 function encodeDoc(o){return btoa(unescape(encodeURIComponent(JSON.stringify(o)))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');}
 function viewURL(d){
   const base=location.href.replace(/studio\.html.*$/,'').replace(/[^/]*$/,'');
+  // 로그인 상태면 클라우드 slug URL(짧고 공유용), 아니면 자체완결 hash URL(오프라인)
+  if(window.CLOUD&&CLOUD.enabled()&&CLOUD.user()) return base+'view.html?slug='+encodeURIComponent(d.slug);
   return base+'view.html#'+encodeDoc(resolve(d));
 }
 
@@ -270,7 +294,7 @@ $('#docGrid').addEventListener('click',e=>{
   if(act==='edit')openBuilder(d.id);
   else if(act==='link'){navigator.clipboard.writeText(viewURL(d)).then(()=>toast('공개 링크 복사됨'));}
   else if(act==='pdf'){window.open(viewURL(d),'_blank');toast('열린 창에서 PDF로 저장을 누르세요');}
-  else if(act==='del'){if(confirm('삭제할까요?')){DOCS=DOCS.filter(x=>x.id!==d.id);save();renderHome();}}
+  else if(act==='del'){if(confirm('삭제할까요?')){if(window.CLOUD&&CLOUD.user())CLOUD.deleteDoc(d.slug);DOCS=DOCS.filter(x=>x.id!==d.id);save();renderHome();}}
 });
 $('#newDocTop').addEventListener('click',()=>{const d=newDoc();openBuilder(d.id);});
 
@@ -349,7 +373,11 @@ $('#bLeft').addEventListener('change',e=>{
   const d=curDoc(); if(!d)return;
   if(e.target.id==='bVis'){d.visibility=e.target.value;touch();}
 });
-$('#bPublish').addEventListener('click',()=>{const d=curDoc();if(!d)return;navigator.clipboard.writeText(viewURL(d)).then(()=>toast('발행됨 · 공개 링크 복사 완료'));});
+$('#bPublish').addEventListener('click',async()=>{
+  const d=curDoc();if(!d)return;
+  if(window.CLOUD&&CLOUD.user()){ try{ await CLOUD.pushDoc(d,resolve(d)); }catch(e){ toast('발행 오류: '+(e.message||e)); return; } }
+  navigator.clipboard.writeText(viewURL(d)).then(()=>toast('발행됨 · 공개 링크 복사 완료'));
+});
 $('#bViewOpen').addEventListener('click',()=>{const d=curDoc();if(d)window.open(viewURL(d),'_blank');});
 
 /* ============ LIBRARY ============ */
@@ -451,8 +479,57 @@ $('#importBtn').addEventListener('click',()=>{
 if(s)r.setAttribute('data-theme',s);else if(matchMedia('(prefers-color-scheme:dark)').matches)r.setAttribute('data-theme','dark');
 $('#themeBtn').addEventListener('click',()=>{var n=r.getAttribute('data-theme')==='dark'?'light':'dark';r.setAttribute('data-theme',n);localStorage.setItem('studio_theme',n);if(curDoc())updatePreview();});})();
 
+/* ============ cloud sync ============ */
+let cloudTimer=null;
+function cloudSync(){
+  if(!(window.CLOUD&&CLOUD.enabled()&&CLOUD.user()))return;
+  clearTimeout(cloudTimer);
+  cloudTimer=setTimeout(async()=>{
+    try{ await CLOUD.pushLibrary(LIB); for(const d of DOCS){ await CLOUD.pushDoc(d,resolve(d)); } }
+    catch(e){ console.warn('cloudSync',e); }
+  },900);
+}
+async function syncFromCloud(){
+  try{
+    const r=await CLOUD.pull(); if(!r)return;
+    if(r.library) LIB=r.library; else await CLOUD.pushLibrary(LIB);
+    if(r.docs&&r.docs.length) DOCS=r.docs;
+    else if(DOCS.length){ for(const d of DOCS) await CLOUD.pushDoc(d,resolve(d)); }
+    localStorage.setItem(LS_LIB,JSON.stringify(LIB));
+    localStorage.setItem(LS_DOCS,JSON.stringify(DOCS));
+    renderHome(); toast('클라우드 동기화 완료');
+  }catch(e){ console.warn(e); toast('동기화 오류'); }
+}
+function renderAuthBox(){
+  const box=$('#authBox'); if(!box)return;
+  if(!(window.CLOUD&&CLOUD.enabled())){box.innerHTML='<span style="font-size:11px;color:var(--muted)">오프라인 모드</span>';return;}
+  const u=CLOUD.user();
+  if(u){
+    box.innerHTML=`<div style="font-size:11px;color:var(--ok);word-break:break-all">☁️ ${esc(u.email)}</div><button class="mini" id="logoutBtn" style="margin-top:6px;width:100%">로그아웃</button>`;
+    $('#logoutBtn').onclick=async()=>{await CLOUD.signOut();toast('로그아웃');};
+  }else{
+    box.innerHTML=`<button class="mini" id="loginBtn" style="width:100%">☁️ 클라우드 로그인</button>`;
+    $('#loginBtn').onclick=()=>{$('#authModal').style.display='grid';$('#authErr').textContent='';};
+  }
+}
+let _lastUser=null;
+function onAuth(u){ renderAuthBox(); if(u&&!_lastUser) syncFromCloud(); _lastUser=u; }
+function authVals(){return [$('#authEmail').value.trim(),$('#authPw').value];}
+$('#authClose').onclick=()=>$('#authModal').style.display='none';
+$('#authLogin').onclick=async()=>{const[e,p]=authVals();try{await CLOUD.signIn(e,p);$('#authModal').style.display='none';}catch(err){$('#authErr').textContent=err.message||String(err);}};
+$('#authSignup').onclick=async()=>{const[e,p]=authVals();try{const d=await CLOUD.signUp(e,p);if(!d.session){$('#authErr').textContent='가입됨. 이메일 확인이 필요할 수 있어요(설정에서 확인을 끄면 바로 로그인).';}else{$('#authModal').style.display='none';}}catch(err){$('#authErr').textContent=err.message||String(err);}};
+
 /* ============ boot ============ */
-renderHome();
+(async function(){
+  renderHome();
+  if(window.CLOUD&&CLOUD.enabled()){
+    await CLOUD.init();
+    _lastUser=CLOUD.user();
+    CLOUD.onAuth(onAuth);
+    renderAuthBox();
+    if(CLOUD.user()) await syncFromCloud();
+  }else{ renderAuthBox(); }
+})();
 </script>
 </body>
 </html>
