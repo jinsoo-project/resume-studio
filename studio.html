@@ -131,7 +131,8 @@ main{min-width:0}
     <div class="brand"><span class="lg">JK</span> Resume Studio</div>
     <button class="nv on" data-view="home"><svg viewBox="0 0 24 24"><path d="M3 9.5 12 3l9 6.5V20a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1z"/></svg> 내보낸 이력서</button>
     <button class="nv" data-view="library"><svg viewBox="0 0 24 24"><path d="M4 5h11a2 2 0 0 1 2 2v13M4 5v13a2 2 0 0 0 2 2h11M4 5a2 2 0 0 1 2-2h9"/></svg> 콘텐츠 라이브러리</button>
-    <button class="nv" data-view="builder"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 17h7M17.5 14v7"/></svg> 빌더</button>
+    <button class="nv" data-view="builder"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 17h7M17.5 14v7"/></svg> 이력서 내보내기</button>
+    <button class="nv" data-view="portfolio"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg> 포트폴리오</button>
     <div class="rail-sp"></div>
     <div class="railfoot">
       <div id="authBox" style="margin-bottom:10px"></div>
@@ -168,6 +169,22 @@ main{min-width:0}
       <div class="buildwrap" id="bWrap">
         <div class="bcol left" id="bLeft"></div>
         <div class="bcol right"><iframe class="previewframe" id="preview" title="미리보기"></iframe></div>
+      </div>
+    </section>
+
+    <!-- PORTFOLIO -->
+    <section id="v-portfolio" class="hidden">
+      <div class="mtop">
+        <h1 id="pfTitle">포트폴리오</h1><div class="sp"></div>
+        <button class="btn sm" id="pfBackList" style="display:none">← 목록</button>
+        <button class="btn sm" id="pfViewOpen" style="display:none">새 탭</button>
+        <button class="btn a sm" id="pfPublish" style="display:none">🚀 발행 / 링크복사</button>
+        <button class="btn p" id="pfNew">+ 새 포트폴리오</button>
+      </div>
+      <div class="mwrap" id="pfList"></div>
+      <div class="buildwrap hidden" id="pfWrap">
+        <div class="bcol left" id="pfLeft"></div>
+        <div class="bcol right"><iframe class="previewframe" id="pfPreview" title="포트폴리오 미리보기"></iframe></div>
       </div>
     </section>
   </main>
@@ -264,24 +281,29 @@ function encodeDoc(o){return btoa(unescape(encodeURIComponent(JSON.stringify(o))
 function viewURL(d){
   const base=location.href.replace(/studio\.html.*$/,'').replace(/[^/]*$/,'');
   // 로그인 상태면 클라우드 slug URL(짧고 공유용), 아니면 자체완결 hash URL(오프라인)
-  if(window.CLOUD&&CLOUD.enabled()&&CLOUD.user()) return base+'view.html?slug='+encodeURIComponent(d.slug);
-  return base+'view.html#'+encodeDoc(resolve(d));
+  if(window.CLOUD&&CLOUD.enabled()&&CLOUD.user()){
+    if(location.protocol==='http:'||location.protocol==='https:') return base+(d.kind==='portfolio'?'p/':'r/')+encodeURIComponent(d.slug);
+    return base+'view.html?slug='+encodeURIComponent(d.slug);
+  }
+  return base+'view.html#'+encodeDoc(resolveAny(d));
 }
+function resolveAny(d){ return d.kind==='portfolio' ? resolvePF(d) : resolve(d); }
 
 /* ============ nav ============ */
 function show(view){
-  ['home','library','builder'].forEach(v=>$('#v-'+v).classList.toggle('hidden',v!==view));
+  ['home','library','builder','portfolio'].forEach(v=>$('#v-'+v).classList.toggle('hidden',v!==view));
   document.querySelectorAll('.nv').forEach(b=>b.classList.toggle('on',b.dataset.view===view));
   if(view==='home')renderHome();
   if(view==='library')renderLibrary();
   if(view==='builder')renderBuilder();
+  if(view==='portfolio')renderPortfolioView();
 }
 document.querySelectorAll('.nv').forEach(b=>b.addEventListener('click',()=>show(b.dataset.view)));
 
 /* ============ HOME ============ */
 function renderHome(){
   const g=$('#docGrid');
-  const cards=DOCS.map(d=>{
+  const cards=DOCS.filter(d=>d.kind!=='portfolio').map(d=>{
     const tpl=TEMPLATES.list.find(t=>t.id===d.template)||{name:d.template};
     return `<div class="doc" data-id="${d.id}">
       <div class="tt">${esc(d.title)}</div>
@@ -388,6 +410,104 @@ $('#bPublish').addEventListener('click',async()=>{
   navigator.clipboard.writeText(viewURL(d)).then(()=>toast('발행됨 · 공개 링크 복사 완료'));
 });
 $('#bViewOpen').addEventListener('click',()=>{const d=curDoc();if(d)window.open(viewURL(d),'_blank');});
+
+/* ============ PORTFOLIO ============ */
+let curPfId=null, pfPvTimer=null;
+function curPf(){return DOCS.find(x=>x.id===curPfId&&x.kind==='portfolio');}
+function flatWorks(){const a=[];(LIB.companies||[]).forEach((c,ci)=>(c.works||[]).forEach((w,wi)=>a.push({ci,wi})));return a;}
+function reconcilePF(d){
+  if(!d.works)d.works=[];
+  const key=x=>x.ci+':'+x.wi, have=new Set(d.works.map(key));
+  d.works=d.works.filter(x=>LIB.companies[x.ci]&&LIB.companies[x.ci].works[x.wi]);
+  flatWorks().forEach(x=>{if(!have.has(key(x)))d.works.push({ci:x.ci,wi:x.wi,on:false});});
+  return d;
+}
+function resolvePF(d){
+  reconcilePF(d);
+  const works=[];
+  d.works.forEach(x=>{ if(x.on){ const c=LIB.companies[x.ci], w=c&&c.works[x.wi]; if(w) works.push(Object.assign({company:c.name},w)); }});
+  return { template:'portfolio', title:d.title, subtitle:d.subtitle, intro:d.intro, cover:d.cover, slug:d.slug, visibility:d.visibility, profile:LIB.profile, works };
+}
+function newPortfolio(){
+  const d={id:uid(),kind:'portfolio',template:'portfolio',title:'새 포트폴리오',subtitle:'',intro:'',cover:'',slug:'pf-'+uid(),visibility:'unlisted',works:[],updated:Date.now()};
+  reconcilePF(d); d.works.forEach(x=>{const w=LIB.companies[x.ci].works[x.wi]; x.on=!!w.featured;});
+  DOCS.unshift(d); save(); return d;
+}
+function pfTouch(){const d=curPf();if(d){d.updated=Date.now();save();}}
+function updatePfPreview(){const d=curPf();if(!d)return;$('#pfURL').value=viewURL(d);clearTimeout(pfPvTimer);pfPvTimer=setTimeout(()=>{$('#pfPreview').setAttribute('srcdoc',TEMPLATES.render(resolvePF(d)));},180);}
+
+function renderPortfolioView(){
+  if(curPfId&&curPf()){ renderPfEditor(); return; }
+  curPfId=null;
+  $('#pfWrap').classList.add('hidden'); $('#pfList').classList.remove('hidden');
+  $('#pfBackList').style.display='none';$('#pfViewOpen').style.display='none';$('#pfPublish').style.display='none';$('#pfNew').style.display='';
+  $('#pfTitle').textContent='포트폴리오';
+  const list=DOCS.filter(d=>d.kind==='portfolio');
+  $('#pfList').innerHTML=`<div class="grid"><div class="newcard" id="pfNewCard">+ 새 포트폴리오 만들기</div>`+
+    list.map(d=>`<div class="doc" data-pfid="${d.id}"><div class="tt">${esc(d.title)}</div>
+      <span class="badge" style="color:var(--ok);background:color-mix(in oklch,var(--ok) 14%,transparent)">포트폴리오</span>
+      <div class="meta">/p/${esc(d.slug)} · ${new Date(d.updated).toLocaleDateString('ko-KR')}</div>
+      <div class="acts"><button class="btn sm" data-pfact="edit">편집</button><button class="btn sm" data-pfact="link">🔗 링크</button><button class="btn sm" data-pfact="open">열기</button><button class="btn sm" data-pfact="del">삭제</button></div></div>`).join('')+`</div>`;
+}
+function renderPfEditor(){
+  const d=curPf(); if(!d){renderPortfolioView();return;}
+  reconcilePF(d);
+  $('#pfWrap').classList.remove('hidden'); $('#pfList').classList.add('hidden');
+  $('#pfBackList').style.display='';$('#pfViewOpen').style.display='';$('#pfPublish').style.display='';$('#pfNew').style.display='none';
+  $('#pfTitle').textContent=d.title||'포트폴리오';
+  const rows=d.works.map((x,pos)=>{const c=LIB.companies[x.ci],w=c&&c.works[x.wi];if(!w)return '';
+    return `<div class="tgl" data-pfpos="${pos}"><span class="mv" data-pfmv="up">▲</span><span class="mv" data-pfmv="dn">▼</span><span class="nm">${esc(w.title)} <span style="color:var(--muted);font-size:11px">· ${esc(c.name)}</span></span><button class="sw ${x.on?'':'off'}" data-pftoggle="1"></button></div>`;}).join('');
+  $('#pfLeft').innerHTML=`
+    <div class="blabel">포트폴리오 정보</div>
+    <div class="f"><label>제목</label><input id="pfF-title" value="${esc(d.title)}"></div>
+    <div class="f"><label>부제</label><input id="pfF-subtitle" value="${esc(d.subtitle||'')}"></div>
+    <div class="f"><label>소개글</label><textarea id="pfF-intro" rows="3">${esc(d.intro||'')}</textarea></div>
+    <div class="f"><label>커버 이미지 URL</label><input id="pfF-cover" value="${esc(d.cover||'')}"></div>
+    <div class="blabel">담을 작업 <span style="color:var(--muted);font-weight:400;text-transform:none;letter-spacing:0">· 켜기/순서</span></div>
+    ${rows||'<div class="empty" style="padding:10px">작업 없음 (라이브러리에서 추가)</div>'}
+    <div class="pubbox">
+      <div class="blabel" style="margin:0 0 8px">발행</div>
+      <div class="f"><label>URL 주소(슬러그)</label><input id="pfF-slug" value="${esc(d.slug)}"></div>
+      <div class="f"><label>공개 범위</label><select id="pfF-vis"><option value="unlisted"${d.visibility==='unlisted'?' selected':''}>링크 있는 사람만</option><option value="public"${d.visibility==='public'?' selected':''}>공개</option></select></div>
+      <div class="urlline"><input id="pfURL" readonly value=""><button class="btn sm" id="pfCopy" style="border:none;border-radius:0">복사</button></div>
+    </div>`;
+  updatePfPreview();
+}
+$('#pfNew').addEventListener('click',()=>{const d=newPortfolio();curPfId=d.id;renderPortfolioView();});
+$('#pfBackList').addEventListener('click',()=>{curPfId=null;renderPortfolioView();});
+$('#pfViewOpen').addEventListener('click',()=>{const d=curPf();if(d)window.open(viewURL(d),'_blank');});
+$('#pfPublish').addEventListener('click',async()=>{const d=curPf();if(!d)return;
+  if(window.CLOUD&&CLOUD.user()){try{await CLOUD.pushDoc(d,resolvePF(d));}catch(e){toast('발행 오류: '+(e.message||e));return;}}
+  navigator.clipboard.writeText(viewURL(d)).then(()=>toast('발행됨 · 포트폴리오 링크 복사'));});
+$('#pfList').addEventListener('click',e=>{
+  if(e.target.id==='pfNewCard'){const d=newPortfolio();curPfId=d.id;renderPortfolioView();return;}
+  const card=e.target.closest('.doc'); if(!card)return;
+  const d=DOCS.find(x=>x.id===card.dataset.pfid); const act=e.target.dataset.pfact; if(!d||!act)return;
+  if(act==='edit'){curPfId=d.id;renderPortfolioView();}
+  else if(act==='link'){navigator.clipboard.writeText(viewURL(d)).then(()=>toast('포트폴리오 링크 복사됨'));}
+  else if(act==='open'){window.open(viewURL(d),'_blank');}
+  else if(act==='del'){if(confirm('삭제할까요?')){if(window.CLOUD&&CLOUD.user())CLOUD.deleteDoc(d.slug);DOCS=DOCS.filter(x=>x.id!==d.id);save();renderPortfolioView();}}
+});
+$('#pfLeft').addEventListener('click',e=>{
+  const d=curPf(); if(!d)return;
+  const row=e.target.closest('[data-pfpos]');
+  if(row){const pos=+row.dataset.pfpos;
+    if(e.target.dataset.pftoggle){d.works[pos].on=!d.works[pos].on;e.target.classList.toggle('off');pfTouch();updatePfPreview();return;}
+    const mv=e.target.dataset.pfmv;
+    if(mv==='up'&&pos>0){[d.works[pos-1],d.works[pos]]=[d.works[pos],d.works[pos-1]];pfTouch();renderPfEditor();}
+    if(mv==='dn'&&pos<d.works.length-1){[d.works[pos+1],d.works[pos]]=[d.works[pos],d.works[pos+1]];pfTouch();renderPfEditor();}
+    return;}
+  if(e.target.id==='pfCopy'){navigator.clipboard.writeText($('#pfURL').value).then(()=>toast('링크 복사됨'));}
+});
+$('#pfLeft').addEventListener('input',e=>{
+  const d=curPf(); if(!d)return; const id=e.target.id;
+  if(id==='pfF-title'){d.title=e.target.value;$('#pfTitle').textContent=d.title;pfTouch();}
+  else if(id==='pfF-subtitle'){d.subtitle=e.target.value;pfTouch();updatePfPreview();}
+  else if(id==='pfF-intro'){d.intro=e.target.value;pfTouch();updatePfPreview();}
+  else if(id==='pfF-cover'){d.cover=e.target.value;pfTouch();updatePfPreview();}
+  else if(id==='pfF-slug'){d.slug=e.target.value.replace(/[^a-zA-Z0-9-_가-힣]/g,'-');e.target.value=d.slug;pfTouch();updatePfPreview();}
+});
+$('#pfLeft').addEventListener('change',e=>{const d=curPf();if(d&&e.target.id==='pfF-vis'){d.visibility=e.target.value;pfTouch();}});
 
 /* ============ LIBRARY ============ */
 function fInput(b,i,field,val,label,type){
@@ -522,7 +642,7 @@ function cloudSync(){
   if(!(window.CLOUD&&CLOUD.enabled()&&CLOUD.user()))return;
   clearTimeout(cloudTimer);
   cloudTimer=setTimeout(async()=>{
-    try{ await CLOUD.pushLibrary(LIB); for(const d of DOCS){ await CLOUD.pushDoc(d,resolve(d)); } }
+    try{ await CLOUD.pushLibrary(LIB); for(const d of DOCS){ await CLOUD.pushDoc(d,resolveAny(d)); } }
     catch(e){ console.warn('cloudSync',e); }
   },900);
 }
@@ -533,7 +653,7 @@ async function syncFromCloud(){
     if(!LIB.companies){ LIB.companies=clone((window.RESUME||{}).companies||[]); }  // v2 마이그레이션
     derive();
     if(r.docs&&r.docs.length) DOCS=r.docs;
-    else if(DOCS.length){ for(const d of DOCS) await CLOUD.pushDoc(d,resolve(d)); }
+    else if(DOCS.length){ for(const d of DOCS) await CLOUD.pushDoc(d,resolveAny(d)); }
     localStorage.setItem(LS_LIB,JSON.stringify(LIB));
     localStorage.setItem(LS_DOCS,JSON.stringify(DOCS));
     renderHome(); toast('클라우드 동기화 완료');

@@ -3,7 +3,8 @@
   "cleanUrls": true,
   "trailingSlash": false,
   "rewrites": [
-    { "source": "/r/:slug", "destination": "/view.html?slug=:slug" }
+    { "source": "/r/:slug", "destination": "/view.html?slug=:slug" },
+    { "source": "/p/:slug", "destination": "/view.html?slug=:slug" }
   ],
   "headers": [
     {

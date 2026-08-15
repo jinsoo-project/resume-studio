@@ -140,6 +140,62 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
     return doc(`${esc(p.nameKo)} — 웹 포트폴리오`, css, body);
   }
 
+  /* ====================== 4) 포트폴리오 페이지 (웹) ====================== */
+  function renderPortfolio(d) {
+    const p = d.profile || {};
+    const css = `
+:root{--blue:#3182F6;--blue-weak:#EAF2FE;--ink:#191F28;--sub:#4E5968;--faint:#8B95A1;--bg:#FFFFFF;--panel:#F9FAFB;--border:#E5E8EB;
+  --font:-apple-system,BlinkMacSystemFont,"Pretendard","Apple SD Gothic Neo",system-ui,Roboto,"Segoe UI","Malgun Gothic",sans-serif}
+@media(prefers-color-scheme:dark){:root{--blue:#4593FC;--blue-weak:rgba(69,147,252,.14);--ink:#ECEFF3;--sub:#A7AEB8;--faint:#6B7280;--bg:#16181D;--panel:#1E2127;--border:rgba(255,255,255,.10)}}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--font);line-height:1.6;-webkit-font-smoothing:antialiased;letter-spacing:-.02em}
+.pf{max-width:900px;margin:0 auto;padding:0 20px 80px}
+.pfhero{padding:64px 0 34px}
+.cover{height:200px;border-radius:20px;background-size:cover;background-position:center;margin-bottom:28px;background-color:var(--panel)}
+.pfeyebrow{font-size:13px;font-weight:700;color:var(--blue);margin-bottom:12px}
+.pfhero h1{font-size:clamp(30px,6vw,48px);font-weight:800;letter-spacing:-.03em;margin:0;text-wrap:balance}
+.pfhero .sub{font-size:18px;color:var(--sub);margin:14px 0 0;font-weight:500}
+.pfhero .intro{font-size:15px;color:var(--sub);margin:18px 0 0;max-width:640px;white-space:pre-wrap}
+.pfmain{display:grid;gap:20px}
+.wk{border:1px solid var(--border);border-radius:18px;overflow:hidden;background:var(--panel);transition:transform .18s,box-shadow .18s}
+.wk:hover{transform:translateY(-3px);box-shadow:0 18px 40px -20px rgba(0,0,0,.3)}
+.wk-media{height:200px;background-size:cover;background-position:center;background-color:var(--blue-weak);display:grid;place-items:center;color:var(--blue);font-weight:800;font-size:15px}
+.wk-body{padding:20px 22px}
+.wk-top{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.wk-top .cat{font-size:11.5px;font-weight:700;color:var(--blue);background:var(--blue-weak);border-radius:6px;padding:3px 9px}
+.wk-top .meta{font-size:12.5px;color:var(--faint);font-variant-numeric:tabular-nums}
+.wk-body h3{font-size:19px;font-weight:750;margin:0 0 8px;letter-spacing:-.02em}
+.wk-body p{font-size:14px;color:var(--sub);margin:0;white-space:pre-wrap}
+.wk-body .links{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+.wk-body .links a{font-size:12.5px;font-weight:600;color:var(--blue);text-decoration:none;border:1px solid var(--border);border-radius:8px;padding:6px 11px;background:var(--bg)}
+.wk-body .links a:hover{border-color:var(--blue);background:var(--blue-weak)}
+.pffoot{margin-top:40px;padding-top:20px;border-top:1px solid var(--border);font-size:12.5px;color:var(--faint)}
+@media(max-width:560px){.wk-media{height:150px}}`;
+    const card = w => {
+      const img = (w.images && w.images[0]) || "";
+      const links = (w.links || []).map(l => `<a href="${esc(l.url)}" target="_blank" rel="noopener">${esc(l.label || "링크")} ↗</a>`).join("");
+      return `<article class="wk">
+        <div class="wk-media"${img ? ` style="background-image:url('${esc(img)}')"` : ""}>${img ? "" : esc(w.category || w.title || "")}</div>
+        <div class="wk-body">
+          <div class="wk-top">${w.category ? `<span class="cat">${esc(w.category)}</span>` : ""}<span class="meta">${esc(w.company || "")}${w.period ? " · " + esc(w.period) : ""}</span></div>
+          <h3>${esc(w.title)}</h3>
+          <p>${esc(w.detail || w.summary || "")}</p>
+          ${links ? `<div class="links">${links}</div>` : ""}
+        </div></article>`;
+    };
+    const body = `<div class="pf">
+      <header class="pfhero">
+        ${d.cover ? `<div class="cover" style="background-image:url('${esc(d.cover)}')"></div>` : ""}
+        <div class="pfeyebrow">${esc(p.nameKo || "")}${p.title ? " · " + esc(p.title) : ""}</div>
+        <h1>${esc(d.title || "포트폴리오")}</h1>
+        ${d.subtitle ? `<p class="sub">${esc(d.subtitle)}</p>` : ""}
+        ${d.intro ? `<p class="intro">${esc(d.intro)}</p>` : ""}
+      </header>
+      <main class="pfmain">${(d.works || []).map(card).join("") || '<p style="color:var(--faint)">담긴 작업이 없습니다.</p>'}</main>
+      <footer class="pffoot">© ${esc(p.nameKo || "")}${p.email ? " · " + esc(p.email) : ""}</footer>
+    </div>`;
+    return doc(`${esc(d.title || "포트폴리오")} — ${esc(p.nameKo || "")}`, css, body);
+  }
+
   /* ---------- doc wrapper ---------- */
   function doc(title, css, body) {
     return `<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${title}</title>${FONT}<style>${css}</style></head><body>${body}</body></html>`;
@@ -153,6 +209,7 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
     ],
     render(d) {
       if (!d || !d.profile) return doc("빈 문서", "", "<p style='font-family:sans-serif;padding:40px;color:#888'>내용이 없습니다.</p>");
+      if (d.template === "portfolio") return renderPortfolio(d);
       if (d.template === "remember") return renderRemember(d);
       if (d.template === "web") return renderWeb(d);
       return renderWanted(d);
