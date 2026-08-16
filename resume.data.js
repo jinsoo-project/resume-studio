@@ -102,7 +102,17 @@ window.RESUME = {
         { id: "b-galvanic", title: "앱솔브랩 갈바닉 (신사업 커머스)", category: "커머스", featured: false, period: "2019.09–2020.05",
           summary: "뷰티기기 커머스 프로젝트, 네이버쇼핑 뷰티 핫딜 1위, 킥오프 8개월 만에 재고 소진.",
           detail: "티몬·위메프 특가 병행.", metrics: [{ n: "1위", l: "네이버쇼핑 핫딜" }], stack: [],
-          links: [{ label: "스토어", url: "https://smartstore.naver.com/absorb_store/products/4641342424" }], images: [] }
+          links: [{ label: "스토어", url: "https://smartstore.naver.com/absorb_store/products/4641342424" }], images: [] },
+        { id: "b-wag", title: "와그 × 유니버설스튜디오재팬 제휴 캠페인", category: "제휴", featured: true, period: "2023.12–2024.12",
+          summary: "크로스·업셀링 목적 제휴 캠페인 기획·페이지·소재 제작·운영, 선착순 티켓 목표 대비 조기 소진.",
+          detail: "인플루언서 KOLs 협업(숏폼 2차 활용).", metrics: [], stack: [], links: [], images: [] },
+        { id: "b-navershop", title: "네이버쇼핑 최적화 관리·운영", category: "커머스", featured: false, period: "2024.01–2024.12",
+          summary: "상품 카테고리·상품명 클린업, 피드 URL 로직·노출 페이지 기획·커스텀 운영, 클린위반 이슈 정상화.",
+          detail: "", metrics: [], stack: [], links: [], images: [] },
+        { id: "b-seburi", title: "뷰티 유튜브 채널 [쎄뷰리] 운영", category: "콘텐츠", featured: false, period: "2019.04–2019.10",
+          summary: "'세상의 모든 뷰티제품 리뷰' 컨셉 채널 운영, 6개월 만에 구독 1,000명, 일 평균 조회 2,000회 유지.",
+          detail: "", metrics: [{ n: "1,000", l: "구독자(6개월)" }], stack: [],
+          links: [{ label: "YouTube 채널", url: "https://www.youtube.com/channel/UCudCgE-s22Q9HmNE9YQV_nw" }], images: [] }
       ]
     },
     {

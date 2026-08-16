@@ -30,6 +30,7 @@
 .role{font-size:14px;color:var(--accent);font-weight:600;margin-top:5px}
 .contact{font-size:12px;color:var(--sub);text-align:right;line-height:1.9}.contact a{color:var(--sub);text-decoration:none}
 .intro{font-size:13px;color:var(--sub);margin:16px 0 4px;line-height:1.7}
+.axline{font-size:12.5px;color:#2f2f36;margin-bottom:5px;line-height:1.55}.axline b{color:var(--ink)}
 section{margin-top:22px}.slabel{font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);padding-bottom:7px;margin-bottom:12px;border-bottom:1px solid var(--line)}
 .exp{margin-bottom:16px}.exp:last-child{margin-bottom:0}.exp .r1{display:flex;align-items:baseline;gap:8px}
 .exp .co{font-size:15px;font-weight:700}.exp .rl{font-size:12.5px;color:var(--sub)}.exp .dt{margin-left:auto;font-size:12px;color:var(--faint)}
@@ -48,6 +49,7 @@ section{margin-top:22px}.slabel{font-size:11px;font-weight:700;letter-spacing:.1
     <div class="contact">${contactInline(p).map(x => `<div>${x}</div>`).join("")}</div>
   </div>
   ${d.summaryOn !== false && p.summary ? `<div class="intro">${esc(p.summary)}</div>` : ""}
+  ${has(d.ax) ? `<section><div class="slabel">AX 경험 · AI 활용</div>${d.ax.map((a, i) => `<div class="axline"><b>${i + 1}. ${esc(a.title)}</b> — ${esc(a.desc)}</div>`).join("")}</section>` : ""}
   ${has(d.experiences) ? `<section><div class="slabel">경력사항 · Experience</div>${d.experiences.map(e => `
     <div class="exp"><div class="r1"><span class="co">${esc(e.company)}</span><span class="rl">${esc(e.role)}</span><span class="dt mono">${esc(e.period)}</span></div>
     ${e.summary ? `<div class="sm">${esc(e.summary)}</div>` : ""}

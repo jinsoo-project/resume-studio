@@ -78,8 +78,9 @@ main{min-width:0}
 .blockcard .bh .rm:hover{color:#dc2626;border-color:#dc2626}
 .f{margin-bottom:10px}
 .f:last-child{margin-bottom:0}
-.f label{display:block;font-size:11px;font-weight:600;color:var(--muted);margin-bottom:4px}
-.f input,.f textarea,.f select{width:100%;border:1px solid var(--border);background:var(--surface);color:var(--fg);border-radius:8px;padding:8px 10px;font-size:13px}
+.f label{display:block;font-size:11.5px;font-weight:600;color:var(--muted);margin-bottom:5px}
+.f input,.f textarea,.f select{width:100%;border:1px solid var(--border);background:var(--surface);color:var(--fg);border-radius:9px;padding:10px 12px;font-size:14px;transition:border-color .12s}
+.f input:focus,.f textarea:focus{outline:none;border-color:var(--acc)}
 .f textarea{resize:vertical;line-height:1.5}
 .f .hint{font-size:10.5px;color:var(--muted);margin-top:3px}
 .frow{display:grid;grid-template-columns:1fr 1fr;gap:10px}
@@ -94,8 +95,13 @@ main{min-width:0}
 .seg{display:inline-flex;background:var(--panel);border-radius:10px;padding:3px;gap:2px}
 .segbtn{border:none;background:none;color:var(--muted);font-size:12.5px;font-weight:600;padding:7px 12px;border-radius:8px;cursor:pointer;font-family:inherit}
 .segbtn.on{background:var(--surface);color:var(--acc);box-shadow:0 1px 3px rgba(0,0,0,.1)}
-.libsplit{display:grid;grid-template-columns:1fr minmax(340px,44%);height:calc(100vh - 58px)}
-.libform{overflow-y:auto;padding:20px 24px 90px}
+.libsplit{display:grid;grid-template-columns:1.7fr minmax(300px,34%);height:calc(100vh - 58px)}
+.libform{overflow-y:auto;padding:24px 30px 100px}
+.libform .sec{max-width:920px}
+.skillgrid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media(max-width:1200px){.skillgrid{grid-template-columns:1fr}}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{font-size:11.5px;color:var(--muted);background:var(--panel);border-radius:7px;padding:4px 9px}
 .libpv{background:var(--panel);border-left:1px solid var(--border);padding:16px}
 #libPreview{width:100%;height:100%;border:1px solid var(--border);border-radius:12px;background:#fff}
 /* company accordion */
@@ -578,10 +584,8 @@ function renderCompanies(){
             <div class="workcard">
               <div class="bh"><span class="t">📦 ${esc(w.title||'작업')}</span><span class="rm" data-rmwork="${ci}:${wi}">삭제</span></div>
               <div class="frow3">${wField(ci,wi,'title',w.title,'제목')}${wField(ci,wi,'category',w.category,'카테고리')}${wField(ci,wi,'period',w.period,'기간')}</div>
-              ${wArea(ci,wi,'summary',w.summary,'요약 (이력서용, 짧게)','str',2)}
-              ${wArea(ci,wi,'detail',w.detail,'상세 (포트폴리오용)','str',3)}
-              ${wArea(ci,wi,'links',(w.links||[]).map(l=>l.label+' | '+l.url).join('\n'),'링크 (라벨 | URL, 한 줄에 하나)','links',2,'예: YouTube | https://youtu.be/...')}
-              ${wArea(ci,wi,'images',(w.images||[]).join('\n'),'이미지 URL (한 줄에 하나)','lines',2)}
+              <div class="frow">${wArea(ci,wi,'summary',w.summary,'요약 (이력서용, 짧게)','str',3)}${wArea(ci,wi,'detail',w.detail,'상세 (포트폴리오용)','str',3)}</div>
+              <div class="frow">${wArea(ci,wi,'links',(w.links||[]).map(l=>l.label+' | '+l.url).join('\n'),'링크 (라벨 | URL, 한 줄에 하나)','links',3,'예: YouTube | https://youtu.be/...')}${wArea(ci,wi,'images',(w.images||[]).join('\n'),'이미지 URL (한 줄에 하나)','lines',3)}</div>
               <label class="featlbl"><input type="checkbox" data-feat="${ci}:${wi}" ${w.featured?'checked':''}> 이력서 '프로젝트' 섹션에 표시</label>
             </div>`).join('')||'<div class="empty" style="padding:8px;font-size:12px">작업 없음 · + 작업 추가</div>'}
         </div>
@@ -607,10 +611,15 @@ function renderLibrary(){
 
   h+=renderCompanies();
 
-  h+=libList('스킬','skills',LIB.skills,(s,i)=>`
-    ${fInput('skills',i,'group',s.group,'그룹명')}
-    ${fArea('skills',i,'items',(s.items||[]).join(', '),'항목 (쉼표)','csv',2)}`,
-    ()=>({group:'그룹',items:[]}));
+  h+=`<div class="sec"><h2>스킬 <span class="add" data-add="skills">+ 그룹 추가</span></h2>
+    <div class="skillgrid">${(LIB.skills||[]).map((s,i)=>`
+      <div class="blockcard">
+        <div class="bh"><span class="t">${esc(s.group||'그룹')}</span><span class="rm" data-rm="skills" data-i="${i}">삭제</span></div>
+        ${fInput('skills',i,'group',s.group,'그룹명')}
+        ${fArea('skills',i,'items',(s.items||[]).join(', '),'항목 (쉼표로 구분)','csv',3)}
+        <div class="chips" style="margin-top:8px">${(s.items||[]).map(x=>`<span class="chip">${esc(x)}</span>`).join('')}</div>
+      </div>`).join('')||'<div class="empty" style="padding:12px">스킬 그룹 없음 · + 그룹 추가</div>'}</div></div>`;
+  window['_fac_skills']=()=>({group:'그룹',items:[]});
 
   h+=libList('학력','education',LIB.education,(e,i)=>`
     <div class="frow3">${fInput('education',i,'school',e.school,'학교/전공')}${fInput('education',i,'degree',e.degree,'학위')}${fInput('education',i,'period',e.period,'기간')}</div>`,
