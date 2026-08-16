@@ -109,6 +109,7 @@ main{min-width:0}
 .dbtab.on{background:var(--acc);color:#fff;border-color:var(--acc)}
 .dbins{border:1px solid var(--acc);border-radius:12px;background:var(--acc-soft);padding:16px 18px;margin-bottom:16px;max-width:560px}
 .dbins select{width:100%;border:1px solid var(--border);background:var(--surface);color:var(--fg);border-radius:9px;padding:10px 12px;font-size:14px}
+.dbwrap{padding:22px 30px 90px}
 .dbcard{border:1px solid var(--border);border-radius:12px;background:var(--card);padding:16px 18px;margin-bottom:14px}
 .dbhd{display:flex;align-items:center;gap:10px;margin-bottom:10px}
 .dbname{font-weight:700;font-size:15px;font-family:ui-monospace,Menlo,monospace}
@@ -119,7 +120,7 @@ main{min-width:0}
 .dbtable{overflow-x:auto;border:1px solid var(--border);border-radius:9px}
 .dbtable table{border-collapse:collapse;width:100%;font-size:12px}
 .dbtable th{text-align:left;background:var(--panel);color:var(--muted);font-weight:600;padding:7px 10px;white-space:nowrap;font-family:ui-monospace,Menlo,monospace;font-size:11px;border-bottom:1px solid var(--border)}
-.dbtable td{padding:7px 10px;white-space:nowrap;max-width:220px;overflow:hidden;text-overflow:ellipsis;border-bottom:1px solid var(--border);color:var(--fg)}
+.dbtable td{padding:8px 12px;white-space:normal;vertical-align:top;max-width:340px;word-break:break-word;border-bottom:1px solid var(--border);color:var(--fg);line-height:1.5}
 .dbtable tr:last-child td{border-bottom:none}
 .dbrel.grpc{color:var(--ok);background:color-mix(in oklch,var(--ok) 14%,transparent)}
 .libpv{background:var(--panel);padding:14px;overflow:hidden}
@@ -256,7 +257,7 @@ main{min-width:0}
         <span class="mono" style="font-size:12px;color:var(--muted);margin-right:10px" id="dbWho"></span>
         <button class="btn sm" id="dbRefresh">↻ 새로고침</button>
       </div>
-      <div class="mwrap" id="dbBody"></div>
+      <div id="dbBody" class="dbwrap"></div>
     </section>
   </main>
 </div>
@@ -414,7 +415,7 @@ function dbCard(t,rows,err){
     count=`<span class="dbcount">${rows.length} rows</span>`;
     if(rows.length){
       tbl=`<div class="dbtable"><table><thead><tr>${t.cols.map(k=>`<th>${k}</th>`).join('')}</tr></thead><tbody>`+
-        rows.slice(0,25).map(r=>`<tr>${t.cols.map(k=>`<td title="${esc(dbCell(r[k]))}">${esc(dbCell(r[k]))}</td>`).join('')}</tr>`).join('')+
+        rows.slice(0,60).map(r=>`<tr>${t.cols.map(k=>{const raw=dbCell(r[k]);const disp=((k==='id'||k.endsWith('_id'))&&raw.length>12)?raw.slice(0,8)+'…':raw;return `<td title="${esc(raw)}">${esc(disp)}</td>`;}).join('')}</tr>`).join('')+
         `</tbody></table></div>`;
     } else { tbl=`<div class="muted" style="font-size:12px">(비어있음)</div>`; }
   }
