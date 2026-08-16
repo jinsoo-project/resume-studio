@@ -122,6 +122,15 @@
       if (p.data && p.data.snapshot) return p.data;
       return null;
     },
+    async uploadFile(file) {
+      const c = client(); if (!c || !user) throw new Error("로그인 필요");
+      const ext = (file.name.split(".").pop() || "bin").toLowerCase().replace(/[^a-z0-9]/g, "");
+      const path = user.id + "/" + Date.now() + "-" + Math.random().toString(36).slice(2, 8) + "." + ext;
+      const { error } = await c.storage.from("media").upload(path, file, { cacheControl: "3600", upsert: false });
+      if (error) throw error;
+      const { data } = c.storage.from("media").getPublicUrl(path);
+      return data.publicUrl;
+    },
     async tableRows(table, limit) {
       const c = client(); if (!c || !user) return null;
       const { data, error } = await c.from(table).select("*").limit(limit || 200);

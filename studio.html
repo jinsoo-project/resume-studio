@@ -718,6 +718,7 @@ function renderCompanies(){
         <div class="frow"><div class="f"><label>시작일</label><input type="month" data-co="${ci}" data-cf="startDate" value="${esc(c.startDate||'')}"></div><div class="f"><label>종료일 (비우면 재직중)</label><input type="month" data-co="${ci}" data-cf="endDate" value="${esc(c.endDate||'')}"></div></div>
         ${cArea(ci,'summary',c.summary,'회사 한 줄 요약',2)}
         ${cField(ci,'logo',c.logo,'회사 로고 URL')}
+        <div class="f"><label>또는 로고 파일 업로드</label><input type="file" accept="image/*" data-uploadco="${ci}"></div>
         <div class="worksec">
           <div class="workhd">작업 (프로젝트·캠페인)<span class="add" data-addwork="${ci}">+ 작업 추가</span></div>
           ${(c.works||[]).map((w,wi)=>`
@@ -729,6 +730,7 @@ function renderCompanies(){
               ${wArea(ci,wi,'metrics',(w.metrics||[]).map(m=>m.value+' | '+m.label).join('\n'),'성과수치 (값 | 설명, 한 줄에 하나)','metrics',2,'예: 5억 | 월 최대 예산')}
               <div class="frow">${wArea(ci,wi,'stack',(w.stack||[]).join(', '),'스택 (쉼표)','csv',2)}${wArea(ci,wi,'links',(w.links||[]).map(l=>l.label+' | '+l.url).join('\n'),'링크 (라벨 | URL)','links',2,'예: YouTube | https://youtu.be/...')}</div>
               ${wArea(ci,wi,'media',(w.media||[]).filter(m=>m.type==='image').map(m=>m.url).join('\n'),'이미지 URL (한 줄에 하나)','medialines',2)}
+              <div class="f"><label>또는 이미지 파일 업로드 (여러 장)</label><input type="file" accept="image/*" multiple data-upload="${ci}:${wi}"></div>
               <label class="featlbl"><input type="checkbox" data-feat="${ci}:${wi}" ${w.featured?'checked':''}> 이력서 '프로젝트' 섹션에 표시</label>
             </div>`).join('')||'<div class="empty" style="padding:8px;font-size:12px">작업 없음 · + 작업 추가</div>'}
         </div>
@@ -831,6 +833,20 @@ document.querySelectorAll('[data-libtpl]').forEach(b=>b.addEventListener('click'
   document.querySelectorAll('[data-libtpl]').forEach(x=>x.classList.toggle('on',x===b));
   updateLibPreview();
 }));
+$('#libBody').addEventListener('change',async e=>{
+  const upW=e.target.closest('[data-upload]'), upC=e.target.closest('[data-uploadco]');
+  const files=e.target.files;
+  if((upW||upC)&&files&&files.length){
+    if(!(window.CLOUD&&CLOUD.user())){toast('이미지 업로드는 로그인이 필요해요');e.target.value='';return;}
+    toast('업로드 중…');
+    try{
+      if(upW){const[ci,wi]=upW.dataset.upload.split(':').map(Number);const w=LIB.companies[ci].works[wi];
+        for(const f of files){const url=await CLOUD.uploadFile(f);w.media.push({id:uid(),type:'image',url});}}
+      else{const ci=+upC.dataset.uploadco;const url=await CLOUD.uploadFile(files[0]);LIB.companies[ci].logo=url;}
+      normalizeIds();derive();save();renderLibrary();toast('업로드 완료 ✓');
+    }catch(err){toast('업로드 오류: '+(err.message||err));}
+  }
+});
 
 /* ============ import / export / theme ============ */
 $('#seedBtn').addEventListener('click',()=>{
