@@ -143,47 +143,63 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
   }
 
   /* ====================== 4) 포트폴리오 페이지 (웹) ====================== */
-  function renderPortfolio(d) {
+  // 포트폴리오 = 케이스 스터디 스타일 (성과수치 forward). pfStyle로 확장 가능.
+  function renderPortfolio(d) { return renderPfCase(d); }
+  function renderPfCase(d) {
     const p = d.profile || {};
     const css = `
 :root{--blue:#3182F6;--blue-weak:#EAF2FE;--ink:#191F28;--sub:#4E5968;--faint:#8B95A1;--bg:#FFFFFF;--panel:#F9FAFB;--border:#E5E8EB;
   --font:-apple-system,BlinkMacSystemFont,"Pretendard","Apple SD Gothic Neo",system-ui,Roboto,"Segoe UI","Malgun Gothic",sans-serif}
-@media(prefers-color-scheme:dark){:root{--blue:#4593FC;--blue-weak:rgba(69,147,252,.14);--ink:#ECEFF3;--sub:#A7AEB8;--faint:#6B7280;--bg:#16181D;--panel:#1E2127;--border:rgba(255,255,255,.10)}}
+@media(prefers-color-scheme:dark){:root{--blue:#4593FC;--blue-weak:rgba(69,147,252,.16);--ink:#ECEFF3;--sub:#A7AEB8;--faint:#6B7280;--bg:#141619;--panel:#1E2127;--border:rgba(255,255,255,.10)}}
 *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--font);line-height:1.6;-webkit-font-smoothing:antialiased;letter-spacing:-.02em}
-.pf{max-width:900px;margin:0 auto;padding:0 20px 80px}
-.pfhero{padding:64px 0 34px}
-.cover{height:200px;border-radius:20px;background-size:cover;background-position:center;margin-bottom:28px;background-color:var(--panel)}
-.pfeyebrow{font-size:13px;font-weight:700;color:var(--blue);margin-bottom:12px}
-.pfhero h1{font-size:clamp(30px,6vw,48px);font-weight:800;letter-spacing:-.03em;margin:0;text-wrap:balance}
-.pfhero .sub{font-size:18px;color:var(--sub);margin:14px 0 0;font-weight:500}
-.pfhero .intro{font-size:15px;color:var(--sub);margin:18px 0 0;max-width:640px;white-space:pre-wrap}
-.pfmain{display:grid;gap:20px}
-.wk{border:1px solid var(--border);border-radius:18px;overflow:hidden;background:var(--panel);transition:transform .18s,box-shadow .18s}
-.wk:hover{transform:translateY(-3px);box-shadow:0 18px 40px -20px rgba(0,0,0,.3)}
-.wk-media{height:200px;background-size:cover;background-position:center;background-color:var(--blue-weak);display:grid;place-items:center;color:var(--blue);font-weight:800;font-size:15px}
-.wk-body{padding:20px 22px}
-.wk-top{display:flex;align-items:center;gap:10px;margin-bottom:8px}
-.wk-top .cat{font-size:11.5px;font-weight:700;color:var(--blue);background:var(--blue-weak);border-radius:6px;padding:3px 9px}
-.wk-top .meta{font-size:12.5px;color:var(--faint);font-variant-numeric:tabular-nums}
-.wk-body h3{font-size:19px;font-weight:750;margin:0 0 8px;letter-spacing:-.02em}
-.wk-body p{font-size:14px;color:var(--sub);margin:0;white-space:pre-wrap}
-.wk-body .links{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
-.wk-body .links a{font-size:12.5px;font-weight:600;color:var(--blue);text-decoration:none;border:1px solid var(--border);border-radius:8px;padding:6px 11px;background:var(--bg)}
-.wk-body .links a:hover{border-color:var(--blue);background:var(--blue-weak)}
-.pffoot{margin-top:40px;padding-top:20px;border-top:1px solid var(--border);font-size:12.5px;color:var(--faint)}
-@media(max-width:560px){.wk-media{height:150px}}`;
-    const card = w => {
-      const img = (w.images && w.images[0]) || "";
+.pf{max-width:920px;margin:0 auto;padding:0 22px 90px}
+.pfhero{padding:66px 0 20px}
+.cover{height:220px;border-radius:22px;background-size:cover;background-position:center;margin-bottom:30px;background-color:var(--panel)}
+.pfeyebrow{font-size:13px;font-weight:700;color:var(--blue);margin-bottom:12px;letter-spacing:.01em}
+.pfhero h1{font-size:clamp(32px,6vw,52px);font-weight:800;letter-spacing:-.035em;margin:0;text-wrap:balance}
+.pfhero .sub{font-size:19px;color:var(--sub);margin:16px 0 0;font-weight:500}
+.pfhero .intro{font-size:15px;color:var(--sub);margin:18px 0 0;max-width:660px;white-space:pre-wrap}
+.pfcount{margin:34px 0 26px;font-size:12px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--faint);border-top:1px solid var(--border);padding-top:22px}
+.pfmain{display:flex;flex-direction:column;gap:26px}
+.cs{border:1px solid var(--border);border-radius:20px;overflow:hidden;background:var(--panel)}
+.cs-banner{height:220px;background-size:cover;background-position:center;background-color:var(--blue-weak);display:grid;place-items:center;color:var(--blue);font-weight:800;font-size:16px}
+.cs-body{padding:26px 28px}
+.cs-top{display:flex;align-items:center;gap:10px;margin-bottom:10px;flex-wrap:wrap}
+.cs-top .cat{font-size:12px;font-weight:700;color:var(--blue);background:var(--blue-weak);border-radius:7px;padding:4px 10px}
+.cs-top .meta{font-size:12.5px;color:var(--faint);font-variant-numeric:tabular-nums}
+.cs h3{font-size:23px;font-weight:800;margin:0 0 14px;letter-spacing:-.025em;text-wrap:balance}
+.cs-metrics{display:flex;flex-wrap:wrap;gap:10px;margin:0 0 16px}
+.cs-metric{background:var(--bg);border:1px solid var(--border);border-radius:14px;padding:12px 16px;min-width:96px}
+.cs-metric .v{font-size:24px;font-weight:800;color:var(--blue);letter-spacing:-.02em;line-height:1.1}
+.cs-metric .l{font-size:11.5px;color:var(--sub);margin-top:3px}
+.cs .sum{font-size:15px;color:var(--ink);margin:0 0 8px;font-weight:500;white-space:pre-wrap}
+.cs .dt{font-size:14px;color:var(--sub);margin:0;white-space:pre-wrap}
+.cs-gallery{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px;margin-top:16px}
+.cs-gallery img{width:100%;height:110px;object-fit:cover;border-radius:10px;border:1px solid var(--border)}
+.cs .links{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px}
+.cs .links a{font-size:12.5px;font-weight:600;color:var(--blue);text-decoration:none;border:1px solid var(--border);border-radius:9px;padding:7px 13px;background:var(--bg)}
+.cs .links a:hover{border-color:var(--blue);background:var(--blue-weak)}
+.pffoot{margin-top:44px;padding-top:22px;border-top:1px solid var(--border);font-size:12.5px;color:var(--faint)}
+@media(max-width:560px){.cs-banner{height:160px}}`;
+    const csCard = w => {
+      const imgs = (w.images || []).filter(Boolean);
+      const banner = imgs[0] || "";
+      const gallery = imgs.slice(1);
+      const metrics = (w.metrics || []).filter(m => m.value || m.label).map(m => `<div class="cs-metric"><div class="v">${esc(m.value || "")}</div><div class="l">${esc(m.label || "")}</div></div>`).join("");
       const links = (w.links || []).map(l => `<a href="${esc(l.url)}" target="_blank" rel="noopener">${esc(l.label || "링크")} ↗</a>`).join("");
-      return `<article class="wk">
-        <div class="wk-media"${img ? ` style="background-image:url('${esc(img)}')"` : ""}>${img ? "" : esc(w.category || w.title || "")}</div>
-        <div class="wk-body">
-          <div class="wk-top">${w.category ? `<span class="cat">${esc(w.category)}</span>` : ""}<span class="meta">${esc(w.company || "")}${w.period ? " · " + esc(w.period) : ""}</span></div>
+      return `<article class="cs">
+        ${banner ? `<div class="cs-banner" style="background-image:url('${esc(banner)}')"></div>` : ""}
+        <div class="cs-body">
+          <div class="cs-top">${w.category ? `<span class="cat">${esc(w.category)}</span>` : ""}<span class="meta">${esc(w.company || "")}${w.period ? " · " + esc(w.period) : ""}</span></div>
           <h3>${esc(w.title)}</h3>
-          <p>${esc(w.detail || w.summary || "")}</p>
+          ${metrics ? `<div class="cs-metrics">${metrics}</div>` : ""}
+          ${w.summary ? `<p class="sum">${esc(w.summary)}</p>` : ""}
+          ${w.detail ? `<p class="dt">${esc(w.detail)}</p>` : ""}
+          ${gallery.length ? `<div class="cs-gallery">${gallery.map(u => `<img src="${esc(u)}" alt="">`).join("")}</div>` : ""}
           ${links ? `<div class="links">${links}</div>` : ""}
         </div></article>`;
     };
+    const works = d.works || [];
     const body = `<div class="pf">
       <header class="pfhero">
         ${d.cover ? `<div class="cover" style="background-image:url('${esc(d.cover)}')"></div>` : ""}
@@ -192,7 +208,8 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
         ${d.subtitle ? `<p class="sub">${esc(d.subtitle)}</p>` : ""}
         ${d.intro ? `<p class="intro">${esc(d.intro)}</p>` : ""}
       </header>
-      <main class="pfmain">${(d.works || []).map(card).join("") || '<p style="color:var(--faint)">담긴 작업이 없습니다.</p>'}</main>
+      ${works.length ? `<div class="pfcount">Case Studies · ${works.length}</div>` : ""}
+      <main class="pfmain">${works.map(csCard).join("") || '<p style="color:var(--faint)">담긴 작업이 없습니다.</p>'}</main>
       <footer class="pffoot">© ${esc(p.nameKo || "")}${p.email ? " · " + esc(p.email) : ""}</footer>
     </div>`;
     return doc(`${esc(d.title || "포트폴리오")} — ${esc(p.nameKo || "")}`, css, body);
