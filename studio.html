@@ -103,6 +103,10 @@ main{min-width:0}
 .chips{display:flex;flex-wrap:wrap;gap:6px}
 .chip{font-size:11.5px;color:var(--muted);background:var(--panel);border-radius:7px;padding:4px 9px}
 /* DB viewer */
+.dbtabs{display:flex;gap:6px;overflow-x:auto;padding-bottom:12px;margin-bottom:14px;border-bottom:1px solid var(--border)}
+.dbtab{white-space:nowrap;font-family:ui-monospace,Menlo,monospace;font-size:12.5px;font-weight:600;color:var(--muted);background:var(--panel);border:1px solid var(--border);border-radius:999px;padding:7px 14px;cursor:pointer}
+.dbtab:hover{color:var(--fg)}
+.dbtab.on{background:var(--acc);color:#fff;border-color:var(--acc)}
 .dbcard{border:1px solid var(--border);border-radius:12px;background:var(--card);padding:16px 18px;margin-bottom:14px}
 .dbhd{display:flex;align-items:center;gap:10px;margin-bottom:10px}
 .dbname{font-weight:700;font-size:15px;font-family:ui-monospace,Menlo,monospace}
@@ -180,6 +184,7 @@ main{min-width:0}
     <div class="rail-sp"></div>
     <div class="railfoot">
       <div id="authBox" style="margin-bottom:10px"></div>
+      <button class="mini" id="seedBtn" style="width:100%;margin-bottom:8px">＋ 이력서 전체 채우기</button>
       정적 빌더 · 클라우드 동기화
       <div class="row">
         <button class="mini" id="exportBtn">내보내기(JSON)</button>
@@ -401,18 +406,19 @@ function dbCard(t,rows,err){
   }
   return `<div class="dbcard"><div class="dbhd"><span class="dbname">${t.name}</span>${t.rel?`<span class="dbrel${t.grp?' grpc':''}">${esc(t.rel)}</span>`:''}${count}</div><div class="dbcols">${cols}</div>${tbl}</div>`;
 }
+let dbSel='companies';
 async function renderDbView(){
   const body=$('#dbBody'), who=$('#dbWho');
   const logged=window.CLOUD&&CLOUD.enabled()&&CLOUD.user();
   who.textContent = logged ? ('☁️ '+CLOUD.user().email) : '오프라인 (로그인 필요)';
-  body.innerHTML = logged ? '' : '<div class="empty" style="padding:14px;margin-bottom:12px">로그인하면 실제 행 데이터가 표시됩니다. 아래는 테이블 구조.</div>';
-  for(const t of DB_TABLES){
-    let rows=null,err=null;
-    if(logged){ const r=await CLOUD.tableRows(t.name,100); if(r&&r.error)err=r.error; else rows=r||[]; }
-    body.insertAdjacentHTML('beforeend', dbCard(t,rows,err));
-  }
+  const tabs=`<div class="dbtabs">${DB_TABLES.map(t=>`<button class="dbtab ${t.name===dbSel?'on':''}" data-dbtab="${t.name}">${t.name}</button>`).join('')}</div>`;
+  const t=DB_TABLES.find(x=>x.name===dbSel)||DB_TABLES[0];
+  let rows=null,err=null;
+  if(logged){ const r=await CLOUD.tableRows(t.name,200); if(r&&r.error)err=r.error; else rows=r||[]; }
+  body.innerHTML = tabs + (logged?'':'<div class="empty" style="padding:14px;margin:12px 0">로그인하면 실제 행 데이터가 표시됩니다. (아래는 테이블 구조)</div>') + dbCard(t,rows,err);
 }
 $('#dbRefresh').addEventListener('click',renderDbView);
+$('#dbBody').addEventListener('click',e=>{const b=e.target.closest('[data-dbtab]');if(b){dbSel=b.dataset.dbtab;renderDbView();}});
 document.querySelectorAll('.nv').forEach(b=>b.addEventListener('click',()=>show(b.dataset.view)));
 
 /* ============ HOME ============ */
@@ -756,6 +762,12 @@ document.querySelectorAll('[data-libtpl]').forEach(b=>b.addEventListener('click'
 }));
 
 /* ============ import / export / theme ============ */
+$('#seedBtn').addEventListener('click',()=>{
+  if(!confirm('현재 라이브러리를 이력서 전체 샘플(회사·작업 전부)로 덮어씁니다. 로그인 상태면 DB에도 반영됩니다. 계속할까요?'))return;
+  LIB=seed(); normalizeIds(); derive(); save();
+  toast('이력서 전체 데이터 채움');
+  const v=document.querySelector('.nv.on'); const cur=v?v.dataset.view:'home'; show(cur);
+});
 $('#exportBtn').addEventListener('click',()=>{
   const blob=new Blob([JSON.stringify({LIB,DOCS},null,2)],{type:'application/json'});
   const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='resume-studio-backup.json';a.click();
