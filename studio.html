@@ -289,7 +289,14 @@ const $=s=>document.querySelector(s);
 const uid=()=> (window.crypto&&crypto.randomUUID) ? crypto.randomUUID() : 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g,c=>{const r=Math.random()*16|0;return (c==='x'?r:(r&0x3|0x8)).toString(16);});
 const isUuid=s=>/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(s||'');
 function normalizeIds(){
-  (LIB.companies||[]).forEach(c=>{ if(!isUuid(c.id))c.id=uid(); (c.works||[]).forEach(w=>{ if(!isUuid(w.id))w.id=uid(); (w.media||[]).forEach(m=>{ if(!isUuid(m.id))m.id=uid(); }); }); });
+  const remap={};
+  (LIB.companies||[]).forEach(c=>{ const old=c.id; if(!isUuid(c.id))c.id=uid(); if(old&&old!==c.id)remap[old]=c.id;
+    (c.works||[]).forEach(w=>{ if(!isUuid(w.id))w.id=uid();
+      (w.metrics||[]).forEach(m=>{ if(!isUuid(m.id))m.id=uid(); });
+      (w.links||[]).forEach(l=>{ if(!isUuid(l.id))l.id=uid(); });
+      (w.media||[]).forEach(m=>{ if(!isUuid(m.id))m.id=uid(); }); }); });
+  (LIB.ax||[]).forEach(a=>{ if(!isUuid(a.id))a.id=uid(); if(a.companyId&&remap[a.companyId])a.companyId=remap[a.companyId]; if(a.companyId&&!isUuid(a.companyId))a.companyId=null; });
+  (LIB.highlights||[]).forEach(h=>{ if(!isUuid(h.id))h.id=uid(); });
   ['skills','education','awards'].forEach(k=>(LIB[k]||[]).forEach(x=>{ if(!isUuid(x.id))x.id=uid(); }));
   (DOCS||[]).forEach(d=>{ if(!isUuid(d.id))d.id=uid(); });
 }
@@ -319,7 +326,8 @@ function seed(){
 }
 function derive(){ if(window.deriveFromCompanies) window.deriveFromCompanies(LIB); }
 let LIB = JSON.parse(localStorage.getItem(LS_LIB)||'null') || seed();
-if(!LIB.companies){ LIB.companies = clone((window.RESUME||{}).companies||[]); }  // v2 마이그레이션
+if(!LIB.companies){ LIB.companies = clone((window.RESUME||{}).companies||[]); }
+if(LIB.companies[0] && LIB.companies[0].nameKo===undefined){ LIB = seed(); }  // v2→v3 구조 재시드
 derive();
 let DOCS = JSON.parse(localStorage.getItem(LS_DOCS)||'null') || [];
 let curDocId = null;
@@ -381,16 +389,20 @@ function show(view){
   if(view==='db')renderDbView();
 }
 const DB_TABLES=[
-  {name:'profile', rel:'1행/유저', cols:['name_ko','name_en','title','summary','email','phone','links','role_tags','ax','highlights']},
-  {name:'companies', rel:'회사 → works', grp:1, cols:['id','name','role','period','summary','logo_url','sort']},
-  {name:'works', rel:'작업 → media', grp:1, cols:['id','company_id','title','category','period','summary','detail','featured','icon','cover_url','metrics','stack','links','sort']},
-  {name:'media', rel:'image/video/file', grp:1, cols:['id','work_id','type','url','title','sort']},
+  {name:'profile', rel:'1행/유저', cols:['name_ko','name_en','title','summary','email','phone','location','links','role_tags']},
+  {name:'companies', rel:'회사 → works', grp:1, cols:['id','name_ko','name_en','role','start_date','end_date','summary','logo_url','sort']},
+  {name:'works', rel:'작업(회사 기준)', grp:1, cols:['id','company_id','title','category','start_date','end_date','summary','detail','featured','stack','sort']},
+  {name:'work_metrics', rel:'성과수치(작업 기준)', grp:1, cols:['id','work_id','value','label','sort']},
+  {name:'work_links', rel:'외부 URL(작업 기준)', grp:1, cols:['id','work_id','label','url','sort']},
+  {name:'media', rel:'이미지/영상/첨부', grp:1, cols:['id','work_id','type','url','title','sort']},
+  {name:'ax_experiences', rel:'AX 경험(회사 연결)', cols:['id','company_id','title','description','sort']},
+  {name:'highlights', rel:'핵심 지표', cols:['id','value','label','sort']},
   {name:'skills', cols:['id','group_name','items','sort']},
-  {name:'education', cols:['id','school','degree','period','sort']},
-  {name:'awards', cols:['id','title','org','date_text','sort']},
+  {name:'education', cols:['id','school','degree','field','start_date','end_date','sort']},
+  {name:'awards', cols:['id','title','org','award_date','sort']},
   {name:'resume_docs', rel:'이력서 발행', cols:['id','slug','title','template','visibility','updated_at']},
-  {name:'portfolio_pages', rel:'포트폴리오 발행', cols:['id','slug','title','subtitle','visibility']},
-  {name:'portfolio_blocks', rel:'페이지 블록', cols:['id','page_id','type','content','sort']}
+  {name:'portfolio_pages', rel:'포폴 발행', cols:['id','slug','title','subtitle','visibility']},
+  {name:'portfolio_blocks', rel:'블록', cols:['id','page_id','type','content','sort']}
 ];
 function dbCell(v){ if(v==null)return ''; if(typeof v==='object')return JSON.stringify(v).slice(0,80); return String(v).slice(0,80); }
 function dbCard(t,rows,err){
@@ -410,17 +422,25 @@ function dbCard(t,rows,err){
 }
 let dbSel='companies', dbInsOpen=false;
 const DB_INS={
-  companies:{title:'회사',fields:[['name','회사명'],['role','직무/역할'],['period','기간'],['summary','요약'],['logo','로고 URL']],
-    add(v){LIB.companies.push({id:uid(),name:v.name||'새 회사',role:v.role||'',period:v.period||'',summary:v.summary||'',logo:v.logo||'',works:[]});}},
-  works:{title:'작업',parent:'company',fields:[['title','제목'],['category','카테고리'],['period','기간'],['summary','요약(이력서용)'],['detail','상세(포폴용)'],['cover','대표이미지 URL'],['icon','아이콘(이모지)']],
-    add(v,pi){const c=LIB.companies[pi];if(c)c.works.push({id:uid(),title:v.title||'새 작업',category:v.category||'',period:v.period||'',summary:v.summary||'',detail:v.detail||'',cover:v.cover||'',icon:v.icon||'',featured:false,metrics:[],stack:[],links:[],media:[]});}},
+  companies:{title:'회사',fields:[['nameKo','회사명(국문)'],['nameEn','회사명(영문)'],['role','직무/역할'],['startDate','시작일 (YYYY-MM)'],['endDate','종료일 (YYYY-MM, 비우면 재직중)'],['summary','요약'],['logo','로고 URL']],
+    add(v){LIB.companies.push({id:uid(),nameKo:v.nameKo||'새 회사',nameEn:v.nameEn||'',role:v.role||'',startDate:v.startDate||'',endDate:v.endDate||'',summary:v.summary||'',logo:v.logo||'',works:[]});}},
+  works:{title:'작업',parent:'company',fields:[['title','제목'],['category','카테고리'],['startDate','시작일 (YYYY-MM)'],['endDate','종료일 (YYYY-MM)'],['summary','요약(이력서용)'],['detail','상세(포폴용)']],
+    add(v,pi){const c=LIB.companies[pi];if(c)c.works.push({id:uid(),title:v.title||'새 작업',category:v.category||'',startDate:v.startDate||'',endDate:v.endDate||'',summary:v.summary||'',detail:v.detail||'',featured:false,stack:[],metrics:[],links:[],media:[]});}},
+  work_metrics:{title:'성과수치',parent:'work',fields:[['value','값 (예: 5억)'],['label','설명 (예: 월 최대 예산)']],
+    add(v,pi){const t=dbFlatWorks()[pi];if(t)t.w.metrics.push({id:uid(),value:v.value||'',label:v.label||''});}},
+  work_links:{title:'링크',parent:'work',fields:[['label','라벨'],['url','URL']],
+    add(v,pi){const t=dbFlatWorks()[pi];if(t)t.w.links.push({id:uid(),label:v.label||'',url:v.url||''});}},
   media:{title:'미디어',parent:'work',fields:[['type','타입 (image/video/file)'],['url','URL'],['title','제목']],
-    add(v,pi){const fw=dbFlatWorks();const t=fw[pi];if(t)t.w.media.push({id:uid(),type:v.type||'image',url:v.url||'',title:v.title||'',alt:''});}},
+    add(v,pi){const t=dbFlatWorks()[pi];if(t)t.w.media.push({id:uid(),type:v.type||'image',url:v.url||'',title:v.title||'',alt:''});}},
+  ax_experiences:{title:'AX 경험',parent:'company',fields:[['title','제목'],['description','설명']],
+    add(v,pi){const c=LIB.companies[pi];LIB.ax.push({id:uid(),companyId:c?c.id:null,title:v.title||'',description:v.description||''});}},
+  highlights:{title:'핵심지표',fields:[['value','값'],['label','설명']],
+    add(v){LIB.highlights.push({id:uid(),value:v.value||'',label:v.label||''});}},
   skills:{title:'스킬 그룹',fields:[['group','그룹명'],['items','항목 (쉼표로 구분)']],
     add(v){LIB.skills.push({id:uid(),group:v.group||'',items:(v.items||'').split(',').map(s=>s.trim()).filter(Boolean)});}},
-  education:{title:'학력',fields:[['school','학교/전공'],['degree','학위'],['period','기간']],
-    add(v){LIB.education.push({id:uid(),school:v.school||'',degree:v.degree||'',period:v.period||''});}},
-  awards:{title:'수상',fields:[['title','제목'],['org','주최/설명'],['date','날짜']],
+  education:{title:'학력',fields:[['school','학교'],['field','전공'],['degree','학위'],['startDate','입학 (YYYY-MM)'],['endDate','졸업 (YYYY-MM)']],
+    add(v){LIB.education.push({id:uid(),school:v.school||'',field:v.field||'',degree:v.degree||'',startDate:v.startDate||'',endDate:v.endDate||''});}},
+  awards:{title:'수상',fields:[['title','제목'],['org','주최/설명'],['date','수상일 (YYYY-MM)']],
     add(v){LIB.awards.push({id:uid(),title:v.title||'',org:v.org||'',date:v.date||''});}}
 };
 function dbFlatWorks(){const a=[];(LIB.companies||[]).forEach(c=>(c.works||[]).forEach(w=>a.push({w,label:(c.name||'')+' · '+(w.title||'')})));return a;}
@@ -587,7 +607,7 @@ function reconcilePF(d){
 function resolvePF(d){
   reconcilePF(d);
   const works=[];
-  d.works.forEach(x=>{ if(x.on){ const c=LIB.companies[x.ci], w=c&&c.works[x.wi]; if(w) works.push(Object.assign({company:c.name},w)); }});
+  d.works.forEach(x=>{ if(x.on){ const c=LIB.companies[x.ci], w=c&&c.works[x.wi]; if(w) works.push(Object.assign({},w,{company:c.nameKo||c.nameEn||'', period:window.fmtPeriod(w.startDate,w.endDate), images:(w.media||[]).filter(m=>m.type==='image').map(m=>m.url)})); }});
   return { template:'portfolio', title:d.title, subtitle:d.subtitle, intro:d.intro, cover:d.cover, slug:d.slug, visibility:d.visibility, profile:LIB.profile, works };
 }
 function newPortfolio(){
@@ -689,21 +709,26 @@ function renderCompanies(){
      return `<div class="cocard ${open?'open':''}">
       <div class="cohd" data-cotoggle="${ci}">
         <span class="chev">▶</span>
-        <div class="coinfo"><div class="coname">${esc(c.name||'회사')}</div><div class="cometa">${esc(c.role||'역할 미입력')}${c.period?' · '+esc(c.period):''} · 작업 ${(c.works||[]).length}개</div></div>
+        <div class="coinfo"><div class="coname">${esc(c.nameKo||c.nameEn||'회사')}</div><div class="cometa">${esc(c.role||'역할 미입력')}${window.fmtPeriod(c.startDate,c.endDate)?' · '+esc(window.fmtPeriod(c.startDate,c.endDate)):''} · 작업 ${(c.works||[]).length}개</div></div>
         <span class="rm" data-rmco="${ci}">삭제</span>
       </div>
       <div class="cobody">
-        <div class="frow">${cField(ci,'name',c.name,'회사명')}${cField(ci,'period',c.period,'기간')}</div>
+        <div class="frow">${cField(ci,'nameKo',c.nameKo,'회사명(국문)')}${cField(ci,'nameEn',c.nameEn,'회사명(영문)')}</div>
         ${cField(ci,'role',c.role,'직무/역할')}
+        <div class="frow"><div class="f"><label>시작일</label><input type="month" data-co="${ci}" data-cf="startDate" value="${esc(c.startDate||'')}"></div><div class="f"><label>종료일 (비우면 재직중)</label><input type="month" data-co="${ci}" data-cf="endDate" value="${esc(c.endDate||'')}"></div></div>
         ${cArea(ci,'summary',c.summary,'회사 한 줄 요약',2)}
+        ${cField(ci,'logo',c.logo,'회사 로고 URL')}
         <div class="worksec">
           <div class="workhd">작업 (프로젝트·캠페인)<span class="add" data-addwork="${ci}">+ 작업 추가</span></div>
           ${(c.works||[]).map((w,wi)=>`
             <div class="workcard">
               <div class="bh"><span class="t">📦 ${esc(w.title||'작업')}</span><span class="rm" data-rmwork="${ci}:${wi}">삭제</span></div>
-              <div class="frow3">${wField(ci,wi,'title',w.title,'제목')}${wField(ci,wi,'category',w.category,'카테고리')}${wField(ci,wi,'period',w.period,'기간')}</div>
+              <div class="frow">${wField(ci,wi,'title',w.title,'제목')}${wField(ci,wi,'category',w.category,'카테고리')}</div>
+              <div class="frow"><div class="f"><label>시작일</label><input type="month" data-wc="${ci}:${wi}" data-wf="startDate" data-wt="str" value="${esc(w.startDate||'')}"></div><div class="f"><label>종료일</label><input type="month" data-wc="${ci}:${wi}" data-wf="endDate" data-wt="str" value="${esc(w.endDate||'')}"></div></div>
               <div class="frow">${wArea(ci,wi,'summary',w.summary,'요약 (이력서용, 짧게)','str',3)}${wArea(ci,wi,'detail',w.detail,'상세 (포트폴리오용)','str',3)}</div>
-              <div class="frow">${wArea(ci,wi,'links',(w.links||[]).map(l=>l.label+' | '+l.url).join('\n'),'링크 (라벨 | URL, 한 줄에 하나)','links',3,'예: YouTube | https://youtu.be/...')}${wArea(ci,wi,'images',(w.images||[]).join('\n'),'이미지 URL (한 줄에 하나)','lines',3)}</div>
+              ${wArea(ci,wi,'metrics',(w.metrics||[]).map(m=>m.value+' | '+m.label).join('\n'),'성과수치 (값 | 설명, 한 줄에 하나)','metrics',2,'예: 5억 | 월 최대 예산')}
+              <div class="frow">${wArea(ci,wi,'stack',(w.stack||[]).join(', '),'스택 (쉼표)','csv',2)}${wArea(ci,wi,'links',(w.links||[]).map(l=>l.label+' | '+l.url).join('\n'),'링크 (라벨 | URL)','links',2,'예: YouTube | https://youtu.be/...')}</div>
+              ${wArea(ci,wi,'media',(w.media||[]).filter(m=>m.type==='image').map(m=>m.url).join('\n'),'이미지 URL (한 줄에 하나)','medialines',2)}
               <label class="featlbl"><input type="checkbox" data-feat="${ci}:${wi}" ${w.featured?'checked':''}> 이력서 '프로젝트' 섹션에 표시</label>
             </div>`).join('')||'<div class="empty" style="padding:8px;font-size:12px">작업 없음 · + 작업 추가</div>'}
         </div>
@@ -740,21 +765,23 @@ function renderLibrary(){
   window['_fac_skills']=()=>({group:'그룹',items:[]});
 
   h+=libList('학력','education',LIB.education,(e,i)=>`
-    <div class="frow3">${fInput('education',i,'school',e.school,'학교/전공')}${fInput('education',i,'degree',e.degree,'학위')}${fInput('education',i,'period',e.period,'기간')}</div>`,
-    ()=>({school:'',degree:'',period:''}));
+    <div class="frow">${fInput('education',i,'school',e.school,'학교')}${fInput('education',i,'field',e.field,'전공')}</div>
+    <div class="frow3">${fInput('education',i,'degree',e.degree,'학위')}<div class="f"><label>입학</label><input type="month" data-b="education" data-i="${i}" data-f="startDate" data-t="str" value="${esc(e.startDate||'')}"></div><div class="f"><label>졸업</label><input type="month" data-b="education" data-i="${i}" data-f="endDate" data-t="str" value="${esc(e.endDate||'')}"></div></div>`,
+    ()=>({school:'',degree:'',field:'',startDate:'',endDate:''}));
 
   h+=libList('수상 · 기타','awards',LIB.awards,(a,i)=>`
-    <div class="frow3">${fInput('awards',i,'title',a.title,'제목')}${fInput('awards',i,'org',a.org,'주최/설명')}${fInput('awards',i,'date',a.date,'날짜')}</div>`,
+    <div class="frow3">${fInput('awards',i,'title',a.title,'제목')}${fInput('awards',i,'org',a.org,'주최/설명')}<div class="f"><label>수상일</label><input type="month" data-b="awards" data-i="${i}" data-f="date" data-t="str" value="${esc(a.date||'')}"></div></div>`,
     ()=>({title:'',org:'',date:''}));
 
-  h+=libList('AX 하이라이트 (웹용)','ax',LIB.ax,(a,i)=>`
+  h+=libList('AX 경험','ax',LIB.ax,(a,i)=>`
     ${fInput('ax',i,'title',a.title,'제목')}
-    ${fArea('ax',i,'desc',a.desc,'설명','str',2)}`,
-    ()=>({title:'',desc:''}));
+    ${fArea('ax',i,'description',a.description,'설명','str',2)}
+    <div class="f"><label>연결 회사</label><select data-b="ax" data-i="${i}" data-f="companyId" data-t="str"><option value="">(없음)</option>${(LIB.companies||[]).map(c=>`<option value="${c.id}"${a.companyId===c.id?' selected':''}>${esc(c.nameKo||c.nameEn||'회사')}</option>`).join('')}</select></div>`,
+    ()=>({title:'',description:'',companyId:(LIB.companies[0]&&LIB.companies[0].id)||''}));
 
   h+=libList('핵심 지표 (웹용)','highlights',LIB.highlights,(x,i)=>`
-    <div class="frow">${fInput('highlights',i,'n',x.n,'수치')}${fInput('highlights',i,'l',x.l,'설명')}</div>`,
-    ()=>({n:'',l:''}));
+    <div class="frow">${fInput('highlights',i,'value',x.value,'수치')}${fInput('highlights',i,'label',x.label,'설명')}</div>`,
+    ()=>({value:'',label:''}));
 
   $('#libBody').innerHTML=h;
 }
@@ -768,7 +795,10 @@ $('#libBody').addEventListener('input',e=>{
   const t=e.target;
   if(t.dataset.co!==undefined&&t.dataset.cf){const c=LIB.companies[+t.dataset.co];if(c){c[t.dataset.cf]=t.value;derive();save();}return;}
   if(t.dataset.wc){const[ci,wi]=t.dataset.wc.split(':').map(Number);const w=LIB.companies[ci]&&LIB.companies[ci].works[wi];if(w){const ty=t.dataset.wt,v=t.value;
-    if(ty==='links')w[t.dataset.wf]=parseLinks(v);
+    if(ty==='links')w.links=parseLinks(v);
+    else if(ty==='metrics')w.metrics=v.split('\n').map(s=>s.trim()).filter(Boolean).map(l=>{const[va,...r]=l.split('|');return{value:(va||'').trim(),label:r.join('|').trim()};});
+    else if(ty==='medialines'){const imgs=v.split('\n').map(s=>s.trim()).filter(Boolean).map(u=>({type:'image',url:u}));w.media=(w.media||[]).filter(m=>m.type!=='image').concat(imgs);}
+    else if(ty==='csv')w[t.dataset.wf]=v.split(',').map(s=>s.trim()).filter(Boolean);
     else if(ty==='lines')w[t.dataset.wf]=v.split('\n').map(s=>s.trim()).filter(Boolean);
     else w[t.dataset.wf]=v;
     derive();save();}return;}
