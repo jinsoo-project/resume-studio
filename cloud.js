@@ -134,6 +134,14 @@
       let p = await c.from("portfolio_pages").select("snapshot,title,template").eq("slug", slug).neq("visibility", "private").maybeSingle();
       if (p.data && p.data.snapshot) return p.data;
       return null;
+    },
+
+    /* ---------- DB 뷰어용: 특정 테이블 행 읽기 ---------- */
+    async tableRows(table, limit) {
+      const c = client(); if (!c || !user) return null;
+      const { data, error } = await c.from(table).select("*").limit(limit || 100);
+      if (error) return { error: error.message };
+      return data || [];
     }
   };
   window.CLOUD = CLOUD;

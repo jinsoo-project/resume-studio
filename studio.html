@@ -102,6 +102,20 @@ main{min-width:0}
 @media(max-width:1200px){.skillgrid{grid-template-columns:1fr}}
 .chips{display:flex;flex-wrap:wrap;gap:6px}
 .chip{font-size:11.5px;color:var(--muted);background:var(--panel);border-radius:7px;padding:4px 9px}
+/* DB viewer */
+.dbcard{border:1px solid var(--border);border-radius:12px;background:var(--card);padding:16px 18px;margin-bottom:14px}
+.dbhd{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.dbname{font-weight:700;font-size:15px;font-family:ui-monospace,Menlo,monospace}
+.dbrel{font-size:11px;color:var(--acc);background:var(--acc-soft);border-radius:6px;padding:2px 8px}
+.dbcount{font-size:11.5px;color:var(--muted);margin-left:auto}
+.dbcols{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:12px}
+.dbcol{font-size:11px;font-family:ui-monospace,Menlo,monospace;color:var(--muted);background:var(--panel);border-radius:6px;padding:3px 8px}
+.dbtable{overflow-x:auto;border:1px solid var(--border);border-radius:9px}
+.dbtable table{border-collapse:collapse;width:100%;font-size:12px}
+.dbtable th{text-align:left;background:var(--panel);color:var(--muted);font-weight:600;padding:7px 10px;white-space:nowrap;font-family:ui-monospace,Menlo,monospace;font-size:11px;border-bottom:1px solid var(--border)}
+.dbtable td{padding:7px 10px;white-space:nowrap;max-width:220px;overflow:hidden;text-overflow:ellipsis;border-bottom:1px solid var(--border);color:var(--fg)}
+.dbtable tr:last-child td{border-bottom:none}
+.dbrel.grpc{color:var(--ok);background:color-mix(in oklch,var(--ok) 14%,transparent)}
 .libpv{background:var(--panel);border-left:1px solid var(--border);padding:16px}
 #libPreview{width:100%;height:100%;border:1px solid var(--border);border-radius:12px;background:#fff}
 /* company accordion */
@@ -162,6 +176,7 @@ main{min-width:0}
     <button class="nv" data-view="library"><svg viewBox="0 0 24 24"><path d="M4 5h11a2 2 0 0 1 2 2v13M4 5v13a2 2 0 0 0 2 2h11M4 5a2 2 0 0 1 2-2h9"/></svg> 콘텐츠 라이브러리</button>
     <button class="nv" data-view="builder"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 17h7M17.5 14v7"/></svg> 이력서 내보내기</button>
     <button class="nv" data-view="portfolio"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg> 포트폴리오</button>
+    <button class="nv" data-view="db"><svg viewBox="0 0 24 24"><ellipse cx="12" cy="5" rx="8" ry="3"/><path d="M4 5v14c0 1.7 3.6 3 8 3s8-1.3 8-3V5M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3"/></svg> 데이터 (DB)</button>
     <div class="rail-sp"></div>
     <div class="railfoot">
       <div id="authBox" style="margin-bottom:10px"></div>
@@ -226,6 +241,15 @@ main{min-width:0}
         <div class="bcol left" id="pfLeft"></div>
         <div class="bcol right"><iframe class="previewframe" id="pfPreview" title="포트폴리오 미리보기"></iframe></div>
       </div>
+    </section>
+
+    <!-- DB VIEWER -->
+    <section id="v-db" class="hidden">
+      <div class="mtop"><h1>데이터 (DB 테이블)</h1><div class="sp"></div>
+        <span class="mono" style="font-size:12px;color:var(--muted);margin-right:10px" id="dbWho"></span>
+        <button class="btn sm" id="dbRefresh">↻ 새로고침</button>
+      </div>
+      <div class="mwrap" id="dbBody"></div>
     </section>
   </main>
 </div>
@@ -341,13 +365,54 @@ function resolveAny(d){ return d.kind==='portfolio' ? resolvePF(d) : resolve(d);
 
 /* ============ nav ============ */
 function show(view){
-  ['home','library','builder','portfolio'].forEach(v=>$('#v-'+v).classList.toggle('hidden',v!==view));
+  ['home','library','builder','portfolio','db'].forEach(v=>$('#v-'+v).classList.toggle('hidden',v!==view));
   document.querySelectorAll('.nv').forEach(b=>b.classList.toggle('on',b.dataset.view===view));
   if(view==='home')renderHome();
   if(view==='library'){renderLibrary();updateLibPreview();}
   if(view==='builder')renderBuilder();
   if(view==='portfolio')renderPortfolioView();
+  if(view==='db')renderDbView();
 }
+const DB_TABLES=[
+  {name:'profile', rel:'1행/유저', cols:['name_ko','name_en','title','summary','email','phone','links','role_tags','ax','highlights']},
+  {name:'companies', rel:'회사 → works', grp:1, cols:['id','name','role','period','summary','logo_url','sort']},
+  {name:'works', rel:'작업 → media', grp:1, cols:['id','company_id','title','category','period','summary','detail','featured','icon','cover_url','metrics','stack','links','sort']},
+  {name:'media', rel:'image/video/file', grp:1, cols:['id','work_id','type','url','title','sort']},
+  {name:'skills', cols:['id','group_name','items','sort']},
+  {name:'education', cols:['id','school','degree','period','sort']},
+  {name:'awards', cols:['id','title','org','date_text','sort']},
+  {name:'resume_docs', rel:'이력서 발행', cols:['id','slug','title','template','visibility','updated_at']},
+  {name:'portfolio_pages', rel:'포트폴리오 발행', cols:['id','slug','title','subtitle','visibility']},
+  {name:'portfolio_blocks', rel:'페이지 블록', cols:['id','page_id','type','content','sort']}
+];
+function dbCell(v){ if(v==null)return ''; if(typeof v==='object')return JSON.stringify(v).slice(0,80); return String(v).slice(0,80); }
+function dbCard(t,rows,err){
+  const cols=t.cols.map(c=>`<span class="dbcol">${c}</span>`).join('');
+  let count='', tbl='';
+  if(err){ tbl=`<div style="color:#dc2626;font-size:12px">${esc(err)}</div>`; }
+  else if(rows===null){ tbl=`<div class="muted" style="font-size:12px">로그인하면 실제 행 표시</div>`; }
+  else {
+    count=`<span class="dbcount">${rows.length} rows</span>`;
+    if(rows.length){
+      tbl=`<div class="dbtable"><table><thead><tr>${t.cols.map(k=>`<th>${k}</th>`).join('')}</tr></thead><tbody>`+
+        rows.slice(0,25).map(r=>`<tr>${t.cols.map(k=>`<td title="${esc(dbCell(r[k]))}">${esc(dbCell(r[k]))}</td>`).join('')}</tr>`).join('')+
+        `</tbody></table></div>`;
+    } else { tbl=`<div class="muted" style="font-size:12px">(비어있음)</div>`; }
+  }
+  return `<div class="dbcard"><div class="dbhd"><span class="dbname">${t.name}</span>${t.rel?`<span class="dbrel${t.grp?' grpc':''}">${esc(t.rel)}</span>`:''}${count}</div><div class="dbcols">${cols}</div>${tbl}</div>`;
+}
+async function renderDbView(){
+  const body=$('#dbBody'), who=$('#dbWho');
+  const logged=window.CLOUD&&CLOUD.enabled()&&CLOUD.user();
+  who.textContent = logged ? ('☁️ '+CLOUD.user().email) : '오프라인 (로그인 필요)';
+  body.innerHTML = logged ? '' : '<div class="empty" style="padding:14px;margin-bottom:12px">로그인하면 실제 행 데이터가 표시됩니다. 아래는 테이블 구조.</div>';
+  for(const t of DB_TABLES){
+    let rows=null,err=null;
+    if(logged){ const r=await CLOUD.tableRows(t.name,100); if(r&&r.error)err=r.error; else rows=r||[]; }
+    body.insertAdjacentHTML('beforeend', dbCard(t,rows,err));
+  }
+}
+$('#dbRefresh').addEventListener('click',renderDbView);
 document.querySelectorAll('.nv').forEach(b=>b.addEventListener('click',()=>show(b.dataset.view)));
 
 /* ============ HOME ============ */
