@@ -107,6 +107,8 @@ main{min-width:0}
 .dbtab{white-space:nowrap;font-family:ui-monospace,Menlo,monospace;font-size:12.5px;font-weight:600;color:var(--muted);background:var(--panel);border:1px solid var(--border);border-radius:999px;padding:7px 14px;cursor:pointer}
 .dbtab:hover{color:var(--fg)}
 .dbtab.on{background:var(--acc);color:#fff;border-color:var(--acc)}
+.dbins{border:1px solid var(--acc);border-radius:12px;background:var(--acc-soft);padding:16px 18px;margin-bottom:16px;max-width:560px}
+.dbins select{width:100%;border:1px solid var(--border);background:var(--surface);color:var(--fg);border-radius:9px;padding:10px 12px;font-size:14px}
 .dbcard{border:1px solid var(--border);border-radius:12px;background:var(--card);padding:16px 18px;margin-bottom:14px}
 .dbhd{display:flex;align-items:center;gap:10px;margin-bottom:10px}
 .dbname{font-weight:700;font-size:15px;font-family:ui-monospace,Menlo,monospace}
@@ -406,19 +408,58 @@ function dbCard(t,rows,err){
   }
   return `<div class="dbcard"><div class="dbhd"><span class="dbname">${t.name}</span>${t.rel?`<span class="dbrel${t.grp?' grpc':''}">${esc(t.rel)}</span>`:''}${count}</div><div class="dbcols">${cols}</div>${tbl}</div>`;
 }
-let dbSel='companies';
+let dbSel='companies', dbInsOpen=false;
+const DB_INS={
+  companies:{title:'회사',fields:[['name','회사명'],['role','직무/역할'],['period','기간'],['summary','요약'],['logo','로고 URL']],
+    add(v){LIB.companies.push({id:uid(),name:v.name||'새 회사',role:v.role||'',period:v.period||'',summary:v.summary||'',logo:v.logo||'',works:[]});}},
+  works:{title:'작업',parent:'company',fields:[['title','제목'],['category','카테고리'],['period','기간'],['summary','요약(이력서용)'],['detail','상세(포폴용)'],['cover','대표이미지 URL'],['icon','아이콘(이모지)']],
+    add(v,pi){const c=LIB.companies[pi];if(c)c.works.push({id:uid(),title:v.title||'새 작업',category:v.category||'',period:v.period||'',summary:v.summary||'',detail:v.detail||'',cover:v.cover||'',icon:v.icon||'',featured:false,metrics:[],stack:[],links:[],media:[]});}},
+  media:{title:'미디어',parent:'work',fields:[['type','타입 (image/video/file)'],['url','URL'],['title','제목']],
+    add(v,pi){const fw=dbFlatWorks();const t=fw[pi];if(t)t.w.media.push({id:uid(),type:v.type||'image',url:v.url||'',title:v.title||'',alt:''});}},
+  skills:{title:'스킬 그룹',fields:[['group','그룹명'],['items','항목 (쉼표로 구분)']],
+    add(v){LIB.skills.push({id:uid(),group:v.group||'',items:(v.items||'').split(',').map(s=>s.trim()).filter(Boolean)});}},
+  education:{title:'학력',fields:[['school','학교/전공'],['degree','학위'],['period','기간']],
+    add(v){LIB.education.push({id:uid(),school:v.school||'',degree:v.degree||'',period:v.period||''});}},
+  awards:{title:'수상',fields:[['title','제목'],['org','주최/설명'],['date','날짜']],
+    add(v){LIB.awards.push({id:uid(),title:v.title||'',org:v.org||'',date:v.date||''});}}
+};
+function dbFlatWorks(){const a=[];(LIB.companies||[]).forEach(c=>(c.works||[]).forEach(w=>a.push({w,label:(c.name||'')+' · '+(w.title||'')})));return a;}
+function dbInsForm(table){
+  const s=DB_INS[table];if(!s)return '';
+  let par='';
+  if(s.parent==='company')par=`<div class="f"><label>소속 회사</label><select id="dbinsParent">${(LIB.companies||[]).map((c,i)=>`<option value="${i}">${esc(c.name||'회사')}</option>`).join('')}</select></div>`;
+  if(s.parent==='work')par=`<div class="f"><label>소속 작업</label><select id="dbinsParent">${dbFlatWorks().map((x,i)=>`<option value="${i}">${esc(x.label)}</option>`).join('')}</select></div>`;
+  return `<div class="dbins"><div style="font-weight:700;font-size:13.5px;margin-bottom:12px">＋ ${s.title} 새 행 추가</div>
+    ${par}${s.fields.map(([k,l])=>`<div class="f"><label>${l}</label><input data-dbf="${k}"></div>`).join('')}
+    <div style="display:flex;gap:8px;margin-top:8px"><button class="btn a sm" id="dbinsSave">추가</button><button class="btn sm" id="dbinsCancel">취소</button></div></div>`;
+}
 async function renderDbView(){
   const body=$('#dbBody'), who=$('#dbWho');
   const logged=window.CLOUD&&CLOUD.enabled()&&CLOUD.user();
   who.textContent = logged ? ('☁️ '+CLOUD.user().email) : '오프라인 (로그인 필요)';
   const tabs=`<div class="dbtabs">${DB_TABLES.map(t=>`<button class="dbtab ${t.name===dbSel?'on':''}" data-dbtab="${t.name}">${t.name}</button>`).join('')}</div>`;
+  const insertable=!!DB_INS[dbSel];
+  const topbar = insertable
+    ? (dbInsOpen ? dbInsForm(dbSel) : `<button class="btn a sm" id="dbAddBtn" style="margin-bottom:14px">＋ ${DB_INS[dbSel].title} 추가</button>`)
+    : `<div class="muted" style="font-size:12px;margin-bottom:14px">이 테이블은 라이브러리/빌더에서 관리돼요.</div>`;
   const t=DB_TABLES.find(x=>x.name===dbSel)||DB_TABLES[0];
   let rows=null,err=null;
   if(logged){ const r=await CLOUD.tableRows(t.name,200); if(r&&r.error)err=r.error; else rows=r||[]; }
-  body.innerHTML = tabs + (logged?'':'<div class="empty" style="padding:14px;margin:12px 0">로그인하면 실제 행 데이터가 표시됩니다. (아래는 테이블 구조)</div>') + dbCard(t,rows,err);
+  body.innerHTML = tabs + (logged?'':'<div class="empty" style="padding:14px;margin:12px 0">로그인하면 실제 행 데이터가 표시됩니다.</div>') + topbar + dbCard(t,rows,err);
 }
 $('#dbRefresh').addEventListener('click',renderDbView);
-$('#dbBody').addEventListener('click',e=>{const b=e.target.closest('[data-dbtab]');if(b){dbSel=b.dataset.dbtab;renderDbView();}});
+$('#dbBody').addEventListener('click',e=>{
+  const b=e.target.closest('[data-dbtab]'); if(b){dbSel=b.dataset.dbtab;dbInsOpen=false;renderDbView();return;}
+  if(e.target.id==='dbAddBtn'){dbInsOpen=true;renderDbView();return;}
+  if(e.target.id==='dbinsCancel'){dbInsOpen=false;renderDbView();return;}
+  if(e.target.id==='dbinsSave'){
+    const s=DB_INS[dbSel]; const v={}; document.querySelectorAll('#dbBody [data-dbf]').forEach(el=>v[el.dataset.dbf]=el.value);
+    const pe=document.getElementById('dbinsParent'); const pi=pe?+pe.value:0;
+    s.add(v,pi); normalizeIds(); derive(); save(); dbInsOpen=false;
+    toast(s.title+' 추가됨 (DB 반영)'); renderDbView();
+    return;
+  }
+});
 document.querySelectorAll('.nv').forEach(b=>b.addEventListener('click',()=>show(b.dataset.view)));
 
 /* ============ HOME ============ */
