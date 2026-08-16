@@ -95,9 +95,9 @@ main{min-width:0}
 .seg{display:inline-flex;background:var(--panel);border-radius:10px;padding:3px;gap:2px}
 .segbtn{border:none;background:none;color:var(--muted);font-size:12.5px;font-weight:600;padding:7px 12px;border-radius:8px;cursor:pointer;font-family:inherit}
 .segbtn.on{background:var(--surface);color:var(--acc);box-shadow:0 1px 3px rgba(0,0,0,.1)}
-.libsplit{display:grid;grid-template-columns:1.7fr minmax(300px,34%);height:calc(100vh - 58px)}
-.libform{overflow-y:auto;padding:24px 30px 100px}
-.libform .sec{max-width:920px}
+.libsplit{display:grid;grid-template-columns:minmax(300px,32%) 1fr;height:calc(100vh - 58px)}
+.libform{overflow-y:auto;padding:22px 24px 100px;border-right:1px solid var(--border)}
+.libform .sec{max-width:none}
 .skillgrid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 @media(max-width:1200px){.skillgrid{grid-template-columns:1fr}}
 .chips{display:flex;flex-wrap:wrap;gap:6px}
@@ -122,8 +122,8 @@ main{min-width:0}
 .dbtable td{padding:7px 10px;white-space:nowrap;max-width:220px;overflow:hidden;text-overflow:ellipsis;border-bottom:1px solid var(--border);color:var(--fg)}
 .dbtable tr:last-child td{border-bottom:none}
 .dbrel.grpc{color:var(--ok);background:color-mix(in oklch,var(--ok) 14%,transparent)}
-.libpv{background:var(--panel);border-left:1px solid var(--border);padding:16px}
-#libPreview{width:100%;height:100%;border:1px solid var(--border);border-radius:12px;background:#fff}
+.libpv{background:var(--panel);padding:26px 28px;display:flex;justify-content:center;align-items:flex-start;overflow:hidden}
+#libPreview{width:100%;max-width:860px;height:100%;border:1px solid var(--border);border-radius:14px;background:#fff;box-shadow:0 26px 64px -28px rgba(0,0,0,.35)}
 /* company accordion */
 .cocard{border:1px solid var(--border);border-radius:12px;background:var(--card);margin-bottom:10px;overflow:hidden}
 .cohd{display:flex;align-items:center;gap:11px;padding:13px 14px;cursor:pointer;user-select:none}
