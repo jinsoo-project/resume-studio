@@ -255,7 +255,13 @@ main{min-width:0}
 /* ============ storage & state ============ */
 const LS_LIB='rs_lib_v1', LS_DOCS='rs_docs_v1';
 const $=s=>document.querySelector(s);
-const uid=()=>Math.random().toString(36).slice(2,8);
+const uid=()=> (window.crypto&&crypto.randomUUID) ? crypto.randomUUID() : 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g,c=>{const r=Math.random()*16|0;return (c==='x'?r:(r&0x3|0x8)).toString(16);});
+const isUuid=s=>/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(s||'');
+function normalizeIds(){
+  (LIB.companies||[]).forEach(c=>{ if(!isUuid(c.id))c.id=uid(); (c.works||[]).forEach(w=>{ if(!isUuid(w.id))w.id=uid(); (w.media||[]).forEach(m=>{ if(!isUuid(m.id))m.id=uid(); }); }); });
+  ['skills','education','awards'].forEach(k=>(LIB[k]||[]).forEach(x=>{ if(!isUuid(x.id))x.id=uid(); }));
+  (DOCS||[]).forEach(d=>{ if(!isUuid(d.id))d.id=uid(); });
+}
 const clone=o=>JSON.parse(JSON.stringify(o));
 const esc=s=>String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 function save(){localStorage.setItem(LS_LIB,JSON.stringify(LIB));localStorage.setItem(LS_DOCS,JSON.stringify(DOCS));flash();cloudSync();updateLibPreview();}
@@ -369,7 +375,7 @@ $('#docGrid').addEventListener('click',e=>{
   if(act==='edit')openBuilder(d.id);
   else if(act==='link'){navigator.clipboard.writeText(viewURL(d)).then(()=>toast('공개 링크 복사됨'));}
   else if(act==='pdf'){window.open(viewURL(d),'_blank');toast('열린 창에서 PDF로 저장을 누르세요');}
-  else if(act==='del'){if(confirm('삭제할까요?')){if(window.CLOUD&&CLOUD.user())CLOUD.deleteDoc(d.slug);DOCS=DOCS.filter(x=>x.id!==d.id);save();renderHome();}}
+  else if(act==='del'){if(confirm('삭제할까요?')){DOCS=DOCS.filter(x=>x.id!==d.id);save();renderHome();}}
 });
 $('#newDocTop').addEventListener('click',()=>{const d=newDoc();openBuilder(d.id);});
 
@@ -450,7 +456,7 @@ $('#bLeft').addEventListener('change',e=>{
 });
 $('#bPublish').addEventListener('click',async()=>{
   const d=curDoc();if(!d)return;
-  if(window.CLOUD&&CLOUD.user()){ try{ await CLOUD.pushDoc(d,resolve(d)); }catch(e){ toast('발행 오류: '+(e.message||e)); return; } }
+  if(window.CLOUD&&CLOUD.user()){ try{ normalizeIds(); await CLOUD.pushAll(LIB,DOCS,resolveAny); }catch(e){ toast('발행 오류: '+(e.message||e)); return; } }
   navigator.clipboard.writeText(viewURL(d)).then(()=>toast('발행됨 · 공개 링크 복사 완료'));
 });
 $('#bViewOpen').addEventListener('click',()=>{const d=curDoc();if(d)window.open(viewURL(d),'_blank');});
@@ -521,7 +527,7 @@ $('#pfNew').addEventListener('click',()=>{const d=newPortfolio();curPfId=d.id;re
 $('#pfBackList').addEventListener('click',()=>{curPfId=null;renderPortfolioView();});
 $('#pfViewOpen').addEventListener('click',()=>{const d=curPf();if(d)window.open(viewURL(d),'_blank');});
 $('#pfPublish').addEventListener('click',async()=>{const d=curPf();if(!d)return;
-  if(window.CLOUD&&CLOUD.user()){try{await CLOUD.pushDoc(d,resolvePF(d));}catch(e){toast('발행 오류: '+(e.message||e));return;}}
+  if(window.CLOUD&&CLOUD.user()){try{normalizeIds();await CLOUD.pushAll(LIB,DOCS,resolveAny);}catch(e){toast('발행 오류: '+(e.message||e));return;}}
   navigator.clipboard.writeText(viewURL(d)).then(()=>toast('발행됨 · 포트폴리오 링크 복사'));});
 $('#pfList').addEventListener('click',e=>{
   if(e.target.id==='pfNewCard'){const d=newPortfolio();curPfId=d.id;renderPortfolioView();return;}
@@ -530,7 +536,7 @@ $('#pfList').addEventListener('click',e=>{
   if(act==='edit'){curPfId=d.id;renderPortfolioView();}
   else if(act==='link'){navigator.clipboard.writeText(viewURL(d)).then(()=>toast('포트폴리오 링크 복사됨'));}
   else if(act==='open'){window.open(viewURL(d),'_blank');}
-  else if(act==='del'){if(confirm('삭제할까요?')){if(window.CLOUD&&CLOUD.user())CLOUD.deleteDoc(d.slug);DOCS=DOCS.filter(x=>x.id!==d.id);save();renderPortfolioView();}}
+  else if(act==='del'){if(confirm('삭제할까요?')){DOCS=DOCS.filter(x=>x.id!==d.id);save();renderPortfolioView();}}
 });
 $('#pfLeft').addEventListener('click',e=>{
   const d=curPf(); if(!d)return;
@@ -704,18 +710,22 @@ function cloudSync(){
   if(!(window.CLOUD&&CLOUD.enabled()&&CLOUD.user()))return;
   clearTimeout(cloudTimer);
   cloudTimer=setTimeout(async()=>{
-    try{ await CLOUD.pushLibrary(LIB); for(const d of DOCS){ await CLOUD.pushDoc(d,resolveAny(d)); } }
+    try{ normalizeIds(); await CLOUD.pushAll(LIB,DOCS,resolveAny); }
     catch(e){ console.warn('cloudSync',e); }
   },900);
 }
 async function syncFromCloud(){
   try{
     const r=await CLOUD.pull(); if(!r)return;
-    if(r.library) LIB=r.library; else await CLOUD.pushLibrary(LIB);
-    if(!LIB.companies){ LIB.companies=clone((window.RESUME||{}).companies||[]); }  // v2 마이그레이션
-    derive();
-    if(r.docs&&r.docs.length) DOCS=r.docs;
-    else if(DOCS.length){ for(const d of DOCS) await CLOUD.pushDoc(d,resolveAny(d)); }
+    if(r.library){                       // 클라우드에 데이터 있으면 채택
+      LIB=Object.assign({},LIB,r.library);
+      DOCS=r.docs||[];
+      normalizeIds(); derive();
+    }else{                               // 최초: 로컬 시드를 클라우드로 업로드
+      if(!LIB.companies){ LIB.companies=clone((window.RESUME||{}).companies||[]); }
+      normalizeIds(); derive();
+      await CLOUD.pushAll(LIB,DOCS,resolveAny);
+    }
     localStorage.setItem(LS_LIB,JSON.stringify(LIB));
     localStorage.setItem(LS_DOCS,JSON.stringify(DOCS));
     renderHome(); toast('클라우드 동기화 완료');
