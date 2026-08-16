@@ -119,7 +119,9 @@ main{min-width:0}
 .dbcol{font-size:11px;font-family:ui-monospace,Menlo,monospace;color:var(--muted);background:var(--panel);border-radius:6px;padding:3px 8px}
 .dbtable{overflow-x:auto;border:1px solid var(--border);border-radius:9px}
 .dbtable table{border-collapse:collapse;width:100%;font-size:12px}
-.dbtable th{text-align:left;background:var(--panel);color:var(--muted);font-weight:600;padding:7px 10px;white-space:nowrap;font-family:ui-monospace,Menlo,monospace;font-size:11px;border-bottom:1px solid var(--border)}
+.dbtable th{text-align:left;background:var(--panel);color:var(--muted);font-weight:600;padding:7px 10px;white-space:nowrap;font-family:ui-monospace,Menlo,monospace;font-size:11px;border-bottom:1px solid var(--border);position:sticky;top:0}
+.dbtable th.dbsortable{cursor:pointer;user-select:none}
+.dbtable th.dbsortable:hover{color:var(--acc)}
 .dbtable td{padding:8px 12px;white-space:normal;vertical-align:top;max-width:340px;word-break:break-word;border-bottom:1px solid var(--border);color:var(--fg);line-height:1.5}
 .dbtable tr:last-child td{border-bottom:none}
 .dbrel.grpc{color:var(--ok);background:color-mix(in oklch,var(--ok) 14%,transparent)}
@@ -406,7 +408,20 @@ const DB_TABLES=[
   {name:'portfolio_blocks', rel:'블록', cols:['id','page_id','type','content','sort']}
 ];
 function dbCell(v){ if(v==null)return ''; if(typeof v==='object')return JSON.stringify(v).slice(0,80); return String(v).slice(0,80); }
-function dbCard(t,rows,err){
+let dbSort={col:null,dir:1};
+function dbSortRows(rows,t,maps){
+  const val=(r,k)=>{ if(k==='company_id')return maps.co[r[k]]||''; if(k==='work_id')return maps.wk[r[k]]||''; const v=r[k]; return v==null?'':v; };
+  const rr=[...rows];
+  if(dbSort.col){
+    rr.sort((a,b)=>{const x=val(a,dbSort.col),y=val(b,dbSort.col);const c=(typeof x==='number'&&typeof y==='number')?x-y:String(x).localeCompare(String(y),'ko',{numeric:true});return c*dbSort.dir;});
+  } else {
+    const pk=t.cols.includes('company_id')?'company_id':(t.cols.includes('work_id')?'work_id':null);
+    rr.sort((a,b)=>{ if(pk){const c=String(val(a,pk)).localeCompare(String(val(b,pk)),'ko');if(c)return c;} return (a.sort??0)-(b.sort??0); });
+  }
+  return rr;
+}
+function dbCard(t,rows,err,maps){
+  maps=maps||{co:{},wk:{}};
   const cols=t.cols.map(c=>`<span class="dbcol">${c}</span>`).join('');
   let count='', tbl='';
   if(err){ tbl=`<div style="color:#dc2626;font-size:12px">${esc(err)}</div>`; }
@@ -414,8 +429,11 @@ function dbCard(t,rows,err){
   else {
     count=`<span class="dbcount">${rows.length} rows</span>`;
     if(rows.length){
-      tbl=`<div class="dbtable"><table><thead><tr>${t.cols.map(k=>`<th>${k}</th>`).join('')}</tr></thead><tbody>`+
-        rows.slice(0,60).map(r=>`<tr>${t.cols.map(k=>{const raw=dbCell(r[k]);const disp=((k==='id'||k.endsWith('_id'))&&raw.length>12)?raw.slice(0,8)+'…':raw;return `<td title="${esc(raw)}">${esc(disp)}</td>`;}).join('')}</tr>`).join('')+
+      const sorted=dbSortRows(rows,t,maps);
+      const cell=(r,k)=>{ if(k==='company_id')return maps.co[r[k]]||dbCell(r[k]); if(k==='work_id')return maps.wk[r[k]]||dbCell(r[k]); const raw=dbCell(r[k]); return (k==='id'&&raw.length>12)?raw.slice(0,8)+'…':raw; };
+      const arrow=k=>dbSort.col===k?(dbSort.dir>0?' ▲':' ▼'):'';
+      tbl=`<div class="dbtable"><table><thead><tr>${t.cols.map(k=>`<th data-dbsort="${k}" class="dbsortable">${k}${arrow(k)}</th>`).join('')}</tr></thead><tbody>`+
+        sorted.slice(0,100).map(r=>`<tr>${t.cols.map(k=>`<td title="${esc(dbCell(r[k]))}">${esc(cell(r,k))}</td>`).join('')}</tr>`).join('')+
         `</tbody></table></div>`;
     } else { tbl=`<div class="muted" style="font-size:12px">(비어있음)</div>`; }
   }
@@ -444,11 +462,11 @@ const DB_INS={
   awards:{title:'수상',fields:[['title','제목'],['org','주최/설명'],['date','수상일 (YYYY-MM)']],
     add(v){LIB.awards.push({id:uid(),title:v.title||'',org:v.org||'',date:v.date||''});}}
 };
-function dbFlatWorks(){const a=[];(LIB.companies||[]).forEach(c=>(c.works||[]).forEach(w=>a.push({w,label:(c.name||'')+' · '+(w.title||'')})));return a;}
+function dbFlatWorks(){const a=[];(LIB.companies||[]).forEach(c=>(c.works||[]).forEach(w=>a.push({w,label:(c.nameKo||c.nameEn||'')+' · '+(w.title||'')})));return a;}
 function dbInsForm(table){
   const s=DB_INS[table];if(!s)return '';
   let par='';
-  if(s.parent==='company')par=`<div class="f"><label>소속 회사</label><select id="dbinsParent">${(LIB.companies||[]).map((c,i)=>`<option value="${i}">${esc(c.name||'회사')}</option>`).join('')}</select></div>`;
+  if(s.parent==='company')par=`<div class="f"><label>소속 회사</label><select id="dbinsParent">${(LIB.companies||[]).map((c,i)=>`<option value="${i}">${esc(c.nameKo||c.nameEn||'회사')}</option>`).join('')}</select></div>`;
   if(s.parent==='work')par=`<div class="f"><label>소속 작업</label><select id="dbinsParent">${dbFlatWorks().map((x,i)=>`<option value="${i}">${esc(x.label)}</option>`).join('')}</select></div>`;
   return `<div class="dbins"><div style="font-weight:700;font-size:13.5px;margin-bottom:12px">＋ ${s.title} 새 행 추가</div>
     ${par}${s.fields.map(([k,l])=>`<div class="f"><label>${l}</label><input data-dbf="${k}"></div>`).join('')}
@@ -464,13 +482,24 @@ async function renderDbView(){
     ? (dbInsOpen ? dbInsForm(dbSel) : `<button class="btn a sm" id="dbAddBtn" style="margin-bottom:14px">＋ ${DB_INS[dbSel].title} 추가</button>`)
     : `<div class="muted" style="font-size:12px;margin-bottom:14px">이 테이블은 라이브러리/빌더에서 관리돼요.</div>`;
   const t=DB_TABLES.find(x=>x.name===dbSel)||DB_TABLES[0];
-  let rows=null,err=null;
-  if(logged){ const r=await CLOUD.tableRows(t.name,200); if(r&&r.error)err=r.error; else rows=r||[]; }
-  body.innerHTML = tabs + (logged?'':'<div class="empty" style="padding:14px;margin:12px 0">로그인하면 실제 행 데이터가 표시됩니다.</div>') + topbar + dbCard(t,rows,err);
+  let rows=null,err=null,maps={co:{},wk:{}};
+  if(logged){
+    const needCo=t.cols.includes('company_id'), needWk=t.cols.includes('work_id');
+    const [r,cos,wks]=await Promise.all([
+      CLOUD.tableRows(t.name,300),
+      needCo?CLOUD.tableRows('companies',300):Promise.resolve([]),
+      needWk?CLOUD.tableRows('works',600):Promise.resolve([])
+    ]);
+    if(r&&r.error)err=r.error; else rows=r||[];
+    if(Array.isArray(cos))cos.forEach(c=>maps.co[c.id]=c.name_ko||c.name_en||'');
+    if(Array.isArray(wks))wks.forEach(w=>maps.wk[w.id]=w.title||'');
+  }
+  body.innerHTML = tabs + (logged?'':'<div class="empty" style="padding:14px;margin:12px 0">로그인하면 실제 행 데이터가 표시됩니다.</div>') + topbar + dbCard(t,rows,err,maps);
 }
 $('#dbRefresh').addEventListener('click',renderDbView);
 $('#dbBody').addEventListener('click',e=>{
-  const b=e.target.closest('[data-dbtab]'); if(b){dbSel=b.dataset.dbtab;dbInsOpen=false;renderDbView();return;}
+  const b=e.target.closest('[data-dbtab]'); if(b){dbSel=b.dataset.dbtab;dbInsOpen=false;dbSort={col:null,dir:1};renderDbView();return;}
+  const sh=e.target.closest('[data-dbsort]'); if(sh){const c=sh.dataset.dbsort; if(dbSort.col===c)dbSort.dir*=-1; else dbSort={col:c,dir:1}; renderDbView();return;}
   if(e.target.id==='dbAddBtn'){dbInsOpen=true;renderDbView();return;}
   if(e.target.id==='dbinsCancel'){dbInsOpen=false;renderDbView();return;}
   if(e.target.id==='dbinsSave'){
