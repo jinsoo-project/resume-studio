@@ -90,6 +90,28 @@ main{min-width:0}
 .workhd .add{margin-left:auto}
 .workcard{border:1px solid var(--border);border-radius:9px;background:var(--panel);padding:12px;margin-bottom:8px}
 .featlbl{font-size:12px;color:var(--muted);display:flex;align-items:center;gap:6px;margin-top:6px;cursor:pointer}
+/* library 2-pane + segmented toggle */
+.seg{display:inline-flex;background:var(--panel);border-radius:10px;padding:3px;gap:2px}
+.segbtn{border:none;background:none;color:var(--muted);font-size:12.5px;font-weight:600;padding:7px 12px;border-radius:8px;cursor:pointer;font-family:inherit}
+.segbtn.on{background:var(--surface);color:var(--acc);box-shadow:0 1px 3px rgba(0,0,0,.1)}
+.libsplit{display:grid;grid-template-columns:1fr minmax(340px,44%);height:calc(100vh - 58px)}
+.libform{overflow-y:auto;padding:20px 24px 90px}
+.libpv{background:var(--panel);border-left:1px solid var(--border);padding:16px}
+#libPreview{width:100%;height:100%;border:1px solid var(--border);border-radius:12px;background:#fff}
+/* company accordion */
+.cocard{border:1px solid var(--border);border-radius:12px;background:var(--card);margin-bottom:10px;overflow:hidden}
+.cohd{display:flex;align-items:center;gap:11px;padding:13px 14px;cursor:pointer;user-select:none}
+.cohd:hover{background:var(--panel)}
+.cohd .chev{color:var(--muted);font-size:11px;transition:transform .15s;flex-shrink:0}
+.cocard.open .cohd .chev{transform:rotate(90deg)}
+.cohd .coinfo{flex:1;min-width:0}
+.cohd .coname{font-weight:700;font-size:14.5px}
+.cohd .cometa{font-size:11.5px;color:var(--muted);margin-top:2px}
+.cohd .rm{color:var(--muted);cursor:pointer;font-size:11.5px;border:1px solid var(--border);border-radius:7px;padding:4px 9px;flex-shrink:0}
+.cohd .rm:hover{color:#dc2626;border-color:#dc2626}
+.cobody{display:none;padding:4px 14px 16px;border-top:1px solid var(--border)}
+.cocard.open .cobody{display:block}
+@media(max-width:900px){.libsplit{grid-template-columns:1fr;height:auto}.libpv{border-left:none;border-top:1px solid var(--border)}#libPreview{height:70vh}}
 
 /* builder */
 .buildwrap{display:grid;grid-template-columns:380px 1fr;gap:0;height:calc(100vh - 58px)}
@@ -155,8 +177,19 @@ main{min-width:0}
 
     <!-- LIBRARY -->
     <section id="v-library" class="hidden">
-      <div class="mtop"><h1>콘텐츠 라이브러리</h1><div class="sp"></div><span class="mono" style="font-size:12px;color:var(--muted)" id="libSaved">저장됨</span></div>
-      <div class="mwrap" id="libBody"></div>
+      <div class="mtop">
+        <h1>콘텐츠 라이브러리</h1><div class="sp"></div>
+        <span class="mono" style="font-size:12px;color:var(--muted);margin-right:12px" id="libSaved">저장됨</span>
+        <div class="seg">
+          <button data-libtpl="wanted" class="segbtn on">원티드로 보기</button>
+          <button data-libtpl="remember" class="segbtn">리멤버로 보기</button>
+          <button data-libtpl="web" class="segbtn">웹</button>
+        </div>
+      </div>
+      <div class="libsplit">
+        <div class="libform" id="libBody"></div>
+        <div class="libpv"><iframe class="previewframe" id="libPreview" title="이력서 미리보기"></iframe></div>
+      </div>
     </section>
 
     <!-- BUILDER -->
@@ -219,7 +252,10 @@ const $=s=>document.querySelector(s);
 const uid=()=>Math.random().toString(36).slice(2,8);
 const clone=o=>JSON.parse(JSON.stringify(o));
 const esc=s=>String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-function save(){localStorage.setItem(LS_LIB,JSON.stringify(LIB));localStorage.setItem(LS_DOCS,JSON.stringify(DOCS));flash();cloudSync();}
+function save(){localStorage.setItem(LS_LIB,JSON.stringify(LIB));localStorage.setItem(LS_DOCS,JSON.stringify(DOCS));flash();cloudSync();updateLibPreview();}
+function buildFullResolved(tpl){return {template:tpl,title:'미리보기',profile:LIB.profile,summaryOn:true,highlights:LIB.highlights,ax:LIB.ax,experiences:LIB.experiences,projects:LIB.projects,skills:LIB.skills,education:LIB.education,awards:LIB.awards,roleTags:LIB.roleTags};}
+let libPvTimer=null;
+function updateLibPreview(){const pv=document.getElementById('libPreview');if(!pv)return;if(document.getElementById('v-library').classList.contains('hidden'))return;clearTimeout(libPvTimer);libPvTimer=setTimeout(()=>{pv.setAttribute('srcdoc',TEMPLATES.render(buildFullResolved(libTpl)));},200);}
 function flash(){const el=$('#libSaved');if(el){el.textContent='저장됨 · '+new Date().toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit'});}}
 function toast(m){const t=$('#toast');t.textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),1900);}
 
@@ -244,6 +280,7 @@ if(!LIB.companies){ LIB.companies = clone((window.RESUME||{}).companies||[]); } 
 derive();
 let DOCS = JSON.parse(localStorage.getItem(LS_DOCS)||'null') || [];
 let curDocId = null;
+let libTpl = 'wanted', openCo = new Set();
 
 /* ============ doc config ============ */
 function newDoc(){
@@ -295,7 +332,7 @@ function show(view){
   ['home','library','builder','portfolio'].forEach(v=>$('#v-'+v).classList.toggle('hidden',v!==view));
   document.querySelectorAll('.nv').forEach(b=>b.classList.toggle('on',b.dataset.view===view));
   if(view==='home')renderHome();
-  if(view==='library')renderLibrary();
+  if(view==='library'){renderLibrary();updateLibPreview();}
   if(view==='builder')renderBuilder();
   if(view==='portfolio')renderPortfolioView();
 }
@@ -523,26 +560,34 @@ function wField(ci,wi,f,val,label){return `<div class="f"><label>${label}</label
 function wArea(ci,wi,f,val,label,type,rows,hint){return `<div class="f"><label>${label}</label><textarea rows="${rows||2}" data-wc="${ci}:${wi}" data-wf="${f}" data-wt="${type||'str'}">${esc(val)}</textarea>${hint?`<div class="hint">${hint}</div>`:''}</div>`;}
 function renderCompanies(){
   return `<div class="sec"><h2>경력 · 회사 <span class="add" data-addco="1">+ 회사 추가</span></h2>
-   ${(LIB.companies||[]).map((c,ci)=>`
-    <div class="blockcard">
-      <div class="bh"><span class="t">🏢 회사 ${ci+1}</span><span class="rm" data-rmco="${ci}">회사 삭제</span></div>
-      <div class="frow">${cField(ci,'name',c.name,'회사명')}${cField(ci,'period',c.period,'기간')}</div>
-      ${cField(ci,'role',c.role,'직무/역할')}
-      ${cArea(ci,'summary',c.summary,'회사 한 줄 요약',2)}
-      <div class="worksec">
-        <div class="workhd">작업 (프로젝트·캠페인)<span class="add" data-addwork="${ci}">+ 작업 추가</span></div>
-        ${(c.works||[]).map((w,wi)=>`
-          <div class="workcard">
-            <div class="bh"><span class="t">📦 ${esc(w.title||'작업')}</span><span class="rm" data-rmwork="${ci}:${wi}">삭제</span></div>
-            <div class="frow3">${wField(ci,wi,'title',w.title,'제목')}${wField(ci,wi,'category',w.category,'카테고리')}${wField(ci,wi,'period',w.period,'기간')}</div>
-            ${wArea(ci,wi,'summary',w.summary,'요약 (이력서용, 짧게)','str',2)}
-            ${wArea(ci,wi,'detail',w.detail,'상세 (포트폴리오용)','str',3)}
-            ${wArea(ci,wi,'links',(w.links||[]).map(l=>l.label+' | '+l.url).join('\n'),'링크 (라벨 | URL, 한 줄에 하나)','links',2,'예: YouTube | https://youtu.be/...')}
-            ${wArea(ci,wi,'images',(w.images||[]).join('\n'),'이미지 URL (한 줄에 하나)','lines',2)}
-            <label class="featlbl"><input type="checkbox" data-feat="${ci}:${wi}" ${w.featured?'checked':''}> 이력서 '프로젝트' 섹션에 표시</label>
-          </div>`).join('')||'<div class="empty" style="padding:8px;font-size:12px">작업 없음 · + 작업 추가</div>'}
+   ${(LIB.companies||[]).map((c,ci)=>{
+     const open=openCo.has(ci);
+     return `<div class="cocard ${open?'open':''}">
+      <div class="cohd" data-cotoggle="${ci}">
+        <span class="chev">▶</span>
+        <div class="coinfo"><div class="coname">${esc(c.name||'회사')}</div><div class="cometa">${esc(c.role||'역할 미입력')}${c.period?' · '+esc(c.period):''} · 작업 ${(c.works||[]).length}개</div></div>
+        <span class="rm" data-rmco="${ci}">삭제</span>
       </div>
-    </div>`).join('')||'<div class="empty" style="padding:14px">회사 없음 · + 회사 추가</div>'}
+      <div class="cobody">
+        <div class="frow">${cField(ci,'name',c.name,'회사명')}${cField(ci,'period',c.period,'기간')}</div>
+        ${cField(ci,'role',c.role,'직무/역할')}
+        ${cArea(ci,'summary',c.summary,'회사 한 줄 요약',2)}
+        <div class="worksec">
+          <div class="workhd">작업 (프로젝트·캠페인)<span class="add" data-addwork="${ci}">+ 작업 추가</span></div>
+          ${(c.works||[]).map((w,wi)=>`
+            <div class="workcard">
+              <div class="bh"><span class="t">📦 ${esc(w.title||'작업')}</span><span class="rm" data-rmwork="${ci}:${wi}">삭제</span></div>
+              <div class="frow3">${wField(ci,wi,'title',w.title,'제목')}${wField(ci,wi,'category',w.category,'카테고리')}${wField(ci,wi,'period',w.period,'기간')}</div>
+              ${wArea(ci,wi,'summary',w.summary,'요약 (이력서용, 짧게)','str',2)}
+              ${wArea(ci,wi,'detail',w.detail,'상세 (포트폴리오용)','str',3)}
+              ${wArea(ci,wi,'links',(w.links||[]).map(l=>l.label+' | '+l.url).join('\n'),'링크 (라벨 | URL, 한 줄에 하나)','links',2,'예: YouTube | https://youtu.be/...')}
+              ${wArea(ci,wi,'images',(w.images||[]).join('\n'),'이미지 URL (한 줄에 하나)','lines',2)}
+              <label class="featlbl"><input type="checkbox" data-feat="${ci}:${wi}" ${w.featured?'checked':''}> 이력서 '프로젝트' 섹션에 표시</label>
+            </div>`).join('')||'<div class="empty" style="padding:8px;font-size:12px">작업 없음 · + 작업 추가</div>'}
+        </div>
+      </div>
+     </div>`;
+   }).join('')||'<div class="empty" style="padding:14px">회사 없음 · + 회사 추가</div>'}
   </div>`;
 }
 function renderLibrary(){
@@ -620,8 +665,15 @@ $('#libBody').addEventListener('click',e=>{
   const add=e.target.dataset.add;
   if(add){LIB[add].push(window['_fac_'+add]());save();renderLibrary();return;}
   const rm=e.target.dataset.rm;
-  if(rm){LIB[rm].splice(+e.target.dataset.i,1);save();renderLibrary();}
+  if(rm){LIB[rm].splice(+e.target.dataset.i,1);save();renderLibrary();return;}
+  const coT=e.target.closest('[data-cotoggle]');
+  if(coT){const ci=+coT.dataset.cotoggle;openCo.has(ci)?openCo.delete(ci):openCo.add(ci);renderLibrary();}
 });
+document.querySelectorAll('[data-libtpl]').forEach(b=>b.addEventListener('click',()=>{
+  libTpl=b.dataset.libtpl;
+  document.querySelectorAll('[data-libtpl]').forEach(x=>x.classList.toggle('on',x===b));
+  updateLibPreview();
+}));
 
 /* ============ import / export / theme ============ */
 $('#exportBtn').addEventListener('click',()=>{
