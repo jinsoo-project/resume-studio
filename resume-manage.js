@@ -45,8 +45,18 @@ window.RESUME_DOC = {
   .links .lbl{font-weight:600; color:var(--ink); margin-right:6px;}
   body{outline:none}
   [contenteditable]:focus{outline:2px solid #93c5fd; outline-offset:2px; border-radius:3px}
-  @media print{ @page{ margin:0; } body{background:#fff;} .page{box-shadow:none; margin:0; max-width:100%; border-radius:0; padding:16mm 15mm;}
-    [contenteditable]:focus{outline:none} }
+  @media print{
+    @page{ margin:0; }
+    body{background:#fff;}
+    .page{box-shadow:none; margin:0; max-width:100%; border-radius:0; padding:15mm 15mm;}
+    [contenteditable]:focus{outline:none}
+    h2.sec{ page-break-after:avoid; break-after:avoid; }
+    .job-head{ page-break-after:avoid; break-after:avoid; }
+    .proj{ page-break-inside:avoid; break-inside:avoid; }
+    .edu, .awards, section.skills-sec, .links{ page-break-inside:avoid; break-inside:avoid; }
+    .ax-list li, .awards li, .proj ul li, .proj p.lead{ page-break-inside:avoid; break-inside:avoid; }
+    p{ orphans:3; widows:3; }
+  }
   @media(max-width:640px){ .page{padding:32px 22px; margin:0;} header.resume-head h1{font-size:28px;} }
   `,
 
