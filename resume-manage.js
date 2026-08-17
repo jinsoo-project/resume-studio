@@ -45,7 +45,7 @@ window.RESUME_DOC = {
   .links .lbl{font-weight:600; color:var(--ink); margin-right:6px;}
   body{outline:none}
   [contenteditable]:focus{outline:2px solid #93c5fd; outline-offset:2px; border-radius:3px}
-  @media print{ body{background:#fff;} .page{box-shadow:none; margin:0; max-width:100%; border-radius:0;}
+  @media print{ @page{ margin:0; } body{background:#fff;} .page{box-shadow:none; margin:0; max-width:100%; border-radius:0; padding:16mm 15mm;}
     [contenteditable]:focus{outline:none} }
   @media(max-width:640px){ .page{padding:32px 22px; margin:0;} header.resume-head h1{font-size:28px;} }
   `,

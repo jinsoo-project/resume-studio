@@ -552,7 +552,7 @@ function renderResumeManage(){
       }
     });
   }catch(e){} };
-  f.srcdoc=`<!doctype html><html lang="${rLang}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><style>${RESUME_DOC.css}</style></head><body contenteditable="true">${rBody(rLang)}</body></html>`;
+  f.srcdoc=`<!doctype html><html lang="${rLang}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${rLang==='en'?'Kim Jinsoo — Resume':'김진수 이력서'}</title><style>${RESUME_DOC.css}</style></head><body contenteditable="true">${rBody(rLang)}</body></html>`;
 }
 function rSaveCurrent(){ const f=$('#rFrame'); try{ if(f&&f.contentDocument&&f.contentDocument.body){ localStorage.setItem(rKey(rLang), f.contentDocument.body.innerHTML); return true; } }catch(e){} return false; }
 $('#rSave')&&$('#rSave').addEventListener('click',()=>toast(rSaveCurrent()?'저장됨 ✓':'저장 실패'));
