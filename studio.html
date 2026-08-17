@@ -538,23 +538,33 @@ const APP_ICONS={
   '에이블리블랙':'a-bly.com','Ably Black':'a-bly.com',
   '바비톡':'babitalk.co.kr','Babitalk':'babitalk.co.kr'
 };
+// 이력서 표시명(한/영) → 회사 정식명(국문) 매핑 (로고 조회용)
+const RESUME_CO={
+  '핸디즈':'핸디즈','Handys':'핸디즈','와그(WAUG)':'와그','WAUG':'와그',
+  '온디맨드랩':'온디맨드랩','Ondemandlab':'온디맨드랩','에이블리블랙':'에이블리블랙','Ably Black':'에이블리블랙',
+  '바비톡':'바비톡','Babitalk':'바비톡','레드브릭스':'레드브릭스','Redbricks':'레드브릭스'
+};
+const rBaseName=s=>String(s||'').replace(/\s*\(.*?\)\s*/g,'').replace(/\s+/g,'').trim().toLowerCase();
+function resumeLogoFor(name){
+  name=(name||'').trim();
+  const canon=RESUME_CO[name];
+  if(canon){ const co=(LIB.companies||[]).find(c=>rBaseName(c.nameKo)===rBaseName(canon)); if(co&&co.logo) return co.logo; }
+  const dom=APP_ICONS[name]; return dom?('https://www.google.com/s2/favicons?domain='+dom+'&sz=64'):null;
+}
 function renderResumeManage(){
   const f=$('#rFrame'); if(!f||!window.RESUME_DOC)return;
   f.onload=()=>{ try{
     const doc=f.contentDocument; if(!doc)return;
     doc.querySelectorAll('.job-head .co').forEach(el=>{
-      const dom=APP_ICONS[el.textContent.trim()];
       const prev=el.previousElementSibling;
-      if(dom && !(prev&&prev.classList&&prev.classList.contains('applogo'))){
-        const img=doc.createElement('img'); img.className='applogo'; img.alt='';
-        img.src='https://www.google.com/s2/favicons?domain='+dom+'&sz=64';
-        el.parentNode.insertBefore(img, el);
-      }
+      if(prev&&prev.classList&&prev.classList.contains('applogo'))prev.remove();
+      const src=resumeLogoFor(el.textContent);
+      if(src){ const img=doc.createElement('img'); img.className='applogo'; img.alt=''; img.src=src; el.parentNode.insertBefore(img, el); }
     });
   }catch(e){} };
   f.srcdoc=`<!doctype html><html lang="${rLang}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${rLang==='en'?'Kim Jinsoo — Resume':'김진수 이력서'}</title><style>${RESUME_DOC.css}</style></head><body contenteditable="true">${rBody(rLang)}</body></html>`;
 }
-function rSaveCurrent(){ const f=$('#rFrame'); try{ if(f&&f.contentDocument&&f.contentDocument.body){ localStorage.setItem(rKey(rLang), f.contentDocument.body.innerHTML); return true; } }catch(e){} return false; }
+function rSaveCurrent(){ const f=$('#rFrame'); try{ if(f&&f.contentDocument&&f.contentDocument.body){ const c=f.contentDocument.body.cloneNode(true); c.querySelectorAll('img.applogo').forEach(x=>x.remove()); localStorage.setItem(rKey(rLang), c.innerHTML); return true; } }catch(e){} return false; }
 $('#rSave')&&$('#rSave').addEventListener('click',()=>toast(rSaveCurrent()?'저장됨 ✓':'저장 실패'));
 $('#rReset')&&$('#rReset').addEventListener('click',()=>{ if(!confirm(rLang==='ko'?'한글본을 원본으로 되돌릴까요? (편집 내용 삭제)':'Reset English resume to original?'))return; localStorage.removeItem(rKey(rLang)); renderResumeManage(); toast('원본 복원'); });
 $('#rPdf')&&$('#rPdf').addEventListener('click',()=>{ rSaveCurrent(); const f=$('#rFrame'); if(f&&f.contentWindow){ f.contentWindow.focus(); setTimeout(()=>f.contentWindow.print(),60); } });
