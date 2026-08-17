@@ -25,6 +25,7 @@ window.RESUME_DOC = {
   .job{margin-bottom:28px;}
   .job-head{display:flex; justify-content:space-between; align-items:baseline; flex-wrap:wrap; gap:4px;}
   .job-head .co{font-size:18px; font-weight:700;}
+  .applogo{width:24px; height:24px; border-radius:6px; vertical-align:-6px; margin-right:9px; object-fit:cover; border:1px solid #ececec; display:inline-block; background:#fff;}
   .job-head .role{color:var(--sub); font-weight:500; font-size:14px; margin-left:8px;}
   .job-head .period{color:var(--sub); font-size:13.5px; white-space:nowrap;}
   .proj{margin:16px 0 0; padding-left:2px;}

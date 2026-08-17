@@ -531,8 +531,27 @@ document.querySelectorAll('.nv').forEach(b=>b.addEventListener('click',()=>show(
 let rLang='ko';
 const rKey=l=>'rdoc_'+l;
 function rBody(l){ const s=localStorage.getItem(rKey(l)); return (s!=null)?s:((window.RESUME_DOC&&RESUME_DOC[l])||'<div class="page">데이터 없음</div>'); }
+const APP_ICONS={
+  '핸디즈':'urbanstay.co.kr','Handys':'urbanstay.co.kr',
+  '와그(WAUG)':'waug.com','WAUG':'waug.com',
+  '온디맨드랩':'ondemandlab.co.kr','Ondemandlab':'ondemandlab.co.kr',
+  '에이블리블랙':'a-bly.com','Ably Black':'a-bly.com',
+  '바비톡':'babitalk.co.kr','Babitalk':'babitalk.co.kr'
+};
 function renderResumeManage(){
   const f=$('#rFrame'); if(!f||!window.RESUME_DOC)return;
+  f.onload=()=>{ try{
+    const doc=f.contentDocument; if(!doc)return;
+    doc.querySelectorAll('.job-head .co').forEach(el=>{
+      const dom=APP_ICONS[el.textContent.trim()];
+      const prev=el.previousElementSibling;
+      if(dom && !(prev&&prev.classList&&prev.classList.contains('applogo'))){
+        const img=doc.createElement('img'); img.className='applogo'; img.alt='';
+        img.src='https://www.google.com/s2/favicons?domain='+dom+'&sz=64';
+        el.parentNode.insertBefore(img, el);
+      }
+    });
+  }catch(e){} };
   f.srcdoc=`<!doctype html><html lang="${rLang}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><style>${RESUME_DOC.css}</style></head><body contenteditable="true">${rBody(rLang)}</body></html>`;
 }
 function rSaveCurrent(){ const f=$('#rFrame'); try{ if(f&&f.contentDocument&&f.contentDocument.body){ localStorage.setItem(rKey(rLang), f.contentDocument.body.innerHTML); return true; } }catch(e){} return false; }
