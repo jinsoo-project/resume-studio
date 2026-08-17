@@ -185,6 +185,7 @@ main{min-width:0}
     <button class="nv" data-view="library"><svg viewBox="0 0 24 24"><path d="M4 5h11a2 2 0 0 1 2 2v13M4 5v13a2 2 0 0 0 2 2h11M4 5a2 2 0 0 1 2-2h9"/></svg> 이력서 라이브러리</button>
     <button class="nv" data-view="builder"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 17h7M17.5 14v7"/></svg> 이력서 내보내기</button>
     <button class="nv" data-view="portfolio"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg> 포트폴리오</button>
+    <button class="nv" data-view="resume"><svg viewBox="0 0 24 24"><path d="M6 2h9l5 5v15H6z"/><path d="M14 2v6h6M9 13h6M9 17h6"/></svg> 이력서 관리</button>
     <button class="nv" data-view="db"><svg viewBox="0 0 24 24"><ellipse cx="12" cy="5" rx="8" ry="3"/><path d="M4 5v14c0 1.7 3.6 3 8 3s8-1.3 8-3V5M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3"/></svg> 데이터 (DB)</button>
     <div class="rail-sp"></div>
     <div class="railfoot">
@@ -253,6 +254,18 @@ main{min-width:0}
       </div>
     </section>
 
+    <!-- RESUME MANAGE -->
+    <section id="v-resume" class="hidden">
+      <div class="mtop"><h1>이력서 관리</h1><div class="sp"></div>
+        <div class="seg" style="margin-right:10px"><button data-rlang="ko" class="segbtn on">한글</button><button data-rlang="en" class="segbtn">English</button></div>
+        <span style="font-size:11.5px;color:var(--muted);margin-right:10px">클릭해서 직접 편집 · 저장됨</span>
+        <button class="btn sm" id="rReset">원본 복원</button>
+        <button class="btn sm" id="rSave">저장</button>
+        <button class="btn a sm" id="rPdf">⤓ PDF 내보내기</button>
+      </div>
+      <iframe id="rFrame" title="이력서" style="width:100%;height:calc(100vh - 58px);border:none;background:#f7f7f8;display:block"></iframe>
+    </section>
+
     <!-- DB VIEWER -->
     <section id="v-db" class="hidden">
       <div class="mtop"><h1>데이터 (DB 테이블)</h1><div class="sp"></div>
@@ -284,6 +297,7 @@ main{min-width:0}
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="cloud.js"></script>
 <script src="resume.data.js"></script>
+<script src="resume-manage.js"></script>
 <script src="templates.js"></script>
 <script>
 /* ============ storage & state ============ */
@@ -383,13 +397,14 @@ function resolveAny(d){ return d.kind==='portfolio' ? resolvePF(d) : resolve(d);
 
 /* ============ nav ============ */
 function show(view){
-  ['home','library','builder','portfolio','db'].forEach(v=>$('#v-'+v).classList.toggle('hidden',v!==view));
+  ['home','library','builder','portfolio','resume','db'].forEach(v=>$('#v-'+v).classList.toggle('hidden',v!==view));
   document.querySelectorAll('.nv').forEach(b=>b.classList.toggle('on',b.dataset.view===view));
   if(view==='home')renderHome();
   if(view==='library'){renderLibrary();updateLibPreview();}
   if(view==='builder')renderBuilder();
   if(view==='portfolio')renderPortfolioView();
   if(view==='db')renderDbView();
+  if(view==='resume')renderResumeManage();
 }
 const DB_TABLES=[
   {name:'profile', rel:'1행/유저', cols:['name_ko','name_en','title','summary','email','phone','location','links','role_tags']},
@@ -511,6 +526,20 @@ $('#dbBody').addEventListener('click',e=>{
   }
 });
 document.querySelectorAll('.nv').forEach(b=>b.addEventListener('click',()=>show(b.dataset.view)));
+
+/* ============ 이력서 관리 (한/영 · 편집 · PDF) ============ */
+let rLang='ko';
+const rKey=l=>'rdoc_'+l;
+function rBody(l){ const s=localStorage.getItem(rKey(l)); return (s!=null)?s:((window.RESUME_DOC&&RESUME_DOC[l])||'<div class="page">데이터 없음</div>'); }
+function renderResumeManage(){
+  const f=$('#rFrame'); if(!f||!window.RESUME_DOC)return;
+  f.srcdoc=`<!doctype html><html lang="${rLang}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><style>${RESUME_DOC.css}</style></head><body contenteditable="true">${rBody(rLang)}</body></html>`;
+}
+function rSaveCurrent(){ const f=$('#rFrame'); try{ if(f&&f.contentDocument&&f.contentDocument.body){ localStorage.setItem(rKey(rLang), f.contentDocument.body.innerHTML); return true; } }catch(e){} return false; }
+$('#rSave')&&$('#rSave').addEventListener('click',()=>toast(rSaveCurrent()?'저장됨 ✓':'저장 실패'));
+$('#rReset')&&$('#rReset').addEventListener('click',()=>{ if(!confirm(rLang==='ko'?'한글본을 원본으로 되돌릴까요? (편집 내용 삭제)':'Reset English resume to original?'))return; localStorage.removeItem(rKey(rLang)); renderResumeManage(); toast('원본 복원'); });
+$('#rPdf')&&$('#rPdf').addEventListener('click',()=>{ rSaveCurrent(); const f=$('#rFrame'); if(f&&f.contentWindow){ f.contentWindow.focus(); setTimeout(()=>f.contentWindow.print(),60); } });
+document.querySelectorAll('[data-rlang]').forEach(b=>b.addEventListener('click',()=>{ rSaveCurrent(); rLang=b.dataset.rlang; document.querySelectorAll('[data-rlang]').forEach(x=>x.classList.toggle('on',x===b)); renderResumeManage(); }));
 
 /* ============ HOME ============ */
 function renderHome(){
