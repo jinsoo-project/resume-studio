@@ -36,7 +36,7 @@
     async pull() {
       if (!user) return null;
       const c = client(), u = user.id;
-      const [pf, cos, wks, wm, wl, med, axr, hl, sk, ed, aw, rd, pp] = await Promise.all([
+      const [pf, cos, wks, wm, wl, med, axr, hl, sk, ed, aw, rd, pp, cap, pipe, flow] = await Promise.all([
         c.from("profile").select("*").eq("user_id", u).maybeSingle(),
         c.from("companies").select("*").eq("user_id", u).order("sort"),
         c.from("works").select("*").eq("user_id", u).order("sort"),
@@ -49,13 +49,18 @@
         c.from("education").select("*").eq("user_id", u).order("sort"),
         c.from("awards").select("*").eq("user_id", u).order("sort"),
         c.from("resume_docs").select("*").eq("user_id", u).order("updated_at", { ascending: false }),
-        c.from("portfolio_pages").select("*").eq("user_id", u).order("updated_at", { ascending: false })
+        c.from("portfolio_pages").select("*").eq("user_id", u).order("updated_at", { ascending: false }),
+        c.from("capabilities").select("*").eq("user_id", u).order("sort"),
+        c.from("pipeline_steps").select("*").eq("user_id", u).order("sort"),
+        c.from("flow_items").select("*").eq("user_id", u).order("sort")
       ]);
       const W = wks.data || [], WM = wm.data || [], WL = wl.data || [], MED = med.data || [];
       const companies = (cos.data || []).map(co => ({
         id: co.id, nameKo: co.name_ko, nameEn: co.name_en, role: co.role, startDate: fromDate(co.start_date), endDate: fromDate(co.end_date), summary: co.summary, logo: co.logo_url,
+        periodText: co.period_text || "", metrics: co.metrics || [],
         works: W.filter(w => w.company_id === co.id).map(w => ({
           id: w.id, title: w.title, category: w.category, startDate: fromDate(w.start_date), endDate: fromDate(w.end_date), summary: w.summary, detail: w.detail, featured: w.featured, stack: w.stack || [],
+          code: w.code || "", tags: w.tags || [], problem: w.problem || "", action: w.action || "", result: w.result || "",
           metrics: WM.filter(m => m.work_id === w.id).map(m => ({ id: m.id, value: m.value, label: m.label })),
           links: WL.filter(l => l.work_id === w.id).map(l => ({ id: l.id, label: l.label, url: l.url })),
           media: MED.filter(m => m.work_id === w.id).map(m => ({ id: m.id, type: m.type, url: m.url, title: m.title, alt: m.alt }))
@@ -63,13 +68,16 @@
       }));
       const p = pf.data;
       const lib = {
-        profile: p ? { nameKo: p.name_ko, nameEn: p.name_en, title: p.title, tagline: p.tagline, summary: p.summary, email: p.email, phone: p.phone, location: p.location, avatar: p.avatar_url, links: p.links || [] } : null,
+        profile: p ? { nameKo: p.name_ko, nameEn: p.name_en, title: p.title, tagline: p.tagline, summary: p.summary, email: p.email, phone: p.phone, location: p.location, avatar: p.avatar_url, links: p.links || [], rotWords: p.rot_words || [], stack: p.stack || [], heroHeadline: p.hero_headline || "" } : null,
         companies,
         ax: (axr.data || []).map(a => ({ id: a.id, companyId: a.company_id, title: a.title, description: a.description })),
         highlights: (hl.data || []).map(h => ({ id: h.id, value: h.value, label: h.label })),
         skills: (sk.data || []).map(s => ({ id: s.id, group: s.group_name, items: s.items || [] })),
         education: (ed.data || []).map(e => ({ id: e.id, school: e.school, degree: e.degree, field: e.field, startDate: fromDate(e.start_date), endDate: fromDate(e.end_date) })),
         awards: (aw.data || []).map(a => ({ id: a.id, title: a.title, org: a.org, date: fromDate(a.award_date) })),
+        capabilities: (cap.data || []).map(x => ({ id: x.id, label: x.label, description: x.description, visible: x.visible !== false })),
+        pipeline: (pipe.data || []).map(x => ({ id: x.id, step: x.step_label, title: x.title, description: x.description, tools: x.tools || [], visible: x.visible !== false })),
+        flow: (flow.data || []).map(x => ({ id: x.id, num: x.num, title: x.title, sub: x.sub, caption: x.caption, visible: x.visible !== false })),
         roleTags: p ? (p.role_tags || []) : []
       };
       const docs = [
@@ -84,14 +92,14 @@
       const c = client(), u = user.id, now = new Date().toISOString();
       if (lib.profile) {
         const p = lib.profile;
-        const { error } = await c.from("profile").upsert({ user_id: u, name_ko: p.nameKo, name_en: p.nameEn, title: p.title, tagline: p.tagline, summary: p.summary, email: p.email, phone: p.phone, location: p.location, avatar_url: p.avatar, links: p.links || [], role_tags: lib.roleTags || [], updated_at: now });
+        const { error } = await c.from("profile").upsert({ user_id: u, name_ko: p.nameKo, name_en: p.nameEn, title: p.title, tagline: p.tagline, summary: p.summary, email: p.email, phone: p.phone, location: p.location, avatar_url: p.avatar, links: p.links || [], role_tags: lib.roleTags || [], rot_words: p.rotWords || [], stack: p.stack || [], hero_headline: p.heroHeadline || null, updated_at: now });
         if (error) console.warn("[cloud] profile", error.message);
       }
       const coRows = [], wkRows = [], wmRows = [], wlRows = [], medRows = [], axRows = [], hlRows = [];
       (lib.companies || []).forEach((co, ci) => {
-        coRows.push({ id: co.id, user_id: u, name_ko: co.nameKo, name_en: co.nameEn, role: co.role, start_date: toDate(co.startDate), end_date: toDate(co.endDate), summary: co.summary, logo_url: co.logo || null, sort: ci, updated_at: now });
+        coRows.push({ id: co.id, user_id: u, name_ko: co.nameKo, name_en: co.nameEn, role: co.role, start_date: toDate(co.startDate), end_date: toDate(co.endDate), summary: co.summary, logo_url: co.logo || null, period_text: co.periodText || null, metrics: co.metrics || [], sort: ci, updated_at: now });
         (co.works || []).forEach((w, wi) => {
-          wkRows.push({ id: w.id, user_id: u, company_id: co.id, title: w.title, category: w.category, start_date: toDate(w.startDate), end_date: toDate(w.endDate), summary: w.summary, detail: w.detail, featured: !!w.featured, stack: w.stack || [], sort: wi, updated_at: now });
+          wkRows.push({ id: w.id, user_id: u, company_id: co.id, title: w.title, category: w.category, start_date: toDate(w.startDate), end_date: toDate(w.endDate), summary: w.summary, detail: w.detail, featured: !!w.featured, stack: w.stack || [], code: w.code || null, tags: w.tags || [], problem: w.problem || null, action: w.action || null, result: w.result || null, sort: wi, updated_at: now });
           (w.metrics || []).forEach((m, mi) => wmRows.push({ id: m.id, user_id: u, work_id: w.id, value: m.value, label: m.label, sort: mi }));
           (w.links || []).forEach((l, li) => wlRows.push({ id: l.id, user_id: u, work_id: w.id, label: l.label, url: l.url, sort: li }));
           (w.media || []).forEach((m, mi) => medRows.push({ id: m.id, user_id: u, work_id: w.id, type: m.type || "image", url: m.url, title: m.title || null, alt: m.alt || null, sort: mi }));
@@ -109,6 +117,9 @@
       await upsertPrune("skills", (lib.skills || []).map((s, i) => ({ id: s.id, user_id: u, group_name: s.group, items: s.items || [], sort: i })));
       await upsertPrune("education", (lib.education || []).map((e, i) => ({ id: e.id, user_id: u, school: e.school, degree: e.degree, field: e.field, start_date: toDate(e.startDate), end_date: toDate(e.endDate), sort: i })));
       await upsertPrune("awards", (lib.awards || []).map((a, i) => ({ id: a.id, user_id: u, title: a.title, org: a.org, award_date: toDate(a.date), sort: i })));
+      await upsertPrune("capabilities", (lib.capabilities || []).map((x, i) => ({ id: x.id, user_id: u, label: x.label, description: x.description, visible: x.visible !== false, sort: i })));
+      await upsertPrune("pipeline_steps", (lib.pipeline || []).map((x, i) => ({ id: x.id, user_id: u, step_label: x.step, title: x.title, description: x.description, tools: x.tools || [], visible: x.visible !== false, sort: i })));
+      await upsertPrune("flow_items", (lib.flow || []).map((x, i) => ({ id: x.id, user_id: u, num: x.num, title: x.title, sub: x.sub, caption: x.caption, visible: x.visible !== false, sort: i })));
       const resumes = (docs || []).filter(d => d.kind !== "portfolio"), pfs = (docs || []).filter(d => d.kind === "portfolio");
       await upsertPrune("resume_docs", resumes.map(d => ({ id: d.id, user_id: u, slug: d.slug, title: d.title, template: d.template, config: d, snapshot: resolveFn ? resolveFn(d) : null, visibility: d.visibility || "unlisted", updated_at: now })));
       await upsertPrune("portfolio_pages", pfs.map(d => ({ id: d.id, user_id: u, slug: d.slug, title: d.title, subtitle: d.subtitle, intro: d.intro, cover_url: d.cover, config: d, snapshot: resolveFn ? resolveFn(d) : null, visibility: d.visibility || "unlisted", updated_at: now })));
@@ -118,7 +129,7 @@
       const c = client(); if (!c) return null;
       let r = await c.from("resume_docs").select("snapshot,title,template").eq("slug", slug).neq("visibility", "private").maybeSingle();
       if (r.data && r.data.snapshot) return r.data;
-      let p = await c.from("portfolio_pages").select("snapshot,title,template").eq("slug", slug).neq("visibility", "private").maybeSingle();
+      let p = await c.from("portfolio_pages").select("snapshot,title").eq("slug", slug).neq("visibility", "private").maybeSingle();
       if (p.data && p.data.snapshot) return p.data;
       return null;
     },

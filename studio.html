@@ -186,6 +186,7 @@ main{min-width:0}
     <button class="nv" data-view="builder"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 17h7M17.5 14v7"/></svg> 이력서 내보내기</button>
     <button class="nv" data-view="portfolio"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg> 포트폴리오</button>
     <button class="nv" data-view="resume"><svg viewBox="0 0 24 24"><path d="M6 2h9l5 5v15H6z"/><path d="M14 2v6h6M9 13h6M9 17h6"/></svg> 이력서 관리</button>
+    <button class="nv" data-view="ax"><svg viewBox="0 0 24 24"><path d="M12 2 2 7l10 5 10-5z"/><path d="M2 17l10 5 10-5M2 12l10 5 10-5"/></svg> AX 포트폴리오</button>
     <button class="nv" data-view="db"><svg viewBox="0 0 24 24"><ellipse cx="12" cy="5" rx="8" ry="3"/><path d="M4 5v14c0 1.7 3.6 3 8 3s8-1.3 8-3V5M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3"/></svg> 데이터 (DB)</button>
     <div class="rail-sp"></div>
     <div class="railfoot">
@@ -264,6 +265,20 @@ main{min-width:0}
         <button class="btn a sm" id="rPdf">⤓ PDF 내보내기</button>
       </div>
       <iframe id="rFrame" title="이력서" style="width:100%;height:calc(100vh - 58px);border:none;background:#f7f7f8;display:block"></iframe>
+    </section>
+
+    <!-- AX PORTFOLIO -->
+    <section id="v-ax" class="hidden">
+      <div class="mtop">
+        <h1>AX 포트폴리오</h1><div class="sp"></div>
+        <span class="mono" style="font-size:12px;color:var(--muted);margin-right:12px">채우면 자동 저장 · DB반영</span>
+        <button class="btn sm" id="axViewOpen">새 탭</button>
+        <button class="btn a sm" id="axPublish">🚀 발행 / 링크복사</button>
+      </div>
+      <div class="libsplit">
+        <div class="libform" id="axLeft" style="padding:18px 20px"></div>
+        <div class="libpv"><iframe class="previewframe" id="axPreview" title="AX 포트폴리오 미리보기"></iframe></div>
+      </div>
     </section>
 
     <!-- DB VIEWER -->
@@ -393,11 +408,12 @@ function viewURL(d){
   }
   return base+'view.html#'+encodeDoc(resolveAny(d));
 }
-function resolveAny(d){ return d.kind==='portfolio' ? resolvePF(d) : resolve(d); }
+function resolveAny(d){ if(d.template==='ax') return resolveAX(d); return d.kind==='portfolio' ? resolvePF(d) : resolve(d); }
+function resolveAX(d){ return { template:'ax', title:d.title||'AX 포트폴리오', slug:d.slug, visibility:d.visibility||'unlisted', profile:LIB.profile, companies:LIB.companies||[], capabilities:LIB.capabilities||[], pipeline:LIB.pipeline||[], flow:LIB.flow||[], highlights:LIB.highlights||[] }; }
 
 /* ============ nav ============ */
 function show(view){
-  ['home','library','builder','portfolio','resume','db'].forEach(v=>$('#v-'+v).classList.toggle('hidden',v!==view));
+  ['home','library','builder','portfolio','resume','ax','db'].forEach(v=>$('#v-'+v).classList.toggle('hidden',v!==view));
   document.querySelectorAll('.nv').forEach(b=>b.classList.toggle('on',b.dataset.view===view));
   if(view==='home')renderHome();
   if(view==='library'){renderLibrary();updateLibPreview();}
@@ -405,6 +421,7 @@ function show(view){
   if(view==='portfolio')renderPortfolioView();
   if(view==='db')renderDbView();
   if(view==='resume')renderResumeManage();
+  if(view==='ax')renderAXAdmin();
 }
 const DB_TABLES=[
   {name:'profile', rel:'1행/유저', cols:['name_ko','name_en','title','summary','email','phone','location','links','role_tags']},
@@ -1006,6 +1023,81 @@ function authVals(){return [$('#authEmail').value.trim(),$('#authPw').value];}
 $('#authClose').onclick=()=>$('#authModal').style.display='none';
 $('#authLogin').onclick=async()=>{const[e,p]=authVals();try{await CLOUD.signIn(e,p);$('#authModal').style.display='none';}catch(err){$('#authErr').textContent=err.message||String(err);}};
 $('#authSignup').onclick=async()=>{const[e,p]=authVals();try{const d=await CLOUD.signUp(e,p);if(!d.session){$('#authErr').textContent='가입됨. 이메일 확인이 필요할 수 있어요(설정에서 확인을 끄면 바로 로그인).';}else{$('#authModal').style.display='none';}}catch(err){$('#authErr').textContent=err.message||String(err);}};
+
+/* ============ AX 포트폴리오 어드민 ============ */
+function axEnsure(){
+  LIB.profile=LIB.profile||{};
+  if(!Array.isArray(LIB.profile.rotWords))LIB.profile.rotWords=[];
+  if(!Array.isArray(LIB.profile.stack))LIB.profile.stack=[];
+  LIB.capabilities=LIB.capabilities||[]; LIB.pipeline=LIB.pipeline||[]; LIB.flow=LIB.flow||[]; LIB.highlights=LIB.highlights||[];
+  (LIB.companies||[]).forEach(c=>{ if(!Array.isArray(c.metrics))c.metrics=[]; if(c.periodText==null)c.periodText=''; (c.works||[]).forEach(w=>{ if(!Array.isArray(w.tags))w.tags=[]; }); });
+}
+function axGet(path){ const s=path.split('.'); let o=LIB; for(let i=0;i<s.length;i++){ if(o==null)return undefined; o=o[s[i]]; } return o; }
+function axSet(path,val){ const s=path.split('.'); let o=LIB; for(let i=0;i<s.length-1;i++){ if(o[s[i]]==null)o[s[i]]={}; o=o[s[i]]; } o[s[s.length-1]]=val; }
+function axTmpl(seg){ return seg==='capabilities'?{id:uid(),label:'',description:''}: seg==='pipeline'?{id:uid(),step:'',title:'',description:'',tools:[]}: seg==='flow'?{id:uid(),num:'',title:'',sub:'',caption:''}: seg==='highlights'?{id:uid(),value:'',label:''}: seg==='stack'?{area:'',title:'',desc:''}: seg==='metrics'?{v:'',k:''}:{}; }
+function axAdd(path){ const a=axGet(path); if(Array.isArray(a))a.push(axTmpl(path.split('.').pop())); }
+function axDel(path){ const s=path.split('.'); const i=+s.pop(); const a=axGet(s.join('.')); if(Array.isArray(a))a.splice(i,1); }
+function axDoc(){ let d=DOCS.find(x=>x.template==='ax'); if(!d){ d={id:uid(),kind:'portfolio',template:'ax',title:'AX 포트폴리오',subtitle:'',intro:'',cover:'',slug:'ax',visibility:'unlisted',updated:Date.now()}; DOCS.unshift(d); } return d; }
+let axPvTimer,axSaveTimer;
+function updateAXPreview(){ clearTimeout(axPvTimer); axPvTimer=setTimeout(()=>{ const f=$('#axPreview'); if(f) f.setAttribute('srcdoc',TEMPLATES.render(Object.assign({template:'ax'},LIB))); },220); }
+function axSchedule(){ clearTimeout(axSaveTimer); axSaveTimer=setTimeout(()=>{ save(); updateAXPreview(); },400); }
+const axAttr=s=>String(s==null?'':s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+const axText=s=>String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+let axWired=false;
+function renderAXAdmin(){
+  axEnsure();
+  const iS='width:100%;padding:8px 10px;border:1px solid var(--line);border-radius:6px;font-size:13px;background:transparent;color:inherit;box-sizing:border-box;font-family:inherit';
+  const ti=(p,v,ph)=>`<input data-p="${p}" value="${axAttr(v)}" placeholder="${axAttr(ph||'')}" style="${iS}">`;
+  const ta=(p,v,ph,r)=>`<textarea data-p="${p}" rows="${r||2}" placeholder="${axAttr(ph||'')}" style="${iS};resize:vertical">${axText(v)}</textarea>`;
+  const taLines=(p,arr,ph)=>`<textarea data-p="${p}" data-arr="lines" rows="4" placeholder="${axAttr(ph||'')}" style="${iS};resize:vertical">${axText((arr||[]).join('\n'))}</textarea>`;
+  const comma=(p,arr,ph)=>`<input data-p="${p}" data-arr="comma" value="${axAttr((arr||[]).join(', '))}" placeholder="${axAttr(ph||'')}" style="${iS}">`;
+  const lbl=t=>`<div style="font-size:11px;color:var(--muted);margin:9px 0 3px;font-weight:600">${t}</div>`;
+  const sec=(t,inner,sub)=>`<details open style="margin-bottom:14px;border:1px solid var(--line);border-radius:10px;overflow:hidden"><summary style="padding:12px 14px;font-weight:700;font-size:14px;cursor:pointer;background:var(--panel)">${t}${sub?`<span style="font-weight:400;font-size:11px;color:var(--muted);margin-left:8px">${sub}</span>`:''}</summary><div style="padding:12px 14px">${inner}</div></details>`;
+  const item=(inner,del)=>`<div style="border:1px solid var(--line);border-radius:8px;padding:10px 12px;margin-bottom:8px;position:relative">${inner}<button data-del="${del}" style="position:absolute;top:9px;right:10px;font-size:11px;color:#c0392b;background:none;border:none;cursor:pointer">✕</button></div>`;
+  const add=(p,t)=>`<button data-add="${p}" class="mini" style="margin-top:2px">＋ ${t}</button>`;
+  const two=(a,b)=>`<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">${a}${b}</div>`;
+
+  // Hero
+  const stats=(LIB.highlights||[]).map((h,i)=>item(two(ti(`highlights.${i}.value`,h.value,'값 (예:187%)'),ti(`highlights.${i}.label`,h.label,'라벨 (예:ROAS 개선)')),`highlights.${i}`)).join('')+add('highlights','지표 추가');
+  const stack=(LIB.profile.stack||[]).map((s,i)=>item(two(ti(`profile.stack.${i}.area`,s.area,'영역 (예:Ads)'),ti(`profile.stack.${i}.title`,s.title,'제목'))+lbl('설명')+ta(`profile.stack.${i}.desc`,s.desc,'설명'),`profile.stack.${i}`)).join('')+add('profile.stack','스택 추가');
+  const hero=sec('Hero (히어로)',
+    lbl('헤드라인 1행 (예: 데이터로 설계하고,)')+ti('profile.heroHeadline',LIB.profile.heroHeadline,'데이터로 설계하고,')+
+    lbl('회전 문구 (줄바꿈 = 항목, 히어로에서 순환)')+taLines('profile.rotWords',LIB.profile.rotWords,'AI 자동화\n트래킹 설계\nCRM 시나리오')+
+    lbl('히어로 지표 (앞 3개가 히어로에 큰 숫자로 표시)')+stats+
+    lbl('AI·자동화 스택 (AX 탭 하단 그리드)')+stack);
+
+  // capabilities
+  const caps=(LIB.capabilities||[]).map((c,i)=>item(ti(`capabilities.${i}.label`,c.label,'역량명 (예: 매체 운영·최적화)')+lbl('설명')+ta(`capabilities.${i}.description`,c.description,'이 역량을 한두 문장으로'),`capabilities.${i}`)).join('')+add('capabilities','역량 추가');
+  const capSec=sec('역량칩 (Capabilities)',caps,'프로젝트 태그와 이름이 같으면 케이스 수가 자동 집계');
+
+  // pipeline
+  const pipe=(LIB.pipeline||[]).map((p,i)=>item(two(ti(`pipeline.${i}.step`,p.step,'단계 (예: STEP 01)'),ti(`pipeline.${i}.title`,p.title,'제목 (예: 기획·리서치)'))+lbl('설명')+ta(`pipeline.${i}.description`,p.description,'이 단계에서 하는 일')+lbl('도구 (쉼표로 구분)')+comma(`pipeline.${i}.tools`,p.tools,'Claude, n8n, GA4'),`pipeline.${i}`)).join('')+add('pipeline','단계 추가');
+  const pipeSec=sec('AX 파이프라인 (Pipeline)',pipe);
+
+  // flow
+  const flow=(LIB.flow||[]).map((f,i)=>item(two(ti(`flow.${i}.num`,f.num,'번호 (예: 01)'),ti(`flow.${i}.title`,f.title,'제목 (예: 퍼포먼스)'))+two(ti(`flow.${i}.sub`,f.sub,'서브 (예: PAID MEDIA)'),ti(`flow.${i}.caption`,f.caption,'캡션')),`flow.${i}`)).join('')+add('flow','플로우 추가');
+  const flowSec=sec('풀퍼널 플로우 (Flow)',flow,'홈 상단 애니메이션 좌측 리스트');
+
+  // companies / works
+  const cos=(LIB.companies||[]).map((c,ci)=>{
+    const mets=(c.metrics||[]).map((m,mi)=>item(two(ti(`companies.${ci}.metrics.${mi}.v`,m.v,'값 (예:+187%)'),ti(`companies.${ci}.metrics.${mi}.k`,m.k,'라벨 (예:ROAS)')),`companies.${ci}.metrics.${mi}`)).join('')+add(`companies.${ci}.metrics`,'회사 지표 추가');
+    const works=(c.works||[]).map((w,wi)=>`<div style="border-left:2px solid var(--line);padding-left:12px;margin:10px 0"><div style="font-size:12.5px;font-weight:700;margin-bottom:4px">${axText(w.title||'(제목없음)')}</div>${two(ti(`companies.${ci}.works.${wi}.code`,w.code,'코드 (예: A-01)'),comma(`companies.${ci}.works.${wi}.tags`,w.tags,'태그: 매체 운영·최적화, ...'))}${lbl('PROBLEM')}${ta(`companies.${ci}.works.${wi}.problem`,w.problem,'문제 상황')}${lbl('ACTION')}${ta(`companies.${ci}.works.${wi}.action`,w.action,'실행')}${lbl('RESULT')}${ta(`companies.${ci}.works.${wi}.result`,w.result,'결과')}</div>`).join('');
+    return `<details style="margin-bottom:10px;border:1px solid var(--line);border-radius:8px"><summary style="padding:10px 12px;font-weight:700;font-size:13px;cursor:pointer">${axText(c.nameKo||c.nameEn||'회사')}</summary><div style="padding:10px 12px">${lbl('표시 기간 (비우면 날짜에서 자동)')}${ti(`companies.${ci}.periodText`,c.periodText,'2023 — 현재')}${lbl('회사 지표 (케이스 좌측)')}${mets}${lbl('프로젝트별 상세 (Problem/Action/Result·코드·태그)')}${works||'<div style="font-size:12px;color:var(--muted)">이 회사에 작업이 없습니다. 이력서 관리 탭에서 추가하세요.</div>'}</div></details>`;
+  }).join('');
+  const coSec=sec('회사 · 프로젝트 (Cases)',cos,'제목/요약은 이력서 관리 탭에서 · 여기선 AX 전용 필드');
+
+  $('#axLeft').innerHTML=hero+capSec+pipeSec+flowSec+coSec;
+
+  if(!axWired){
+    axWired=true;
+    const left=$('#axLeft');
+    left.addEventListener('input',e=>{ const t=e.target; const p=t.dataset.p; if(!p)return; let v=t.value; if(t.dataset.arr==='lines')v=v.split('\n').map(s=>s.trim()).filter(Boolean); else if(t.dataset.arr==='comma')v=v.split(',').map(s=>s.trim()).filter(Boolean); axSet(p,v); axSchedule(); });
+    left.addEventListener('click',e=>{ const a=e.target.closest('[data-add]'),d=e.target.closest('[data-del]'); if(a){ axAdd(a.dataset.add); renderAXAdmin(); save(); updateAXPreview(); } else if(d){ axDel(d.dataset.del); renderAXAdmin(); save(); updateAXPreview(); } });
+    const pub=$('#axPublish'); if(pub)pub.onclick=()=>{ const d=axDoc(); d.updated=Date.now(); save(); const u=viewURL(d); if(navigator.clipboard)navigator.clipboard.writeText(u).then(()=>toast('발행됨 · 링크 복사: '+u)).catch(()=>toast('발행됨: '+u)); else toast('발행됨: '+u); };
+    const vo=$('#axViewOpen'); if(vo)vo.onclick=()=>{ const d=axDoc(); save(); setTimeout(()=>window.open(viewURL(d),'_blank'),300); };
+  }
+  updateAXPreview();
+}
 
 /* ============ boot ============ */
 (async function(){
