@@ -1029,6 +1029,10 @@ function axEnsure(){
   LIB.profile=LIB.profile||{};
   if(!Array.isArray(LIB.profile.rotWords))LIB.profile.rotWords=[];
   if(!Array.isArray(LIB.profile.stack))LIB.profile.stack=[];
+  var NK=["home","cases","resume","ax"];
+  if(!Array.isArray(LIB.profile.navOrder))LIB.profile.navOrder=[];
+  LIB.profile.navOrder=LIB.profile.navOrder.filter(function(k){return NK.indexOf(k)>=0;});
+  NK.forEach(function(k){if(LIB.profile.navOrder.indexOf(k)<0)LIB.profile.navOrder.push(k);});
   LIB.capabilities=LIB.capabilities||[]; LIB.pipeline=LIB.pipeline||[]; LIB.flow=LIB.flow||[]; LIB.highlights=LIB.highlights||[];
   (LIB.companies||[]).forEach(c=>{ if(!Array.isArray(c.metrics))c.metrics=[]; if(c.periodText==null)c.periodText=''; (c.works||[]).forEach(w=>{ if(!Array.isArray(w.tags))w.tags=[]; }); });
 }
@@ -1037,6 +1041,7 @@ function axSet(path,val){ const s=path.split('.'); let o=LIB; for(let i=0;i<s.le
 function axTmpl(seg){ return seg==='capabilities'?{id:uid(),label:'',description:''}: seg==='pipeline'?{id:uid(),step:'',title:'',description:'',tools:[]}: seg==='flow'?{id:uid(),num:'',title:'',sub:'',caption:''}: seg==='highlights'?{id:uid(),value:'',label:''}: seg==='stack'?{area:'',title:'',desc:''}: seg==='metrics'?{v:'',k:''}:{}; }
 function axAdd(path){ const a=axGet(path); if(Array.isArray(a))a.push(axTmpl(path.split('.').pop())); }
 function axDel(path){ const s=path.split('.'); const i=+s.pop(); const a=axGet(s.join('.')); if(Array.isArray(a))a.splice(i,1); }
+function axMove(arr,i,dir){ var j=dir==='up'?i-1:i+1; if(!Array.isArray(arr)||j<0||j>=arr.length)return; var t=arr[i];arr[i]=arr[j];arr[j]=t; }
 function axDoc(){ let d=DOCS.find(x=>x.template==='ax'); if(!d){ d={id:uid(),kind:'portfolio',template:'ax',title:'AX 포트폴리오',subtitle:'',intro:'',cover:'',slug:'ax',visibility:'unlisted',updated:Date.now()}; DOCS.unshift(d); } return d; }
 let axPvTimer,axSaveTimer;
 function updateAXPreview(){ clearTimeout(axPvTimer); axPvTimer=setTimeout(()=>{ const f=$('#axPreview'); if(f) f.setAttribute('srcdoc',TEMPLATES.render(Object.assign({template:'ax'},LIB))); },220); }
@@ -1082,17 +1087,22 @@ function renderAXAdmin(){
   const cos=(LIB.companies||[]).map((c,ci)=>{
     const mets=(c.metrics||[]).map((m,mi)=>item(two(ti(`companies.${ci}.metrics.${mi}.v`,m.v,'값 (예:+187%)'),ti(`companies.${ci}.metrics.${mi}.k`,m.k,'라벨 (예:ROAS)')),`companies.${ci}.metrics.${mi}`)).join('')+add(`companies.${ci}.metrics`,'회사 지표 추가');
     const works=(c.works||[]).map((w,wi)=>`<div style="border-left:2px solid var(--line);padding-left:12px;margin:10px 0"><div style="font-size:12.5px;font-weight:700;margin-bottom:4px">${axText(w.title||'(제목없음)')}</div>${two(ti(`companies.${ci}.works.${wi}.code`,w.code,'코드 (예: A-01)'),comma(`companies.${ci}.works.${wi}.tags`,w.tags,'태그: 매체 운영·최적화, ...'))}${lbl('PROBLEM')}${ta(`companies.${ci}.works.${wi}.problem`,w.problem,'문제 상황')}${lbl('ACTION')}${ta(`companies.${ci}.works.${wi}.action`,w.action,'실행')}${lbl('RESULT')}${ta(`companies.${ci}.works.${wi}.result`,w.result,'결과')}</div>`).join('');
-    return `<details style="margin-bottom:10px;border:1px solid var(--line);border-radius:8px"><summary style="padding:10px 12px;font-weight:700;font-size:13px;cursor:pointer">${axText(c.nameKo||c.nameEn||'회사')}</summary><div style="padding:10px 12px">${lbl('표시 기간 (비우면 날짜에서 자동)')}${ti(`companies.${ci}.periodText`,c.periodText,'2023 — 현재')}${lbl('회사 지표 (케이스 좌측)')}${mets}${lbl('프로젝트별 상세 (Problem/Action/Result·코드·태그)')}${works||'<div style="font-size:12px;color:var(--muted)">이 회사에 작업이 없습니다. 이력서 관리 탭에서 추가하세요.</div>'}</div></details>`;
+    var moverow='<div style="display:flex;align-items:center;gap:6px;margin-bottom:3px"><button data-ax-moveco="'+ci+':up" class="mini" style="padding:2px 9px"'+(ci===0?' disabled':'')+'>▲</button><button data-ax-moveco="'+ci+':down" class="mini" style="padding:2px 9px"'+(ci===(LIB.companies.length-1)?' disabled':'')+'>▼</button><span class="mono" style="font-size:10.5px;color:var(--muted)">탭 순서 '+(ci+1)+' / '+LIB.companies.length+'</span></div>';
+    return '<div style="margin-bottom:10px">'+moverow+`<details style="border:1px solid var(--line);border-radius:8px"><summary style="padding:10px 12px;font-weight:700;font-size:13px;cursor:pointer">${axText(c.nameKo||c.nameEn||'회사')}</summary><div style="padding:10px 12px">${lbl('표시 기간 (비우면 날짜에서 자동)')}${ti(`companies.${ci}.periodText`,c.periodText,'2023 — 현재')}${lbl('회사 지표 (케이스 좌측)')}${mets}${lbl('프로젝트별 상세 (Problem/Action/Result·코드·태그)')}${works||'<div style="font-size:12px;color:var(--muted)">이 회사에 작업이 없습니다. 이력서 관리 탭에서 추가하세요.</div>'}</div></details></div>`;
   }).join('');
-  const coSec=sec('회사 · 프로젝트 (Cases)',cos,'제목/요약은 이력서 관리 탭에서 · 여기선 AX 전용 필드');
+  const coSec=sec('회사 · 프로젝트 (Cases)',cos,'▲▼로 프로젝트 탭 순서 · 제목/요약은 이력서 관리 탭에서');
 
-  $('#axLeft').innerHTML=hero+capSec+pipeSec+flowSec+coSec;
+  var NAVLB={home:'홈 (Hero)',cases:'프로젝트',resume:'이력서',ax:'AX'};
+  var navrows=(LIB.profile.navOrder||[]).map(function(k,i){ return '<div style="display:flex;align-items:center;gap:8px;border:1px solid var(--line);border-radius:8px;padding:8px 12px;margin-bottom:6px"><span class="mono" style="font-size:11px;color:var(--muted);width:14px">'+(i+1)+'</span><span style="flex:1;font-size:13px;font-weight:600">'+(NAVLB[k]||k)+'</span><button data-ax-movenav="'+i+':up" class="mini" style="padding:2px 9px"'+(i===0?' disabled':'')+'>▲</button><button data-ax-movenav="'+i+':down" class="mini" style="padding:2px 9px"'+(i===LIB.profile.navOrder.length-1?' disabled':'')+'>▼</button></div>'; }).join('');
+  var navSec=sec('상단 탭 순서','<div style="font-size:11.5px;color:var(--muted);margin-bottom:10px">화면 상단 네비게이션 탭 순서 (홈 = Hero 화면)</div>'+navrows);
+
+  $('#axLeft').innerHTML=navSec+hero+capSec+pipeSec+flowSec+coSec;
 
   if(!axWired){
     axWired=true;
     const left=$('#axLeft');
     left.addEventListener('input',e=>{ const t=e.target; const p=t.dataset.p; if(!p)return; let v=t.value; if(t.dataset.arr==='lines')v=v.split('\n').map(s=>s.trim()).filter(Boolean); else if(t.dataset.arr==='comma')v=v.split(',').map(s=>s.trim()).filter(Boolean); axSet(p,v); axSchedule(); });
-    left.addEventListener('click',e=>{ const a=e.target.closest('[data-add]'),d=e.target.closest('[data-del]'); if(a){ axAdd(a.dataset.add); renderAXAdmin(); save(); updateAXPreview(); } else if(d){ axDel(d.dataset.del); renderAXAdmin(); save(); updateAXPreview(); } });
+    left.addEventListener('click',e=>{ const a=e.target.closest('[data-add]'),d=e.target.closest('[data-del]'),mv=e.target.closest('[data-ax-movenav]'),mc=e.target.closest('[data-ax-moveco]'); if(a){ axAdd(a.dataset.add); renderAXAdmin(); save(); updateAXPreview(); } else if(d){ axDel(d.dataset.del); renderAXAdmin(); save(); updateAXPreview(); } else if(mv){ var pp=mv.getAttribute('data-ax-movenav').split(':'); axMove(LIB.profile.navOrder,+pp[0],pp[1]); renderAXAdmin(); save(); updateAXPreview(); } else if(mc){ var qq=mc.getAttribute('data-ax-moveco').split(':'); axMove(LIB.companies,+qq[0],qq[1]); renderAXAdmin(); save(); updateAXPreview(); } });
     const pub=$('#axPublish'); if(pub)pub.onclick=()=>{ const d=axDoc(); d.updated=Date.now(); save(); const u=viewURL(d); if(navigator.clipboard)navigator.clipboard.writeText(u).then(()=>toast('발행됨 · 링크 복사: '+u)).catch(()=>toast('발행됨: '+u)); else toast('발행됨: '+u); };
     const vo=$('#axViewOpen'); if(vo)vo.onclick=()=>{ const d=axDoc(); save(); setTimeout(()=>window.open(viewURL(d),'_blank'),300); };
   }

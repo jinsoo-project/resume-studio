@@ -68,7 +68,7 @@
       }));
       const p = pf.data;
       const lib = {
-        profile: p ? { nameKo: p.name_ko, nameEn: p.name_en, title: p.title, tagline: p.tagline, summary: p.summary, email: p.email, phone: p.phone, location: p.location, avatar: p.avatar_url, links: p.links || [], rotWords: p.rot_words || [], stack: p.stack || [], heroHeadline: p.hero_headline || "" } : null,
+        profile: p ? { nameKo: p.name_ko, nameEn: p.name_en, title: p.title, tagline: p.tagline, summary: p.summary, email: p.email, phone: p.phone, location: p.location, avatar: p.avatar_url, links: p.links || [], rotWords: p.rot_words || [], stack: p.stack || [], heroHeadline: p.hero_headline || "", navOrder: p.nav_order || [] } : null,
         companies,
         ax: (axr.data || []).map(a => ({ id: a.id, companyId: a.company_id, title: a.title, description: a.description })),
         highlights: (hl.data || []).map(h => ({ id: h.id, value: h.value, label: h.label })),
@@ -92,7 +92,7 @@
       const c = client(), u = user.id, now = new Date().toISOString();
       if (lib.profile) {
         const p = lib.profile;
-        const { error } = await c.from("profile").upsert({ user_id: u, name_ko: p.nameKo, name_en: p.nameEn, title: p.title, tagline: p.tagline, summary: p.summary, email: p.email, phone: p.phone, location: p.location, avatar_url: p.avatar, links: p.links || [], role_tags: lib.roleTags || [], rot_words: p.rotWords || [], stack: p.stack || [], hero_headline: p.heroHeadline || null, updated_at: now });
+        const { error } = await c.from("profile").upsert({ user_id: u, name_ko: p.nameKo, name_en: p.nameEn, title: p.title, tagline: p.tagline, summary: p.summary, email: p.email, phone: p.phone, location: p.location, avatar_url: p.avatar, links: p.links || [], role_tags: lib.roleTags || [], rot_words: p.rotWords || [], stack: p.stack || [], hero_headline: p.heroHeadline || null, nav_order: p.navOrder || [], updated_at: now });
         if (error) console.warn("[cloud] profile", error.message);
       }
       const coRows = [], wkRows = [], wmRows = [], wlRows = [], medRows = [], axRows = [], hlRows = [];

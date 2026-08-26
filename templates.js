@@ -233,6 +233,7 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
     const heroStats = (d.highlights || []).slice(0, 3).map(h => ({ v: h.value, k: h.label }));
     return {
       brand: p.title ? (String(p.title).toUpperCase()) : "FULL-STACK MARKETER — AX",
+      navOrder: (p.navOrder && p.navOrder.length) ? p.navOrder : ["home", "cases", "resume", "ax"],
       heroKicker: p.tagline ? "" : "",
       headline: p.heroHeadline || "데이터로 설계하고,",
       rotWords: (p.rotWords && p.rotWords.length) ? p.rotWords : ["AI 자동화", "트래킹 설계", "CRM 시나리오", "매체 최적화", "콘텐츠 실험"],
@@ -255,7 +256,14 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
     const data = axData(d);
     const title = (data.resumeName ? data.resumeName + " — " : "") + "AX 마케터 포트폴리오";
     const head = '<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css"><link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">';
-    const css = "html,body{margin:0;padding:0;background:#fbfbf9;overflow-x:hidden}body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;color:#17181a;-webkit-font-smoothing:antialiased}a{color:#17181a;text-decoration:none}a:hover{color:#3a56d4}::selection{background:#17181a;color:#fbfbf9}.axmono{font-family:'IBM Plex Mono',monospace}@keyframes marquee{from{transform:translateX(0)}to{transform:translateX(-50%)}}@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}";
+    const GOTHIC = "'Pretendard Variable',Pretendard,-apple-system,BlinkMacSystemFont,'Apple SD Gothic Neo','Malgun Gothic','Segoe UI',sans-serif";
+    const POINT = "'IBM Plex Mono','Pretendard Variable',Pretendard,ui-monospace,monospace";
+    const css = "html,body{margin:0;padding:0;background:#fbfbf9;overflow-x:hidden}" +
+      "body{font-family:" + GOTHIC + ";color:#17181a;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;text-rendering:optimizeLegibility;font-feature-settings:'ss01','cv11';letter-spacing:-0.003em;line-height:1.5}" +
+      "h1,h2,h3,h4{font-family:" + GOTHIC + ";word-break:keep-all;text-wrap:pretty}" +
+      "a{color:#17181a;text-decoration:none}a:hover{color:#3a56d4}::selection{background:#17181a;color:#fbfbf9}" +
+      ".axmono{font-family:" + POINT + ";font-feature-settings:'zero','tnum';font-variant-numeric:tabular-nums slashed-zero}" +
+      "@keyframes marquee{from{transform:translateX(0)}to{transform:translateX(-50%)}}@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}";
     const dataJson = JSON.stringify(data).replace(/</g, "\\u003c");
     return "<!doctype html><html lang=\"ko\"><head><meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width,initial-scale=1\"><title>" + esc(title) + "</title>" + head + "<style>" + css + "</style></head><body>" +
       '<div id="scroll-progress" style="position:fixed;top:0;left:0;height:3px;width:0%;background:#3a56d4;z-index:99"></div>' +
@@ -271,7 +279,7 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
     var st = { view: "home", companyIdx: 0, pipeIdx: 0, active: null, rotIdx: 0, statT: 0, sliding: false };
     var root = document.getElementById("ax-root");
     var e = function (s) { return String(s == null ? "" : s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;"); };
-    var mono = "font-family:'IBM Plex Mono',monospace";
+    var mono = "font-family:'IBM Plex Mono','Pretendard Variable',Pretendard,monospace";
 
     function animNum(str) {
       var m = String(str).match(/[\d.]+/); if (!m) return e(str);
@@ -281,7 +289,10 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
     function tagCount(label) { var c = 0; (D.companies || []).forEach(function (co) { (co.projects || []).forEach(function (p) { if ((p.tags || []).indexOf(label) >= 0) c++; }); }); return c; }
 
     function nav() {
-      var tabs = [["home", "홈"], ["cases", "프로젝트"], ["resume", "이력서"], ["ax", "AX"]];
+      var LB = { home: "홈", cases: "프로젝트", resume: "이력서", ax: "AX" };
+      var order = (D.navOrder && D.navOrder.length ? D.navOrder : ["home", "cases", "resume", "ax"]).filter(function (k) { return LB[k]; });
+      ["home", "cases", "resume", "ax"].forEach(function (k) { if (order.indexOf(k) < 0) order.push(k); });
+      var tabs = order.map(function (k) { return [k, LB[k]]; });
       var btns = tabs.map(function (t) {
         var on = st.view === t[0];
         return '<button data-ax-view="' + t[0] + '" style="font-size:14.5px;font-weight:600;padding:9px 18px;border:none;border-radius:999px;cursor:pointer;background:' + (on ? INK : "transparent") + ';color:' + (on ? "#fbfbf9" : "#5a5c63") + ';transition:all .3s">' + e(t[1]) + '</button>';
