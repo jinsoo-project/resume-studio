@@ -6,8 +6,8 @@
     { "source": "/", "destination": "/studio.html", "permanent": false }
   ],
   "rewrites": [
-    { "source": "/r/:slug", "destination": "/view.html?slug=:slug" },
-    { "source": "/p/:slug", "destination": "/view.html?slug=:slug" }
+    { "source": "/r/:slug", "destination": "/view?slug=:slug" },
+    { "source": "/p/:slug", "destination": "/view?slug=:slug" }
   ],
   "headers": [
     {
