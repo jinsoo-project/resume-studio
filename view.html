@@ -44,6 +44,7 @@ function fail(t){var f=document.getElementById('frame');f.style.display='none';v
   var params=new URLSearchParams(location.search);
   var slug=params.get('slug');
   if(!slug){var m=location.pathname.match(/\/[rp]\/([^/?#]+)/);if(m)slug=decodeURIComponent(m[1]);}
+  if(!slug){var segs=location.pathname.split('/').filter(Boolean);if(segs.length)slug=decodeURIComponent(segs[segs.length-1]);}
   var hash=location.hash.slice(1);
 
   // 1) hash 인코딩 모드 (오프라인/자체완결) 우선

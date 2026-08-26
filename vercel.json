@@ -8,8 +8,8 @@
   "rewrites": [
     { "source": "/r/:slug", "destination": "/view?slug=:slug" },
     { "source": "/p/:slug", "destination": "/view?slug=:slug" },
-    { "source": "/portfolio", "destination": "/view?slug=ax" },
-    { "source": "/mkt/portfolio", "destination": "/view?slug=ax" }
+    { "source": "/portfolio", "destination": "/view" },
+    { "source": "/mkt/portfolio", "destination": "/view" }
   ],
   "headers": [
     {
