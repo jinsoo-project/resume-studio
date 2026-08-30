@@ -234,7 +234,7 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
     }));
     const heroStats = (d.highlights || []).slice(0, 3).map(h => ({ v: h.value, k: h.label }));
     return {
-      brand: p.title ? (String(p.title).toUpperCase()) : "FULL-STACK MARKETER — AX",
+      brand: (p.nameKo ? p.nameKo + " " : "") + "마케팅 & AX 포트폴리오",
       navOrder: (p.navOrder && p.navOrder.length) ? p.navOrder : ["home", "cases", "resume", "ax"],
       heroKicker: p.tagline ? "" : "",
       headline: p.heroHeadline || "데이터로 설계하고,",
@@ -260,7 +260,7 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
     const head = '<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css"><link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">';
     const GOTHIC = "'Pretendard Variable',Pretendard,-apple-system,BlinkMacSystemFont,'Apple SD Gothic Neo','Malgun Gothic','Segoe UI',sans-serif";
     const POINT = "'IBM Plex Mono','Pretendard Variable',Pretendard,ui-monospace,monospace";
-    const css = "html,body{margin:0;padding:0;background:#fbfbf9;overflow-x:hidden}" +
+    const css = "html,body{margin:0;padding:0;background:#fbfbf9;overflow-x:clip}" +
       "body{font-family:" + GOTHIC + ";color:#17181a;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;text-rendering:optimizeLegibility;font-feature-settings:'ss01','cv11';letter-spacing:-0.003em;line-height:1.5}" +
       "h1,h2,h3,h4{font-family:" + GOTHIC + ";word-break:keep-all;text-wrap:pretty}" +
       "a{color:#17181a;text-decoration:none}a:hover{color:#3a56d4}::selection{background:#17181a;color:#fbfbf9}" +
@@ -270,6 +270,7 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
     return "<!doctype html><html lang=\"ko\"><head><meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width,initial-scale=1\"><title>" + esc(title) + "</title>" + head + "<style>" + css + "</style></head><body>" +
       '<div id="scroll-progress" style="position:fixed;top:0;left:0;height:3px;width:0%;background:#3a56d4;z-index:99"></div>' +
       '<div style="min-height:100vh;background:#fbfbf9"><div style="max-width:1720px;margin:0 auto;padding:0 clamp(24px,5vw,96px)"><div id="ax-root"></div></div></div>' +
+      '<div id="ax-modal" style="position:fixed;inset:0;z-index:1000;display:none;align-items:center;justify-content:center;background:rgba(13,13,15,.9);padding:clamp(16px,4vw,48px)"><button id="ax-modal-close" aria-label="닫기" style="position:absolute;top:18px;right:22px;width:42px;height:42px;border-radius:50%;border:1px solid rgba(255,255,255,.3);background:rgba(255,255,255,.08);color:#fff;font-size:20px;cursor:pointer;line-height:1">✕</button><div id="ax-modal-body" style="width:min(1040px,94vw)"></div></div>' +
       "<script>window.__AX=" + dataJson + ";(" + axRuntime.toString() + ")();<\/script>" +
       "</body></html>";
   }
@@ -299,7 +300,7 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
         var on = st.view === t[0];
         return '<button data-ax-view="' + t[0] + '" style="font-size:14.5px;font-weight:600;padding:9px 18px;border:none;border-radius:999px;cursor:pointer;background:' + (on ? INK : "transparent") + ';color:' + (on ? "#fbfbf9" : "#5a5c63") + ';transition:all .3s">' + e(t[1]) + '</button>';
       }).join("");
-      return '<nav style="display:flex;align-items:baseline;justify-content:space-between;padding:32px 0;border-bottom:1px solid #17181a"><div class="axmono" style="font-size:13px;font-weight:600;letter-spacing:.08em">' + e(D.brand) + '</div><div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">' + btns + '<a href="#contact" style="font-size:14.5px;font-weight:600;padding:9px 18px;border-radius:999px;border:1px solid #17181a;margin-left:10px">Contact</a></div></nav>';
+      return '<nav style="position:sticky;top:0;z-index:60;background:rgba(251,251,249,.92);backdrop-filter:saturate(180%) blur(8px);-webkit-backdrop-filter:saturate(180%) blur(8px);display:flex;align-items:center;justify-content:space-between;gap:16px;padding:18px 0;border-bottom:1px solid #17181a;flex-wrap:wrap"><div style="font-size:15px;font-weight:700;letter-spacing:-.01em;color:#17181a">' + e(D.brand) + '</div><div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">' + btns + '<a href="#contact" style="font-size:14.5px;font-weight:600;padding:9px 18px;border-radius:999px;border:1px solid #17181a;margin-left:10px">Contact</a></div></nav>';
     }
 
     function home() {
@@ -332,10 +333,10 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
       var cards = [];
       (links || []).forEach(function (l) {
         var yt = ytId(l.url);
-        if (yt) cards.push('<a href="' + e(l.url) + '" target="_blank" rel="noopener" title="' + e(l.label) + '" style="position:relative;display:block;border-radius:10px;overflow:hidden;border:1px solid #e4e4de;aspect-ratio:16/9;background:#0d0d0f"><img src="https://img.youtube.com/vi/' + yt + '/hqdefault.jpg" loading="lazy" style="width:100%;height:100%;object-fit:cover;display:block;opacity:.94"><span style="position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,.55),transparent 55%)"></span><span style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:44px;height:44px;border-radius:50%;background:rgba(255,255,255,.92);display:flex;align-items:center;justify-content:center"><span style="border-left:15px solid #17181a;border-top:9px solid transparent;border-bottom:9px solid transparent;margin-left:4px"></span></span><span style="position:absolute;left:10px;right:10px;bottom:9px;font-size:11.5px;font-weight:600;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + e(l.label) + '</span></a>');
+        if (yt) cards.push('<div data-ax-video="' + yt + '" title="' + e(l.label) + '" style="position:relative;display:block;border-radius:10px;overflow:hidden;border:1px solid #e4e4de;aspect-ratio:16/9;background:#0d0d0f;cursor:pointer"><img src="https://img.youtube.com/vi/' + yt + '/hqdefault.jpg" loading="lazy" style="width:100%;height:100%;object-fit:cover;display:block;opacity:.94"><span style="position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,.55),transparent 55%)"></span><span style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:44px;height:44px;border-radius:50%;background:rgba(255,255,255,.92);display:flex;align-items:center;justify-content:center"><span style="border-left:15px solid #17181a;border-top:9px solid transparent;border-bottom:9px solid transparent;margin-left:4px"></span></span><span style="position:absolute;left:10px;right:10px;bottom:9px;font-size:11.5px;font-weight:600;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + e(l.label) + '</span></div>');
       });
       (mediaArr || []).forEach(function (m) {
-        if (m.url && (m.type === "image" || !m.type)) cards.push('<a href="' + e(m.url) + '" target="_blank" rel="noopener" style="display:block;border-radius:10px;overflow:hidden;border:1px solid #e4e4de;aspect-ratio:16/9;background:#f0f0ea"><img src="' + e(m.url) + '" loading="lazy" style="width:100%;height:100%;object-fit:cover;display:block"></a>');
+        if (m.url && (m.type === "image" || !m.type)) cards.push('<div data-ax-img="' + e(m.url) + '" title="' + e(m.title || "") + '" style="position:relative;display:block;border-radius:10px;overflow:hidden;border:1px solid #e4e4de;aspect-ratio:16/9;background:#f0f0ea;cursor:zoom-in"><img src="' + e(m.url) + '" loading="lazy" style="width:100%;height:100%;object-fit:cover;display:block"><span style="position:absolute;top:8px;right:8px;width:26px;height:26px;border-radius:50%;background:rgba(23,24,26,.6);color:#fff;display:flex;align-items:center;justify-content:center;font-size:13px">⤢</span></div>');
       });
       var others = (links || []).filter(function (l) { return !ytId(l.url); });
       var chips = others.map(function (l) { return '<a href="' + e(l.url) + '" target="_blank" rel="noopener" class="axmono" style="font-size:11.5px;padding:6px 12px;border-radius:999px;border:1px solid #c9c9c2;color:#5a5c63;display:inline-flex;align-items:center;gap:5px">↗ ' + e(l.label) + '</a>'; }).join("");
@@ -432,6 +433,17 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
       else if (t.hasAttribute("data-ax-chip")) { var lb = t.getAttribute("data-ax-chip"); st.active = st.active === lb ? null : lb; if (st.view === "home") st.view = "cases"; render(); }
       else if (t.hasAttribute("data-ax-pipe")) { st.pipeIdx = +t.getAttribute("data-ax-pipe"); render(); }
     });
+
+    // ---- media modal (영상 임베드 / 이미지 라이트박스) ----
+    function modalOpen(html) { var m = document.getElementById("ax-modal"), b = document.getElementById("ax-modal-body"); if (!m || !b) return; b.innerHTML = html; m.style.display = "flex"; document.body.style.overflow = "hidden"; }
+    function modalClose() { var m = document.getElementById("ax-modal"), b = document.getElementById("ax-modal-body"); if (!m) return; m.style.display = "none"; if (b) b.innerHTML = ""; document.body.style.overflow = ""; }
+    document.addEventListener("click", function (ev) {
+      var v = ev.target.closest("[data-ax-video]"), im = ev.target.closest("[data-ax-img]");
+      if (v) { modalOpen('<div style="position:relative;width:100%;aspect-ratio:16/9;border-radius:12px;overflow:hidden;background:#000;box-shadow:0 20px 60px rgba(0,0,0,.5)"><iframe src="https://www.youtube.com/embed/' + v.getAttribute("data-ax-video") + '?autoplay=1&rel=0" style="position:absolute;inset:0;width:100%;height:100%;border:0" allow="autoplay;encrypted-media;fullscreen" allowfullscreen></iframe></div>'); return; }
+      if (im) { modalOpen('<img src="' + im.getAttribute("data-ax-img") + '" style="display:block;max-width:94vw;max-height:86vh;width:auto;height:auto;margin:0 auto;object-fit:contain;border-radius:12px;box-shadow:0 20px 60px rgba(0,0,0,.5)">'); return; }
+      if (ev.target.id === "ax-modal" || ev.target.id === "ax-modal-close") modalClose();
+    });
+    document.addEventListener("keydown", function (ev) { if (ev.key === "Escape") modalClose(); });
 
     render();
   }

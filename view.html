@@ -32,7 +32,7 @@ function render(doc){
   var f=document.getElementById('frame');
   document.title=(doc.profile&&doc.profile.nameKo?doc.profile.nameKo+' — ':'')+(doc.title||'이력서');
   f.setAttribute('srcdoc', window.TEMPLATES.render(doc));
-  document.getElementById('bar').style.display='flex';
+  document.getElementById('bar').style.display = (doc.template==='ax') ? 'none' : 'flex';
   document.getElementById('msg').style.display='none';
   f.style.display='block';
 }
