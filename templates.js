@@ -220,8 +220,9 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
   function axData(d) {
     const p = d.profile || {};
     const co2period = co => co.periodText || [co.startDate, co.endDate || "현재"].filter(Boolean).join(" — ");
+    const dispName = co => co.useService ? (co.serviceKo || co.serviceEn || co.nameKo || co.nameEn || "") : (co.nameKo || co.nameEn || "");
     const companies = (d.companies || []).map(co => ({
-      name: co.nameKo || co.nameEn || "", period: co2period(co), role: co.role || "", summary: co.summary || "", logo: co.logo || "",
+      name: dispName(co), period: co2period(co), role: co.role || "", summary: co.summary || "", logo: co.logo || "",
       metrics: (co.metrics || []).map(m => ({ v: m.v != null ? m.v : m.value, k: m.k != null ? m.k : m.label })),
       projects: (co.works || []).map(w => ({
         num: w.code || "", title: w.title || "", desc: w.detail || w.summary || "",

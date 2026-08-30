@@ -57,7 +57,7 @@
       const W = wks.data || [], WM = wm.data || [], WL = wl.data || [], MED = med.data || [];
       const companies = (cos.data || []).map(co => ({
         id: co.id, nameKo: co.name_ko, nameEn: co.name_en, role: co.role, startDate: fromDate(co.start_date), endDate: fromDate(co.end_date), summary: co.summary, logo: co.logo_url,
-        periodText: co.period_text || "", metrics: co.metrics || [],
+        periodText: co.period_text || "", metrics: co.metrics || [], serviceKo: co.service_ko || "", serviceEn: co.service_en || "", useService: co.use_service === true,
         works: W.filter(w => w.company_id === co.id).map(w => ({
           id: w.id, title: w.title, category: w.category, startDate: fromDate(w.start_date), endDate: fromDate(w.end_date), summary: w.summary, detail: w.detail, featured: w.featured, stack: w.stack || [],
           code: w.code || "", tags: w.tags || [], problem: w.problem || "", action: w.action || "", result: w.result || "",
@@ -97,7 +97,7 @@
       }
       const coRows = [], wkRows = [], wmRows = [], wlRows = [], medRows = [], axRows = [], hlRows = [];
       (lib.companies || []).forEach((co, ci) => {
-        coRows.push({ id: co.id, user_id: u, name_ko: co.nameKo, name_en: co.nameEn, role: co.role, start_date: toDate(co.startDate), end_date: toDate(co.endDate), summary: co.summary, logo_url: co.logo || null, period_text: co.periodText || null, metrics: co.metrics || [], sort: ci, updated_at: now });
+        coRows.push({ id: co.id, user_id: u, name_ko: co.nameKo, name_en: co.nameEn, role: co.role, start_date: toDate(co.startDate), end_date: toDate(co.endDate), summary: co.summary, logo_url: co.logo || null, period_text: co.periodText || null, metrics: co.metrics || [], service_ko: co.serviceKo || null, service_en: co.serviceEn || null, use_service: !!co.useService, sort: ci, updated_at: now });
         (co.works || []).forEach((w, wi) => {
           wkRows.push({ id: w.id, user_id: u, company_id: co.id, title: w.title, category: w.category, start_date: toDate(w.startDate), end_date: toDate(w.endDate), summary: w.summary, detail: w.detail, featured: !!w.featured, stack: w.stack || [], code: w.code || null, tags: w.tags || [], problem: w.problem || null, action: w.action || null, result: w.result || null, sort: wi, updated_at: now });
           (w.metrics || []).forEach((m, mi) => wmRows.push({ id: m.id, user_id: u, work_id: w.id, value: m.value, label: m.label, sort: mi }));
