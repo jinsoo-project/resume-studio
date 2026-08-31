@@ -407,7 +407,7 @@ function viewURL(d){
   return base+'view.html#'+encodeDoc(resolveAny(d));
 }
 function resolveAny(d){ if(d.template==='ax') return resolveAX(d); return d.kind==='portfolio' ? resolvePF(d) : resolve(d); }
-function resolveAX(d){ return { template:'ax', title:d.title||'AX 포트폴리오', slug:d.slug, visibility:d.visibility||'unlisted', profile:LIB.profile, companies:LIB.companies||[], capabilities:LIB.capabilities||[], pipeline:LIB.pipeline||[], flow:LIB.flow||[], highlights:LIB.highlights||[] }; }
+function resolveAX(d){ return { template:'ax', title:d.title||'AX 포트폴리오', slug:d.slug, visibility:d.visibility||'unlisted', profile:LIB.profile, companies:LIB.companies||[], capabilities:LIB.capabilities||[], pipeline:LIB.pipeline||[], flow:LIB.flow||[], highlights:LIB.highlights||[], axLoop:LIB.axLoop||[], axScreens:LIB.axScreens||[], axNotes:LIB.axNotes||[] }; }
 
 /* ============ nav ============ */
 function show(view){
@@ -514,7 +514,7 @@ function nestWorkCfg(label,icon,field,blank,cols){ return { label:label, icon:ic
   parentOpts:function(){ return _flatWorks().map(function(x,i){return {label:x.label,val:i};}); },
   curParent:function(row){ var fw=_flatWorks(); for(var i=0;i<fw.length;i++)if(fw[i].w===row.hostW)return i; return 0; },
   reassign:function(row,vi){ var w=_flatWorks()[+vi]; if(!w||w.w===row.hostW)return; w=w.w; row.hostArr.splice(row.hostArr.indexOf(row.o),1); w[field]=w[field]||[]; w[field].push(row.o); } }; }
-var GRID_ORDER=['profile','companies','works','work_metrics','work_links','media','highlights','capabilities','pipeline','flow','ax','skills','education','awards'];
+var GRID_ORDER=['profile','companies','works','work_metrics','work_links','media','highlights','capabilities','pipeline','flow','axLoop','axScreens','axNotes','ax','skills','education','awards'];
 var GRID={
   profile:{ label:'프로필', icon:'👤', single:true,
     cols:[['nameKo','이름(국문)'],['nameEn','이름(영문)'],['title','타이틀',1],['tagline','태그라인',1],['summary','요약',2],['email','이메일'],['phone','전화'],['location','지역'],['heroHeadline','히어로 헤드라인',1],['rotWords','회전문구(쉼표)','arr',1]],
@@ -538,7 +538,10 @@ var GRID={
   ax: flatCfg('AX 경험','🤖','ax',function(){return {id:uid(),companyId:((LIB.companies||[])[0]||{}).id||null,title:'',description:''};},[['companyId','회사','co'],['title','제목',1],['description','설명',2]]),
   skills: flatCfg('스킬','🧩','skills',function(){return {id:uid(),group:'',items:[]};},[['group','그룹'],['items','항목(쉼표)','arr',2]]),
   education: flatCfg('학력','🎓','education',function(){return {id:uid(),school:'',field:'',degree:'',startDate:'',endDate:''};},[['school','학교',1],['field','전공'],['degree','학위'],['startDate','입학'],['endDate','졸업']]),
-  awards: flatCfg('수상','🏆','awards',function(){return {id:uid(),title:'',org:'',date:''};},[['title','제목',1],['org','주최/설명',2],['date','일자']])
+  awards: flatCfg('수상','🏆','awards',function(){return {id:uid(),title:'',org:'',date:''};},[['title','제목',1],['org','주최/설명',2],['date','일자']]),
+  axLoop: flatCfg('운영 루프','🔁','axLoop',function(){return {id:uid(),num:'',title:'',items:[]};},[['num','번호'],['title','단계명',1],['items','항목(쉼표)','arr',2]]),
+  axScreens: flatCfg('AX 화면 카탈로그','🖥️','axScreens',function(){return {id:uid(),category:'',name:'',code:'',badge:'',description:'',source:'',chips:[]};},[['category','카테고리'],['name','화면명',1],['code','코드'],['badge','뱃지'],['description','설명',2],['source','데이터소스',1],['chips','칩(쉼표)','arr',1]]),
+  axNotes: flatCfg('AX 사상·정의','📐','axNotes',function(){return {id:uid(),section:'principle',title:'',body:''};},[['section','구분 principle/definition'],['title','제목',1],['body','내용',2]])
 };
 var gridRows=[], dbSaveT;
 function scheduleDbSave(){ clearTimeout(dbSaveT); dbSaveT=setTimeout(function(){ normalizeIds(); derive(); save(); },500); }

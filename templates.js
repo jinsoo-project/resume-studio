@@ -246,6 +246,9 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
       capabilities: (d.capabilities || []).filter(c => c.visible !== false).map(c => ({ label: c.label || "", desc: c.description || "" })),
       pipeline: (d.pipeline || []).filter(x => x.visible !== false).map(x => ({ step: x.step || "", title: x.title || "", desc: x.description || "", tools: x.tools || [] })),
       flow: (d.flow || []).filter(x => x.visible !== false).map(x => ({ num: x.num || "", title: x.title || "", sub: x.sub || "", caption: x.caption || "" })),
+      axLoop: (d.axLoop || []).filter(x => x.visible !== false).map(x => ({ num: x.num || "", title: x.title || "", items: x.items || [] })),
+      axScreens: (d.axScreens || []).filter(x => x.visible !== false).map(x => ({ category: x.category || "기타", name: x.name || "", code: x.code || "", badge: x.badge || "", description: x.description || "", source: x.source || "", chips: x.chips || [] })),
+      axNotes: (d.axNotes || []).filter(x => x.visible !== false).map(x => ({ section: x.section || "principle", title: x.title || "", body: x.body || "" })),
       stack: (p.stack || []).map(s => ({ area: s.area || "", title: s.title || "", desc: s.desc || "" })),
       resumeName: p.nameKo || p.nameEn || "",
       resumeRole: p.title || "",
@@ -280,7 +283,7 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
   function axRuntime() {
     var D = window.__AX || {};
     var INK = "#17181a", BLUE = "#3a56d4", CORAL = "#d4553a", MUT = "#8a8c93", LINE = "#e4e4de";
-    var st = { view: "home", companyIdx: 0, pipeIdx: 0, active: null, rotIdx: 0, statT: 0, sliding: false };
+    var st = { view: "home", companyIdx: 0, pipeIdx: 0, active: null, rotIdx: 0, statT: 0, sliding: false, loopIdx: 0, axCat: null };
     var root = document.getElementById("ax-root");
     var e = function (s) { return String(s == null ? "" : s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;"); };
     var mono = "font-family:'IBM Plex Mono','Pretendard Variable',Pretendard,monospace";
@@ -371,13 +374,46 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
     }
 
     function ax() {
-      var steps = (D.pipeline || []).map(function (p, i) { var on = i === st.pipeIdx; return '<button data-ax-pipe="' + i + '" style="text-align:left;padding:22px 20px;border:1px solid ' + (on ? INK : "#c9c9c2") + ';background:' + (on ? INK : "transparent") + ';color:' + (on ? "#fbfbf9" : INK) + ';cursor:pointer;transition:all .3s;border-radius:2px"><div class="axmono" style="font-size:11px;letter-spacing:.12em;margin-bottom:10px;opacity:.6">' + e(p.step) + '</div><div style="font-size:16px;font-weight:700">' + e(p.title) + '</div></button>'; }).join("");
-      var act = (D.pipeline || [])[st.pipeIdx] || { step: "", title: "", desc: "", tools: [] };
-      var tools = (act.tools || []).map(function (t) { return '<span class="axmono" style="font-size:12px;padding:6px 14px;border-radius:999px;background:#fbfbf9;border:1px solid #c9d2f0;color:#3a56d4">' + e(t) + '</span>'; }).join("");
+      var CAT = { "성과·매출":"#0f766e", "광고 집행":"#b45309", "콘텐츠·CRM":"#7c3aed", "영업·파트너십":"#0369a1", "시장·공급":"#4d7c0f" };
+      var catColor = function (c) { return CAT[c] || "#334155"; };
+      // intro
+      var intro = '<section style="padding:80px 0 52px;border-bottom:1px solid #e4e4de"><div class="axmono" style="font-size:13px;letter-spacing:.16em;color:#3a56d4;margin-bottom:22px">AX — AI TRANSFORMATION</div><h2 style="margin:0 0 22px;font-size:clamp(28px,3.2vw,52px);font-weight:800;letter-spacing:-.03em;line-height:1.16">하나의 마케팅 콘솔 안에서<br>수집 → 측정 → 실행 → 영업이 전부 연결돼 돌아갑니다.</h2><p style="margin:0;font-size:17px;line-height:1.7;color:#5a5c63;max-width:720px">모든 화면은 AI 페어로 설계·구축·운영되고, 요청에서 배포까지 보통 반나절 — 화면 30여 개·PR 600건 규모로 누적된 스택입니다.</p></section>';
+      // 운영 루프
+      var loop = D.axLoop || [], loopSection = "";
+      if (loop.length) {
+        var li = ((st.loopIdx % loop.length) + loop.length) % loop.length;
+        var stages = loop.map(function (s, i) { var on = i === li; return '<button data-ax-loop="' + i + '" style="text-align:left;padding:15px 14px;border:1px solid ' + (on ? INK : "#e4e4de") + ';background:' + (on ? INK : "#fff") + ';color:' + (on ? "#fbfbf9" : INK) + ';cursor:pointer;border-radius:10px;transition:all .25s"><div class="axmono" style="font-size:11px;letter-spacing:.1em;opacity:.6;margin-bottom:6px">' + e(s.num) + '</div><div style="font-size:14.5px;font-weight:700">' + e(s.title) + '</div></button>'; }).join("");
+        var la = loop[li]; var litems = (la.items || []).map(function (x) { return '<div style="display:flex;gap:9px;font-size:14.5px;color:#17181a;line-height:1.6;padding:3px 0"><span style="color:#3a56d4">—</span><span>' + e(x) + '</span></div>'; }).join("");
+        loopSection = '<section style="padding:60px 0;border-bottom:1px solid #e4e4de"><div class="axmono" style="font-size:13px;letter-spacing:.16em;color:#3a56d4;margin-bottom:12px">OPERATING LOOP</div><h2 style="margin:0 0 8px;font-size:clamp(24px,2.4vw,38px);font-weight:800;letter-spacing:-.025em">데이터 수집부터 영업까지, 한 콘솔의 루프</h2><p style="margin:0 0 26px;font-size:15px;color:#8a8c93">단계를 누르면 그 단계에서 하는 일이 아래에 나옵니다 · 측정과 실행이 같은 화면군이라 루프가 짧습니다.</p><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(148px,1fr));gap:10px;margin-bottom:20px">' + stages + '</div><div style="background:#eef1fc;border-radius:12px;padding:24px 28px"><div class="axmono" style="font-size:12px;letter-spacing:.12em;color:#3a56d4;margin-bottom:12px">' + e(la.num) + ' · ' + e(la.title) + '</div>' + litems + '</div></section>';
+      }
+      // 사상
+      var principles = (D.axNotes || []).filter(function (n) { return n.section === "principle"; }), prinSection = "";
+      if (principles.length) {
+        var pc = principles.map(function (n, i) { return '<div style="background:#fbfbf9;border:1px solid #e4e4de;border-radius:12px;padding:20px"><div class="axmono" style="font-size:12px;color:#3a56d4;margin-bottom:8px">0' + (i + 1) + '</div><div style="font-size:16px;font-weight:700;margin-bottom:7px">' + e(n.title) + '</div><p style="margin:0;font-size:13.5px;line-height:1.65;color:#5a5c63">' + e(n.body) + '</p></div>'; }).join("");
+        prinSection = '<section style="padding:56px 0;border-bottom:1px solid #e4e4de"><h2 style="margin:0 0 20px;font-size:clamp(22px,2.2vw,34px);font-weight:800;letter-spacing:-.025em">운영 사상</h2><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px">' + pc + '</div></section>';
+      }
+      // 화면 카탈로그
+      var screens = D.axScreens || [], catSection = "";
+      if (screens.length) {
+        var cats = []; screens.forEach(function (s) { if (cats.indexOf(s.category) < 0) cats.push(s.category); });
+        var ac = st.axCat;
+        var filters = '<button data-ax-cat="__all" class="axmono" style="font-size:12px;padding:7px 14px;border-radius:999px;border:1px solid ' + (ac ? "#dcdcd6" : INK) + ';background:' + (ac ? "transparent" : INK) + ';color:' + (ac ? "#5a5c63" : "#fbfbf9") + ';cursor:pointer">전체</button>' + cats.map(function (c) { var on = ac === c, col = catColor(c); return '<button data-ax-cat="' + e(c) + '" class="axmono" style="font-size:12px;padding:7px 14px;border-radius:999px;border:1px solid ' + (on ? col : "#dcdcd6") + ';background:' + (on ? col : "transparent") + ';color:' + (on ? "#fff" : "#5a5c63") + ';cursor:pointer">' + e(c) + '</button>'; }).join("");
+        var shown = ac ? screens.filter(function (s) { return s.category === ac; }) : screens;
+        var sc = shown.map(function (s) { var col = catColor(s.category);
+          var chips = (s.chips || []).map(function (ch) { return '<span class="axmono" style="font-size:10.5px;padding:2px 8px;border-radius:6px;background:#f0f0ea;color:#5a5c63">' + e(ch) + '</span>'; }).join("");
+          return '<div style="background:#fff;border:1px solid #e4e4de;border-left:4px solid ' + col + ';border-radius:12px;padding:16px 18px"><div style="display:flex;align-items:baseline;gap:8px;flex-wrap:wrap"><span style="font-size:14.5px;font-weight:700">' + e(s.name) + '</span>' + (s.code ? '<code class="axmono" style="font-size:10px;color:#b0b2b8">' + e(s.code) + '</code>' : '') + (s.badge ? '<span class="axmono" style="margin-left:auto;font-size:10px;font-weight:700;padding:2px 9px;border-radius:999px;background:' + col + '1f;color:' + col + '">' + e(s.badge) + '</span>' : '') + '</div>' + (s.description ? '<p style="margin:6px 0 0;font-size:13px;line-height:1.6;color:#5a5c63">' + e(s.description) + '</p>' : '') + (s.source ? '<div class="axmono" style="margin-top:8px;font-size:10.5px;color:#a8a29e">' + e(s.source) + '</div>' : '') + (chips ? '<div style="margin-top:9px;display:flex;flex-wrap:wrap;gap:5px">' + chips + '</div>' : '') + '</div>'; }).join("");
+        catSection = '<section style="padding:56px 0;border-bottom:1px solid #e4e4de"><div style="display:flex;align-items:baseline;justify-content:space-between;gap:20px;flex-wrap:wrap;margin-bottom:6px"><h2 style="margin:0;font-size:clamp(22px,2.2vw,34px);font-weight:800;letter-spacing:-.025em">화면 카탈로그</h2><span class="axmono" style="font-size:12px;color:#8a8c93">' + screens.length + ' SCREENS</span></div><p style="margin:0 0 18px;font-size:15px;color:#8a8c93">카테고리를 눌러 필터 · 모든 탭이 같은 숫자 정의를 공유합니다.</p><div style="display:flex;flex-wrap:wrap;gap:7px;margin-bottom:22px">' + filters + '</div><div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px">' + sc + '</div></section>';
+      }
+      // 공통 정의
+      var defs = (D.axNotes || []).filter(function (n) { return n.section === "definition"; }), defSection = "";
+      if (defs.length) {
+        var dr = defs.map(function (n) { return '<div style="padding:12px 0;border-top:1px solid #e4e4de"><span style="font-weight:700;font-size:13.5px">' + e(n.title) + '</span> <span style="font-size:13px;color:#5a5c63;line-height:1.65">' + e(n.body) + '</span></div>'; }).join("");
+        defSection = '<section style="padding:56px 0;border-bottom:1px solid #e4e4de"><h2 style="margin:0 0 8px;font-size:clamp(22px,2.2vw,34px);font-weight:800;letter-spacing:-.025em">공통 정의 — AX의 실체</h2><p style="margin:0 0 14px;font-size:15px;color:#8a8c93">숫자·보안·UI 규격을 전 화면이 공유합니다.</p><div style="background:#fbfbf9;border:1px dashed #d6d3d1;border-radius:12px;padding:8px 20px 16px">' + dr + '</div></section>';
+      }
+      // stack
       var stack = (D.stack || []).map(function (s) { return '<div style="background:#fbfbf9;padding:28px"><div class="axmono" style="font-size:12px;letter-spacing:.1em;color:#3a56d4;margin-bottom:12px">' + e(s.area) + '</div><div style="font-size:18.5px;font-weight:700;margin-bottom:8px">' + e(s.title) + '</div><p style="margin:0;font-size:14px;line-height:1.65;color:#5a5c63">' + e(s.desc) + '</p></div>'; }).join("");
-      var pipeSection = (D.pipeline || []).length ? '<section style="padding:72px 0;border-bottom:1px solid #e4e4de"><h2 style="margin:0 0 12px;font-size:clamp(28px,2.6vw,42px);font-weight:800;letter-spacing:-.025em">자동화 파이프라인</h2><p style="margin:0 0 44px;font-size:15px;color:#8a8c93">단계를 누르면 그 단계에서 하는 일이 아래에 표시됩니다.</p><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:32px">' + steps + '</div><div style="background:#eef1fc;padding:32px 36px;border-radius:2px"><div class="axmono" style="font-size:12px;letter-spacing:.12em;color:#3a56d4;margin-bottom:14px">' + e(act.step) + ' · ' + e(act.title) + '</div><p style="margin:0 0 18px;font-size:16px;line-height:1.7;color:#17181a;max-width:720px">' + e(act.desc) + '</p><div style="display:flex;flex-wrap:wrap;gap:8px">' + tools + '</div></div></section>' : "";
-      var stackSection = (D.stack || []).length ? '<section style="padding:72px 0;border-bottom:1px solid #e4e4de"><h2 style="margin:0 0 16px;font-size:clamp(28px,2.6vw,42px);font-weight:800;letter-spacing:-.025em">AI · 자동화 스택</h2><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1px;background:#e4e4de;border:1px solid #e4e4de">' + stack + '</div></section>' : "";
-      return '<section style="padding:80px 0 64px;border-bottom:1px solid #e4e4de"><div class="axmono" style="font-size:13px;letter-spacing:.16em;color:#3a56d4;margin-bottom:24px">AX — AI TRANSFORMATION</div><h2 style="margin:0 0 24px;font-size:clamp(32px,4vw,64px);font-weight:800;letter-spacing:-.03em;line-height:1.15">AI를 쓰는 마케터가 아니라,<br>마케팅을 AI로 재설계하는 사람.</h2><p style="margin:0;font-size:17px;line-height:1.7;color:#5a5c63;max-width:640px">기획→실행→분석→개선 루프 자체를 자동화 파이프라인으로 바꿉니다. 사람은 판단에, 기계는 반복에.</p></section>' + pipeSection + stackSection;
+      var stackSection = (D.stack || []).length ? '<section style="padding:56px 0;border-bottom:1px solid #e4e4de"><h2 style="margin:0 0 16px;font-size:clamp(22px,2.2vw,34px);font-weight:800;letter-spacing:-.025em">AI · 자동화 스택</h2><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1px;background:#e4e4de;border:1px solid #e4e4de">' + stack + '</div></section>' : "";
+      return intro + loopSection + prinSection + catSection + defSection + stackSection;
     }
 
     function footer() {
@@ -427,12 +463,14 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
 
     // ---- interactions (event delegation) ----
     document.addEventListener("click", function (ev) {
-      var t = ev.target.closest("[data-ax-view],[data-ax-co],[data-ax-co-idx],[data-ax-chip],[data-ax-pipe]"); if (!t) return;
+      var t = ev.target.closest("[data-ax-view],[data-ax-co],[data-ax-co-idx],[data-ax-chip],[data-ax-pipe],[data-ax-loop],[data-ax-cat]"); if (!t) return;
       if (t.hasAttribute("data-ax-view")) { st.view = t.getAttribute("data-ax-view"); st.active = null; window.scrollTo(0, 0); render(); }
       else if (t.hasAttribute("data-ax-co")) { var n = (D.companies || []).length || 1; st.sliding = true; render(); var dir = t.getAttribute("data-ax-co") === "next" ? 1 : -1; setTimeout(function () { st.companyIdx = ((st.companyIdx + dir) % n + n) % n; st.sliding = false; render(); }, 200); }
       else if (t.hasAttribute("data-ax-co-idx")) { st.companyIdx = +t.getAttribute("data-ax-co-idx"); render(); }
       else if (t.hasAttribute("data-ax-chip")) { var lb = t.getAttribute("data-ax-chip"); st.active = st.active === lb ? null : lb; if (st.view === "home") st.view = "cases"; render(); }
       else if (t.hasAttribute("data-ax-pipe")) { st.pipeIdx = +t.getAttribute("data-ax-pipe"); render(); }
+      else if (t.hasAttribute("data-ax-loop")) { st.loopIdx = +t.getAttribute("data-ax-loop"); render(); }
+      else if (t.hasAttribute("data-ax-cat")) { var cv = t.getAttribute("data-ax-cat"); st.axCat = cv === "__all" ? null : cv; render(); }
     });
 
     // ---- media modal (영상 임베드 / 이미지 라이트박스) ----

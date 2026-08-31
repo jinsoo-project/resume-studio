@@ -36,7 +36,7 @@
     async pull() {
       if (!user) return null;
       const c = client(), u = user.id;
-      const [pf, cos, wks, wm, wl, med, axr, hl, sk, ed, aw, rd, pp, cap, pipe, flow] = await Promise.all([
+      const [pf, cos, wks, wm, wl, med, axr, hl, sk, ed, aw, rd, pp, cap, pipe, flow, axl, axs, axn] = await Promise.all([
         c.from("profile").select("*").eq("user_id", u).maybeSingle(),
         c.from("companies").select("*").eq("user_id", u).order("sort"),
         c.from("works").select("*").eq("user_id", u).order("sort"),
@@ -52,7 +52,10 @@
         c.from("portfolio_pages").select("*").eq("user_id", u).order("updated_at", { ascending: false }),
         c.from("capabilities").select("*").eq("user_id", u).order("sort"),
         c.from("pipeline_steps").select("*").eq("user_id", u).order("sort"),
-        c.from("flow_items").select("*").eq("user_id", u).order("sort")
+        c.from("flow_items").select("*").eq("user_id", u).order("sort"),
+        c.from("ax_loop").select("*").eq("user_id", u).order("sort"),
+        c.from("ax_screens").select("*").eq("user_id", u).order("sort"),
+        c.from("ax_notes").select("*").eq("user_id", u).order("sort")
       ]);
       const W = wks.data || [], WM = wm.data || [], WL = wl.data || [], MED = med.data || [];
       const companies = (cos.data || []).map(co => ({
@@ -78,6 +81,9 @@
         capabilities: (cap.data || []).map(x => ({ id: x.id, label: x.label, description: x.description, visible: x.visible !== false })),
         pipeline: (pipe.data || []).map(x => ({ id: x.id, step: x.step_label, title: x.title, description: x.description, tools: x.tools || [], visible: x.visible !== false })),
         flow: (flow.data || []).map(x => ({ id: x.id, num: x.num, title: x.title, sub: x.sub, caption: x.caption, visible: x.visible !== false })),
+        axLoop: (axl.data || []).map(x => ({ id: x.id, num: x.num, title: x.title, items: x.items || [], visible: x.visible !== false })),
+        axScreens: (axs.data || []).map(x => ({ id: x.id, category: x.category, name: x.name, code: x.code, badge: x.badge, description: x.description, source: x.source, chips: x.chips || [], visible: x.visible !== false })),
+        axNotes: (axn.data || []).map(x => ({ id: x.id, section: x.section, title: x.title, body: x.body, visible: x.visible !== false })),
         roleTags: p ? (p.role_tags || []) : []
       };
       const docs = [
@@ -120,6 +126,9 @@
       await upsertPrune("capabilities", (lib.capabilities || []).map((x, i) => ({ id: x.id, user_id: u, label: x.label, description: x.description, visible: x.visible !== false, sort: i })));
       await upsertPrune("pipeline_steps", (lib.pipeline || []).map((x, i) => ({ id: x.id, user_id: u, step_label: x.step, title: x.title, description: x.description, tools: x.tools || [], visible: x.visible !== false, sort: i })));
       await upsertPrune("flow_items", (lib.flow || []).map((x, i) => ({ id: x.id, user_id: u, num: x.num, title: x.title, sub: x.sub, caption: x.caption, visible: x.visible !== false, sort: i })));
+      await upsertPrune("ax_loop", (lib.axLoop || []).map((x, i) => ({ id: x.id, user_id: u, num: x.num, title: x.title, items: x.items || [], visible: x.visible !== false, sort: i })));
+      await upsertPrune("ax_screens", (lib.axScreens || []).map((x, i) => ({ id: x.id, user_id: u, category: x.category, name: x.name, code: x.code, badge: x.badge, description: x.description, source: x.source, chips: x.chips || [], visible: x.visible !== false, sort: i })));
+      await upsertPrune("ax_notes", (lib.axNotes || []).map((x, i) => ({ id: x.id, user_id: u, section: x.section, title: x.title, body: x.body, visible: x.visible !== false, sort: i })));
       const resumes = (docs || []).filter(d => d.kind !== "portfolio"), pfs = (docs || []).filter(d => d.kind === "portfolio");
       await upsertPrune("resume_docs", resumes.map(d => ({ id: d.id, user_id: u, slug: d.slug, title: d.title, template: d.template, config: d, snapshot: resolveFn ? resolveFn(d) : null, visibility: d.visibility || "unlisted", updated_at: now })));
       await upsertPrune("portfolio_pages", pfs.map(d => ({ id: d.id, user_id: u, slug: d.slug, title: d.title, subtitle: d.subtitle, intro: d.intro, cover_url: d.cover, config: d, snapshot: resolveFn ? resolveFn(d) : null, visibility: d.visibility || "unlisted", updated_at: now })));
