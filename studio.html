@@ -517,7 +517,7 @@ function nestWorkCfg(label,icon,field,blank,cols){ return { label:label, icon:ic
 var GRID_ORDER=['profile','companies','works','work_metrics','work_links','media','highlights','capabilities','pipeline','flow','axLoop','axScreens','axNotes','ax','skills','education','awards'];
 var GRID={
   profile:{ label:'프로필', icon:'👤', single:true,
-    cols:[['nameKo','이름(국문)'],['nameEn','이름(영문)'],['title','타이틀',1],['tagline','태그라인',1],['summary','요약',2],['email','이메일'],['phone','전화'],['location','지역'],['heroHeadline','히어로 헤드라인',1],['rotWords','회전문구(쉼표)','arr',1]],
+    cols:[['nameKo','이름(국문)'],['nameEn','이름(영문)'],['title','타이틀',1],['tagline','태그라인',1],['summary','요약',2],['email','이메일'],['phone','전화'],['location','지역'],['heroHeadline','히어로 헤드라인 ({rot}=회전문구)',2],['rotWords','회전문구(쉼표)','arr',1]],
     rows:function(){ LIB.profile=LIB.profile||{}; return [{o:LIB.profile,hostArr:null}]; } },
   companies: flatCfg('회사','🏢','companies',function(){return {id:uid(),nameKo:'',nameEn:'',serviceKo:'',serviceEn:'',useService:false,role:'',startDate:'',endDate:'',periodText:'',summary:'',logo:'',metrics:[],works:[]};},
     [['nameKo','회사명(국문)'],['nameEn','회사명(영문)'],['serviceKo','서비스명(국문)'],['serviceEn','서비스명(영문)'],['useService','서비스명 표시','bool'],['role','역할',1],['startDate','시작'],['endDate','종료'],['periodText','표시기간'],['summary','요약',2],['logo','로고 URL',1]]),
@@ -1118,8 +1118,9 @@ function renderAXAdmin(){
   const stats=(LIB.highlights||[]).map((h,i)=>item(two(ti(`highlights.${i}.value`,h.value,'값 (예:187%)'),ti(`highlights.${i}.label`,h.label,'라벨 (예:ROAS 개선)')),`highlights.${i}`)).join('')+add('highlights','지표 추가');
   const stack=(LIB.profile.stack||[]).map((s,i)=>item(two(ti(`profile.stack.${i}.area`,s.area,'영역 (예:Ads)'),ti(`profile.stack.${i}.title`,s.title,'제목'))+lbl('설명')+ta(`profile.stack.${i}.desc`,s.desc,'설명'),`profile.stack.${i}`)).join('')+add('profile.stack','스택 추가');
   const hero=sec('Hero (히어로)',
-    lbl('헤드라인 1행 (예: 데이터로 설계하고,)')+ti('profile.heroHeadline',LIB.profile.heroHeadline,'데이터로 설계하고,')+
-    lbl('회전 문구 (줄바꿈 = 항목, 히어로에서 순환)')+taLines('profile.rotWords',LIB.profile.rotWords,'AI 자동화\n트래킹 설계\nCRM 시나리오')+
+    lbl('헤드라인 (여러 줄 가능 · {rot} 자리에 회전문구가 들어감)')+ta('profile.heroHeadline',LIB.profile.heroHeadline,'데이터로 설계하고,\n{rot}로 증명하는\n풀스택 마케터.',3)+
+    lbl('회전 문구 ({rot} 자리에서 순환 · 줄바꿈 = 항목)')+taLines('profile.rotWords',LIB.profile.rotWords,'AI 자동화\n트래킹 설계\nCRM 시나리오')+
+    lbl('히어로 아래 설명 (lede · 헤드라인 밑 문단)')+ta('profile.summary',LIB.profile.summary,'매체 운영부터 트래킹 설계, CRM, 콘텐츠 제작까지 퍼널 전 구간을 직접 다룹니다.',4)+
     lbl('히어로 지표 (앞 3개가 히어로에 큰 숫자로 표시)')+stats+
     lbl('AI·자동화 스택 (AX 탭 하단 그리드)')+stack);
 
