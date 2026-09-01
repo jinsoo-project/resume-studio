@@ -395,6 +395,18 @@
   .rv.on .sharebar{transform:scaleX(1)}
   @media(max-width:960px){.kpis5{grid-template-columns:repeat(3,1fr)}}
   @media(max-width:600px){.kpis5{grid-template-columns:1fr}}
+  /* ── 성과·효과 밴드 + 예시 배지 ── */
+  .impact{margin-top:28px;display:grid;grid-template-columns:158px 1fr 1fr 1fr;border:1px solid var(--line);border-radius:16px;overflow:hidden;background:#fff;box-shadow:var(--shadow)}
+  .impact .ih{background:var(--ink);color:#fff;display:flex;flex-direction:column;justify-content:center;gap:4px;padding:16px 18px}
+  .impact .ih b{font-size:15px;font-weight:900;letter-spacing:-.02em}
+  .impact .ih small{font-weight:800;color:#aeb4c8;font-size:10px;letter-spacing:.14em}
+  .impact .ii{padding:15px 18px;border-left:1px solid var(--line)}
+  .impact .ii b{display:block;font-size:14px;font-weight:900;letter-spacing:-.01em;color:var(--ink)}
+  .impact .ii b i{font-style:normal;color:var(--mint);margin-right:6px}
+  .impact .ii span{display:block;font-size:12px;color:var(--sub);margin-top:4px;line-height:1.5}
+  .exbadge{font-size:10px;font-weight:800;color:#b5791b;background:#fff4e2;border:1px solid #ffe1b0;border-radius:6px;padding:2px 8px;letter-spacing:.02em;white-space:nowrap;vertical-align:middle}
+  .exnote{font-size:11.5px;color:var(--faint);font-weight:700}
+  @media(max-width:900px){.impact{grid-template-columns:1fr}.impact .ii{border-left:none;border-top:1px solid var(--line)}}
   @media (prefers-reduced-motion: reduce){*{animation-duration:.01ms!important;transition-duration:.01ms!important}}
 </style>
 </head>
@@ -420,6 +432,7 @@
       <div class="stat glow rv"><b data-n="8">0</b><span>자동 데이터 파이프라인</span></div>
       <div class="stat glow rv"><b>½<i>일</i></b><span>요청 → 배포 리드타임</span></div>
     </div>
+    <div class="exnote" style="text-align:center;margin-top:18px">※ 이 페이지의 모든 수치는 <b style="color:#b5791b">예시</b>입니다 — 실제 데이터가 아닙니다</div>
   </div>
 </header>
 
@@ -449,6 +462,12 @@
         <div class="pr glow"><span class="tag">DESIGN PRINCIPLE 03</span><b>측정과 집행의 통합</b><p>성과 화면과 집행 화면이 같은 콘솔에 있습니다. 기획된 소재 문구는 캠페인 빌더로 자동 매핑되고, 빌더는 매체 API로 집행하며, 결과는 다시 성과 화면으로 돌아옵니다.</p></div>
       </div>
     </div>
+    <div class="impact rv">
+      <div class="ih"><small>SO WHAT</small><b>그래서 성과는</b></div>
+      <div class="ii"><b><i>↓</i>운영 리소스 절감</b><span>도구 사이 복사·붙여넣기 이관 제거 — 반복 취합에 쓰던 시간을 회수합니다.</span></div>
+      <div class="ii"><b><i>≡</i>지표 해석 통일</b><span>전 화면이 같은 지표 사전 — 탭마다 다른 숫자로 대사하는 일이 사라집니다.</span></div>
+      <div class="ii"><b><i>↺</i>측정 → 실행 단축</b><span>성과 확인과 다음 실행 사이의 왕복이 짧아집니다.</span></div>
+    </div>
   </div>
 </section>
 
@@ -462,7 +481,7 @@
       <button class="selc" data-p="p3"><span class="no">03</span><h3>히스토리 · 워크플로우</h3><p>소통과 실행 기록이 자동으로 남는 업무 구조를 만들었습니다.</p><span class="prog"><i></i></span></button>
     </div>
     <div class="persp rv"><div class="screen" id="screen">
-      <div class="tbar"><i></i><i></i><i></i><span>console / dashboard</span><span class="live"><i></i>LIVE</span></div>
+      <div class="tbar"><i></i><i></i><i></i><span>console / dashboard</span><span class="exbadge" style="margin-left:auto">예시 수치</span><span class="live" style="margin-left:8px"><i></i>LIVE</span></div>
       <div class="pane on" id="p1">
         <div class="fbar"><span class="f on">최근 30일</span><span class="f">지난주</span><span class="f">지난달</span><span class="f">직접 지정 📅</span><span class="f" style="margin-left:auto">일</span><span class="f on">주</span><span class="f">월</span></div>
         <div class="kpis">
@@ -528,7 +547,7 @@
           <span class="mf">매체 API 집행<br><small style="font-weight:600;color:var(--faint)">일시중지로 생성</small></span><span class="mfa">→</span>
           <span class="mf">성과 회수<br><small style="font-weight:600;color:var(--faint)">소재별 CTR · CPA</small></span>
         </div>
-        <div class="panelbox" style="margin-top:14px"><h4>집행 캠페인 성과 — 소재에서 출발한 캠페인이 여기로 돌아옵니다</h4>
+        <div class="panelbox" style="margin-top:14px"><h4>집행 캠페인 성과 — 소재에서 출발한 캠페인이 여기로 돌아옵니다 <span class="exbadge">예시 수치</span></h4>
         <table class="tbl">
           <tr><th>캠페인</th><th style="text-align:left">비중</th><th>광고비</th><th>가입</th><th>구매</th><th>CAC</th><th>ROAS</th></tr>
           <tr><td><span class="pill">소셜</span> 전환 캠페인 A</td><td style="text-align:left"><i class="sharebar" style="width:96px"></i></td><td>₩1,240,000</td><td>96</td><td>14</td><td>₩12,900</td><td>21.2x</td></tr>
@@ -693,7 +712,7 @@
       </div>
 
       <div class="duo" style="margin-top:14px">
-        <div class="panelbox"><h4>채널별 유닛 이코노믹스 — CAC와 LTV:CAC로 상한을 정합니다</h4>
+        <div class="panelbox"><h4>채널별 유닛 이코노믹스 — CAC와 LTV:CAC로 상한을 정합니다 <span class="exbadge">예시 수치</span></h4>
           <table class="tbl">
             <tr><th>채널</th><th style="text-align:left">LTV : CAC</th><th>광고비</th><th>신규</th><th>CAC</th><th>12M LTV</th><th>회수</th><th>판정</th></tr>
             <tr><td><span class="pill g">검색</span> 브랜드 키워드</td><td style="text-align:left"><i class="sharebar" style="width:118px"></i>11.9x</td><td>₩310,000</td><td>24</td><td>₩12,900</td><td>₩154,000</td><td>1.6개월</td><td><span class="pill g">확대</span></td></tr>
@@ -718,7 +737,7 @@
         </div>
       </div>
 
-      <div class="panelbox" style="margin-top:14px"><h4>소재 → LTV 기여 — 클릭(CTR)이 아니라 '데려온 유저가 남기는 값'으로 평가 <span style="color:var(--violet)">· 콘텐츠 × 퍼포먼스 연결</span></h4>
+      <div class="panelbox" style="margin-top:14px"><h4>소재 → LTV 기여 — 클릭(CTR)이 아니라 '데려온 유저가 남기는 값'으로 평가 <span style="color:var(--violet)">· 콘텐츠 × 퍼포먼스 연결</span> <span class="exbadge">예시 수치</span></h4>
         <table class="tbl">
           <tr><th>소재 · 콘텐츠</th><th>CTR</th><th>구매 CPA</th><th>신규</th><th>90일 LTV</th><th>LTV : CAC</th><th>판정</th></tr>
           <tr><td><span class="fn">promo_season_1080</span> · 시즌 프로모션</td><td>2.4%</td><td>₩11,200</td><td>96</td><td>₩88,000</td><td>5.6x</td><td><span class="pill g">확대</span></td></tr>
@@ -726,6 +745,12 @@
           <tr><td><span class="fn">offer_story_1920</span> · 오퍼 스토리</td><td>1.1%</td><td>₩22,400</td><td>28</td><td>₩41,000</td><td>1.8x</td><td><span class="pill r">교체</span></td></tr>
         </table>
         <div class="legend">후기 카드는 CTR이 가장 낮아도 LTV는 가장 높습니다 — CTR만 봤다면 껐을 소재를 LTV 기준으로 확대합니다</div>
+      </div>
+      <div class="impact">
+        <div class="ih"><small>SO WHAT</small><b>그래서 성과는</b></div>
+        <div class="ii"><b><i>↓</i>예산 누수 차단</b><span>채널별 CAC 상한을 데이터로 — 밑 빠진 채널에 새는 지출을 조기에 끊습니다.</span></div>
+        <div class="ii"><b><i>◎</i>소재 판단 정확도</b><span>CTR이 아니라 LTV로 평가 — 클릭만 높고 안 남는 소재를 걸러냅니다.</span></div>
+        <div class="ii"><b><i>⚡</i>의사결정 속도</b><span>LTV:CAC로 확대·축소를 자동 분류 — 감이 아니라 기준으로 정합니다.</span></div>
       </div>
     </div>
   </div>
@@ -764,6 +789,12 @@
         <div class="rl ok"><i>✓</i><b>이상 감지 · 정상</b></div>
       </div>
       <div class="term"><div class="th"><i></i><i></i><i></i><span style="margin-left:6px">console — automation.log</span></div><div id="alog"></div></div>
+    </div>
+    <div class="impact rv">
+      <div class="ih"><small>SO WHAT</small><b>그래서 성과는</b></div>
+      <div class="ii"><b><i>↓</i>모니터링 리소스 절감</b><span>사람이 매번 안 봐도 규칙이 24시간 감시 — 반복 점검·조정을 대체합니다.</span></div>
+      <div class="ii"><b><i>◆</i>나쁜 지출 조기 차단</b><span>CAC·ROAS 가드레일이 임계 초과를 자동 정지 — 손실을 하루 안에 끊습니다.</span></div>
+      <div class="ii"><b><i>✓</i>계측 안정성</b><span>전환 0·스펜드 진행을 감지해 픽셀·이벤트 유실을 조기에 발견합니다.</span></div>
     </div>
   </div>
 </section>
@@ -820,13 +851,19 @@
           <div class="rl"><i>2</i><b>AI 코딩</b></div>
           <div class="rl"><i>3</i><b>환경변수 · 시크릿</b></div>
           <div class="rl"><i>4</i><b>자동 검증</b></div>
-          <div class="rl"><i>5</i><b>코드 리뷰</b></div>
+          <div class="rl"><i>5</i><b>AI 코드리뷰 · 게이트</b></div>
           <div class="rl"><i>6</i><b>코멘트 반영</b></div>
-          <div class="rl"><i>7</i><b>리뷰 승인</b></div>
+          <div class="rl"><i>7</i><b>자동 게이트 통과</b></div>
           <div class="rl"><i>8</i><b>머지</b></div>
           <div class="rl"><i>9</i><b>배포 · 적용 보고</b></div>
         </div>
         <div class="term"><div class="th"><i></i><i></i><i></i><span style="margin-left:6px" id="termName">console — delivery.log · 기능 추가</span></div><div id="tlog"></div></div>
+      </div>
+      <div class="impact">
+        <div class="ih"><small>SO WHAT</small><b>그래서 성과는</b></div>
+        <div class="ii"><b><i>⚡</i>리드타임 단축</b><span>요청 → 배포가 반나절 — 실험과 개선의 주기가 빨라집니다.</span></div>
+        <div class="ii"><b><i>↓</i>재작업·사고 감소</b><span>정의 우선 + AI 코드리뷰·자동 게이트 + 검증으로 되돌리는 일을 줄입니다.</span></div>
+        <div class="ii"><b><i>🔒</i>보안 리스크 최소화</b><span>키는 서버 시크릿 전용·노출 0, 롤백·헬스체크를 상비합니다.</span></div>
       </div>
     </div>
   </div>
@@ -880,9 +917,9 @@
       [1,'<span class="run">⚙</span> AI 코딩 — 판정 로직 · 배지 컴포넌트 <span class="dim">(파일 4)</span>'],
       [2,'<span class="dim">🔑</span> 환경변수 — 변경 없음 <span class="dim">(내부 로직)</span>'],
       [3,'<span class="run">⟳</span> 자동 검증 — 타입 <span class="ok">✓</span> 린트 <span class="ok">✓</span> 빌드 <span class="ok">✓</span>'],
-      [4,'<span class="run">👁</span> 코드 리뷰 — <span class="dim">"임계값은 상수로 빼자"</span> 코멘트 1'],
+      [4,'<span class="run">👁</span> AI 코드리뷰 —<span class="dim">"임계값은 상수로 빼자"</span> 코멘트 1'],
       [5,'<span class="run">✎</span> 코멘트 반영 — <span class="cmd">THRESHOLD</span> 분리 · 재검증 <span class="ok">✓</span>'],
-      [6,'<span class="ok">✓</span> 리뷰 승인 — <span class="ok">approved</span>'],
+      [6,'<span class="ok">✓</span> 자동 리뷰 게이트 통과 — <span class="ok">approved</span>'],
       [7,'<span class="ok">⇄</span> 머지 — <span class="cmd">PR #418</span> <span class="dim">(기능 1 = PR 1)</span>'],
       [8,'<span class="ok">✓</span> 배포 → 적용 보고 <span class="cmd">"적용되었어요"</span> <span class="dim">· 요청부터 38분</span>'],
     ]},
@@ -891,9 +928,9 @@
       [1,'<span class="run">⚙</span> AI 코딩 — 라우트 · 쿼리 · 차트 <span class="dim">(파일 7)</span>'],
       [2,'<span class="run">🔑</span> 환경변수 — <span class="cmd">REFERRAL_API_BASE</span> 추가 <span class="dim">(서버 시크릿)</span>'],
       [3,'<span class="run">⟳</span> 자동 검증 — 타입 · 린트 · 빌드 <span class="ok">통과</span>'],
-      [4,'<span class="run">👁</span> 코드 리뷰 — <span class="dim">"빈 상태 UI 필요"</span> 코멘트 1'],
+      [4,'<span class="run">👁</span> AI 코드리뷰 —<span class="dim">"빈 상태 UI 필요"</span> 코멘트 1'],
       [5,'<span class="run">✎</span> 코멘트 반영 — empty-state · 로딩 스켈레톤 추가'],
-      [6,'<span class="ok">✓</span> 리뷰 승인'],
+      [6,'<span class="ok">✓</span> 자동 리뷰 게이트 통과'],
       [7,'<span class="ok">⇄</span> 머지 — <span class="cmd">PR #421</span>'],
       [8,'<span class="ok">✓</span> 배포 감시 <span class="dim">(2분 09초)</span> → 적용 보고'],
     ]},
@@ -902,9 +939,9 @@
       [1,'<span class="run">⚙</span> AI 코딩 — 소재 밸리데이터 · 카탈로그 피드 매핑 <span class="dim">(파일 5)</span>'],
       [2,'<span class="run">🔑</span> 환경변수 — <span class="cmd">META_CATALOG_TOKEN</span> 로테이션 <span class="dim">(값 노출 X)</span>'],
       [3,'<span class="run">⟳</span> 자동 검증 — 빌드 <span class="ok">통과</span> · 시크릿 스캔 <span class="ok">✓</span>'],
-      [4,'<span class="run">👁</span> 코드 리뷰 — <span class="dim">"검수 실패 사유를 로그로"</span> 코멘트'],
+      [4,'<span class="run">👁</span> AI 코드리뷰 —<span class="dim">"검수 실패 사유를 로그로"</span> 코멘트'],
       [5,'<span class="run">✎</span> 코멘트 반영 — 실패 케이스 로깅 추가'],
-      [6,'<span class="ok">✓</span> 리뷰 승인'],
+      [6,'<span class="ok">✓</span> 자동 리뷰 게이트 통과'],
       [7,'<span class="ok">⇄</span> 머지 — <span class="cmd">PR #424</span>'],
       [8,'<span class="ok">✓</span> 배포 → 카탈로그 피드 반영 → 적용 보고'],
     ]},
@@ -913,9 +950,9 @@
       [1,'<span class="run">⚙</span> AI 코딩 — 키 참조가 서버 전용인지 확인 <span class="dim">(파일 2)</span>'],
       [2,'<span class="run">🔑</span> 환경변수 — <span class="cmd">NAVER_SA_SECRET</span> 교체 <span class="dim">· 화면 · 레포 · 대화 노출 0</span>'],
       [3,'<span class="run">⟳</span> 자동 검증 — 빌드 <span class="ok">통과</span> · 시크릿 스캔 <span class="ok">✓</span>'],
-      [4,'<span class="run">👁</span> 코드 리뷰 — <span class="dim">"롤백 플랜 명시"</span> 코멘트'],
+      [4,'<span class="run">👁</span> AI 코드리뷰 —<span class="dim">"롤백 플랜 명시"</span> 코멘트'],
       [5,'<span class="run">✎</span> 코멘트 반영 — 롤백 절차 · 헬스체크 추가'],
-      [6,'<span class="ok">✓</span> 리뷰 승인'],
+      [6,'<span class="ok">✓</span> 자동 리뷰 게이트 통과'],
       [7,'<span class="ok">⇄</span> 머지 — <span class="cmd">PR #427</span>'],
       [8,'<span class="ok">✓</span> 배포 → 헬스체크 <span class="ok">✓</span> → 적용 보고'],
     ]},
