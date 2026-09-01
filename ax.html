@@ -879,7 +879,14 @@
   const io = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) { e.target.classList.add("on"); io.unobserve(e.target) } }), { threshold: .15 })
   document.querySelectorAll(".rv").forEach(el => io.observe(el))
   // 임베드 모드(SPA AX 탭): iframe이 내부 스크롤이 없어 스크롤 리빌이 안 터지므로 로드 시 전부 표시
-  if (document.documentElement.classList.contains("embed")) document.querySelectorAll(".rv").forEach(el => el.classList.add("on"))
+  if (document.documentElement.classList.contains("embed")) {
+    document.querySelectorAll(".rv").forEach(el => el.classList.add("on"))
+    // iframe엔 내부 스크롤이 없으므로 휠/터치를 부모(SPA)로 전달해 페이지가 스크롤되게 (클릭 인터랙션은 유지)
+    addEventListener("wheel", function(e){ try{ parent.scrollBy(0, e.deltaY); e.preventDefault(); }catch(_){}}, {passive:false})
+    var _ty=0
+    addEventListener("touchstart", function(e){ _ty=e.touches[0].clientY }, {passive:true})
+    addEventListener("touchmove", function(e){ try{ var y=e.touches[0].clientY; parent.scrollBy(0, _ty-y); _ty=y; e.preventDefault(); }catch(_){}}, {passive:false})
+  }
   const co = new IntersectionObserver(es => es.forEach(e => {
     if (!e.isIntersecting) return; co.unobserve(e.target)
     const b = e.target, n = +b.dataset.n, t0 = performance.now()
