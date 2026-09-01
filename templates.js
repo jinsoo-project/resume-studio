@@ -288,7 +288,7 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
     var D = window.__AX || {};
     var INK = "#0a0f24", BLUE = "#335cff", VIOLET = "#7c5cff", MINT = "#0fbf9f", CORAL = "#ff5c7a", MUT = "#8b91a7", LINE = "#e8eaf2";
     var GRAD = "linear-gradient(120deg,#335cff,#7c5cff 55%,#0fbf9f)";
-    var st = { view: "home", companyIdx: 0, pipeIdx: 0, active: null, rotIdx: 0, statT: 0, sliding: false, loopIdx: 0, axCat: null };
+    var st = { view: "home", companyIdx: 0, pipeIdx: 0, active: null, rotIdx: 0, statT: 0, sliding: false, loopIdx: 0, axCat: null, caseFilter: null };
     var root = document.getElementById("ax-root");
     var e = function (s) { return String(s == null ? "" : s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;"); };
     var mono = "font-family:'IBM Plex Mono','Pretendard Variable',Pretendard,monospace";
@@ -432,7 +432,50 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
       return '<footer id="contact" style="padding:96px 0 80px"><div class="axmono" style="font-size:13px;letter-spacing:.16em;color:#335cff;margin-bottom:24px">CONTACT</div><h2 style="margin:0 0 32px;font-size:clamp(26px,3.2vw,44px);font-weight:800;letter-spacing:-.03em;line-height:1.15">퍼널 전체를 맡길 수 있는<br>마케터를 찾고 계신가요?</h2><div style="display:flex;gap:32px;font-size:16px;flex-wrap:wrap">' + (D.email ? '<a href="mailto:' + e(D.email) + '" style="border-bottom:2px solid #0a0f24;padding-bottom:3px;font-weight:600">' + e(D.email) + '</a>' : "") + links + '</div><div class="axmono" style="margin-top:72px;padding-top:24px;border-top:1px solid #e8eaf2;font-size:12px;color:#9aa2b3;display:flex;justify-content:space-between"><span>© ' + new Date().getFullYear() + ' ' + e(D.resumeName) + '</span><span>' + e(D.location) + '</span></div></footer>';
     }
 
-    function view() { return st.view === "cases" ? cases() : st.view === "resume" ? resume() : st.view === "ax" ? ax() : home(); }
+    function chipStyle(on) { return 'font-size:12.5px;font-weight:600;padding:8px 15px;border-radius:999px;cursor:pointer;transition:all .2s;border:1px solid ' + (on ? INK : '#e8eaf2') + ';background:' + (on ? INK : '#fff') + ';color:' + (on ? '#fff' : '#4b5268'); }
+    function caseThumb(p, co) {
+      var img = null;
+      (p.media || []).some(function (m) { if (m.url && (m.type === "image" || !m.type)) { img = m.url; return true; } });
+      if (!img) (p.links || []).some(function (l) { var y = ytId(l.url); if (y) { img = "https://img.youtube.com/vi/" + y + "/hqdefault.jpg"; return true; } });
+      if (img) return '<div style="aspect-ratio:16/10;overflow:hidden;background:#eef1f8"><img src="' + e(img) + '" loading="lazy" style="width:100%;height:100%;object-fit:cover;display:block"></div>';
+      return '<div style="aspect-ratio:16/10;background:linear-gradient(135deg,#eaf0ff,#f3ecff 55%,#e6faf4);display:flex;align-items:center;justify-content:center;padding:16px">' + (co.logo ? '<img src="' + e(co.logo) + '" style="max-height:46px;max-width:64%;object-fit:contain">' : '<span class="axgrad" style="font-size:22px;font-weight:800">' + e(co.name) + '</span>') + '</div>';
+    }
+    function caseCard(x) {
+      var p = x.p, co = x.co;
+      var mets = (p.metrics || []).slice(0, 2).map(function (m) { return '<div><div class="axgrad" style="font-size:22px;font-weight:800;letter-spacing:-.02em;display:inline-block">' + e(m.v) + '</div><div style="font-size:11.5px;color:#8b91a7;margin-top:1px">' + e(m.k) + '</div></div>'; }).join("");
+      var tgs = (p.tags || []).slice(0, 2).map(function (t) { return '<span class="axmono" style="font-size:10.5px;padding:3px 9px;border-radius:999px;background:#eef1f8;color:#4b5268">' + e(t) + '</span>'; }).join("");
+      return '<button data-ax-case="' + x.ci + '-' + x.pi + '" class="axcard" style="text-align:left;background:#fff;border:1px solid #e8eaf2;border-radius:16px;overflow:hidden;cursor:pointer;box-shadow:0 6px 20px -12px rgba(20,28,70,.12);display:flex;flex-direction:column;padding:0">' + caseThumb(p, co) + '<div style="padding:16px 18px 18px;display:flex;flex-direction:column;gap:11px;flex:1"><div style="display:flex;align-items:center;gap:8px">' + (co.logo ? '<img src="' + e(co.logo) + '" style="height:15px;max-width:66px;object-fit:contain">' : '') + '<span class="axmono" style="font-size:11px;color:#8b91a7">' + e(co.name) + '</span></div><div style="font-size:16px;font-weight:700;line-height:1.4;letter-spacing:-.02em;color:#0a0f24">' + e(p.title) + '</div>' + (mets ? '<div style="display:flex;gap:22px;margin-top:2px">' + mets + '</div>' : '') + (tgs ? '<div style="display:flex;flex-wrap:wrap;gap:5px">' + tgs + '</div>' : '') + '<div style="margin-top:auto;padding-top:6px;font-size:13px;font-weight:700;color:#335cff">자세히 보기 →</div></div></button>';
+    }
+    function caseModalHtml(ci, pi) {
+      var co = (D.companies || [])[ci]; if (!co) return "";
+      var p = (co.projects || [])[pi]; if (!p) return "";
+      var mets = (p.metrics || []).map(function (m) { return '<div><div class="axgrad" style="font-size:30px;font-weight:800;letter-spacing:-.03em;display:inline-block">' + e(m.v) + '</div><div style="font-size:12.5px;color:#8b91a7;margin-top:2px">' + e(m.k) + '</div></div>'; }).join("");
+      var tgs = (p.tags || []).map(function (t) { return '<span class="axmono" style="font-size:11.5px;padding:5px 12px;border-radius:999px;background:#eef1f8;color:#4b5268">' + e(t) + '</span>'; }).join("");
+      var pb = function (en, kr, col, bg, bd, txt) { return '<div style="background:' + bg + ';border:1px solid ' + bd + ';border-radius:14px;padding:18px 20px;margin-bottom:12px"><div class="axmono" style="font-size:11px;letter-spacing:.1em;color:' + col + ';margin-bottom:8px">' + en + ' · ' + kr + '</div><p style="margin:0;font-size:14.5px;line-height:1.7;color:#0a0f24">' + e(txt) + '</p></div>'; };
+      var par = (p.problem ? pb('CHALLENGE', '과제', '#e0436a', '#fff1f4', '#ffdde5', p.problem) : '') + (p.action ? pb('SOLUTION', '실행', '#7c5cff', '#f6f7fb', '#e8eaf2', p.action) : '') + (p.result ? pb('RESULTS', '성과', '#335cff', '#eef2ff', '#dfe6ff', p.result) : '');
+      var media = mediaGrid(p.links, p.media);
+      return '<div style="background:#fff;border-radius:18px;max-width:min(880px,94vw);max-height:88vh;overflow-y:auto;box-shadow:0 30px 80px rgba(10,16,40,.5);text-align:left">' +
+        '<div style="padding:28px clamp(22px,4vw,40px) 6px">' +
+        '<div style="display:flex;align-items:center;gap:12px;margin-bottom:16px">' + (co.logo ? '<img src="' + e(co.logo) + '" style="height:26px;max-width:120px;object-fit:contain">' : '') + '<div><div style="font-size:14px;font-weight:700">' + e(co.name) + '</div><div style="font-size:12px;color:#8b91a7">' + e(co.role) + '</div></div></div>' +
+        (tgs ? '<div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px">' + tgs + '</div>' : '') +
+        '<h2 style="margin:0;font-size:clamp(22px,2.4vw,32px);font-weight:800;letter-spacing:-.03em;line-height:1.25">' + e(p.title) + '</h2>' +
+        (p.desc ? '<p style="margin:10px 0 0;font-size:15px;line-height:1.7;color:#4b5268">' + e(p.desc) + '</p>' : '') +
+        (mets ? '<div style="display:flex;flex-wrap:wrap;gap:clamp(24px,4vw,44px);margin:22px 0 2px;padding:20px 0;border-top:1px solid #e8eaf2;border-bottom:1px solid #e8eaf2">' + mets + '</div>' : '') +
+        '</div>' +
+        '<div style="padding:16px clamp(22px,4vw,40px) 32px">' + par + (media ? '<div style="margin-top:8px">' + media + '</div>' : '') + '</div>' +
+        '</div>';
+    }
+    function cases2() {
+      var cos = D.companies || []; if (!cos.length) return '<section style="padding:80px 0;color:#8b91a7">등록된 회사가 없습니다.</section>';
+      var all = []; cos.forEach(function (co, ci) { (co.projects || []).forEach(function (p, pi) { all.push({ co: co, ci: ci, pi: pi, p: p }); }); });
+      var f = st.caseFilter;
+      var shown = (f == null) ? all : all.filter(function (x) { return x.ci === f; });
+      var chips = '<button data-ax-cofilter="all" class="axmono" style="' + chipStyle(f == null) + '">전체 ' + all.length + '</button>' + cos.map(function (co, ci) { return '<button data-ax-cofilter="' + ci + '" class="axmono" style="' + chipStyle(f === ci) + '">' + e(co.name) + ' ' + (co.projects || []).length + '</button>'; }).join("");
+      var cards = shown.map(caseCard).join("");
+      return '<section id="cases" style="padding:64px 0 80px;border-bottom:1px solid #e8eaf2"><h2 style="margin:0;font-size:clamp(22px,2vw,31px);font-weight:800;letter-spacing:-.025em">프로젝트 · 케이스 스터디</h2><p style="margin:10px 0 0;font-size:15px;color:#8b91a7">카드를 누르면 상세 사례가 모달로 열립니다.</p><div style="display:flex;flex-wrap:wrap;gap:8px;margin:24px 0 28px">' + chips + '</div><div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:clamp(14px,1.6vw,22px)">' + cards + '</div></section>';
+    }
+
+    function view() { return st.view === "cases" ? cases2() : st.view === "resume" ? resume() : st.view === "ax" ? ax() : home(); }
 
     function render() {
       root.innerHTML = nav() + view() + footer();
@@ -491,7 +534,7 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
 
     // ---- interactions (event delegation) ----
     document.addEventListener("click", function (ev) {
-      var t = ev.target.closest("[data-ax-view],[data-ax-co],[data-ax-co-idx],[data-ax-chip],[data-ax-pipe],[data-ax-loop],[data-ax-cat]"); if (!t) return;
+      var t = ev.target.closest("[data-ax-view],[data-ax-co],[data-ax-co-idx],[data-ax-chip],[data-ax-pipe],[data-ax-loop],[data-ax-cat],[data-ax-cofilter],[data-ax-case]"); if (!t) return;
       if (t.hasAttribute("data-ax-view")) { st.view = t.getAttribute("data-ax-view"); st.active = null; window.scrollTo(0, 0); render(); }
       else if (t.hasAttribute("data-ax-co")) { var n = (D.companies || []).length || 1; st.sliding = true; render(); var dir = t.getAttribute("data-ax-co") === "next" ? 1 : -1; setTimeout(function () { st.companyIdx = ((st.companyIdx + dir) % n + n) % n; st.sliding = false; render(); }, 200); }
       else if (t.hasAttribute("data-ax-co-idx")) { st.companyIdx = +t.getAttribute("data-ax-co-idx"); render(); }
@@ -499,6 +542,8 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
       else if (t.hasAttribute("data-ax-pipe")) { st.pipeIdx = +t.getAttribute("data-ax-pipe"); render(); }
       else if (t.hasAttribute("data-ax-loop")) { st.loopIdx = +t.getAttribute("data-ax-loop"); render(); }
       else if (t.hasAttribute("data-ax-cat")) { var cv = t.getAttribute("data-ax-cat"); st.axCat = cv === "__all" ? null : cv; render(); }
+      else if (t.hasAttribute("data-ax-cofilter")) { var cf = t.getAttribute("data-ax-cofilter"); st.caseFilter = cf === "all" ? null : +cf; render(); }
+      else if (t.hasAttribute("data-ax-case")) { var pr = t.getAttribute("data-ax-case").split("-"); modalOpen(caseModalHtml(+pr[0], +pr[1])); }
     });
 
     // ---- media modal (영상 임베드 / 이미지 라이트박스) ----
