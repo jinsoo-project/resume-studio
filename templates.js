@@ -413,7 +413,8 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
       // stack
       var stack = (D.stack || []).map(function (s) { return '<div style="background:#fbfbf9;padding:28px"><div class="axmono" style="font-size:12px;letter-spacing:.1em;color:#3a56d4;margin-bottom:12px">' + e(s.area) + '</div><div style="font-size:18.5px;font-weight:700;margin-bottom:8px">' + e(s.title) + '</div><p style="margin:0;font-size:14px;line-height:1.65;color:#5a5c63">' + e(s.desc) + '</p></div>'; }).join("");
       var stackSection = (D.stack || []).length ? '<section style="padding:56px 0;border-bottom:1px solid #e4e4de"><h2 style="margin:0 0 16px;font-size:clamp(22px,2.2vw,34px);font-weight:800;letter-spacing:-.025em">AI · 자동화 스택</h2><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1px;background:#e4e4de;border:1px solid #e4e4de">' + stack + '</div></section>' : "";
-      return intro + loopSection + prinSection + catSection + defSection + stackSection;
+      // AX 탭 = 독립 마케팅 콘솔 페이지(/ax)를 임베드 모드로 풀블리드 iframe 삽입 (헤더는 기존 SPA nav 유지)
+      return '<div style="width:100vw;margin-left:calc(50% - 50vw)"><iframe id="ax-embed-frame" src="/ax?embed=1" title="AX 마케팅 콘솔" scrolling="no" style="width:100%;border:0;display:block;min-height:3000px;background:#fbfbf9"></iframe></div>';
     }
 
     function footer() {
@@ -426,6 +427,23 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
     function render() {
       root.innerHTML = nav() + view() + footer();
       if (st.view === "home") { startStats(); startFlow(); }
+      if (st.view === "ax") { syncAxFrame(); }
+    }
+
+    function syncAxFrame() {
+      var f = document.getElementById("ax-embed-frame"); if (!f) return;
+      var maxH = 0, tries = 0;
+      function fit() {
+        if (!document.body.contains(f)) return;
+        try {
+          var d = f.contentWindow && f.contentWindow.document;
+          var h = d ? Math.max(d.documentElement.scrollHeight, d.body ? d.body.scrollHeight : 0) : 0;
+          if (h > maxH) { maxH = h; f.style.height = h + "px"; }
+        } catch (e) {}
+        if (++tries < 140) setTimeout(fit, 400);
+      }
+      f.addEventListener("load", function () { tries = 0; fit(); });
+      fit();
     }
 
     // ---- animations ----
