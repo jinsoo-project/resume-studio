@@ -411,6 +411,26 @@
   /* 임베드 모드(SPA AX 탭 안에 들어갈 때 — 자체 헤더 숨김) */
   html.embed nav{display:none}
   html.embed header{padding-top:56px}
+  /* 도구별 관점(WHY) — 문제 → 관점 → 도구 */
+  .why{display:flex;flex-direction:column;gap:14px;margin-top:36px}
+  .rat{background:#fff;border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow);overflow:hidden;transition:transform .25s,box-shadow .25s}
+  .rat:hover{transform:translateY(-3px);box-shadow:0 20px 44px rgba(20,28,70,.13)}
+  .rat .rhead{display:flex;align-items:center;gap:12px;padding:15px 20px;border-bottom:1px solid var(--line)}
+  .rat .ric{width:40px;height:40px;border-radius:12px;display:grid;place-items:center;font-size:19px;flex:none}
+  .rat .rhead b{font-size:16px;font-weight:900;letter-spacing:-.02em;display:block;line-height:1.3}
+  .rat .rhead .rsub{font-size:12px;color:var(--sub)}
+  .rat .rtag{margin-left:auto;font-size:10.5px;font-weight:900;padding:5px 12px;border-radius:999px;background:#eef2ff;color:var(--blue);white-space:nowrap}
+  .rat .rbody{padding:4px 20px 14px}
+  .rline{display:grid;grid-template-columns:118px 1fr;gap:16px;align-items:start;padding:12px 0;border-top:1px dashed var(--line)}
+  .rline:first-child{border-top:none}
+  .rline .rl{font-size:11px;font-weight:900;letter-spacing:.01em;padding:5px 10px;border-radius:8px;text-align:center;white-space:nowrap}
+  .rline .rl.p{background:#fff1f4;color:#e0436a}
+  .rline .rl.v{background:#f0edff;color:#6b4bff}
+  .rline .rl.s{background:#e6faf4;color:#0aa07f}
+  .rline p{margin:0;font-size:13.5px;line-height:1.7}
+  .rline.pl p{color:var(--sub)}
+  .rline.sl p{color:#0a0f24;font-weight:600}
+  @media(max-width:640px){.rline{grid-template-columns:1fr;gap:6px}.rline .rl{justify-self:start}}
   @media (prefers-reduced-motion: reduce){*{animation-duration:.01ms!important;transition-duration:.01ms!important}}
 </style>
 </head>
@@ -471,6 +491,70 @@
       <div class="ii"><b><i>↓</i>운영 리소스 절감</b><span>도구 사이 복사·붙여넣기 이관 제거 — 반복 취합에 쓰던 시간을 회수합니다.</span></div>
       <div class="ii"><b><i>≡</i>지표 해석 통일</b><span>전 화면이 같은 지표 사전 — 탭마다 다른 숫자로 대사하는 일이 사라집니다.</span></div>
       <div class="ii"><b><i>↺</i>측정 → 실행 단축</b><span>성과 확인과 다음 실행 사이의 왕복이 짧아집니다.</span></div>
+    </div>
+  </div>
+</section>
+
+<section id="why">
+  <div class="wrap">
+    <div class="sec-head rv"><span class="kick" style="color:var(--violet)">WHY IT EXISTS</span><h2>도구마다의 관점 — 번거로움을 구조로 풀다</h2>
+    <p class="desc">지표가 흩어지고, 세팅이 느리고, 히스토리가 사라지던 번거로움.<br>핵심 도구는 전부 그 문제에서 출발해 설계했습니다.</p></div>
+    <div class="why rv">
+
+      <div class="rat">
+        <div class="rhead"><span class="ric" style="background:#eaf0ff;color:#335cff">📊</span><div style="flex:1"><b>통합 성과 대시보드</b><span class="rsub">서비스지표 × 마케팅지표를 한 판에</span></div><span class="rtag">의사결정</span></div>
+        <div class="rbody">
+          <div class="rline pl"><span class="rl p">번거로웠던 것</span><p>서비스(대시보드) 지표와 마케팅 지표를 늘 함께 봐야 하는데 기준이 다르고 화면마다 흩어져 있었습니다. 마케팅이 서비스 지표에 얼마나 기여하고 효과가 있는지 비교하는 과정이 번거로워 의사결정이 느렸습니다.</p></div>
+          <div class="rline"><span class="rl v">그래서 · 관점</span><p>서비스지표와 마케팅지표를 한 곳에서, 같은 정의로 봅니다. 기여도와 효과를 바로 비교해 의사결정을 빠르게.</p></div>
+          <div class="rline sl"><span class="rl s">이렇게 · 도구</span><p>거래액 3레이어(확정·현금유동·순액)와 채널별 CAC·ROAS·퍼널을 한 판에. 지표 사전 하나를 전 화면이 임포트.</p></div>
+        </div>
+      </div>
+
+      <div class="rat">
+        <div class="rhead"><span class="ric" style="background:#fff2e5;color:#cf7a12">🚀</span><div style="flex:1"><b>캠페인 빌더</b><span class="rsub">광고관리자의 느린 세팅을 템플릿으로</span></div><span class="rtag">집행 효율</span></div>
+        <div class="rbody">
+          <div class="rline pl"><span class="rl p">번거로웠던 것</span><p>광고관리자의 느린 UX와 반복되는 세팅. 캠페인·세트·소재를 매번 새로 만들다 보니 시간이 들고 실수가 났습니다.</p></div>
+          <div class="rline"><span class="rl v">그래서 · 관점</span><p>자주 쓰는 세팅을 템플릿화해 그대로 옮겨 집행. 라이브 이후 운영은 얼럿·알림으로 간편하게 확인.</p></div>
+          <div class="rline sl"><span class="rl s">이렇게 · 도구</span><p>광고관리자 문법 그대로의 트리 인라인 편집 → 버튼 한 번에 API로 전송(항상 PAUSED). 집행 뒤엔 가드레일이 대신 지켜봅니다.</p></div>
+        </div>
+      </div>
+
+      <div class="rat">
+        <div class="rhead"><span class="ric" style="background:#e6faf4;color:#0aa07f">🛡</span><div style="flex:1"><b>퍼포먼스 자동화</b><span class="rsub">사람 대신 규칙이 24시간 감시</span></div><span class="rtag">운영 자동화</span></div>
+        <div class="rbody">
+          <div class="rline pl"><span class="rl p">번거로웠던 것</span><p>성과를 사람이 매번 들여다보며 예산을 조정했고, 나쁜 지출을 늦게 발견하기 일쑤였습니다.</p></div>
+          <div class="rline"><span class="rl v">그래서 · 관점</span><p>판단 기준을 규칙(가드레일)으로 걸어 24시간 감시. 임계치를 넘으면 자동으로 줄이고 알립니다.</p></div>
+          <div class="rline sl"><span class="rl s">이렇게 · 도구</span><p>ROAS·CAC 가드레일, 매시 롤링 재수집, 소재 피로도 로테이션, 이상 감지 → Slack·타임라인 알림.</p></div>
+        </div>
+      </div>
+
+      <div class="rat">
+        <div class="rhead"><span class="ric" style="background:#f0edff;color:#6b4bff">🎯</span><div style="flex:1"><b>콘텐츠 → 퍼포먼스 연결</b><span class="rsub">기획이 곧 집행, 소재는 LTV로 평가</span></div><span class="rtag">파이프라인</span></div>
+        <div class="rbody">
+          <div class="rline pl"><span class="rl p">번거로웠던 것</span><p>콘텐츠 기획과 광고 집행·성과가 분리돼 문구를 다시 옮겨 적었고, 소재는 CTR까지만 평가됐습니다.</p></div>
+          <div class="rline"><span class="rl v">그래서 · 관점</span><p>소재 문구가 그대로 빌더로 흐르고, 소재를 클릭이 아니라 LTV로 평가. 콘텐츠가 성과로 이어지는 한 흐름으로.</p></div>
+          <div class="rline sl"><span class="rl s">이렇게 · 도구</span><p>소재 라이브러리 → 캠페인 빌더 자동 매핑, 소재별 90일 LTV·LTV:CAC 기여로 확대/교체 판단.</p></div>
+        </div>
+      </div>
+
+      <div class="rat">
+        <div class="rhead"><span class="ric" style="background:#eaf0ff;color:#2f7fd4">✉️</span><div style="flex:1"><b>영업 파이프라인</b><span class="rsub">메일함을 읽어 히스토리가 저절로</span></div><span class="rtag">업무 효율</span></div>
+        <div class="rbody">
+          <div class="rline pl"><span class="rl p">번거로웠던 것</span><p>메일·회의·제안 기록이 흩어져 소통 히스토리를 찾는 데 시간이 들었습니다.</p></div>
+          <div class="rline"><span class="rl v">그래서 · 관점</span><p>사람이 적지 않아도 남는 구조. 메일함을 읽어 AI 요약으로 파이프라인이 저절로 쌓이게.</p></div>
+          <div class="rline sl"><span class="rl s">이렇게 · 도구</span><p>팀 포워딩함을 서비스계정으로 수집 → 업체 매칭 메일만 본문+AI 요약 적재, 단계 8종 보드로 관리.</p></div>
+        </div>
+      </div>
+
+      <div class="rat">
+        <div class="rhead"><span class="ric" style="background:#fff1f4;color:#e0436a">🧬</span><div style="flex:1"><b>트래킹 · 계측 체계</b><span class="rsub">택소노미를 한 곳에 고정</span></div><span class="rtag">측정 신뢰</span></div>
+        <div class="rbody">
+          <div class="rline pl"><span class="rl p">번거로웠던 것</span><p>이벤트 정의가 화면·매체마다 흩어지면 숫자가 흔들리고 대사(對査)가 반복됐습니다.</p></div>
+          <div class="rline"><span class="rl v">그래서 · 관점</span><p>택소노미를 한 곳에 고정하고, 양면 퍼널을 표준 이벤트로 계측.</p></div>
+          <div class="rline sl"><span class="rl s">이렇게 · 도구</span><p>GTM 단일 관리, GA4 ↔ Meta 표준 이벤트 매핑, 맞춤전환으로 호스트·게스트 퍼널 동시 계측.</p></div>
+        </div>
+      </div>
+
     </div>
   </div>
 </section>
