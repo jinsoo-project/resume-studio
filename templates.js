@@ -235,7 +235,7 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
     }));
     const heroStats = (d.highlights || []).slice(0, 3).map(h => ({ v: h.value, k: h.label }));
     return {
-      brand: (p.nameKo ? p.nameKo + " " : "") + "마케팅 & AX 포트폴리오",
+      brand: (p.nameKo ? p.nameKo + " " : "") + "AX & 마케팅 포트폴리오",
       navOrder: (p.navOrder && p.navOrder.length) ? p.navOrder : ["home", "cases", "resume", "ax"],
       heroKicker: p.tagline ? "" : "",
       headline: p.heroHeadline || "데이터로 설계하고,",
@@ -310,7 +310,7 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
         var on = st.view === t[0];
         return '<button data-ax-view="' + t[0] + '" style="font-size:14.5px;font-weight:600;padding:9px 18px;border:none;border-radius:999px;cursor:pointer;background:' + (on ? INK : "transparent") + ';color:' + (on ? "#ffffff" : "#4b5268") + ';transition:all .3s">' + e(t[1]) + '</button>';
       }).join("");
-      return '<nav style="position:sticky;top:0;z-index:60;background:rgba(255,255,255,.85);backdrop-filter:saturate(180%) blur(10px);-webkit-backdrop-filter:saturate(180%) blur(8px);display:flex;align-items:center;justify-content:space-between;gap:16px;padding:18px 0;border-bottom:1px solid #0a0f24;flex-wrap:wrap"><div style="font-size:15px;font-weight:700;letter-spacing:-.01em;color:#0a0f24">' + e(D.brand) + '</div><div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">' + btns + '<a href="#contact" style="font-size:14.5px;font-weight:600;padding:9px 18px;border-radius:999px;border:1px solid #0a0f24;margin-left:10px">Contact</a></div></nav>';
+      return '<nav style="position:sticky;top:0;z-index:60;background:rgba(255,255,255,.85);backdrop-filter:saturate(180%) blur(10px);-webkit-backdrop-filter:saturate(180%) blur(8px);display:flex;align-items:center;justify-content:space-between;gap:16px;padding:14px 0;border-bottom:1px solid #0a0f24;flex-wrap:wrap"><div style="font-size:clamp(17px,1.55vw,19.5px);font-weight:800;letter-spacing:-.02em;color:#0a0f24;line-height:1;display:flex;align-items:center">' + e(D.brand) + '</div><div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">' + btns + '<a href="#contact" style="font-size:14.5px;font-weight:600;padding:9px 18px;border-radius:999px;border:1px solid #0a0f24;margin-left:10px">Contact</a></div></nav>';
     }
 
     function home() {
