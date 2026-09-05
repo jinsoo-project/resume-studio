@@ -273,7 +273,8 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
       ".axgrad{background:linear-gradient(120deg,#335cff,#7c5cff 55%,#0fbf9f);-webkit-background-clip:text;background-clip:text;color:transparent}" +
       ".axcard{transition:transform .22s cubic-bezier(.2,.8,.2,1),box-shadow .22s,border-color .22s}.axcard:hover{transform:translateY(-3px);box-shadow:0 16px 36px -12px rgba(20,28,70,.16)}" +
       ".axmchip{transition:transform .2s,border-color .2s,color .2s}.axmchip:hover{transform:translateY(-2px);border-color:#335cff;color:#335cff}" +
-      ".axgridbg{background-image:linear-gradient(#e8eaf2 1px,transparent 1px),linear-gradient(90deg,#e8eaf2 1px,transparent 1px);background-size:52px 52px;-webkit-mask-image:radial-gradient(60% 65% at 30% 20%,#000 20%,transparent 100%);mask-image:radial-gradient(60% 65% at 30% 20%,#000 20%,transparent 100%)}";
+      ".axgridbg{background-image:linear-gradient(#e8eaf2 1px,transparent 1px),linear-gradient(90deg,#e8eaf2 1px,transparent 1px);background-size:52px 52px;-webkit-mask-image:radial-gradient(60% 65% at 30% 20%,#000 20%,transparent 100%);mask-image:radial-gradient(60% 65% at 30% 20%,#000 20%,transparent 100%)}" +
+      ".cocards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:clamp(14px,1.6vw,22px);margin-top:28px}@media(max-width:920px){.cocards{grid-template-columns:repeat(2,minmax(0,1fr))}}@media(max-width:560px){.cocards{grid-template-columns:1fr}}";
     const dataJson = JSON.stringify(data).replace(/</g, "\\u003c");
     return "<!doctype html><html lang=\"ko\"><head><meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width,initial-scale=1\"><title>" + esc(title) + "</title>" + head + "<style>" + css + "</style></head><body>" +
       '<div id="scroll-progress" style="position:fixed;top:0;left:0;height:3px;width:0%;background:linear-gradient(90deg,#335cff,#7c5cff,#0fbf9f);z-index:99"></div>' +
@@ -471,7 +472,7 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
     function cases2() {
       var cos = D.companies || []; if (!cos.length) return '<section style="padding:80px 0;color:#8b91a7">등록된 회사가 없습니다.</section>';
       var cards = cos.map(function (co, ci) { return (co.projects || []).length ? companyCard(co, ci) : ''; }).join("");
-      return '<section id="cases" style="padding:64px 0 80px;border-bottom:1px solid #e8eaf2"><h2 style="margin:0;font-size:clamp(22px,2vw,31px);font-weight:800;letter-spacing:-.025em">프로젝트 · 회사별 케이스</h2><p style="margin:10px 0 0;font-size:15px;color:#8b91a7">회사 카드를 누르면 그 회사의 프로젝트 사례가 모달로 열립니다.</p><div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:clamp(14px,1.6vw,22px);margin-top:28px">' + cards + '</div></section>';
+      return '<section id="cases" style="padding:64px 0 80px;border-bottom:1px solid #e8eaf2"><h2 style="margin:0;font-size:clamp(22px,2vw,31px);font-weight:800;letter-spacing:-.025em">프로젝트 · 회사별 케이스</h2><p style="margin:10px 0 0;font-size:15px;color:#8b91a7">회사 카드를 누르면 그 회사의 프로젝트 사례가 모달로 열립니다.</p><div class="cocards">' + cards + '</div></section>';
     }
 
     function view() { return st.view === "cases" ? cases2() : st.view === "resume" ? resume() : st.view === "ax" ? ax() : home(); }
