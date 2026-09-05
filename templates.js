@@ -434,45 +434,56 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
     }
 
     function coMets(co) { if (co.metrics && co.metrics.length) return co.metrics.slice(0, 3); var m = []; (co.projects || []).some(function (p) { if ((p.metrics || []).length) { m = p.metrics; return true; } }); return m.slice(0, 3); }
-    function companyThumb(co) {
-      var img = null;
-      (co.projects || []).some(function (p) {
-        (p.media || []).some(function (m) { if (m.url && (m.type === "image" || !m.type)) { img = m.url; return true; } });
-        if (!img) (p.links || []).some(function (l) { var y = ytId(l.url); if (y) { img = "https://img.youtube.com/vi/" + y + "/hqdefault.jpg"; return true; } });
-        return !!img;
-      });
-      if (img) return '<div style="aspect-ratio:16/9;overflow:hidden;background:#eef1f8;position:relative"><img src="' + e(img) + '" loading="lazy" style="width:100%;height:100%;object-fit:cover;display:block">' + (co.logo ? '<span style="position:absolute;left:14px;bottom:12px;background:#fff;border-radius:9px;padding:6px 11px;box-shadow:0 4px 14px rgba(10,16,40,.18)"><img src="' + e(co.logo) + '" style="height:17px;max-width:88px;object-fit:contain;display:block"></span>' : '') + '</div>';
-      return '<div style="aspect-ratio:16/9;background:linear-gradient(135deg,#eaf0ff,#f3ecff 55%,#e6faf4);display:flex;align-items:center;justify-content:center;padding:16px">' + (co.logo ? '<img src="' + e(co.logo) + '" style="max-height:52px;max-width:60%;object-fit:contain">' : '<span class="axgrad" style="font-size:24px;font-weight:800">' + e(co.name) + '</span>') + '</div>';
+    function coAccent(co, ci) {
+      var map = { "핸디즈": ["#5b6cff", "#3730c4"], "와그": ["#12b5a3", "#0a6f78"], "매일새옷": ["#9a6bff", "#5b3fc0"], "멜리즈": ["#ff5c8a", "#c62f6a"], "바비톡": ["#3b82f6", "#1e40af"], "레드브릭스": ["#ff7a4a", "#c0432f"] };
+      var pal = [["#5b6cff", "#3730c4"], ["#12b5a3", "#0a6f78"], ["#9a6bff", "#5b3fc0"], ["#ff5c8a", "#c62f6a"], ["#3b82f6", "#1e40af"], ["#ff7a4a", "#c0432f"]];
+      return map[co.name] || pal[ci % pal.length];
+    }
+    function companyThumb(co, acc) {
+      var dot = 'width:8px;height:8px;border-radius:50%;display:inline-block';
+      return '<div style="aspect-ratio:16/10;background:linear-gradient(150deg,' + acc[0] + ',' + acc[1] + ');display:flex;align-items:flex-end;justify-content:center;padding:26px 26px 0;overflow:hidden">' +
+        '<div style="width:80%;background:#fff;border-radius:13px 13px 0 0;box-shadow:0 22px 45px -20px rgba(8,12,30,.55);overflow:hidden">' +
+        '<div style="display:flex;gap:6px;padding:10px 13px;border-bottom:1px solid #eef0f5">' +
+        '<span style="' + dot + ';background:#ff5f57"></span><span style="' + dot + ';background:#febc2e"></span><span style="' + dot + ';background:#28c840"></span>' +
+        '</div>' +
+        '<div style="padding:26px 18px 30px;text-align:center">' +
+        '<div style="font-size:22px;font-weight:800;letter-spacing:-.02em;color:#0a0f24">' + e(co.name) + '</div>' +
+        '<div style="width:32px;height:3px;border-radius:2px;background:' + acc[0] + ';margin:10px auto 0"></div>' +
+        '</div></div></div>';
     }
     function companyCard(co, ci) {
-      var mets = coMets(co).map(function (m) { return '<div><div class="axgrad" style="font-size:22px;font-weight:800;letter-spacing:-.02em;display:inline-block">' + e(m.v) + '</div><div style="font-size:11.5px;color:#8b91a7;margin-top:1px">' + e(m.k) + '</div></div>'; }).join("");
+      var acc = coAccent(co, ci);
+      var mets = coMets(co).map(function (m) { return '<div><div style="font-size:22px;font-weight:800;letter-spacing:-.02em;color:' + acc[0] + '">' + e(m.v) + '</div><div style="font-size:11.5px;color:#8b91a7;margin-top:1px">' + e(m.k) + '</div></div>'; }).join("");
       var np = (co.projects || []).length;
-      return '<button data-ax-company="' + ci + '" class="axcard" style="text-align:left;background:#fff;border:1px solid #e8eaf2;border-radius:16px;overflow:hidden;cursor:pointer;box-shadow:0 6px 20px -12px rgba(20,28,70,.12);display:flex;flex-direction:column;padding:0">' + companyThumb(co) + '<div style="padding:17px 20px 18px;display:flex;flex-direction:column;gap:12px;flex:1"><div><div style="display:flex;align-items:baseline;justify-content:space-between;gap:10px"><span style="font-size:18px;font-weight:800;letter-spacing:-.02em;color:#0a0f24">' + e(co.name) + '</span><span class="axmono" style="font-size:11px;color:#8b91a7;white-space:nowrap">프로젝트 ' + np + '</span></div><div style="font-size:12.5px;color:#4b5268;margin-top:3px">' + e(co.role || "") + '</div></div>' + (mets ? '<div style="display:flex;gap:22px;flex-wrap:wrap">' + mets + '</div>' : '') + '<div style="margin-top:auto;padding-top:4px;font-size:13px;font-weight:700;color:#335cff">사례 보기 →</div></div></button>';
+      return '<button data-ax-company="' + ci + '" class="axcard" style="text-align:left;background:#fff;border:1px solid #e8eaf2;border-radius:16px;overflow:hidden;cursor:pointer;box-shadow:0 6px 20px -12px rgba(20,28,70,.12);display:flex;flex-direction:column;padding:0">' + companyThumb(co, acc) + '<div style="padding:18px 20px;display:flex;flex-direction:column;gap:12px;flex:1"><div><div style="display:flex;align-items:baseline;justify-content:space-between;gap:10px"><span style="font-size:17px;font-weight:800;letter-spacing:-.02em;color:#0a0f24">' + e(co.name) + '</span><span class="axmono" style="font-size:11px;color:#8b91a7;white-space:nowrap">프로젝트 ' + np + '</span></div><div style="font-size:12.5px;color:#4b5268;margin-top:3px">' + e(co.role || "") + '</div></div>' + (mets ? '<div style="display:flex;gap:22px;flex-wrap:wrap">' + mets + '</div>' : '') + '<div style="margin-top:auto;padding-top:4px;font-size:12.5px;font-weight:700;color:' + acc[0] + '">사례 자세히 보기 →</div></div></button>';
     }
     function companyModalHtml(ci) {
       var co = (D.companies || [])[ci]; if (!co) return "";
-      var mets = coMets(co).map(function (m) { return '<div><div class="axgrad" style="font-size:30px;font-weight:800;letter-spacing:-.03em;display:inline-block">' + e(m.v) + '</div><div style="font-size:12.5px;color:#8b91a7;margin-top:2px">' + e(m.k) + '</div></div>'; }).join("");
-      var pb = function (en, kr, col, bg, bd, txt) { return txt ? '<div style="background:' + bg + ';border:1px solid ' + bd + ';border-radius:12px;padding:14px 16px"><div class="axmono" style="font-size:10.5px;letter-spacing:.1em;color:' + col + ';margin-bottom:6px">' + en + ' · ' + kr + '</div><p style="margin:0;font-size:13.5px;line-height:1.65;color:#0a0f24">' + e(txt) + '</p></div>' : ''; };
+      var acc = coAccent(co, ci);
+      var mets = coMets(co).map(function (m) { return '<div><div style="font-size:30px;font-weight:800;letter-spacing:-.03em;color:#fff">' + e(m.v) + '</div><div style="font-size:12.5px;color:rgba(255,255,255,.72);margin-top:2px">' + e(m.k) + '</div></div>'; }).join("");
+      var pb = function (en, kr, col, txt) { return txt ? '<div style="background:#f8f9fc;border:1px solid #eceef4;border-radius:12px;padding:14px 16px"><div class="axmono" style="font-size:10.5px;letter-spacing:.1em;color:' + col + ';margin-bottom:6px;font-weight:700">' + en + ' · ' + kr + '</div><p style="margin:0;font-size:13.5px;line-height:1.65;color:#2b3350">' + e(txt) + '</p></div>' : ''; };
       var projs = (co.projects || []).map(function (p) {
-        var pms = (p.metrics || []).map(function (m) { return '<span class="axmono" style="font-size:12px;font-weight:600;padding:5px 12px;border-radius:999px;border:1px solid #cdd7ff;background:#f4f6ff;color:#2440c8">' + e(m.v) + ' ' + e(m.k) + '</span>'; }).join("");
+        var pms = (p.metrics || []).map(function (m) { return '<span class="axmono" style="font-size:12px;font-weight:600;padding:5px 12px;border-radius:999px;border:1px solid #e2e6f0;background:#f6f7fb;color:' + acc[1] + '">' + e(m.v) + ' ' + e(m.k) + '</span>'; }).join("");
         var tgs = (p.tags || []).map(function (t) { return '<span class="axmono" style="font-size:11px;padding:4px 10px;border-radius:999px;background:#eef1f8;color:#4b5268">' + e(t) + '</span>'; }).join("");
-        var par = (p.problem || p.action || p.result) ? '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:8px;margin:14px 0">' + pb('CHALLENGE', '과제', '#e0436a', '#fff1f4', '#ffdde5', p.problem) + pb('SOLUTION', '실행', '#7c5cff', '#f6f7fb', '#e8eaf2', p.action) + pb('RESULTS', '성과', '#335cff', '#eef2ff', '#dfe6ff', p.result) + '</div>' : '';
+        var par = (p.problem || p.action || p.result) ? '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:8px;margin:14px 0">' + pb('CHALLENGE', '과제', '#e0436a', p.problem) + pb('SOLUTION', '실행', acc[0], p.action) + pb('RESULTS', '성과', '#1f8f6f', p.result) + '</div>' : '';
         var media = mediaGrid(p.links, p.media);
-        return '<div style="padding:26px 0;border-top:1px solid #e8eaf2"><div style="display:flex;align-items:baseline;gap:12px;margin-bottom:8px">' + (p.num ? '<span class="axmono" style="font-size:12px;color:#8b91a7">' + e(p.num) + '</span>' : '') + '<h3 style="margin:0;font-size:clamp(18px,1.8vw,23px);font-weight:800;letter-spacing:-.02em">' + e(p.title) + '</h3></div>' + (p.desc ? '<p style="margin:0;font-size:14.5px;line-height:1.7;color:#4b5268">' + e(p.desc) + '</p>' : '') + par + ((pms || tgs) ? '<div style="display:flex;flex-wrap:wrap;gap:6px;align-items:center' + (media ? ';margin-bottom:12px' : '') + '">' + pms + tgs + '</div>' : '') + media + '</div>';
+        return '<div style="padding:26px 0;border-top:1px solid #e8eaf2"><div style="display:flex;align-items:baseline;gap:12px;margin-bottom:8px">' + (p.num ? '<span class="axmono" style="font-size:12px;color:' + acc[0] + ';font-weight:700">' + e(p.num) + '</span>' : '') + '<h3 style="margin:0;font-size:clamp(18px,1.8vw,23px);font-weight:800;letter-spacing:-.02em">' + e(p.title) + '</h3></div>' + (p.desc ? '<p style="margin:0;font-size:14.5px;line-height:1.7;color:#4b5268">' + e(p.desc) + '</p>' : '') + par + ((pms || tgs) ? '<div style="display:flex;flex-wrap:wrap;gap:6px;align-items:center' + (media ? ';margin-bottom:12px' : '') + '">' + pms + tgs + '</div>' : '') + media + '</div>';
       }).join("");
-      return '<div style="background:#fff;border-radius:18px;max-width:min(900px,94vw);max-height:88vh;overflow-y:auto;box-shadow:0 30px 80px rgba(10,16,40,.5);text-align:left">' +
-        '<div style="padding:30px clamp(22px,4vw,42px) 0">' +
-        '<div style="display:flex;align-items:center;gap:14px;margin-bottom:14px">' + (co.logo ? '<img src="' + e(co.logo) + '" style="height:30px;max-width:130px;object-fit:contain">' : '') + '<div><div style="font-size:20px;font-weight:800;letter-spacing:-.02em">' + e(co.name) + '</div><div style="font-size:12.5px;color:#8b91a7">' + e(co.role || "") + (co.period ? ' · ' + e(co.period) : '') + '</div></div></div>' +
-        (co.summary ? '<p style="margin:0;font-size:15px;line-height:1.75;color:#4b5268;max-width:62ch">' + e(co.summary) + '</p>' : '') +
-        (mets ? '<div style="display:flex;flex-wrap:wrap;gap:clamp(24px,4vw,44px);margin:22px 0 6px;padding:20px 0;border-top:1px solid #e8eaf2;border-bottom:1px solid #e8eaf2">' + mets + '</div>' : '') +
+      return '<div style="background:#fff;border-radius:18px;max-width:min(900px,94vw);max-height:88vh;overflow:hidden;box-shadow:0 30px 80px rgba(10,16,40,.5);text-align:left;display:flex;flex-direction:column">' +
+        '<div style="background:linear-gradient(150deg,' + acc[0] + ',' + acc[1] + ');color:#fff;padding:30px clamp(22px,4vw,42px) 26px">' +
+        '<div class="axmono" style="font-size:11px;letter-spacing:.16em;color:rgba(255,255,255,.72);margin-bottom:12px">CASE STUDY</div>' +
+        '<div style="font-size:clamp(24px,3vw,32px);font-weight:800;letter-spacing:-.025em">' + e(co.name) + '</div>' +
+        '<div style="font-size:13px;color:rgba(255,255,255,.82);margin-top:4px">' + e(co.role || "") + (co.period ? ' · ' + e(co.period) : '') + '</div>' +
+        (co.summary ? '<p style="margin:14px 0 0;font-size:14.5px;line-height:1.7;color:rgba(255,255,255,.92);max-width:64ch">' + e(co.summary) + '</p>' : '') +
+        (mets ? '<div style="display:flex;flex-wrap:wrap;gap:clamp(22px,4vw,44px);margin-top:22px;padding-top:20px;border-top:1px solid rgba(255,255,255,.22)">' + mets + '</div>' : '') +
         '</div>' +
-        '<div style="padding:8px clamp(22px,4vw,42px) 34px">' + projs + '</div>' +
+        '<div style="padding:8px clamp(22px,4vw,42px) 34px;overflow-y:auto;flex:1 1 auto;min-height:0">' + projs + '</div>' +
         '</div>';
     }
     function cases2() {
       var cos = D.companies || []; if (!cos.length) return '<section style="padding:80px 0;color:#8b91a7">등록된 회사가 없습니다.</section>';
       var cards = cos.map(function (co, ci) { return (co.projects || []).length ? companyCard(co, ci) : ''; }).join("");
-      return '<section id="cases" style="padding:64px 0 80px;border-bottom:1px solid #e8eaf2"><h2 style="margin:0;font-size:clamp(22px,2vw,31px);font-weight:800;letter-spacing:-.025em">프로젝트 · 회사별 케이스</h2><p style="margin:10px 0 0;font-size:15px;color:#8b91a7">회사 카드를 누르면 그 회사의 프로젝트 사례가 모달로 열립니다.</p><div class="cocards">' + cards + '</div></section>';
+      return '<section id="cases" style="padding:64px 0 80px;border-bottom:1px solid #e8eaf2"><div class="axmono" style="font-size:12px;letter-spacing:.16em;color:#8b91a7;margin-bottom:12px">SELECTED WORK</div><h2 style="margin:0;font-size:clamp(22px,2vw,31px);font-weight:800;letter-spacing:-.025em">회사별 프로젝트 케이스</h2><p style="margin:10px 0 0;font-size:15px;color:#8b91a7;max-width:56ch">퍼포먼스·그로스·콘텐츠까지, 회사별 대표 프로젝트와 핵심 성과를 정리했습니다.</p><div class="cocards">' + cards + '</div></section>';
     }
 
     function view() { return st.view === "cases" ? cases2() : st.view === "resume" ? resume() : st.view === "ax" ? ax() : home(); }
