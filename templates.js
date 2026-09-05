@@ -432,7 +432,7 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
       return '<footer id="contact" style="padding:96px 0 80px"><div class="axmono" style="font-size:13px;letter-spacing:.16em;color:#335cff;margin-bottom:24px">CONTACT</div><h2 style="margin:0 0 32px;font-size:clamp(26px,3.2vw,44px);font-weight:800;letter-spacing:-.03em;line-height:1.15">퍼널 전체를 맡길 수 있는<br>마케터를 찾고 계신가요?</h2><div style="display:flex;gap:32px;font-size:16px;flex-wrap:wrap">' + (D.email ? '<a href="mailto:' + e(D.email) + '" style="border-bottom:2px solid #0a0f24;padding-bottom:3px;font-weight:600">' + e(D.email) + '</a>' : "") + links + '</div><div class="axmono" style="margin-top:72px;padding-top:24px;border-top:1px solid #e8eaf2;font-size:12px;color:#9aa2b3;display:flex;justify-content:space-between"><span>© ' + new Date().getFullYear() + ' ' + e(D.resumeName) + '</span><span>' + e(D.location) + '</span></div></footer>';
     }
 
-    function coMets(co) { var m = (co.metrics && co.metrics.length) ? co.metrics : (((co.projects || [])[0] || {}).metrics || []); return m.slice(0, 3); }
+    function coMets(co) { if (co.metrics && co.metrics.length) return co.metrics.slice(0, 3); var m = []; (co.projects || []).some(function (p) { if ((p.metrics || []).length) { m = p.metrics; return true; } }); return m.slice(0, 3); }
     function companyThumb(co) {
       var img = null;
       (co.projects || []).some(function (p) {
@@ -470,7 +470,7 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
     }
     function cases2() {
       var cos = D.companies || []; if (!cos.length) return '<section style="padding:80px 0;color:#8b91a7">등록된 회사가 없습니다.</section>';
-      var cards = cos.map(function (co, ci) { return companyCard(co, ci); }).join("");
+      var cards = cos.map(function (co, ci) { return (co.projects || []).length ? companyCard(co, ci) : ''; }).join("");
       return '<section id="cases" style="padding:64px 0 80px;border-bottom:1px solid #e8eaf2"><h2 style="margin:0;font-size:clamp(22px,2vw,31px);font-weight:800;letter-spacing:-.025em">프로젝트 · 회사별 케이스</h2><p style="margin:10px 0 0;font-size:15px;color:#8b91a7">회사 카드를 누르면 그 회사의 프로젝트 사례가 모달로 열립니다.</p><div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:clamp(14px,1.6vw,22px);margin-top:28px">' + cards + '</div></section>';
     }
 
