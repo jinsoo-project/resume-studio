@@ -495,36 +495,31 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
       if (/기부런|부작용|소비자\s*조사|USJ|유니버설|제휴|영상|유튜브|쎄뷰리|브랜딩|프로모션/.test(t)) return "brand";
       return "perf";
     }
-    function sigMetrics(its) {
-      var out = [];
-      its.forEach(function (it) { var m = (it.p.metrics || [])[0]; if (m && out.length < 4) out.push(m); });
-      if (out.length < 4) its.forEach(function (it) { (it.p.metrics || []).slice(1).forEach(function (m) { if (out.length < 4) out.push(m); }); });
-      return out;
+    function coBrand(co, ci) {
+      var map = { "핸디즈": ["#eceffe", "#4655d6"], "와그": ["#e2f6f2", "#0e9c8c"], "온디맨드랩": ["#f0ebff", "#7a54e6"], "매일새옷": ["#f0ebff", "#7a54e6"], "에이블리블랙": ["#fdeaf1", "#d83f68"], "앨리즈": ["#fdeaf1", "#d83f68"], "에일리즈": ["#fdeaf1", "#d83f68"], "바비톡": ["#e8f0fe", "#2563eb"], "레드브릭스": ["#ffece3", "#e0562f"] };
+      var pal = [["#eceffe", "#4655d6"], ["#e2f6f2", "#0e9c8c"], ["#f0ebff", "#7a54e6"], ["#fdeaf1", "#d83f68"], ["#e8f0fe", "#2563eb"], ["#ffece3", "#e0562f"]];
+      return map[co.name] || pal[ci % pal.length];
     }
-    function catHero(cat, its) {
-      var sm = sigMetrics(its);
-      var metricsHtml = sm.map(function (m) { return '<div><div style="font-size:clamp(26px,3.2vw,38px);font-weight:800;letter-spacing:-.03em;line-height:1">' + e(m.v) + '</div><div style="font-size:11.5px;opacity:.82;margin-top:4px;line-height:1.35">' + e(m.k) + '</div></div>'; }).join("");
-      return '<div style="border-radius:20px;overflow:hidden;background:linear-gradient(135deg,' + cat.acc[0] + ',' + cat.acc[1] + ');color:#fff;padding:clamp(24px,3.4vw,40px)">' +
-        '<div class="cathero">' +
-        '<div>' +
-        '<div class="axmono" style="font-size:12px;letter-spacing:.18em;opacity:.82">COMPETENCY ' + cat.no + '</div>' +
-        '<h3 style="margin:9px 0 0;font-size:clamp(24px,3.2vw,38px);font-weight:800;letter-spacing:-.03em">' + e(cat.name) + '</h3>' +
-        '<p style="margin:12px 0 0;font-size:14.5px;line-height:1.7;opacity:.92;max-width:44ch">' + e(cat.desc) + '</p>' +
-        '<div class="axmono" style="display:inline-block;margin-top:16px;font-size:12px;padding:6px 13px;border-radius:999px;background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.28)">' + its.length + ' PROJECTS</div>' +
-        '</div>' +
-        (metricsHtml ? '<div style="display:grid;grid-template-columns:1fr 1fr;gap:20px 26px">' + metricsHtml + '</div>' : '') +
-        '</div></div>';
+    function caseThumb(co, ci, p) {
+      var b = coBrand(co, ci), img = null;
+      (p.media || []).some(function (m) { if (m.url && (m.type === "image" || !m.type)) { img = m.url; return true; } });
+      if (!img) (p.links || []).some(function (l) { var y = ytId(l.url); if (y) { img = "https://img.youtube.com/vi/" + y + "/hqdefault.jpg"; return true; } });
+      if (img) return '<div style="aspect-ratio:16/10;overflow:hidden;position:relative;background:' + b[0] + '"><img src="' + e(img) + '" loading="lazy" style="width:100%;height:100%;object-fit:cover;display:block"><span style="position:absolute;left:14px;bottom:12px;background:#fff;border-radius:8px;padding:5px 11px;font-size:12px;font-weight:800;letter-spacing:-.01em;color:' + b[1] + ';box-shadow:0 4px 12px rgba(10,16,40,.18)">' + e(co.name) + '</span></div>';
+      var m0 = (p.metrics || [])[0];
+      if (m0) return '<div style="aspect-ratio:16/10;background:' + b[0] + ';display:flex;flex-direction:column;justify-content:center;padding:22px 26px"><span style="font-size:13px;font-weight:800;letter-spacing:-.01em;color:' + b[1] + '">' + e(co.name) + '</span><span style="font-size:clamp(30px,4vw,46px);font-weight:800;letter-spacing:-.03em;color:' + b[1] + ';line-height:1;margin-top:9px">' + e(m0.v) + '</span><span style="font-size:12px;color:' + b[1] + ';opacity:.72;margin-top:5px">' + e(m0.k) + '</span></div>';
+      return '<div style="aspect-ratio:16/10;background:' + b[0] + ';display:flex;align-items:center;justify-content:center;padding:20px"><span style="font-size:clamp(22px,2.6vw,32px);font-weight:800;letter-spacing:-.02em;color:' + b[1] + '">' + e(co.name) + '</span></div>';
     }
-    function projShowcaseCard(it, cat) {
-      var p = it.p, acc = cat.acc;
-      var mv = (p.metrics || []).slice(0, 3).map(function (m) { return '<span style="font-size:14px;font-weight:800;letter-spacing:-.02em;color:' + acc[0] + '">' + e(m.v) + '</span>'; }).join('<span style="color:#d0d5e0">·</span>');
-      var tgs = (p.tags || []).slice(0, 2).map(function (t) { return '<span class="axmono" style="font-size:10px;padding:2px 8px;border-radius:999px;background:#f1f3f9;color:#6b7285">' + e(t) + '</span>'; }).join("");
-      return '<button data-ax-proj="' + it.ci + '-' + it.pi + '" class="axcard" style="text-align:left;background:#fff;border:1px solid #e8eaf2;border-radius:14px;padding:16px 17px;cursor:pointer;display:flex;flex-direction:column;gap:9px;box-shadow:0 4px 16px -12px rgba(20,28,70,.16)">' +
-        '<div style="display:flex;align-items:center;gap:6px"><span style="width:6px;height:6px;border-radius:50%;background:' + acc[0] + '"></span><span class="axmono" style="font-size:11px;color:#8b91a7;font-weight:600">' + e(it.co.name) + '</span></div>' +
-        '<div style="font-size:14px;font-weight:700;letter-spacing:-.01em;color:#0a0f24;line-height:1.4;flex:1">' + e(p.title) + '</div>' +
-        (mv ? '<div style="display:flex;align-items:center;gap:7px;flex-wrap:wrap">' + mv + '</div>' : '') +
-        (tgs ? '<div style="display:flex;gap:4px;flex-wrap:wrap">' + tgs + '</div>' : '') +
-        '</button>';
+    function caseCard(it) {
+      var co = it.co, p = it.p, ci = it.ci, cat = catOf(it.cat), b = coBrand(co, ci);
+      var showBody = (p.metrics || []).slice(1, 3).map(function (m) { return '<div><div style="font-size:18px;font-weight:800;letter-spacing:-.02em;color:#0a0f24">' + e(m.v) + '</div><div style="font-size:11px;color:#8b91a7;margin-top:1px">' + e(m.k) + '</div></div>'; }).join("");
+      return '<button data-ax-proj="' + ci + '-' + it.pi + '" class="axcard" style="text-align:left;background:#fff;border:1px solid #e8eaf2;border-radius:16px;overflow:hidden;cursor:pointer;display:flex;flex-direction:column;box-shadow:0 6px 22px -16px rgba(20,28,70,.18);padding:0">' +
+        caseThumb(co, ci, p) +
+        '<div style="padding:17px 20px 19px;display:flex;flex-direction:column;gap:12px;flex:1">' +
+        '<div style="display:flex;align-items:center;gap:6px"><span style="width:6px;height:6px;border-radius:50%;background:' + cat.acc[0] + '"></span><span class="axmono" style="font-size:11px;color:#8b91a7;font-weight:600">' + e(cat.name) + '</span></div>' +
+        '<div style="font-size:15.5px;font-weight:700;letter-spacing:-.015em;color:#0a0f24;line-height:1.5;flex:1">' + e(p.title) + '</div>' +
+        (showBody ? '<div style="display:flex;gap:26px">' + showBody + '</div>' : '') +
+        '<div style="font-size:13px;font-weight:700;color:' + b[1] + '">사례 읽기 →</div>' +
+        '</div></button>';
     }
     function projectModalHtml(ci, pi) {
       var co = (D.companies || [])[ci]; if (!co) return "";
@@ -555,20 +550,21 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
       cos.forEach(function (co, ci) { (co.projects || []).forEach(function (p, pi) { items.push({ co: co, ci: ci, p: p, pi: pi, cat: projCategory(p) }); }); });
       if (!items.length) return '<section style="padding:80px 0;color:#8b91a7">등록된 프로젝트가 없습니다.</section>';
       var avail = CATS.filter(function (cat) { return items.some(function (it) { return it.cat === cat.key; }); });
-      var activeKey = (st.projCat && avail.some(function (c) { return c.key === st.projCat; })) ? st.projCat : (avail[0] && avail[0].key);
-      var activeCat = catOf(activeKey);
-      var activeItems = items.filter(function (it) { return it.cat === activeKey; });
-      var tabs = avail.map(function (cat) {
-        var on = cat.key === activeKey;
-        return '<button data-ax-projcat="' + cat.key + '" style="font-size:13.5px;font-weight:700;padding:9px 15px;border-radius:999px;cursor:pointer;display:inline-flex;align-items:center;gap:8px;transition:all .2s;' + (on ? ('background:' + cat.acc[0] + ';color:#fff;border:1px solid transparent;box-shadow:0 10px 22px -12px ' + cat.acc[0]) : 'background:#fff;color:#4b5268;border:1px solid #e2e6f0') + '"><span class="axmono" style="font-size:11px;' + (on ? 'opacity:.85' : 'color:' + cat.acc[0]) + '">' + cat.no + '</span>' + e(cat.name) + '</button>';
+      var activeKey = (st.projCat && avail.some(function (c) { return c.key === st.projCat; })) ? st.projCat : "__all";
+      var shown = activeKey === "__all" ? items : items.filter(function (it) { return it.cat === activeKey; });
+      var ncomp = cos.filter(function (c) { return (c.projects || []).length; }).length;
+      var tabDefs = [{ key: "__all", name: "전체" }].concat(avail.map(function (c) { return { key: c.key, name: c.name }; }));
+      var tabs = tabDefs.map(function (td) {
+        var on = td.key === activeKey;
+        return '<button data-ax-projcat="' + td.key + '" style="font-size:13.5px;font-weight:600;padding:8px 16px;border-radius:999px;cursor:pointer;transition:all .2s;' + (on ? 'background:#0a0f24;color:#fff;border:1px solid #0a0f24' : 'background:#fff;color:#4b5268;border:1px solid #e2e6f0') + '">' + e(td.name) + '</button>';
       }).join("");
-      var cards = activeItems.map(function (it) { return projShowcaseCard(it, activeCat); }).join("");
+      var cards = shown.map(function (it) { return caseCard(it); }).join("");
       return '<section id="cases" style="padding:56px 0 80px;border-bottom:1px solid #e8eaf2">' +
-        '<div class="axmono" style="font-size:12px;letter-spacing:.16em;color:#8b91a7;margin-bottom:12px">SELECTED WORK</div>' +
-        '<h2 style="margin:0;font-size:clamp(22px,2vw,30px);font-weight:800;letter-spacing:-.025em">역량별 프로젝트 케이스</h2>' +
-        '<p style="margin:10px 0 22px;font-size:15px;color:#8b91a7;max-width:60ch">퍼포먼스 · 브랜드 · 커머스 · 그로스 — 4개 역량으로 정리한 대표 프로젝트와 성과.</p>' +
-        '<div style="display:flex;flex-wrap:wrap;gap:9px;margin-bottom:22px">' + tabs + '</div>' +
-        '<div style="animation:axfade .45s">' + catHero(activeCat, activeItems) + '<div class="projwrap">' + cards + '</div></div>' +
+        '<div class="axmono" style="font-size:12px;letter-spacing:.16em;color:#8b91a7;margin-bottom:12px">CASE STUDIES</div>' +
+        '<h2 style="margin:0;font-size:clamp(24px,2.4vw,34px);font-weight:800;letter-spacing:-.03em">프로젝트 사례</h2>' +
+        '<p style="margin:10px 0 24px;font-size:15px;color:#8b91a7;max-width:60ch">' + ncomp + '개 회사 · ' + items.length + '개 프로젝트 — 퍼포먼스부터 그로스·자동화까지.</p>' +
+        '<div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:24px">' + tabs + '</div>' +
+        '<div class="cocards" style="margin-top:0;animation:axfade .4s">' + cards + '</div>' +
         '</section>';
     }
 
