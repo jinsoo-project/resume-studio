@@ -480,10 +480,78 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
         '<div style="padding:8px clamp(22px,4vw,42px) 34px;overflow-y:auto;flex:1 1 auto;min-height:0">' + projs + '</div>' +
         '</div>';
     }
+    var CATS = [
+      { key: "perf", no: "01", name: "퍼포먼스 마케팅", desc: "UA·매체 운영·예산 배분·전환 최적화", acc: ["#335cff", "#2440c8"] },
+      { key: "brand", no: "02", name: "브랜드 · 콘텐츠 · 세일즈", desc: "캠페인·프로모션·콘텐츠·영상 기획 제작", acc: ["#ff5c7a", "#c62f6a"] },
+      { key: "commerce", no: "03", name: "커머스 · SEO", desc: "네이버쇼핑·커머스·특가 운영과 노출 최적화", acc: ["#0fbf9f", "#0a8f78"] },
+      { key: "growth", no: "04", name: "그로스 · 데이터 · 자동화", desc: "지표 체계·데이터 파이프라인·어트리뷰션·AX 자동화", acc: ["#7c5cff", "#5b3fc0"] }
+    ];
+    function catOf(key) { for (var i = 0; i < CATS.length; i++) { if (CATS[i].key === key) return CATS[i]; } return CATS[0]; }
+    function projCategory(p) {
+      if (p.category) return p.category;
+      var t = p.title || "";
+      if (/마켓플레이스|그로스|데이터|파이프라인|어트리뷰션|지표\s*(운영|관리|세팅)|자동화|Taxonomy|텍소노미|CRM|푸시|플친|\bAX\b/.test(t)) return "growth";
+      if (/네이버\s*쇼핑|쇼핑|커머스|특가|갈바닉|핫딜|SEO/.test(t)) return "commerce";
+      if (/기부런|부작용|소비자\s*조사|USJ|유니버설|제휴|영상|유튜브|쎄뷰리|브랜딩|프로모션/.test(t)) return "brand";
+      return "perf";
+    }
+    function projectCard(it, cat) {
+      var p = it.p, acc = cat.acc;
+      var mets = (p.metrics || []).slice(0, 3).map(function (m) { return '<div><div style="font-size:18px;font-weight:800;letter-spacing:-.02em;color:' + acc[0] + '">' + e(m.v) + '</div><div style="font-size:10.5px;color:#8b91a7;margin-top:1px">' + e(m.k) + '</div></div>'; }).join("");
+      var tgs = (p.tags || []).slice(0, 3).map(function (t) { return '<span class="axmono" style="font-size:10.5px;padding:3px 9px;border-radius:999px;background:#eef1f8;color:#4b5268">' + e(t) + '</span>'; }).join("");
+      return '<button data-ax-proj="' + it.ci + '-' + it.pi + '" class="axcard" style="text-align:left;background:#fff;border:1px solid #e8eaf2;border-radius:14px;padding:19px 19px 17px;cursor:pointer;display:flex;flex-direction:column;gap:11px;box-shadow:0 6px 20px -14px rgba(20,28,70,.14)">' +
+        '<div style="display:flex;align-items:center;gap:7px"><span style="width:7px;height:7px;border-radius:50%;background:' + acc[0] + '"></span><span class="axmono" style="font-size:11.5px;color:#4b5268;font-weight:600">' + e(it.co.name) + '</span></div>' +
+        '<div style="font-size:15.5px;font-weight:800;letter-spacing:-.02em;color:#0a0f24;line-height:1.42">' + e(p.title) + '</div>' +
+        (mets ? '<div style="display:flex;gap:16px;flex-wrap:wrap">' + mets + '</div>' : '') +
+        (tgs ? '<div style="display:flex;gap:5px;flex-wrap:wrap">' + tgs + '</div>' : '') +
+        '<div style="margin-top:auto;padding-top:3px;font-size:12px;font-weight:700;color:' + acc[0] + '">자세히 보기 →</div>' +
+        '</button>';
+    }
+    function projectModalHtml(ci, pi) {
+      var co = (D.companies || [])[ci]; if (!co) return "";
+      var p = (co.projects || [])[pi]; if (!p) return "";
+      var cat = catOf(projCategory(p)), acc = cat.acc;
+      var hm = (p.metrics || []).slice(0, 4).map(function (m) { return '<div><div style="font-size:26px;font-weight:800;letter-spacing:-.03em;color:#fff">' + e(m.v) + '</div><div style="font-size:12px;color:rgba(255,255,255,.72);margin-top:2px">' + e(m.k) + '</div></div>'; }).join("");
+      var pb = function (en, kr, col, txt) { return txt ? '<div style="background:#f8f9fc;border:1px solid #eceef4;border-radius:12px;padding:15px 17px"><div class="axmono" style="font-size:10.5px;letter-spacing:.1em;color:' + col + ';margin-bottom:6px;font-weight:700">' + en + ' · ' + kr + '</div><p style="margin:0;font-size:14px;line-height:1.65;color:#2b3350">' + e(txt) + '</p></div>' : ''; };
+      var par = (p.problem || p.action || p.result) ? '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:9px;margin:0 0 18px">' + pb('CHALLENGE', '과제', '#e0436a', p.problem) + pb('SOLUTION', '실행', acc[0], p.action) + pb('RESULTS', '성과', '#1f8f6f', p.result) + '</div>' : '';
+      var tgs = (p.tags || []).map(function (t) { return '<span class="axmono" style="font-size:11.5px;padding:5px 11px;border-radius:999px;background:#eef1f8;color:#4b5268">' + e(t) + '</span>'; }).join("");
+      var media = mediaGrid(p.links, p.media);
+      var body = par + (tgs ? '<div style="display:flex;flex-wrap:wrap;gap:6px' + (media ? ';margin-bottom:14px' : '') + '">' + tgs + '</div>' : '') + media;
+      var bodyPad = 'padding:22px clamp(22px,4vw,40px) 32px;overflow-y:auto;flex:1 1 auto;min-height:0';
+      var bodyHtml = body.replace(/\s/g, "") ? '<div style="' + bodyPad + '">' + body + '</div>' : ((p.desc || hm) ? '' : '<div style="' + bodyPad + '"><p style="margin:0;font-size:13.5px;color:#8b91a7">상세 케이스는 준비 중입니다.</p></div>');
+      return '<div style="background:#fff;border-radius:18px;max-width:min(860px,94vw);max-height:88vh;overflow:hidden;box-shadow:0 30px 80px rgba(10,16,40,.5);text-align:left;display:flex;flex-direction:column">' +
+        '<div style="background:linear-gradient(150deg,' + acc[0] + ',' + acc[1] + ');color:#fff;padding:28px clamp(22px,4vw,40px) 26px">' +
+        '<div class="axmono" style="font-size:11px;letter-spacing:.16em;color:rgba(255,255,255,.78);margin-bottom:12px">' + e(cat.name) + '</div>' +
+        '<div style="font-size:clamp(20px,2.6vw,28px);font-weight:800;letter-spacing:-.02em;line-height:1.28">' + e(p.title) + '</div>' +
+        '<div style="font-size:12.5px;color:rgba(255,255,255,.85);margin-top:7px;display:flex;gap:8px;flex-wrap:wrap;align-items:center"><span style="font-weight:700">' + e(co.name) + '</span>' + (co.role ? '<span style="opacity:.6">·</span><span>' + e(co.role) + '</span>' : '') + (p.period ? '<span style="opacity:.6">·</span><span>' + e(p.period) + '</span>' : '') + '</div>' +
+        (p.desc ? '<p style="margin:14px 0 0;font-size:14px;line-height:1.7;color:rgba(255,255,255,.92);max-width:64ch">' + e(p.desc) + '</p>' : '') +
+        (hm ? '<div style="display:flex;flex-wrap:wrap;gap:clamp(20px,4vw,40px);margin-top:20px;padding-top:18px;border-top:1px solid rgba(255,255,255,.22)">' + hm + '</div>' : '') +
+        '</div>' +
+        bodyHtml +
+        '</div>';
+    }
     function cases2() {
-      var cos = D.companies || []; if (!cos.length) return '<section style="padding:80px 0;color:#8b91a7">등록된 회사가 없습니다.</section>';
-      var cards = cos.map(function (co, ci) { return (co.projects || []).length ? companyCard(co, ci) : ''; }).join("");
-      return '<section id="cases" style="padding:64px 0 80px;border-bottom:1px solid #e8eaf2"><div class="axmono" style="font-size:12px;letter-spacing:.16em;color:#8b91a7;margin-bottom:12px">SELECTED WORK</div><h2 style="margin:0;font-size:clamp(22px,2vw,31px);font-weight:800;letter-spacing:-.025em">회사별 프로젝트 케이스</h2><p style="margin:10px 0 0;font-size:15px;color:#8b91a7;max-width:56ch">퍼포먼스·그로스·콘텐츠까지, 회사별 대표 프로젝트와 핵심 성과를 정리했습니다.</p><div class="cocards">' + cards + '</div></section>';
+      var cos = D.companies || [];
+      var items = [];
+      cos.forEach(function (co, ci) { (co.projects || []).forEach(function (p, pi) { items.push({ co: co, ci: ci, p: p, pi: pi, cat: projCategory(p) }); }); });
+      if (!items.length) return '<section style="padding:80px 0;color:#8b91a7">등록된 프로젝트가 없습니다.</section>';
+      var sections = CATS.map(function (cat) {
+        var its = items.filter(function (it) { return it.cat === cat.key; });
+        if (!its.length) return "";
+        var cards = its.map(function (it) { return projectCard(it, cat); }).join("");
+        return '<section style="padding:36px 0 4px">' +
+          '<div style="display:flex;align-items:flex-end;gap:16px;margin:0 0 22px;padding-bottom:14px;border-bottom:2px solid #0a0f24">' +
+          '<span class="axmono" style="font-size:clamp(28px,3vw,38px);font-weight:800;color:' + cat.acc[0] + ';line-height:.85">' + cat.no + '</span>' +
+          '<div style="flex:1"><h3 style="margin:0;font-size:clamp(19px,2vw,26px);font-weight:800;letter-spacing:-.02em">' + e(cat.name) + '</h3><p style="margin:4px 0 0;font-size:13px;color:#8b91a7">' + e(cat.desc) + '</p></div>' +
+          '<span class="axmono" style="font-size:11.5px;color:#8b91a7;white-space:nowrap">' + its.length + ' PROJECTS</span>' +
+          '</div><div class="cocards">' + cards + '</div></section>';
+      }).join("");
+      return '<section id="cases" style="padding:56px 0 80px;border-bottom:1px solid #e8eaf2">' +
+        '<div class="axmono" style="font-size:12px;letter-spacing:.16em;color:#8b91a7;margin-bottom:12px">SELECTED WORK</div>' +
+        '<h2 style="margin:0;font-size:clamp(22px,2vw,31px);font-weight:800;letter-spacing:-.025em">역량별 프로젝트 케이스</h2>' +
+        '<p style="margin:10px 0 0;font-size:15px;color:#8b91a7;max-width:60ch">퍼포먼스 · 브랜드 · 커머스 · 그로스 — 4개 역량으로 정리한 대표 프로젝트입니다.</p>' +
+        sections +
+        '</section>';
     }
 
     function view() { return st.view === "cases" ? cases2() : st.view === "resume" ? resume() : st.view === "ax" ? ax() : home(); }
@@ -545,7 +613,7 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
 
     // ---- interactions (event delegation) ----
     document.addEventListener("click", function (ev) {
-      var t = ev.target.closest("[data-ax-view],[data-ax-co],[data-ax-co-idx],[data-ax-chip],[data-ax-pipe],[data-ax-loop],[data-ax-cat],[data-ax-company]"); if (!t) return;
+      var t = ev.target.closest("[data-ax-view],[data-ax-co],[data-ax-co-idx],[data-ax-chip],[data-ax-pipe],[data-ax-loop],[data-ax-cat],[data-ax-company],[data-ax-proj]"); if (!t) return;
       if (t.hasAttribute("data-ax-view")) { st.view = t.getAttribute("data-ax-view"); st.active = null; window.scrollTo(0, 0); render(); }
       else if (t.hasAttribute("data-ax-co")) { var n = (D.companies || []).length || 1; st.sliding = true; render(); var dir = t.getAttribute("data-ax-co") === "next" ? 1 : -1; setTimeout(function () { st.companyIdx = ((st.companyIdx + dir) % n + n) % n; st.sliding = false; render(); }, 200); }
       else if (t.hasAttribute("data-ax-co-idx")) { st.companyIdx = +t.getAttribute("data-ax-co-idx"); render(); }
@@ -554,6 +622,7 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
       else if (t.hasAttribute("data-ax-loop")) { st.loopIdx = +t.getAttribute("data-ax-loop"); render(); }
       else if (t.hasAttribute("data-ax-cat")) { var cv = t.getAttribute("data-ax-cat"); st.axCat = cv === "__all" ? null : cv; render(); }
       else if (t.hasAttribute("data-ax-company")) { modalOpen(companyModalHtml(+t.getAttribute("data-ax-company"))); }
+      else if (t.hasAttribute("data-ax-proj")) { var pp = t.getAttribute("data-ax-proj").split("-"); modalOpen(projectModalHtml(+pp[0], +pp[1])); }
     });
 
     // ---- media modal (영상 임베드 / 이미지 라이트박스) ----
