@@ -500,25 +500,32 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
       var pal = [["#eceffe", "#4655d6"], ["#e2f6f2", "#0e9c8c"], ["#f0ebff", "#7a54e6"], ["#fdeaf1", "#d83f68"], ["#e8f0fe", "#2563eb"], ["#ffece3", "#e0562f"]];
       return map[co.name] || pal[ci % pal.length];
     }
-    function caseThumb(co, ci, p) {
-      var b = coBrand(co, ci), img = null;
+    function firstMediaImg(p) {
+      var img = null;
       (p.media || []).some(function (m) { if (m.url && (m.type === "image" || !m.type)) { img = m.url; return true; } });
       if (!img) (p.links || []).some(function (l) { var y = ytId(l.url); if (y) { img = "https://img.youtube.com/vi/" + y + "/hqdefault.jpg"; return true; } });
+      return img;
+    }
+    function caseThumb(co, ci, p) {
+      var b = coBrand(co, ci), img = firstMediaImg(p);
       if (img) return '<div style="aspect-ratio:16/10;overflow:hidden;position:relative;background:' + b[0] + '"><img src="' + e(img) + '" loading="lazy" style="width:100%;height:100%;object-fit:cover;display:block"><span style="position:absolute;left:14px;bottom:12px;background:#fff;border-radius:8px;padding:5px 11px;font-size:12px;font-weight:800;letter-spacing:-.01em;color:' + b[1] + ';box-shadow:0 4px 12px rgba(10,16,40,.18)">' + e(co.name) + '</span></div>';
       var m0 = (p.metrics || [])[0];
       if (m0) return '<div style="aspect-ratio:16/10;background:' + b[0] + ';display:flex;flex-direction:column;justify-content:center;padding:22px 26px"><span style="font-size:13px;font-weight:800;letter-spacing:-.01em;color:' + b[1] + '">' + e(co.name) + '</span><span style="font-size:clamp(30px,4vw,46px);font-weight:800;letter-spacing:-.03em;color:' + b[1] + ';line-height:1;margin-top:9px">' + e(m0.v) + '</span><span style="font-size:12px;color:' + b[1] + ';opacity:.72;margin-top:5px">' + e(m0.k) + '</span></div>';
-      return '<div style="aspect-ratio:16/10;background:' + b[0] + ';display:flex;align-items:center;justify-content:center;padding:20px"><span style="font-size:clamp(22px,2.6vw,32px);font-weight:800;letter-spacing:-.02em;color:' + b[1] + '">' + e(co.name) + '</span></div>';
+      return '<div style="aspect-ratio:16/10;background:' + b[0] + ';display:flex;flex-direction:column;justify-content:center;padding:24px 26px"><span style="font-size:12.5px;font-weight:800;letter-spacing:-.01em;color:' + b[1] + ';opacity:.85">' + e(co.name) + '</span><span style="font-size:clamp(16px,1.9vw,20px);font-weight:800;letter-spacing:-.02em;color:' + b[1] + ';line-height:1.4;margin-top:9px">' + e(p.title) + '</span></div>';
     }
     function caseCard(it) {
       var co = it.co, p = it.p, ci = it.ci, cat = catOf(it.cat), b = coBrand(co, ci);
-      var showBody = (p.metrics || []).slice(1, 3).map(function (m) { return '<div><div style="font-size:18px;font-weight:800;letter-spacing:-.02em;color:#0a0f24">' + e(m.v) + '</div><div style="font-size:11px;color:#8b91a7;margin-top:1px">' + e(m.k) + '</div></div>'; }).join("");
+      var img = firstMediaImg(p), hasM0 = !!(p.metrics || [])[0];
+      var titleOnTile = !img && !hasM0;
+      var bodyMets = (img ? (p.metrics || []).slice(0, 2) : (p.metrics || []).slice(1, 3)).map(function (m) { return '<div><div style="font-size:18px;font-weight:800;letter-spacing:-.02em;color:#0a0f24">' + e(m.v) + '</div><div style="font-size:11px;color:#8b91a7;margin-top:1px">' + e(m.k) + '</div></div>'; }).join("");
+      var headline = titleOnTile ? '' : '<div style="font-size:15.5px;font-weight:700;letter-spacing:-.015em;color:#0a0f24;line-height:1.5;flex:1">' + e(p.title) + '</div>';
       return '<button data-ax-proj="' + ci + '-' + it.pi + '" class="axcard" style="text-align:left;background:#fff;border:1px solid #e8eaf2;border-radius:16px;overflow:hidden;cursor:pointer;display:flex;flex-direction:column;box-shadow:0 6px 22px -16px rgba(20,28,70,.18);padding:0">' +
         caseThumb(co, ci, p) +
         '<div style="padding:17px 20px 19px;display:flex;flex-direction:column;gap:12px;flex:1">' +
         '<div style="display:flex;align-items:center;gap:6px"><span style="width:6px;height:6px;border-radius:50%;background:' + cat.acc[0] + '"></span><span class="axmono" style="font-size:11px;color:#8b91a7;font-weight:600">' + e(cat.name) + '</span></div>' +
-        '<div style="font-size:15.5px;font-weight:700;letter-spacing:-.015em;color:#0a0f24;line-height:1.5;flex:1">' + e(p.title) + '</div>' +
-        (showBody ? '<div style="display:flex;gap:26px">' + showBody + '</div>' : '') +
-        '<div style="font-size:13px;font-weight:700;color:' + b[1] + '">사례 읽기 →</div>' +
+        headline +
+        (bodyMets ? '<div style="display:flex;gap:26px">' + bodyMets + '</div>' : '') +
+        '<div style="margin-top:auto;font-size:13px;font-weight:700;color:' + b[1] + '">사례 읽기 →</div>' +
         '</div></button>';
     }
     function projectModalHtml(ci, pi) {
