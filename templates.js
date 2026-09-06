@@ -274,7 +274,7 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
       ".axcard{transition:transform .22s cubic-bezier(.2,.8,.2,1),box-shadow .22s,border-color .22s}.axcard:hover{transform:translateY(-3px);box-shadow:0 16px 36px -12px rgba(20,28,70,.16)}" +
       ".axmchip{transition:transform .2s,border-color .2s,color .2s}.axmchip:hover{transform:translateY(-2px);border-color:#335cff;color:#335cff}" +
       ".axgridbg{background-image:linear-gradient(#e8eaf2 1px,transparent 1px),linear-gradient(90deg,#e8eaf2 1px,transparent 1px);background-size:52px 52px;-webkit-mask-image:radial-gradient(60% 65% at 30% 20%,#000 20%,transparent 100%);mask-image:radial-gradient(60% 65% at 30% 20%,#000 20%,transparent 100%)}" +
-      ".cocards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:clamp(14px,1.6vw,22px);margin-top:28px}@media(max-width:920px){.cocards{grid-template-columns:repeat(2,minmax(0,1fr))}}@media(max-width:560px){.cocards{grid-template-columns:1fr}}.catgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px;align-items:start}@media(max-width:820px){.catgrid{grid-template-columns:1fr}}.projrow{transition:background .15s}.projrow:hover{background:#f6f7fb}";
+      ".cocards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:clamp(14px,1.6vw,22px);margin-top:28px}@media(max-width:920px){.cocards{grid-template-columns:repeat(2,minmax(0,1fr))}}@media(max-width:560px){.cocards{grid-template-columns:1fr}}.catgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px;align-items:start}@media(max-width:820px){.catgrid{grid-template-columns:1fr}}.projrow{transition:background .15s}.projrow:hover{background:#f6f7fb}.cathero{display:grid;grid-template-columns:1.15fr .85fr;gap:clamp(20px,3vw,40px);align-items:center}@media(max-width:760px){.cathero{grid-template-columns:1fr;gap:22px}}.projwrap{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin-top:16px}@media(max-width:900px){.projwrap{grid-template-columns:repeat(2,1fr)}}@media(max-width:560px){.projwrap{grid-template-columns:1fr}}@keyframes axfade{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}";
     const dataJson = JSON.stringify(data).replace(/</g, "\\u003c");
     return "<!doctype html><html lang=\"ko\"><head><meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width,initial-scale=1\"><title>" + esc(title) + "</title>" + head + "<style>" + css + "</style></head><body>" +
       '<div id="scroll-progress" style="position:fixed;top:0;left:0;height:3px;width:0%;background:linear-gradient(90deg,#335cff,#7c5cff,#0fbf9f);z-index:99"></div>' +
@@ -289,7 +289,7 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
     var D = window.__AX || {};
     var INK = "#0a0f24", BLUE = "#335cff", VIOLET = "#7c5cff", MINT = "#0fbf9f", CORAL = "#ff5c7a", MUT = "#8b91a7", LINE = "#e8eaf2";
     var GRAD = "linear-gradient(120deg,#335cff,#7c5cff 55%,#0fbf9f)";
-    var st = { view: "home", companyIdx: 0, pipeIdx: 0, active: null, rotIdx: 0, statT: 0, sliding: false, loopIdx: 0, axCat: null, caseFilter: null };
+    var st = { view: "home", companyIdx: 0, pipeIdx: 0, active: null, rotIdx: 0, statT: 0, sliding: false, loopIdx: 0, axCat: null, caseFilter: null, projCat: null };
     var root = document.getElementById("ax-root");
     var e = function (s) { return String(s == null ? "" : s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;"); };
     var mono = "font-family:'IBM Plex Mono','Pretendard Variable',Pretendard,monospace";
@@ -495,21 +495,36 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
       if (/기부런|부작용|소비자\s*조사|USJ|유니버설|제휴|영상|유튜브|쎄뷰리|브랜딩|프로모션/.test(t)) return "brand";
       return "perf";
     }
-    function projectRow(it, cat) {
-      var p = it.p, acc = cat.acc;
-      var m = (p.metrics || [])[0];
-      var right = m ? '<div style="flex-shrink:0;margin-left:12px;font-size:15px;font-weight:800;letter-spacing:-.02em;color:' + acc[0] + ';white-space:nowrap">' + e(m.v) + '</div>' : '<span style="flex-shrink:0;margin-left:12px;color:#c7ccd8;font-size:17px;line-height:1">›</span>';
-      return '<button class="projrow" data-ax-proj="' + it.ci + '-' + it.pi + '" style="display:flex;align-items:center;gap:8px;width:100%;text-align:left;border:0;border-top:1px solid #eef0f5;background:transparent;cursor:pointer;padding:12px 8px;border-radius:9px">' +
-        '<div style="flex:1;min-width:0"><div style="font-size:14px;font-weight:650;color:#0a0f24;line-height:1.4">' + e(p.title) + '</div><div style="font-size:11.5px;color:#8b91a7;margin-top:2px">' + e(it.co.name) + '</div></div>' +
-        right + '</button>';
+    function sigMetrics(its) {
+      var out = [];
+      its.forEach(function (it) { var m = (it.p.metrics || [])[0]; if (m && out.length < 4) out.push(m); });
+      if (out.length < 4) its.forEach(function (it) { (it.p.metrics || []).slice(1).forEach(function (m) { if (out.length < 4) out.push(m); }); });
+      return out;
     }
-    function categoryCard(cat, its) {
-      var rows = its.map(function (it) { return projectRow(it, cat); }).join("");
-      return '<div style="background:#fff;border:1px solid #e8eaf2;border-radius:16px;padding:21px 21px 13px;box-shadow:0 6px 22px -16px rgba(20,28,70,.16);display:flex;flex-direction:column">' +
-        '<div style="display:flex;align-items:baseline;gap:11px"><span class="axmono" style="font-size:24px;font-weight:800;color:' + cat.acc[0] + ';line-height:1">' + cat.no + '</span><span style="font-size:17px;font-weight:800;letter-spacing:-.02em;color:#0a0f24">' + e(cat.name) + '</span><span class="axmono" style="font-size:11.5px;color:#8b91a7;margin-left:auto">' + its.length + '</span></div>' +
-        '<div style="font-size:12px;color:#8b91a7;margin:5px 0 10px">' + e(cat.desc) + '</div>' +
-        '<div>' + rows + '</div>' +
-        '</div>';
+    function catHero(cat, its) {
+      var sm = sigMetrics(its);
+      var metricsHtml = sm.map(function (m) { return '<div><div style="font-size:clamp(26px,3.2vw,38px);font-weight:800;letter-spacing:-.03em;line-height:1">' + e(m.v) + '</div><div style="font-size:11.5px;opacity:.82;margin-top:4px;line-height:1.35">' + e(m.k) + '</div></div>'; }).join("");
+      return '<div style="border-radius:20px;overflow:hidden;background:linear-gradient(135deg,' + cat.acc[0] + ',' + cat.acc[1] + ');color:#fff;padding:clamp(24px,3.4vw,40px)">' +
+        '<div class="cathero">' +
+        '<div>' +
+        '<div class="axmono" style="font-size:12px;letter-spacing:.18em;opacity:.82">COMPETENCY ' + cat.no + '</div>' +
+        '<h3 style="margin:9px 0 0;font-size:clamp(24px,3.2vw,38px);font-weight:800;letter-spacing:-.03em">' + e(cat.name) + '</h3>' +
+        '<p style="margin:12px 0 0;font-size:14.5px;line-height:1.7;opacity:.92;max-width:44ch">' + e(cat.desc) + '</p>' +
+        '<div class="axmono" style="display:inline-block;margin-top:16px;font-size:12px;padding:6px 13px;border-radius:999px;background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.28)">' + its.length + ' PROJECTS</div>' +
+        '</div>' +
+        (metricsHtml ? '<div style="display:grid;grid-template-columns:1fr 1fr;gap:20px 26px">' + metricsHtml + '</div>' : '') +
+        '</div></div>';
+    }
+    function projShowcaseCard(it, cat) {
+      var p = it.p, acc = cat.acc;
+      var mv = (p.metrics || []).slice(0, 3).map(function (m) { return '<span style="font-size:14px;font-weight:800;letter-spacing:-.02em;color:' + acc[0] + '">' + e(m.v) + '</span>'; }).join('<span style="color:#d0d5e0">·</span>');
+      var tgs = (p.tags || []).slice(0, 2).map(function (t) { return '<span class="axmono" style="font-size:10px;padding:2px 8px;border-radius:999px;background:#f1f3f9;color:#6b7285">' + e(t) + '</span>'; }).join("");
+      return '<button data-ax-proj="' + it.ci + '-' + it.pi + '" class="axcard" style="text-align:left;background:#fff;border:1px solid #e8eaf2;border-radius:14px;padding:16px 17px;cursor:pointer;display:flex;flex-direction:column;gap:9px;box-shadow:0 4px 16px -12px rgba(20,28,70,.16)">' +
+        '<div style="display:flex;align-items:center;gap:6px"><span style="width:6px;height:6px;border-radius:50%;background:' + acc[0] + '"></span><span class="axmono" style="font-size:11px;color:#8b91a7;font-weight:600">' + e(it.co.name) + '</span></div>' +
+        '<div style="font-size:14px;font-weight:700;letter-spacing:-.01em;color:#0a0f24;line-height:1.4;flex:1">' + e(p.title) + '</div>' +
+        (mv ? '<div style="display:flex;align-items:center;gap:7px;flex-wrap:wrap">' + mv + '</div>' : '') +
+        (tgs ? '<div style="display:flex;gap:4px;flex-wrap:wrap">' + tgs + '</div>' : '') +
+        '</button>';
     }
     function projectModalHtml(ci, pi) {
       var co = (D.companies || [])[ci]; if (!co) return "";
@@ -539,15 +554,21 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
       var items = [];
       cos.forEach(function (co, ci) { (co.projects || []).forEach(function (p, pi) { items.push({ co: co, ci: ci, p: p, pi: pi, cat: projCategory(p) }); }); });
       if (!items.length) return '<section style="padding:80px 0;color:#8b91a7">등록된 프로젝트가 없습니다.</section>';
-      var cards = CATS.map(function (cat) {
-        var its = items.filter(function (it) { return it.cat === cat.key; });
-        return its.length ? categoryCard(cat, its) : "";
+      var avail = CATS.filter(function (cat) { return items.some(function (it) { return it.cat === cat.key; }); });
+      var activeKey = (st.projCat && avail.some(function (c) { return c.key === st.projCat; })) ? st.projCat : (avail[0] && avail[0].key);
+      var activeCat = catOf(activeKey);
+      var activeItems = items.filter(function (it) { return it.cat === activeKey; });
+      var tabs = avail.map(function (cat) {
+        var on = cat.key === activeKey;
+        return '<button data-ax-projcat="' + cat.key + '" style="font-size:13.5px;font-weight:700;padding:9px 15px;border-radius:999px;cursor:pointer;display:inline-flex;align-items:center;gap:8px;transition:all .2s;' + (on ? ('background:' + cat.acc[0] + ';color:#fff;border:1px solid transparent;box-shadow:0 10px 22px -12px ' + cat.acc[0]) : 'background:#fff;color:#4b5268;border:1px solid #e2e6f0') + '"><span class="axmono" style="font-size:11px;' + (on ? 'opacity:.85' : 'color:' + cat.acc[0]) + '">' + cat.no + '</span>' + e(cat.name) + '</button>';
       }).join("");
+      var cards = activeItems.map(function (it) { return projShowcaseCard(it, activeCat); }).join("");
       return '<section id="cases" style="padding:56px 0 80px;border-bottom:1px solid #e8eaf2">' +
         '<div class="axmono" style="font-size:12px;letter-spacing:.16em;color:#8b91a7;margin-bottom:12px">SELECTED WORK</div>' +
         '<h2 style="margin:0;font-size:clamp(22px,2vw,30px);font-weight:800;letter-spacing:-.025em">역량별 프로젝트 케이스</h2>' +
-        '<p style="margin:10px 0 26px;font-size:15px;color:#8b91a7;max-width:60ch">퍼포먼스 · 브랜드 · 커머스 · 그로스 — 4개 역량으로 정리한 대표 프로젝트입니다.</p>' +
-        '<div class="catgrid">' + cards + '</div>' +
+        '<p style="margin:10px 0 22px;font-size:15px;color:#8b91a7;max-width:60ch">퍼포먼스 · 브랜드 · 커머스 · 그로스 — 4개 역량으로 정리한 대표 프로젝트와 성과.</p>' +
+        '<div style="display:flex;flex-wrap:wrap;gap:9px;margin-bottom:22px">' + tabs + '</div>' +
+        '<div style="animation:axfade .45s">' + catHero(activeCat, activeItems) + '<div class="projwrap">' + cards + '</div></div>' +
         '</section>';
     }
 
@@ -610,7 +631,7 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
 
     // ---- interactions (event delegation) ----
     document.addEventListener("click", function (ev) {
-      var t = ev.target.closest("[data-ax-view],[data-ax-co],[data-ax-co-idx],[data-ax-chip],[data-ax-pipe],[data-ax-loop],[data-ax-cat],[data-ax-company],[data-ax-proj]"); if (!t) return;
+      var t = ev.target.closest("[data-ax-view],[data-ax-co],[data-ax-co-idx],[data-ax-chip],[data-ax-pipe],[data-ax-loop],[data-ax-cat],[data-ax-company],[data-ax-proj],[data-ax-projcat]"); if (!t) return;
       if (t.hasAttribute("data-ax-view")) { st.view = t.getAttribute("data-ax-view"); st.active = null; window.scrollTo(0, 0); render(); }
       else if (t.hasAttribute("data-ax-co")) { var n = (D.companies || []).length || 1; st.sliding = true; render(); var dir = t.getAttribute("data-ax-co") === "next" ? 1 : -1; setTimeout(function () { st.companyIdx = ((st.companyIdx + dir) % n + n) % n; st.sliding = false; render(); }, 200); }
       else if (t.hasAttribute("data-ax-co-idx")) { st.companyIdx = +t.getAttribute("data-ax-co-idx"); render(); }
@@ -620,6 +641,7 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
       else if (t.hasAttribute("data-ax-cat")) { var cv = t.getAttribute("data-ax-cat"); st.axCat = cv === "__all" ? null : cv; render(); }
       else if (t.hasAttribute("data-ax-company")) { modalOpen(companyModalHtml(+t.getAttribute("data-ax-company"))); }
       else if (t.hasAttribute("data-ax-proj")) { var pp = t.getAttribute("data-ax-proj").split("-"); modalOpen(projectModalHtml(+pp[0], +pp[1])); }
+      else if (t.hasAttribute("data-ax-projcat")) { st.projCat = t.getAttribute("data-ax-projcat"); render(); }
     });
 
     // ---- media modal (영상 임베드 / 이미지 라이트박스) ----
