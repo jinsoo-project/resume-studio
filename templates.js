@@ -274,7 +274,7 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
       ".axcard{transition:transform .22s cubic-bezier(.2,.8,.2,1),box-shadow .22s,border-color .22s}.axcard:hover{transform:translateY(-3px);box-shadow:0 16px 36px -12px rgba(20,28,70,.16)}" +
       ".axmchip{transition:transform .2s,border-color .2s,color .2s}.axmchip:hover{transform:translateY(-2px);border-color:#335cff;color:#335cff}" +
       ".axgridbg{background-image:linear-gradient(#e8eaf2 1px,transparent 1px),linear-gradient(90deg,#e8eaf2 1px,transparent 1px);background-size:52px 52px;-webkit-mask-image:radial-gradient(60% 65% at 30% 20%,#000 20%,transparent 100%);mask-image:radial-gradient(60% 65% at 30% 20%,#000 20%,transparent 100%)}" +
-      ".cocards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:clamp(14px,1.6vw,22px);margin-top:28px}@media(max-width:920px){.cocards{grid-template-columns:repeat(2,minmax(0,1fr))}}@media(max-width:560px){.cocards{grid-template-columns:1fr}}";
+      ".cocards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:clamp(14px,1.6vw,22px);margin-top:28px}@media(max-width:920px){.cocards{grid-template-columns:repeat(2,minmax(0,1fr))}}@media(max-width:560px){.cocards{grid-template-columns:1fr}}.catgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px;align-items:start}@media(max-width:820px){.catgrid{grid-template-columns:1fr}}.projrow{transition:background .15s}.projrow:hover{background:#f6f7fb}";
     const dataJson = JSON.stringify(data).replace(/</g, "\\u003c");
     return "<!doctype html><html lang=\"ko\"><head><meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width,initial-scale=1\"><title>" + esc(title) + "</title>" + head + "<style>" + css + "</style></head><body>" +
       '<div id="scroll-progress" style="position:fixed;top:0;left:0;height:3px;width:0%;background:linear-gradient(90deg,#335cff,#7c5cff,#0fbf9f);z-index:99"></div>' +
@@ -495,17 +495,21 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
       if (/기부런|부작용|소비자\s*조사|USJ|유니버설|제휴|영상|유튜브|쎄뷰리|브랜딩|프로모션/.test(t)) return "brand";
       return "perf";
     }
-    function projectCard(it, cat) {
+    function projectRow(it, cat) {
       var p = it.p, acc = cat.acc;
-      var mets = (p.metrics || []).slice(0, 3).map(function (m) { return '<div><div style="font-size:18px;font-weight:800;letter-spacing:-.02em;color:' + acc[0] + '">' + e(m.v) + '</div><div style="font-size:10.5px;color:#8b91a7;margin-top:1px">' + e(m.k) + '</div></div>'; }).join("");
-      var tgs = (p.tags || []).slice(0, 3).map(function (t) { return '<span class="axmono" style="font-size:10.5px;padding:3px 9px;border-radius:999px;background:#eef1f8;color:#4b5268">' + e(t) + '</span>'; }).join("");
-      return '<button data-ax-proj="' + it.ci + '-' + it.pi + '" class="axcard" style="text-align:left;background:#fff;border:1px solid #e8eaf2;border-radius:14px;padding:19px 19px 17px;cursor:pointer;display:flex;flex-direction:column;gap:11px;box-shadow:0 6px 20px -14px rgba(20,28,70,.14)">' +
-        '<div style="display:flex;align-items:center;gap:7px"><span style="width:7px;height:7px;border-radius:50%;background:' + acc[0] + '"></span><span class="axmono" style="font-size:11.5px;color:#4b5268;font-weight:600">' + e(it.co.name) + '</span></div>' +
-        '<div style="font-size:15.5px;font-weight:800;letter-spacing:-.02em;color:#0a0f24;line-height:1.42">' + e(p.title) + '</div>' +
-        (mets ? '<div style="display:flex;gap:16px;flex-wrap:wrap">' + mets + '</div>' : '') +
-        (tgs ? '<div style="display:flex;gap:5px;flex-wrap:wrap">' + tgs + '</div>' : '') +
-        '<div style="margin-top:auto;padding-top:3px;font-size:12px;font-weight:700;color:' + acc[0] + '">자세히 보기 →</div>' +
-        '</button>';
+      var m = (p.metrics || [])[0];
+      var right = m ? '<div style="flex-shrink:0;margin-left:12px;font-size:15px;font-weight:800;letter-spacing:-.02em;color:' + acc[0] + ';white-space:nowrap">' + e(m.v) + '</div>' : '<span style="flex-shrink:0;margin-left:12px;color:#c7ccd8;font-size:17px;line-height:1">›</span>';
+      return '<button class="projrow" data-ax-proj="' + it.ci + '-' + it.pi + '" style="display:flex;align-items:center;gap:8px;width:100%;text-align:left;border:0;border-top:1px solid #eef0f5;background:transparent;cursor:pointer;padding:12px 8px;border-radius:9px">' +
+        '<div style="flex:1;min-width:0"><div style="font-size:14px;font-weight:650;color:#0a0f24;line-height:1.4">' + e(p.title) + '</div><div style="font-size:11.5px;color:#8b91a7;margin-top:2px">' + e(it.co.name) + '</div></div>' +
+        right + '</button>';
+    }
+    function categoryCard(cat, its) {
+      var rows = its.map(function (it) { return projectRow(it, cat); }).join("");
+      return '<div style="background:#fff;border:1px solid #e8eaf2;border-radius:16px;padding:21px 21px 13px;box-shadow:0 6px 22px -16px rgba(20,28,70,.16);display:flex;flex-direction:column">' +
+        '<div style="display:flex;align-items:baseline;gap:11px"><span class="axmono" style="font-size:24px;font-weight:800;color:' + cat.acc[0] + ';line-height:1">' + cat.no + '</span><span style="font-size:17px;font-weight:800;letter-spacing:-.02em;color:#0a0f24">' + e(cat.name) + '</span><span class="axmono" style="font-size:11.5px;color:#8b91a7;margin-left:auto">' + its.length + '</span></div>' +
+        '<div style="font-size:12px;color:#8b91a7;margin:5px 0 10px">' + e(cat.desc) + '</div>' +
+        '<div>' + rows + '</div>' +
+        '</div>';
     }
     function projectModalHtml(ci, pi) {
       var co = (D.companies || [])[ci]; if (!co) return "";
@@ -535,22 +539,15 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
       var items = [];
       cos.forEach(function (co, ci) { (co.projects || []).forEach(function (p, pi) { items.push({ co: co, ci: ci, p: p, pi: pi, cat: projCategory(p) }); }); });
       if (!items.length) return '<section style="padding:80px 0;color:#8b91a7">등록된 프로젝트가 없습니다.</section>';
-      var sections = CATS.map(function (cat) {
+      var cards = CATS.map(function (cat) {
         var its = items.filter(function (it) { return it.cat === cat.key; });
-        if (!its.length) return "";
-        var cards = its.map(function (it) { return projectCard(it, cat); }).join("");
-        return '<section style="padding:36px 0 4px">' +
-          '<div style="display:flex;align-items:flex-end;gap:16px;margin:0 0 22px;padding-bottom:14px;border-bottom:2px solid #0a0f24">' +
-          '<span class="axmono" style="font-size:clamp(28px,3vw,38px);font-weight:800;color:' + cat.acc[0] + ';line-height:.85">' + cat.no + '</span>' +
-          '<div style="flex:1"><h3 style="margin:0;font-size:clamp(19px,2vw,26px);font-weight:800;letter-spacing:-.02em">' + e(cat.name) + '</h3><p style="margin:4px 0 0;font-size:13px;color:#8b91a7">' + e(cat.desc) + '</p></div>' +
-          '<span class="axmono" style="font-size:11.5px;color:#8b91a7;white-space:nowrap">' + its.length + ' PROJECTS</span>' +
-          '</div><div class="cocards">' + cards + '</div></section>';
+        return its.length ? categoryCard(cat, its) : "";
       }).join("");
       return '<section id="cases" style="padding:56px 0 80px;border-bottom:1px solid #e8eaf2">' +
         '<div class="axmono" style="font-size:12px;letter-spacing:.16em;color:#8b91a7;margin-bottom:12px">SELECTED WORK</div>' +
-        '<h2 style="margin:0;font-size:clamp(22px,2vw,31px);font-weight:800;letter-spacing:-.025em">역량별 프로젝트 케이스</h2>' +
-        '<p style="margin:10px 0 0;font-size:15px;color:#8b91a7;max-width:60ch">퍼포먼스 · 브랜드 · 커머스 · 그로스 — 4개 역량으로 정리한 대표 프로젝트입니다.</p>' +
-        sections +
+        '<h2 style="margin:0;font-size:clamp(22px,2vw,30px);font-weight:800;letter-spacing:-.025em">역량별 프로젝트 케이스</h2>' +
+        '<p style="margin:10px 0 26px;font-size:15px;color:#8b91a7;max-width:60ch">퍼포먼스 · 브랜드 · 커머스 · 그로스 — 4개 역량으로 정리한 대표 프로젝트입니다.</p>' +
+        '<div class="catgrid">' + cards + '</div>' +
         '</section>';
     }
 
