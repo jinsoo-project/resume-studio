@@ -274,7 +274,7 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
       ".axcard{transition:transform .22s cubic-bezier(.2,.8,.2,1),box-shadow .22s,border-color .22s}.axcard:hover{transform:translateY(-3px);box-shadow:0 16px 36px -12px rgba(20,28,70,.16)}" +
       ".axmchip{transition:transform .2s,border-color .2s,color .2s}.axmchip:hover{transform:translateY(-2px);border-color:#335cff;color:#335cff}" +
       ".axgridbg{background-image:linear-gradient(#e8eaf2 1px,transparent 1px),linear-gradient(90deg,#e8eaf2 1px,transparent 1px);background-size:52px 52px;-webkit-mask-image:radial-gradient(60% 65% at 30% 20%,#000 20%,transparent 100%);mask-image:radial-gradient(60% 65% at 30% 20%,#000 20%,transparent 100%)}" +
-      ".cocards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:clamp(14px,1.6vw,22px);margin-top:28px}@media(max-width:920px){.cocards{grid-template-columns:repeat(2,minmax(0,1fr))}}@media(max-width:560px){.cocards{grid-template-columns:1fr}}.catgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px;align-items:start}@media(max-width:820px){.catgrid{grid-template-columns:1fr}}.projrow{transition:background .15s}.projrow:hover{background:#f6f7fb}.cathero{display:grid;grid-template-columns:1.15fr .85fr;gap:clamp(20px,3vw,40px);align-items:center}@media(max-width:760px){.cathero{grid-template-columns:1fr;gap:22px}}.projwrap{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin-top:16px}@media(max-width:900px){.projwrap{grid-template-columns:repeat(2,1fr)}}@media(max-width:560px){.projwrap{grid-template-columns:1fr}}@keyframes axfade{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}";
+      ".cocards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:clamp(14px,1.6vw,22px);margin-top:28px}@media(max-width:920px){.cocards{grid-template-columns:repeat(2,minmax(0,1fr))}}@media(max-width:560px){.cocards{grid-template-columns:1fr}}.catgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px;align-items:start}@media(max-width:820px){.catgrid{grid-template-columns:1fr}}.projrow{transition:background .15s}.projrow:hover{background:#f6f7fb}.cathero{display:grid;grid-template-columns:1.15fr .85fr;gap:clamp(20px,3vw,40px);align-items:center}@media(max-width:760px){.cathero{grid-template-columns:1fr;gap:22px}}.projwrap{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin-top:16px}@media(max-width:900px){.projwrap{grid-template-columns:repeat(2,1fr)}}@media(max-width:560px){.projwrap{grid-template-columns:1fr}}@keyframes axfade{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}.edrow{transition:padding-left .35s cubic-bezier(.2,.8,.2,1)}.edrow:hover{padding-left:12px}.edrow .edttl{transition:color .25s}.edrow:hover .edttl{color:#c8442a}.edrow:hover .edidx{color:#c8442a}.edrow:first-child{border-top:0}.edthumb{transition:transform .3s cubic-bezier(.2,.8,.2,1)}.edrow:hover .edthumb{transform:translateY(-3px)}@media(max-width:760px){.edrow{grid-template-columns:40px 1fr!important;gap:16px!important}.edrow .edthumb{grid-column:2;margin-top:14px;max-width:300px}}";
     const dataJson = JSON.stringify(data).replace(/</g, "\\u003c");
     return "<!doctype html><html lang=\"ko\"><head><meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width,initial-scale=1\"><title>" + esc(title) + "</title>" + head + "<style>" + css + "</style></head><body>" +
       '<div id="scroll-progress" style="position:fixed;top:0;left:0;height:3px;width:0%;background:linear-gradient(90deg,#335cff,#7c5cff,#0fbf9f);z-index:99"></div>' +
@@ -506,27 +506,27 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
       if (!img) (p.links || []).some(function (l) { var y = ytId(l.url); if (y) { img = "https://img.youtube.com/vi/" + y + "/hqdefault.jpg"; return true; } });
       return img;
     }
-    function caseThumb(co, ci, p) {
+    function caseThumbEd(co, ci, p) {
       var b = coBrand(co, ci), img = firstMediaImg(p);
-      if (img) return '<div style="aspect-ratio:16/10;overflow:hidden;position:relative;background:' + b[0] + '"><img src="' + e(img) + '" loading="lazy" style="width:100%;height:100%;object-fit:cover;display:block"><span style="position:absolute;left:14px;bottom:12px;background:#fff;border-radius:8px;padding:5px 11px;font-size:12px;font-weight:800;letter-spacing:-.01em;color:' + b[1] + ';box-shadow:0 4px 12px rgba(10,16,40,.18)">' + e(co.name) + '</span></div>';
-      var m0 = (p.metrics || [])[0];
-      if (m0) return '<div style="aspect-ratio:16/10;background:' + b[0] + ';display:flex;flex-direction:column;justify-content:center;padding:22px 26px"><span style="font-size:13px;font-weight:800;letter-spacing:-.01em;color:' + b[1] + '">' + e(co.name) + '</span><span style="font-size:clamp(30px,4vw,46px);font-weight:800;letter-spacing:-.03em;color:' + b[1] + ';line-height:1;margin-top:9px">' + e(m0.v) + '</span><span style="font-size:12px;color:' + b[1] + ';opacity:.72;margin-top:5px">' + e(m0.k) + '</span></div>';
-      return '<div style="aspect-ratio:16/10;background:' + b[0] + ';display:flex;flex-direction:column;justify-content:center;padding:24px 26px"><span style="font-size:12.5px;font-weight:800;letter-spacing:-.01em;color:' + b[1] + ';opacity:.85">' + e(co.name) + '</span><span style="font-size:clamp(16px,1.9vw,20px);font-weight:800;letter-spacing:-.02em;color:' + b[1] + ';line-height:1.4;margin-top:9px">' + e(p.title) + '</span></div>';
+      var base = 'aspect-ratio:4/3;border-radius:10px;overflow:hidden;';
+      if (img) return '<div class="edthumb" style="' + base + 'background:' + b[0] + '"><img src="' + e(img) + '" loading="lazy" style="width:100%;height:100%;object-fit:cover;display:block"></div>';
+      return '<div class="edthumb" style="' + base + 'background:' + b[0] + ';display:flex;align-items:center;justify-content:center;padding:16px"><span style="font-size:clamp(15px,1.5vw,19px);font-weight:700;letter-spacing:-.02em;color:' + b[1] + '">' + e(co.name) + '</span></div>';
     }
-    function caseCard(it) {
-      var co = it.co, p = it.p, ci = it.ci, cat = catOf(it.cat), b = coBrand(co, ci);
-      var img = firstMediaImg(p), hasM0 = !!(p.metrics || [])[0];
-      var titleOnTile = !img && !hasM0;
-      var bodyMets = (img ? (p.metrics || []).slice(0, 2) : (p.metrics || []).slice(1, 3)).map(function (m) { return '<div><div style="font-size:18px;font-weight:800;letter-spacing:-.02em;color:#0a0f24">' + e(m.v) + '</div><div style="font-size:11px;color:#8b91a7;margin-top:1px">' + e(m.k) + '</div></div>'; }).join("");
-      var headline = titleOnTile ? '' : '<div style="font-size:15.5px;font-weight:700;letter-spacing:-.015em;color:#0a0f24;line-height:1.5;flex:1">' + e(p.title) + '</div>';
-      return '<button data-ax-proj="' + ci + '-' + it.pi + '" class="axcard" style="text-align:left;background:#fff;border:1px solid #e8eaf2;border-radius:16px;overflow:hidden;cursor:pointer;display:flex;flex-direction:column;box-shadow:0 6px 22px -16px rgba(20,28,70,.18);padding:0">' +
-        caseThumb(co, ci, p) +
-        '<div style="padding:17px 20px 19px;display:flex;flex-direction:column;gap:12px;flex:1">' +
-        '<div style="display:flex;align-items:center;gap:6px"><span style="width:6px;height:6px;border-radius:50%;background:' + cat.acc[0] + '"></span><span class="axmono" style="font-size:11px;color:#8b91a7;font-weight:600">' + e(cat.name) + '</span></div>' +
-        headline +
-        (bodyMets ? '<div style="display:flex;gap:26px">' + bodyMets + '</div>' : '') +
-        '<div style="margin-top:auto;font-size:13px;font-weight:700;color:' + b[1] + '">사례 읽기 →</div>' +
-        '</div></button>';
+    function editorialRow(it, n) {
+      var co = it.co, p = it.p, ci = it.ci, cat = catOf(it.cat);
+      var idx = (n < 10 ? "0" : "") + n;
+      var mets = (p.metrics || []).slice(0, 3).map(function (m) { return '<div><span style="font-size:18px;font-weight:700;letter-spacing:-.02em;color:#17161b">' + e(m.v) + '</span> <span style="font-size:11.5px;color:#6b6a72">' + e(m.k) + '</span></div>'; }).join("");
+      return '<button class="edrow" data-ax-proj="' + ci + '-' + it.pi + '" style="display:grid;grid-template-columns:46px 1fr 232px;gap:clamp(20px,3vw,40px);align-items:start;width:100%;text-align:left;border:0;border-top:1px solid #dedcd4;background:transparent;cursor:pointer;padding:32px 0">' +
+        '<div class="edidx" style="font-size:14px;font-weight:500;color:#a3a1a8;font-variant-numeric:tabular-nums;padding-top:6px">' + idx + '</div>' +
+        '<div style="min-width:0">' +
+        '<div style="font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:#8a8891;font-weight:600">' + e(cat.name) + '</div>' +
+        '<div class="edttl" style="margin:10px 0 0;font-size:clamp(19px,2.1vw,26px);font-weight:600;letter-spacing:-.03em;line-height:1.24;color:#17161b">' + e(p.title) + '</div>' +
+        '<div style="margin-top:10px;font-size:12.5px;color:#6b6a72"><span style="color:#17161b;font-weight:600">' + e(co.name) + '</span>' + (co.role ? ' · ' + e(co.role) : '') + '</div>' +
+        (p.desc ? '<p style="margin:13px 0 0;font-size:13.5px;line-height:1.68;color:#48474e;max-width:52ch">' + e(p.desc) + '</p>' : '') +
+        (mets ? '<div style="margin-top:15px;display:flex;flex-wrap:wrap;gap:22px">' + mets + '</div>' : '') +
+        '</div>' +
+        caseThumbEd(co, ci, p) +
+        '</button>';
     }
     function projectModalHtml(ci, pi) {
       var co = (D.companies || [])[ci]; if (!co) return "";
@@ -556,23 +556,19 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
       var items = [];
       cos.forEach(function (co, ci) { (co.projects || []).forEach(function (p, pi) { items.push({ co: co, ci: ci, p: p, pi: pi, cat: projCategory(p) }); }); });
       if (!items.length) return '<section style="padding:80px 0;color:#8b91a7">등록된 프로젝트가 없습니다.</section>';
-      var avail = CATS.filter(function (cat) { return items.some(function (it) { return it.cat === cat.key; }); });
-      var activeKey = (st.projCat && avail.some(function (c) { return c.key === st.projCat; })) ? st.projCat : "__all";
-      var shown = activeKey === "__all" ? items : items.filter(function (it) { return it.cat === activeKey; });
+      var order = { perf: 0, brand: 1, commerce: 2, growth: 3 };
+      items.sort(function (a, b) { return (order[a.cat] - order[b.cat]) || (a.ci - b.ci) || (a.pi - b.pi); });
       var ncomp = cos.filter(function (c) { return (c.projects || []).length; }).length;
-      var tabDefs = [{ key: "__all", name: "전체" }].concat(avail.map(function (c) { return { key: c.key, name: c.name }; }));
-      var tabs = tabDefs.map(function (td) {
-        var on = td.key === activeKey;
-        return '<button data-ax-projcat="' + td.key + '" style="font-size:13.5px;font-weight:600;padding:8px 16px;border-radius:999px;cursor:pointer;transition:all .2s;' + (on ? 'background:#0a0f24;color:#fff;border:1px solid #0a0f24' : 'background:#fff;color:#4b5268;border:1px solid #e2e6f0') + '">' + e(td.name) + '</button>';
-      }).join("");
-      var cards = shown.map(function (it) { return caseCard(it); }).join("");
-      return '<section id="cases" style="padding:56px 0 80px;border-bottom:1px solid #e8eaf2">' +
-        '<div class="axmono" style="font-size:12px;letter-spacing:.16em;color:#8b91a7;margin-bottom:12px">CASE STUDIES</div>' +
-        '<h2 style="margin:0;font-size:clamp(24px,2.4vw,34px);font-weight:800;letter-spacing:-.03em">프로젝트 사례</h2>' +
-        '<p style="margin:10px 0 24px;font-size:15px;color:#8b91a7;max-width:60ch">' + ncomp + '개 회사 · ' + items.length + '개 프로젝트 — 퍼포먼스부터 그로스·자동화까지.</p>' +
-        '<div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:24px">' + tabs + '</div>' +
-        '<div class="cocards" style="margin-top:0;animation:axfade .4s">' + cards + '</div>' +
-        '</section>';
+      var rows = items.map(function (it, i) { return editorialRow(it, i + 1); }).join("");
+      return '<section id="cases" style="width:100vw;margin-left:calc(50% - 50vw);background:#f6f5f2;border-top:1px solid #e6e4dc">' +
+        '<div style="max-width:1120px;margin:0 auto;padding:60px clamp(24px,5vw,40px) 92px">' +
+        '<div style="display:flex;justify-content:space-between;align-items:flex-end;gap:20px;padding-bottom:20px;border-bottom:1px solid #17161b">' +
+        '<div><div style="font-size:12px;letter-spacing:.24em;text-transform:uppercase;color:#c8442a;font-weight:600">Selected Work</div>' +
+        '<h2 style="margin:13px 0 0;font-size:clamp(28px,3.6vw,46px);font-weight:700;letter-spacing:-.035em;line-height:1;color:#17161b">대표 프로젝트</h2></div>' +
+        '<div style="text-align:right;font-size:12.5px;color:#6b6a72;line-height:1.7;padding-bottom:3px;white-space:nowrap">2017 — 현재<br>' + items.length + ' Projects · ' + ncomp + ' Companies</div>' +
+        '</div>' +
+        '<div style="animation:axfade .4s">' + rows + '</div>' +
+        '</div></section>';
     }
 
     function view() { return st.view === "cases" ? cases2() : st.view === "resume" ? resume() : st.view === "ax" ? ax() : home(); }
