@@ -729,6 +729,211 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
     render();
   }
 
+  /* ====================== 6) Klio 마케팅 포트폴리오 (원페이지 · DB주도) ====================== */
+  // klio.framer.website UI. draft-f-klio.html 디자인을 데이터 주도로. 데이터는 renderAX와 동일한 doc(d) 사용.
+  function renderKlio(d) {
+    var P = d.profile || {};
+    var fmt = function (s) { return s ? String(s).slice(0, 7).replace("-", ".") : ""; };
+    var wPeriod = function (w) { var a = fmt(w.startDate), b = w.endDate ? fmt(w.endDate) : "현재"; return a ? (a + " – " + b) : (w.endDate ? b : ""); };
+    var coPeriod = function (co) { if (co.periodText) return co.periodText; var a = fmt(co.startDate), b = co.endDate ? fmt(co.endDate) : "재직중"; return a ? (a + " — " + b) : (co.endDate ? b : ""); };
+    var dispName = function (co) { return co.useService ? (co.serviceKo || co.serviceEn || co.nameKo || co.nameEn || "") : (co.nameKo || co.nameEn || ""); };
+    var yearOf = function (w) { return String(w.endDate || w.startDate || "").slice(0, 4); };
+
+    var companies = d.companies || [];
+    var works = [];
+    companies.forEach(function (co) { (co.works || []).forEach(function (w) { works.push({ co: co, w: w }); }); });
+
+    var PAL = ["var(--mint)", "var(--beige)", "var(--sand)", "var(--lav)", "var(--coral)"];
+    var CATMETA = {
+      "퍼포먼스": { en: "Performance", c: "var(--lav)" }, "성과": { en: "Data", c: "var(--mint)" },
+      "브랜딩": { en: "Branding", c: "var(--coral)", dark: true }, "커머스": { en: "Commerce", c: "var(--sand)" },
+      "콘텐츠": { en: "Content", c: "var(--beige)" }, "그로스": { en: "Growth", c: "var(--mint)" },
+      "영상": { en: "Film", c: "var(--beige)" }, "CRM": { en: "CRM", c: "var(--lav)" },
+      "제휴": { en: "Partnership", c: "var(--sand)" }, "AX": { en: "AX", c: "var(--coral)", dark: true }
+    };
+    var catMeta = function (cat) { if (CATMETA[cat]) return CATMETA[cat]; var i = 0, s = String(cat || ""); for (var k = 0; k < s.length; k++) i += s.charCodeAt(k); return { en: (cat || "Work"), c: PAL[i % PAL.length] }; };
+    var catIcon = function (cat) {
+      var cm = catMeta(cat), m = cm.en, st = cm.dark ? "#fff" : "#222";
+      var S = function (p) { return '<svg viewBox="0 0 24 24" fill="none" stroke="' + st + '" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + p + '</svg>'; };
+      if (/Performance|Growth/.test(m)) return S('<path d="M4 19V5M4 19h16M8 16l3-4 3 2 4-6"/>');
+      if (/Data|CRM/.test(m)) return S('<rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/>');
+      if (/Content|Film/.test(m)) return S('<rect x="3" y="4" width="18" height="16" rx="4"/><path d="M10 9.5l5 2.5-5 2.5z"/>');
+      if (/Commerce/.test(m)) return S('<path d="M5 8h14l-1.2 11a2 2 0 0 1-2 1.8H8.2a2 2 0 0 1-2-1.8z"/><path d="M8.5 8V6.8a3.5 3.5 0 0 1 7 0V8"/>');
+      if (/Branding/.test(m)) return S('<path d="M12 20s-7-4.6-9.2-9C1.2 7.6 3.6 4.5 6.8 4.5c2 0 3.7 1.2 5.2 3 1.5-1.8 3.2-3 5.2-3 3.2 0 5.6 3.1 4 6.5C19 15.4 12 20 12 20z"/>');
+      if (/AX/.test(m)) return S('<rect x="6" y="6" width="12" height="12" rx="2"/><path d="M9 1v3M15 1v3M9 20v3M15 20v3M1 9h3M1 15h3M20 9h3M20 15h3"/>');
+      if (/Partnership/.test(m)) return S('<path d="M9 12a3 3 0 0 1 0-4l2-2a3 3 0 0 1 4 4M15 12a3 3 0 0 1 0 4l-2 2a3 3 0 0 1-4-4"/>');
+      return S('<path d="M12 3l2.4 5.6L20 9l-4 4 1 6-5-3-5 3 1-6-4-4 5.6-.4z"/>');
+    };
+
+    // ── HOME
+    var nameEn = P.nameEn || P.nameKo || "";
+    var initials = (nameEn.split(/\s+/).map(function (x) { return x[0] || ""; }).join("") || "JK").slice(0, 2).toUpperCase();
+    var siteUrl = "https://kimjinsoo-mkt-ax.vercel.app";
+    var orbit = (nameEn.toUpperCase() + " · MARKETER · ").replace(/ /g, "&#160;");
+    var sents = (P.summary || "").split(/(?<=다\.)\s+/).filter(Boolean);
+    var tagline = P.tagline || P.title || "";
+    var mainH1 = "저는 " + esc(P.nameKo || nameEn) + " — " + esc(tagline) + (/[.。]$/.test(tagline) ? "" : ".");
+    var dimH1 = esc(sents[0] || "");
+    var home = '<header class="home" id="home">'
+      + '<div class="rv"><div class="sig">' + esc(nameEn) + '</div>'
+      + '<div class="meta"><span>' + esc(P.location || "Seoul, Korea") + '</span>'
+      + (P.email ? '<a href="mailto:' + esc(P.email) + '">' + esc(P.email) + '</a>' : '')
+      + '<a href="' + siteUrl + '" target="_blank" rel="noopener">' + siteUrl.replace(/^https?:\/\//, "") + '</a></div></div>'
+      + '<div class="cnt"><div class="photo rv" style="--d:80ms"><div class="card"><b>' + esc(initials) + '</b></div>'
+      + '<svg class="orbit" viewBox="0 0 150 150" aria-hidden="true"><defs><path id="orb" d="M75,75 m-63,0 a63,63 0 1,1 126,0 a63,63 0 1,1 -126,0"/></defs><text><textPath href="#orb">' + orbit + '</textPath></text></svg></div>'
+      + '<h1 class="rv" style="--d:160ms">' + mainH1 + ' <span class="dim">' + dimH1 + '</span></h1></div></header>';
+
+    // ── ABOUT
+    var half = Math.ceil(sents.length / 2);
+    var ab1 = esc(sents.slice(0, half).join(" ")), ab2 = esc(sents.slice(half).join(" "));
+    var about = '<section class="row" id="about"><h2 class="rv">About</h2><div class="cnt about">'
+      + '<p class="rv">' + ab1 + '</p>' + (ab2 ? '<p class="g rv">' + ab2 + '</p>' : '') + '</div></section>';
+
+    // ── PROJECTS (모자이크 — 대표작 5)
+    var feat = works.filter(function (x) { return x.w.featured; });
+    var featM = feat.filter(function (x) { return (x.w.metrics || []).length; });
+    var pick = (featM.length >= 5 ? featM : feat.length ? feat : works).slice(0, 5);
+    var mosaic = pick.map(function (x, i) {
+      var w = x.w, co = x.co, cm = catMeta(w.category);
+      var span = i === 1 ? " tall" : (i === 3 || i === 4) ? " wide" : "";
+      var dark = cm.dark ? " dark" : "";
+      var m0 = (w.metrics || [])[0];
+      var kp = m0 ? '<span class="kp">' + esc(m0.value || m0.label || "") + '</span>' : '';
+      var icon = (span === " wide")
+        ? '<span class="duo" aria-hidden="true">' + catIcon(w.category) + '<i' + (cm.dark ? '' : ' style="background:rgba(34,34,34,.3)"') + '></i>' + catIcon(w.category) + '</span>'
+        : catIcon(w.category);
+      return '<div class="tile' + span + dark + ' rv" style="background:' + cm.c + '">' + icon + kp
+        + '<span class="lb"><b>' + esc(w.title) + '</b><span>' + esc(cm.en) + ' · ' + esc(dispName(co)) + ' ' + esc(yearOf(w)) + '</span></span></div>';
+    }).join("");
+    var projects = '<section class="row" id="projects"><h2 class="rv">Projects</h2><div class="cnt"><div class="mosaic">' + mosaic + '</div></div></section>';
+
+    // ── EXPERIENCE (+ 스탯)
+    var expSorted = companies.filter(function (c) { return (c.works || []).length; }).slice()
+      .sort(function (a, b) { return String(b.startDate || "").localeCompare(String(a.startDate || "")); });
+    var exp = expSorted.map(function (co) {
+      var svc = (co.serviceKo || co.serviceEn) ? " — " + esc(co.serviceKo || co.serviceEn) : "";
+      return '<div class="ent rv"><h3>' + esc(co.role || dispName(co)) + '</h3>'
+        + '<p class="sub">' + esc(co.nameKo || co.nameEn) + svc + '<br>' + esc(coPeriod(co)) + '</p>'
+        + (co.summary ? '<p class="d">' + esc(co.summary) + '</p>' : '') + '</div>';
+    }).join("");
+    var hs = (d.highlights || []).slice(0, 3).map(function (h) {
+      return '<div class="dcard"><h4 data-count="' + esc(String(h.value).replace(/[^0-9]/g, "")) + '">' + esc(h.value) + '</h4><p>' + esc(h.label) + '</p></div>';
+    }).join("");
+    var experience = '<section class="row" id="experience"><h2 class="rv">Experience</h2><div class="cnt">' + exp
+      + (hs ? '<div class="cards3 mt rv">' + hs + '</div>' : '') + '</div></section>';
+
+    // ── ARCHIVE (전체 작업)
+    var CATORDER = ["AX", "그로스", "성과", "퍼포먼스", "콘텐츠", "영상", "브랜딩", "커머스", "제휴", "CRM"];
+    var arSorted = works.slice().sort(function (a, b) {
+      var ca = CATORDER.indexOf(a.w.category), cb = CATORDER.indexOf(b.w.category);
+      if (ca < 0) ca = 99; if (cb < 0) cb = 99;
+      if (ca !== cb) return ca - cb;
+      return String(b.w.startDate || "").localeCompare(String(a.w.startDate || ""));
+    });
+    var arch = arSorted.map(function (x) {
+      var w = x.w, co = x.co, cm = catMeta(w.category);
+      var links = (w.links || []).map(function (l) { return '<a href="' + esc(l.url) + '" target="_blank" rel="noopener">' + esc(l.label || "link") + '</a>'; }).join("");
+      var desc = w.detail || w.summary || "";
+      return '<div class="ent rv"><h3>' + esc(w.title) + '</h3><p class="sub">' + esc(cm.en) + ' · ' + esc(dispName(co)) + ' — ' + esc(wPeriod(w)) + '</p>'
+        + (desc ? '<p class="d">' + esc(desc) + '</p>' : '') + (links ? '<div class="links">' + links + '</div>' : '') + '</div>';
+    }).join("");
+    var archive = '<section class="row arch" id="archive"><h2 class="rv">Archive</h2><div class="cnt">' + arch + '</div></section>';
+
+    // ── TECHSTACK (마퀴 3행)
+    var toolset = []; works.forEach(function (x) { (x.w.stack || []).forEach(function (t) { if (t && toolset.indexOf(t) < 0) toolset.push(t); }); });
+    var stitles = (P.stack || []).map(function (s) { return s.title; });
+    var caps = (d.capabilities || []).filter(function (c) { return c.visible !== false; }).map(function (c) { return c.label; });
+    var allTech = toolset.concat(stitles).concat(caps);
+    var mqRow = function (items, rev) {
+      if (!items.length) return "";
+      var one = items.map(function (t, i) { return '<span class="' + (i % 2 ? "on" : "") + '">' + esc(t) + '</span>'; }).join("");
+      var dup = items.map(function (t, i) { return '<span class="dup ' + (i % 2 ? "on" : "") + '">' + esc(t) + '</span>'; }).join("");
+      return '<div class="mq' + (rev ? " rev" : "") + '"><div class="tk">' + one + dup + '</div></div>';
+    };
+    var t3 = Math.ceil(allTech.length / 3) || 1;
+    var techstack = '<section class="row" id="techstack"><h2 class="rv">Techstack</h2><div class="cnt stack-rows rv">'
+      + mqRow(allTech.slice(0, t3), false) + mqRow(allTech.slice(t3, t3 * 2), true) + mqRow(allTech.slice(t3 * 2), false) + '</div></section>';
+
+    // ── SKILLS (역량별 프로젝트 수)
+    var catCount = {}; works.forEach(function (x) { var c = x.w.category || "기타"; catCount[c] = (catCount[c] || 0) + 1; });
+    var catArr = Object.keys(catCount).map(function (k) { return { cat: k, n: catCount[k] }; }).sort(function (a, b) { return b.n - a.n; }).slice(0, 6);
+    var skRows = "";
+    for (var si = 0; si < catArr.length; si += 3) {
+      skRows += '<div class="cards3 rv">' + catArr.slice(si, si + 3).map(function (o) {
+        var cm = catMeta(o.cat);
+        return '<div class="dcard"><h4 data-count="' + o.n + '">' + o.n + '</h4><p>' + esc(o.cat) + '<br>' + esc(cm.en) + '</p></div>';
+      }).join("") + '</div>';
+    }
+    var skills = '<section class="row" id="skills"><h2 class="rv">Skills</h2><div class="cnt">' + skRows + '</div></section>';
+
+    // ── CONTACT
+    var contact = '<section class="row contact" id="contact"><h2 class="rv">Contact</h2><div class="cnt">'
+      + '<h3 class="rv">새 프로젝트나 협업, 채용 문의가 있다면 편하게 연락 주세요.</h3>'
+      + '<div class="meta rv"><span>' + esc(P.location || "Seoul, Korea") + '</span>'
+      + (P.email ? '<a href="mailto:' + esc(P.email) + '">' + esc(P.email) + '</a>' : '')
+      + (P.phone ? '<a href="tel:' + esc(String(P.phone).replace(/[^0-9]/g, "")) + '">' + esc(P.phone) + '</a>' : '') + '</div>'
+      + '<div class="avail rv"><i></i>Available for work</div>'
+      + '<div class="socials rv">'
+      + (P.email ? '<a href="mailto:' + esc(P.email) + '" aria-label="이메일"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="3"/><path d="M3.5 7l8.5 6 8.5-6"/></svg></a>' : '')
+      + '<a href="' + siteUrl + '" target="_blank" rel="noopener" aria-label="포트폴리오 사이트"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.6 3.8 5.7 3.8 9S14.5 18.4 12 21M12 3C9.5 5.6 8.2 8.7 8.2 12s1.3 6.4 3.8 9"/></svg></a>'
+      + (P.phone ? '<a href="tel:' + esc(String(P.phone).replace(/[^0-9]/g, "")) + '" aria-label="전화"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4h4l2 5-2.5 1.5a12 12 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2z"/></svg></a>' : '')
+      + '</div></div></section>';
+
+    var dock = '<nav class="dock" aria-label="섹션 이동">'
+      + '<a href="#home" data-sec="home">Home</a><a href="#about" data-sec="about">About</a>'
+      + '<a href="#projects" data-sec="projects">Projects</a><a href="#experience" data-sec="experience">Experience</a>'
+      + '<a href="#archive" data-sec="archive">Archive</a><a href="#techstack" data-sec="techstack">Stack</a>'
+      + '<a href="#skills" data-sec="skills">Skills</a><a href="#contact" data-sec="contact">Contact</a></nav>';
+
+    var KCSS = ':root{--ink:#222;--ink50:rgba(34,34,34,.55);--gray:#909090;--light:#d6d6d6;--bd:rgba(144,144,144,.2);--bd2:rgba(144,144,144,.1);--mint:#abdcd1;--beige:#e6e1d5;--sand:#eae6da;--coral:#dd8e6e;--lav:#c3cde4;--font:"Figtree","Pretendard Variable",Pretendard,-apple-system,system-ui,"Apple SD Gothic Neo",sans-serif;--ez:cubic-bezier(.25,.6,.3,1)}'
+      + '*,*::before,*::after{box-sizing:border-box}html{scroll-behavior:smooth;overflow-x:clip;-webkit-text-size-adjust:100%;scroll-padding-top:40px}'
+      + 'body{margin:0;background:#fff;color:var(--ink);font-family:var(--font);font-size:16px;font-weight:500;line-height:170%;letter-spacing:-.02em;-webkit-font-smoothing:antialiased;overflow-x:clip}'
+      + 'h1,h2,h3,h4{margin:0;font-weight:600;letter-spacing:-.02em}p{margin:0}a{color:inherit;text-decoration:none}::selection{background:var(--mint);color:var(--ink)}:focus-visible{outline:2px solid var(--ink);outline-offset:3px}'
+      + '.js .rv{opacity:0;transform:translateY(22px);transition:opacity .8s var(--ez),transform .8s var(--ez);transition-delay:var(--d,0ms)}.js .rv.in{opacity:1;transform:none}'
+      + '@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}.js .rv{opacity:1;transform:none;transition:none}}'
+      + '.page{max-width:880px;margin:0 auto;padding:0 24px 180px}.row{display:grid;grid-template-columns:1fr 1fr;margin-top:150px}.row>h2{font-size:14px;font-weight:600;line-height:130%}.cnt{max-width:440px}'
+      + '@media(max-width:920px){.row{grid-template-columns:1fr;margin-top:104px}.row>h2{margin-bottom:22px}}'
+      + '.home{display:grid;grid-template-columns:1fr 1fr;padding-top:88px}.sig{font-family:"Caveat",cursive;font-size:34px;font-weight:600;line-height:1;color:var(--ink)}'
+      + '.meta{margin-top:34px;display:flex;flex-direction:column;gap:4px}.meta span,.meta a{font-size:13px;font-weight:500;line-height:160%}.meta a{text-decoration:underline;text-underline-offset:2px;text-decoration-thickness:1px}.meta a:hover{color:var(--gray)}'
+      + '.photo{position:relative;width:196px;height:260px}.photo .card{width:196px;height:260px;border-radius:24px;background:var(--mint);display:grid;place-items:center;overflow:hidden}.photo .card b{font-size:56px;font-weight:700;letter-spacing:-.04em;color:var(--ink);transform:translateX(-14px)}'
+      + '.photo .orbit{position:absolute;top:50%;right:-98px;width:150px;height:150px;margin-top:-75px;animation:spin 26s linear infinite;pointer-events:none}.photo .orbit text{font-family:var(--font);font-size:12px;font-weight:600;letter-spacing:.42em;fill:var(--ink);text-transform:uppercase}'
+      + '@keyframes spin{to{transform:rotate(360deg)}}@media(prefers-reduced-motion:reduce){.photo .orbit{animation:none}}'
+      + '.home h1{margin-top:40px;font-size:20px;line-height:150%;max-width:360px}.home h1 .dim{color:var(--gray)}@media(max-width:920px){.home{grid-template-columns:1fr;padding-top:64px}.home .cnt{margin-top:52px}}'
+      + '.about p{font-size:16px;line-height:175%}.about p+p{margin-top:22px}.about p.g{color:var(--ink50);font-size:14px}'
+      + '.mosaic{display:grid;grid-template-columns:1fr 1fr;grid-auto-rows:201px;gap:12px}.tile{position:relative;border-radius:24px;overflow:hidden;display:grid;place-items:center;transition:transform .35s var(--ez)}.tile:hover{transform:translateY(-3px)}.tile.tall{grid-row:span 2}.tile.wide{grid-column:span 2}.tile svg{width:46px;height:46px}.tile.wide svg{width:42px;height:42px}'
+      + '.tile .duo{display:flex;align-items:center;gap:26px}.tile .duo i{width:1px;height:44px;background:rgba(255,255,255,.5)}'
+      + '.tile .lb{position:absolute;left:18px;bottom:14px;right:18px;line-height:140%}.tile .lb b{display:block;font-size:13px;font-weight:600;letter-spacing:-.01em}.tile .lb span{display:block;font-size:11px;font-weight:500;color:var(--ink50)}.tile.dark .lb b{color:#fff}.tile.dark .lb span{color:rgba(255,255,255,.72)}'
+      + '.tile .kp{position:absolute;right:16px;top:14px;font-size:11px;font-weight:600;background:rgba(255,255,255,.72);border-radius:999px;padding:5px 10px;line-height:1}@media(max-width:520px){.mosaic{grid-auto-rows:168px}}'
+      + '.ent{padding:44px 0}.ent+.ent{border-top:1px solid var(--bd)}.ent:first-child{padding-top:0}.ent h3{font-size:20px;line-height:130%}.ent .sub{margin-top:6px;font-size:12px;line-height:150%;color:var(--gray)}.ent p.d{margin-top:22px;font-size:14px;line-height:175%;color:var(--ink50)}'
+      + '.ent .links{margin-top:12px;display:flex;gap:4px 16px;flex-wrap:wrap}.ent .links a{font-size:12px;font-weight:500;color:var(--ink);text-decoration:underline;text-underline-offset:2px;text-decoration-thickness:1px}.ent .links a:hover{color:var(--gray)}'
+      + '.arch .ent{padding:30px 0}.arch .ent h3{font-size:17px}.arch .ent p.d{margin-top:12px}'
+      + '.cards3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}.cards3.mt{margin-top:64px}.cards3+.cards3{margin-top:16px}.dcard{background:var(--ink);border-radius:32px;min-height:144px;padding:20px;display:flex;flex-direction:column;justify-content:space-between}.dcard h4{font-size:32px;font-weight:600;line-height:1;color:#fff}.dcard p{font-size:12px;line-height:145%;color:var(--light)}@media(max-width:520px){.cards3{grid-template-columns:1fr 1fr}}'
+      + '.stack-rows{display:flex;flex-direction:column;gap:26px}.mq{overflow:hidden;-webkit-mask-image:linear-gradient(90deg,transparent,#000 10%,#000 90%,transparent);mask-image:linear-gradient(90deg,transparent,#000 10%,#000 90%,transparent)}.mq .tk{display:flex;align-items:center;gap:34px;width:max-content;animation:mqL 34s linear infinite}.mq.rev .tk{animation-name:mqR}.mq:hover .tk{animation-play-state:paused}@keyframes mqL{to{transform:translateX(-50%)}}@keyframes mqR{from{transform:translateX(-50%)}to{transform:translateX(0)}}.mq .tk span{flex-shrink:0;font-size:16px;font-weight:500;color:var(--gray);white-space:nowrap}.mq .tk span.on{color:var(--ink);font-weight:600}'
+      + '@media(prefers-reduced-motion:reduce){.mq .tk,.mq.rev .tk{animation:none;flex-wrap:wrap;width:auto}.mq{mask-image:none;-webkit-mask-image:none}.mq .dup{display:none}}'
+      + '.contact h3{font-size:20px;line-height:150%;max-width:380px}.contact .meta{margin-top:26px}.avail{margin-top:34px;display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600}.avail i{width:8px;height:8px;border-radius:50%;background:var(--mint)}'
+      + '.socials{margin-top:16px;display:flex;gap:10px}.socials a{width:30px;height:30px;border:1px solid var(--bd);border-radius:9px;display:grid;place-items:center;color:var(--ink);transition:.2s}.socials a:hover{background:var(--bd2)}.socials svg{width:15px;height:15px}.foot{margin-top:130px;text-align:center;font-size:12px;color:var(--gray)}'
+      + '.dock{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);z-index:100;display:flex;gap:3px;padding:7px;border-radius:18px;background:rgba(34,34,34,.9);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);box-shadow:0 12px 32px -12px rgba(0,0,0,.4);max-width:calc(100vw - 20px);overflow-x:auto;scrollbar-width:none}.dock::-webkit-scrollbar{display:none}'
+      + '.dock a{font-size:12px;font-weight:600;line-height:1;letter-spacing:-.01em;color:rgba(255,255,255,.6);padding:11px 13px;border-radius:11px;white-space:nowrap;transition:.2s var(--ez)}.dock a:hover{color:#fff}.dock a[aria-current="true"]{color:#fff;background:rgba(255,255,255,.16)}';
+
+    var KJS = '(function(){"use strict";var reduce=matchMedia("(prefers-reduced-motion: reduce)").matches;'
+      + 'var rvs=document.querySelectorAll(".rv");if("IntersectionObserver" in window&&!reduce){var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){e.target.classList.add("in");io.unobserve(e.target);}});},{threshold:.05,rootMargin:"9999px 0px -5% 0px"});rvs.forEach(function(el){io.observe(el);});}else{rvs.forEach(function(el){el.classList.add("in");});}'
+      + 'var links=document.querySelectorAll(".dock a[data-sec]");if("IntersectionObserver" in window){var nio=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){links.forEach(function(a){a.setAttribute("aria-current",a.dataset.sec===e.target.id?"true":"false");});}});},{rootMargin:"-35% 0px -55% 0px"});links.forEach(function(a){var s=document.getElementById(a.dataset.sec);if(s)nio.observe(s);});}'
+      + 'function countUp(el){var target=parseInt(el.dataset.count,10);if(!target||reduce)return;var tpl=el.innerHTML,t0=null,dur=900;function step(t){if(!t0)t0=t;var k=Math.min((t-t0)/dur,1);k=1-Math.pow(1-k,3);el.innerHTML=tpl.replace(String(target),String(Math.round(target*k)));if(k<1)requestAnimationFrame(step);else el.innerHTML=tpl;}requestAnimationFrame(step);}'
+      + 'if("IntersectionObserver" in window){var sio=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){countUp(e.target);sio.unobserve(e.target);}});},{threshold:.6});document.querySelectorAll("[data-count]").forEach(function(s){sio.observe(s);});}})();';
+
+    return '<!doctype html><html lang="ko"><head><script>document.documentElement.classList.add("js")<\/script>'
+      + '<meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/>'
+      + '<title>' + esc(P.nameKo || nameEn || "포트폴리오") + ' — Marketing Portfolio</title>'
+      + '<meta name="description" content="' + esc((tagline || "").replace(/"/g, "")) + '"/><meta name="theme-color" content="#ffffff"/><link rel="icon" href="data:,"/>'
+      + '<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>'
+      + '<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&family=Caveat:wght@600&display=swap">'
+      + '<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css"/>'
+      + '<style>' + KCSS + '</style></head><body>'
+      + '<div class="page">' + home + about + projects + experience + archive + techstack + skills + contact
+      + '<p class="foot">© ' + new Date().getFullYear() + ' — ' + esc(nameEn || P.nameKo || "") + ', Marketing Portfolio</p></div>'
+      + dock + '<script>' + KJS + '<\/script></body></html>';
+  }
+
   /* ---------- doc wrapper ---------- */
   function doc(title, css, body) {
     return `<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${title}</title>${FONT}<style>${css}</style></head><body>${body}</body></html>`;
@@ -739,11 +944,13 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
       { id: "wanted", name: "원티드형", desc: "경력기술 A4", kind: "resume" },
       { id: "remember", name: "리멤버형", desc: "프로필 A4", kind: "resume" },
       { id: "web", name: "웹 · 미니멀", desc: "원페이지", kind: "web" },
-      { id: "ax", name: "AX 마케터", desc: "풀스택·AX 원페이지 SPA", kind: "web" }
+      { id: "ax", name: "AX 마케터", desc: "풀스택·AX 원페이지 SPA", kind: "web" },
+      { id: "klio", name: "마케팅 · Klio", desc: "클리오형 원페이지(라벨 레일·모자이크)", kind: "web" }
     ],
     render(d) {
       if (!d || !d.profile) return doc("빈 문서", "", "<p style='font-family:sans-serif;padding:40px;color:#888'>내용이 없습니다.</p>");
       if (d.template === "ax") return renderAX(d);
+      if (d.template === "klio") return renderKlio(d);
       if (d.template === "portfolio") return renderPortfolio(d);
       if (d.template === "remember") return renderRemember(d);
       if (d.template === "web") return renderWeb(d);
