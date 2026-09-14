@@ -32,7 +32,7 @@ function render(doc){
   var f=document.getElementById('frame');
   document.title=(doc.profile&&doc.profile.nameKo?doc.profile.nameKo+' — ':'')+(doc.title||'이력서');
   f.setAttribute('srcdoc', window.TEMPLATES.render(doc));
-  document.getElementById('bar').style.display = (doc.template==='ax') ? 'none' : 'flex';
+  document.getElementById('bar').style.display = (doc.template==='ax'||doc.template==='klio'||doc.template==='web') ? 'none' : 'flex';
   document.getElementById('msg').style.display='none';
   f.style.display='block';
 }
@@ -57,7 +57,10 @@ function fail(t){var f=document.getElementById('frame');f.style.display='none';v
     document.getElementById('frame').style.display='none'; msg.style.display='grid'; msg.textContent='불러오는 중…';
     try{
       var row=await window.CLOUD.fetchPublic(slug);
-      if(row&&row.snapshot){ render(row.snapshot); return; }
+      // 슬러그별 템플릿 강제 (DB 재발행 없이 표시 템플릿 교체). ?tpl= 로도 override 가능.
+      var FORCE_TPL={portfolio:"klio"};
+      var tplOverride=params.get('tpl')||FORCE_TPL[slug];
+      if(row&&row.snapshot){ if(tplOverride) row.snapshot.template=tplOverride; render(row.snapshot); return; }
       fail('해당 주소의 이력서를 찾을 수 없어요. (비공개이거나 삭제됨)');
     }catch(e){ fail('불러오지 못했어요: '+(e.message||e)); }
     return;
