@@ -407,7 +407,7 @@ function viewURL(d){
   return base+'view.html#'+encodeDoc(resolveAny(d));
 }
 function resolveAny(d){ if(d.template==='ax') return resolveAX(d); return d.kind==='portfolio' ? resolvePF(d) : resolve(d); }
-function resolveAX(d){ return { template:'ax', title:d.title||'AX 포트폴리오', slug:d.slug, visibility:d.visibility||'unlisted', profile:LIB.profile, companies:LIB.companies||[], capabilities:LIB.capabilities||[], pipeline:LIB.pipeline||[], flow:LIB.flow||[], highlights:LIB.highlights||[], axLoop:LIB.axLoop||[], axScreens:LIB.axScreens||[], axNotes:LIB.axNotes||[] }; }
+function resolveAX(d){ return { template:'ax', title:d.title||'AX 포트폴리오', slug:d.slug, visibility:d.visibility||'unlisted', profile:LIB.profile, companies:LIB.companies||[], capabilities:LIB.capabilities||[], pipeline:LIB.pipeline||[], flow:LIB.flow||[], highlights:LIB.highlights||[], axLoop:LIB.axLoop||[], axScreens:LIB.axScreens||[], axNotes:LIB.axNotes||[], klio:d.klio||null }; }
 
 /* ============ nav ============ */
 function show(view){
@@ -1088,6 +1088,18 @@ function axEnsure(){
   LIB.capabilities=LIB.capabilities||[]; LIB.pipeline=LIB.pipeline||[]; LIB.flow=LIB.flow||[]; LIB.highlights=LIB.highlights||[];
   (LIB.companies||[]).forEach(c=>{ if(!Array.isArray(c.metrics))c.metrics=[]; if(c.periodText==null)c.periodText=''; (c.works||[]).forEach(w=>{ if(!Array.isArray(w.tags))w.tags=[]; }); });
 }
+const KLIO_SEC=[['about','About'],['projects','Projects'],['experience','Experience'],['archive','Archive'],['techstack','Techstack'],['skills','Skills'],['contact','Contact']];
+function klioEnsure(){
+  var KEYS=KLIO_SEC.map(function(p){return p[0];});
+  var d=axDoc();
+  if(!d.klio||typeof d.klio!=='object')d.klio={};
+  if(!d.klio.text||typeof d.klio.text!=='object')d.klio.text={};
+  var cur=Array.isArray(d.klio.sections)?d.klio.sections:[];
+  var seen={},out=[];
+  cur.forEach(function(s){ if(s&&KEYS.indexOf(s.key)>=0&&!seen[s.key]){ seen[s.key]=1; out.push({key:s.key,label:(s.label!=null?s.label:''),on:s.on!==false}); } });
+  KEYS.forEach(function(k){ if(!seen[k]) out.push({key:k,label:'',on:true}); });
+  d.klio.sections=out;
+}
 function axGet(path){ const s=path.split('.'); let o=LIB; for(let i=0;i<s.length;i++){ if(o==null)return undefined; o=o[s[i]]; } return o; }
 function axSet(path,val){ const s=path.split('.'); let o=LIB; for(let i=0;i<s.length-1;i++){ if(o[s[i]]==null)o[s[i]]={}; o=o[s[i]]; } o[s[s.length-1]]=val; }
 function axTmpl(seg){ return seg==='capabilities'?{id:uid(),label:'',description:''}: seg==='pipeline'?{id:uid(),step:'',title:'',description:'',tools:[]}: seg==='flow'?{id:uid(),num:'',title:'',sub:'',caption:''}: seg==='highlights'?{id:uid(),value:'',label:''}: seg==='stack'?{area:'',title:'',desc:''}: seg==='metrics'?{v:'',k:''}:{}; }
@@ -1096,13 +1108,13 @@ function axDel(path){ const s=path.split('.'); const i=+s.pop(); const a=axGet(s
 function axMove(arr,i,dir){ var j=dir==='up'?i-1:i+1; if(!Array.isArray(arr)||j<0||j>=arr.length)return; var t=arr[i];arr[i]=arr[j];arr[j]=t; }
 function axDoc(){ let d=DOCS.find(x=>x.template==='ax'); if(!d){ d={id:uid(),kind:'portfolio',template:'ax',title:'AX 포트폴리오',subtitle:'',intro:'',cover:'',slug:'ax',visibility:'unlisted',updated:Date.now()}; DOCS.unshift(d); } return d; }
 let axPvTimer,axSaveTimer;
-function updateAXPreview(){ clearTimeout(axPvTimer); axPvTimer=setTimeout(()=>{ const f=$('#axPreview'); if(f) f.setAttribute('srcdoc',TEMPLATES.render(Object.assign({template:'ax'},LIB))); },220); }
+function updateAXPreview(){ clearTimeout(axPvTimer); axPvTimer=setTimeout(()=>{ const f=$('#axPreview'); if(f) f.setAttribute('srcdoc',TEMPLATES.render(Object.assign({template:'klio',klio:(axDoc().klio||null)},LIB))); },220); }
 function axSchedule(){ clearTimeout(axSaveTimer); axSaveTimer=setTimeout(()=>{ save(); updateAXPreview(); },400); }
 const axAttr=s=>String(s==null?'':s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 const axText=s=>String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 let axWired=false;
 function renderAXAdmin(){
-  axEnsure();
+  axEnsure(); klioEnsure();
   const iS='width:100%;padding:8px 10px;border:1px solid var(--line);border-radius:6px;font-size:13px;background:transparent;color:inherit;box-sizing:border-box;font-family:inherit';
   const ti=(p,v,ph)=>`<input data-p="${p}" value="${axAttr(v)}" placeholder="${axAttr(ph||'')}" style="${iS}">`;
   const ta=(p,v,ph,r)=>`<textarea data-p="${p}" rows="${r||2}" placeholder="${axAttr(ph||'')}" style="${iS};resize:vertical">${axText(v)}</textarea>`;
@@ -1147,15 +1159,22 @@ function renderAXAdmin(){
 
   var NAVLB={home:'홈 (Hero)',cases:'프로젝트',resume:'이력서',ax:'AX'};
   var navrows=(LIB.profile.navOrder||[]).map(function(k,i){ return '<div style="display:flex;align-items:center;gap:8px;border:1px solid var(--line);border-radius:8px;padding:8px 12px;margin-bottom:6px"><span class="mono" style="font-size:11px;color:var(--muted);width:14px">'+(i+1)+'</span><span style="flex:1;font-size:13px;font-weight:600">'+(NAVLB[k]||k)+'</span><button data-ax-movenav="'+i+':up" class="mini" style="padding:2px 9px"'+(i===0?' disabled':'')+'>▲</button><button data-ax-movenav="'+i+':down" class="mini" style="padding:2px 9px"'+(i===LIB.profile.navOrder.length-1?' disabled':'')+'>▼</button></div>'; }).join('');
-  var navSec=sec('상단 탭 순서','<div style="font-size:11.5px;color:var(--muted);margin-bottom:10px">화면 상단 네비게이션 탭 순서 (홈 = Hero 화면)</div>'+navrows);
+  var navSec=sec('상단 탭 순서 (AX 템플릿)','<div style="font-size:11.5px;color:var(--muted);margin-bottom:10px">화면 상단 네비게이션 탭 순서 (홈 = Hero 화면)</div>'+navrows);
 
-  $('#axLeft').innerHTML=navSec+hero+capSec+pipeSec+flowSec+coSec;
+  var kd=axDoc().klio, KL={about:'About',projects:'Projects',experience:'Experience',archive:'Archive',techstack:'Techstack',skills:'Skills',contact:'Contact'};
+  var krows=kd.sections.map(function(s,i){ var def=KL[s.key]||s.key;
+    return '<div style="display:flex;align-items:center;gap:8px;border:1px solid var(--line);border-radius:8px;padding:7px 10px;margin-bottom:6px"><input type="checkbox" data-ax-klio-on="'+i+'" '+(s.on!==false?'checked':'')+' title="표시" style="width:16px;height:16px;flex:none;cursor:pointer"><input data-ax-klio-label="'+i+'" value="'+axAttr(s.label||'')+'" placeholder="'+axAttr(def)+'" style="flex:1;min-width:0;padding:6px 8px;border:1px solid var(--line);border-radius:6px;font-size:13px;background:transparent;color:inherit;font-family:inherit"><button data-ax-moveklio="'+i+':up" class="mini" style="padding:2px 9px"'+(i===0?' disabled':'')+'>▲</button><button data-ax-moveklio="'+i+':down" class="mini" style="padding:2px 9px"'+(i===kd.sections.length-1?' disabled':'')+'>▼</button></div>';
+  }).join('');
+  var ktext=lbl('Contact 문구 (비우면 기본값)')+'<input data-ax-klio-text="contactIntro" value="'+axAttr(kd.text.contactIntro||'')+'" placeholder="새 프로젝트나 협업, 채용 문의가 있다면 편하게 연락 주세요." style="'+iS+'">'+lbl('Available 배지 텍스트')+'<input data-ax-klio-text="available" value="'+axAttr(kd.text.available||'')+'" placeholder="Available for work" style="'+iS+'">';
+  var klioSec=sec('화면 구성 · Klio (/portfolio)','<div style="font-size:11.5px;color:var(--muted);margin-bottom:10px">체크=표시 · 라벨=섹션 제목+하단바 텍스트(비우면 기본) · ▲▼=순서(하단바 같이 변경)</div>'+krows+ktext,'/portfolio 화면에 즉시 반영');
+
+  $('#axLeft').innerHTML=klioSec+navSec+hero+capSec+pipeSec+flowSec+coSec;
 
   if(!axWired){
     axWired=true;
     const left=$('#axLeft');
-    left.addEventListener('input',e=>{ const t=e.target; const p=t.dataset.p; if(!p)return; let v=t.value; if(t.dataset.arr==='lines')v=v.split('\n').map(s=>s.trim()).filter(Boolean); else if(t.dataset.arr==='comma')v=v.split(',').map(s=>s.trim()).filter(Boolean); axSet(p,v); axSchedule(); });
-    left.addEventListener('click',e=>{ const a=e.target.closest('[data-add]'),d=e.target.closest('[data-del]'),mv=e.target.closest('[data-ax-movenav]'),mc=e.target.closest('[data-ax-moveco]'); if(a){ axAdd(a.dataset.add); renderAXAdmin(); save(); updateAXPreview(); } else if(d){ axDel(d.dataset.del); renderAXAdmin(); save(); updateAXPreview(); } else if(mv){ var pp=mv.getAttribute('data-ax-movenav').split(':'); axMove(LIB.profile.navOrder,+pp[0],pp[1]); renderAXAdmin(); save(); updateAXPreview(); } else if(mc){ var qq=mc.getAttribute('data-ax-moveco').split(':'); axMove(LIB.companies,+qq[0],qq[1]); renderAXAdmin(); save(); updateAXPreview(); } });
+    left.addEventListener('input',e=>{ const t=e.target; const kl=t.dataset.axKlioLabel, ktx=t.dataset.axKlioText; if(kl!=null){ if(axDoc().klio&&axDoc().klio.sections[+kl])axDoc().klio.sections[+kl].label=t.value; axSchedule(); return; } if(ktx){ if(axDoc().klio)axDoc().klio.text[ktx]=t.value; axSchedule(); return; } const p=t.dataset.p; if(!p)return; let v=t.value; if(t.dataset.arr==='lines')v=v.split('\n').map(s=>s.trim()).filter(Boolean); else if(t.dataset.arr==='comma')v=v.split(',').map(s=>s.trim()).filter(Boolean); axSet(p,v); axSchedule(); });
+    left.addEventListener('click',e=>{ const a=e.target.closest('[data-add]'),d=e.target.closest('[data-del]'),mv=e.target.closest('[data-ax-movenav]'),mc=e.target.closest('[data-ax-moveco]'),mk=e.target.closest('[data-ax-moveklio]'),kon=e.target.closest('[data-ax-klio-on]'); if(a){ axAdd(a.dataset.add); renderAXAdmin(); save(); updateAXPreview(); } else if(d){ axDel(d.dataset.del); renderAXAdmin(); save(); updateAXPreview(); } else if(mv){ var pp=mv.getAttribute('data-ax-movenav').split(':'); axMove(LIB.profile.navOrder,+pp[0],pp[1]); renderAXAdmin(); save(); updateAXPreview(); } else if(mc){ var qq=mc.getAttribute('data-ax-moveco').split(':'); axMove(LIB.companies,+qq[0],qq[1]); renderAXAdmin(); save(); updateAXPreview(); } else if(mk){ var kk=mk.getAttribute('data-ax-moveklio').split(':'); axMove(axDoc().klio.sections,+kk[0],kk[1]); renderAXAdmin(); save(); updateAXPreview(); } else if(kon){ var ki=+kon.getAttribute('data-ax-klio-on'); if(axDoc().klio&&axDoc().klio.sections[ki])axDoc().klio.sections[ki].on=kon.checked; save(); updateAXPreview(); } });
     const pub=$('#axPublish'); if(pub)pub.onclick=()=>{ const d=axDoc(); d.updated=Date.now(); save(); const u=viewURL(d); if(navigator.clipboard)navigator.clipboard.writeText(u).then(()=>toast('발행됨 · 링크 복사: '+u)).catch(()=>toast('발행됨: '+u)); else toast('발행됨: '+u); };
     const vo=$('#axViewOpen'); if(vo)vo.onclick=()=>{ const d=axDoc(); save(); setTimeout(()=>window.open(viewURL(d),'_blank'),300); };
   }

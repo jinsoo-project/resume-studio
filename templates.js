@@ -786,8 +786,8 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
     // ── ABOUT
     var half = Math.ceil(sents.length / 2);
     var ab1 = esc(sents.slice(0, half).join(" ")), ab2 = esc(sents.slice(half).join(" "));
-    var about = '<section class="row" id="about"><h2 class="rv">About</h2><div class="cnt about">'
-      + '<p class="rv">' + ab1 + '</p>' + (ab2 ? '<p class="g rv">' + ab2 + '</p>' : '') + '</div></section>';
+    var aboutInner = '<div class="cnt about">'
+      + '<p class="rv">' + ab1 + '</p>' + (ab2 ? '<p class="g rv">' + ab2 + '</p>' : '') + '</div>';
 
     // ── PROJECTS (모자이크 — 대표작 5)
     var feat = works.filter(function (x) { return x.w.featured; });
@@ -805,7 +805,7 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
       return '<div class="tile' + span + dark + ' rv" style="background:' + cm.c + '">' + icon + kp
         + '<span class="lb"><b>' + esc(w.title) + '</b><span>' + esc(cm.en) + ' · ' + esc(dispName(co)) + ' ' + esc(yearOf(w)) + '</span></span></div>';
     }).join("");
-    var projects = '<section class="row" id="projects"><h2 class="rv">Projects</h2><div class="cnt"><div class="mosaic">' + mosaic + '</div></div></section>';
+    var projectsInner = '<div class="cnt"><div class="mosaic">' + mosaic + '</div></div>';
 
     // ── EXPERIENCE (+ 스탯)
     var expSorted = companies.filter(function (c) { return (c.works || []).length; }).slice()
@@ -819,8 +819,8 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
     var hs = (d.highlights || []).slice(0, 3).map(function (h) {
       return '<div class="dcard"><h4 data-count="' + esc(String(h.value).replace(/[^0-9]/g, "")) + '">' + esc(h.value) + '</h4><p>' + esc(h.label) + '</p></div>';
     }).join("");
-    var experience = '<section class="row" id="experience"><h2 class="rv">Experience</h2><div class="cnt">' + exp
-      + (hs ? '<div class="cards3 mt rv">' + hs + '</div>' : '') + '</div></section>';
+    var experienceInner = '<div class="cnt">' + exp
+      + (hs ? '<div class="cards3 mt rv">' + hs + '</div>' : '') + '</div>';
 
     // ── ARCHIVE (전체 작업)
     var CATORDER = ["AX", "그로스", "성과", "퍼포먼스", "콘텐츠", "영상", "브랜딩", "커머스", "제휴", "CRM"];
@@ -837,7 +837,7 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
       return '<div class="ent rv"><h3>' + esc(w.title) + '</h3><p class="sub">' + esc(cm.en) + ' · ' + esc(dispName(co)) + ' — ' + esc(wPeriod(w)) + '</p>'
         + (desc ? '<p class="d">' + esc(desc) + '</p>' : '') + (links ? '<div class="links">' + links + '</div>' : '') + '</div>';
     }).join("");
-    var archive = '<section class="row arch" id="archive"><h2 class="rv">Archive</h2><div class="cnt">' + arch + '</div></section>';
+    var archiveInner = '<div class="cnt">' + arch + '</div>';
 
     // ── TECHSTACK (마퀴 3행)
     var toolset = []; works.forEach(function (x) { (x.w.stack || []).forEach(function (t) { if (t && toolset.indexOf(t) < 0) toolset.push(t); }); });
@@ -851,8 +851,8 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
       return '<div class="mq' + (rev ? " rev" : "") + '"><div class="tk">' + one + dup + '</div></div>';
     };
     var t3 = Math.ceil(allTech.length / 3) || 1;
-    var techstack = '<section class="row" id="techstack"><h2 class="rv">Techstack</h2><div class="cnt stack-rows rv">'
-      + mqRow(allTech.slice(0, t3), false) + mqRow(allTech.slice(t3, t3 * 2), true) + mqRow(allTech.slice(t3 * 2), false) + '</div></section>';
+    var techstackInner = '<div class="cnt stack-rows rv">'
+      + mqRow(allTech.slice(0, t3), false) + mqRow(allTech.slice(t3, t3 * 2), true) + mqRow(allTech.slice(t3 * 2), false) + '</div>';
 
     // ── SKILLS (역량별 프로젝트 수)
     var catCount = {}; works.forEach(function (x) { var c = x.w.category || "기타"; catCount[c] = (catCount[c] || 0) + 1; });
@@ -864,26 +864,43 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
         return '<div class="dcard"><h4 data-count="' + o.n + '">' + o.n + '</h4><p>' + esc(o.cat) + '<br>' + esc(cm.en) + '</p></div>';
       }).join("") + '</div>';
     }
-    var skills = '<section class="row" id="skills"><h2 class="rv">Skills</h2><div class="cnt">' + skRows + '</div></section>';
+    var skillsInner = '<div class="cnt">' + skRows + '</div>';
 
-    // ── CONTACT
-    var contact = '<section class="row contact" id="contact"><h2 class="rv">Contact</h2><div class="cnt">'
-      + '<h3 class="rv">새 프로젝트나 협업, 채용 문의가 있다면 편하게 연락 주세요.</h3>'
+    // ── CONTACT (인트로·available 텍스트는 klio.text로 수정 가능)
+    var KT = (d.klio && d.klio.text) || {};
+    var contactIntro = (KT.contactIntro != null && KT.contactIntro !== "") ? KT.contactIntro : "새 프로젝트나 협업, 채용 문의가 있다면 편하게 연락 주세요.";
+    var availLabel = (KT.available != null && KT.available !== "") ? KT.available : "Available for work";
+    var contactInner = '<div class="cnt">'
+      + '<h3 class="rv">' + esc(contactIntro) + '</h3>'
       + '<div class="meta rv"><span>' + esc(P.location || "Seoul, Korea") + '</span>'
       + (P.email ? '<a href="mailto:' + esc(P.email) + '">' + esc(P.email) + '</a>' : '')
       + (P.phone ? '<a href="tel:' + esc(String(P.phone).replace(/[^0-9]/g, "")) + '">' + esc(P.phone) + '</a>' : '') + '</div>'
-      + '<div class="avail rv"><i></i>Available for work</div>'
+      + '<div class="avail rv"><i></i>' + esc(availLabel) + '</div>'
       + '<div class="socials rv">'
       + (P.email ? '<a href="mailto:' + esc(P.email) + '" aria-label="이메일"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="3"/><path d="M3.5 7l8.5 6 8.5-6"/></svg></a>' : '')
       + '<a href="' + siteUrl + '" target="_blank" rel="noopener" aria-label="포트폴리오 사이트"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.6 3.8 5.7 3.8 9S14.5 18.4 12 21M12 3C9.5 5.6 8.2 8.7 8.2 12s1.3 6.4 3.8 9"/></svg></a>'
       + (P.phone ? '<a href="tel:' + esc(String(P.phone).replace(/[^0-9]/g, "")) + '" aria-label="전화"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4h4l2 5-2.5 1.5a12 12 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2z"/></svg></a>' : '')
-      + '</div></div></section>';
+      + '</div></div>';
 
-    var dock = '<nav class="dock" aria-label="섹션 이동">'
-      + '<a href="#home" data-sec="home">Home</a><a href="#about" data-sec="about">About</a>'
-      + '<a href="#projects" data-sec="projects">Projects</a><a href="#experience" data-sec="experience">Experience</a>'
-      + '<a href="#archive" data-sec="archive">Archive</a><a href="#techstack" data-sec="techstack">Stack</a>'
-      + '<a href="#skills" data-sec="skills">Skills</a><a href="#contact" data-sec="contact">Contact</a></nav>';
+    // ── 섹션 레지스트리 + 사용자 구성(klio.sections: 순서·표시·라벨). 하단 독도 같은 구성 사용.
+    var SECDEF = {
+      about: { label: "About", cls: "", inner: aboutInner },
+      projects: { label: "Projects", cls: "", inner: projectsInner },
+      experience: { label: "Experience", cls: "", inner: experienceInner },
+      archive: { label: "Archive", cls: " arch", inner: archiveInner },
+      techstack: { label: "Techstack", cls: "", inner: techstackInner },
+      skills: { label: "Skills", cls: "", inner: skillsInner },
+      contact: { label: "Contact", cls: " contact", inner: contactInner }
+    };
+    var DEFORDER = ["about", "projects", "experience", "archive", "techstack", "skills", "contact"];
+    var kcfg = (d.klio && Array.isArray(d.klio.sections)) ? d.klio.sections : [];
+    var seenK = {}, order = [];
+    kcfg.forEach(function (s) { if (s && SECDEF[s.key] && !seenK[s.key]) { seenK[s.key] = 1; order.push({ key: s.key, label: (s.label != null && s.label !== "") ? s.label : SECDEF[s.key].label, on: s.on !== false }); } });
+    DEFORDER.forEach(function (k) { if (!seenK[k]) order.push({ key: k, label: SECDEF[k].label, on: true }); });
+    var visibleSec = order.filter(function (s) { return s.on; });
+    var sectionsHtml = visibleSec.map(function (s) { var def = SECDEF[s.key]; return '<section class="row' + def.cls + '" id="' + s.key + '"><h2 class="rv">' + esc(s.label) + '</h2>' + def.inner + '</section>'; }).join("");
+    var dock = '<nav class="dock" aria-label="섹션 이동"><a href="#home" data-sec="home">Home</a>'
+      + visibleSec.map(function (s) { return '<a href="#' + s.key + '" data-sec="' + s.key + '">' + esc(s.label) + '</a>'; }).join("") + '</nav>';
 
     var KCSS = ':root{--ink:#222;--ink50:rgba(34,34,34,.55);--gray:#909090;--light:#d6d6d6;--bd:rgba(144,144,144,.2);--bd2:rgba(144,144,144,.1);--mint:#abdcd1;--beige:#e6e1d5;--sand:#eae6da;--coral:#dd8e6e;--lav:#c3cde4;--font:"Figtree","Pretendard Variable",Pretendard,-apple-system,system-ui,"Apple SD Gothic Neo",sans-serif;--ez:cubic-bezier(.25,.6,.3,1)}'
       + '*,*::before,*::after{box-sizing:border-box}html{scroll-behavior:smooth;overflow-x:clip;-webkit-text-size-adjust:100%;scroll-padding-top:40px}'
@@ -929,7 +946,7 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
       + '<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&family=Caveat:wght@600&display=swap">'
       + '<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css"/>'
       + '<style>' + KCSS + '</style></head><body>'
-      + '<div class="page">' + home + about + projects + experience + archive + techstack + skills + contact
+      + '<div class="page">' + home + sectionsHtml
       + '<p class="foot">© ' + new Date().getFullYear() + ' — ' + esc(nameEn || P.nameKo || "") + ', Marketing Portfolio</p></div>'
       + dock + '<script>' + KJS + '<\/script></body></html>';
   }
