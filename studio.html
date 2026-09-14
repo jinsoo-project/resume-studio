@@ -407,7 +407,7 @@ function viewURL(d){
   return base+'view.html#'+encodeDoc(resolveAny(d));
 }
 function resolveAny(d){ if(d.template==='ax') return resolveAX(d); return d.kind==='portfolio' ? resolvePF(d) : resolve(d); }
-function resolveAX(d){ return { template:'ax', title:d.title||'AX 포트폴리오', slug:d.slug, visibility:d.visibility||'unlisted', profile:LIB.profile, companies:LIB.companies||[], capabilities:LIB.capabilities||[], pipeline:LIB.pipeline||[], flow:LIB.flow||[], highlights:LIB.highlights||[], axLoop:LIB.axLoop||[], axScreens:LIB.axScreens||[], axNotes:LIB.axNotes||[], klio:d.klio||null }; }
+function resolveAX(d){ return { template:'ax', title:d.title||'AX 포트폴리오', slug:d.slug, visibility:d.visibility||'unlisted', profile:LIB.profile, companies:LIB.companies||[], capabilities:LIB.capabilities||[], pipeline:LIB.pipeline||[], flow:LIB.flow||[], highlights:LIB.highlights||[], axLoop:LIB.axLoop||[], axScreens:LIB.axScreens||[], axNotes:LIB.axNotes||[], klio:klioNormalize(d) }; }
 
 /* ============ nav ============ */
 function show(view){
@@ -1046,10 +1046,10 @@ async function syncFromCloud(){
     if(r.library){                       // 클라우드에 데이터 있으면 채택
       LIB=Object.assign({},LIB,r.library);
       DOCS=r.docs||[];
-      normalizeIds(); derive();
+      normalizeIds(); derive(); klioEnsure();
     }else{                               // 최초: 로컬 시드를 클라우드로 업로드
       if(!LIB.companies){ LIB.companies=clone((window.RESUME||{}).companies||[]); }
-      normalizeIds(); derive();
+      normalizeIds(); derive(); klioEnsure();
       await CLOUD.pushAll(LIB,DOCS,resolveAny);
     }
     localStorage.setItem(LS_LIB,JSON.stringify(LIB));
@@ -1089,9 +1089,9 @@ function axEnsure(){
   (LIB.companies||[]).forEach(c=>{ if(!Array.isArray(c.metrics))c.metrics=[]; if(c.periodText==null)c.periodText=''; (c.works||[]).forEach(w=>{ if(!Array.isArray(w.tags))w.tags=[]; }); });
 }
 const KLIO_SEC=[['about','About'],['projects','Projects'],['experience','Experience'],['archive','Archive'],['techstack','Techstack'],['skills','Skills'],['contact','Contact']];
-function klioEnsure(){
+function klioNormalize(d){
+  if(!d)return null;
   var KEYS=KLIO_SEC.map(function(p){return p[0];});
-  var d=axDoc();
   if(!d.klio||typeof d.klio!=='object')d.klio={};
   if(!d.klio.text||typeof d.klio.text!=='object')d.klio.text={};
   var cur=Array.isArray(d.klio.sections)?d.klio.sections:[];
@@ -1099,7 +1099,9 @@ function klioEnsure(){
   cur.forEach(function(s){ if(s&&KEYS.indexOf(s.key)>=0&&!seen[s.key]){ seen[s.key]=1; out.push({key:s.key,label:(s.label!=null?s.label:''),on:s.on!==false}); } });
   KEYS.forEach(function(k){ if(!seen[k]) out.push({key:k,label:'',on:true}); });
   d.klio.sections=out;
+  return d.klio;
 }
+function klioEnsure(){ return klioNormalize(axDoc()); }
 function axGet(path){ const s=path.split('.'); let o=LIB; for(let i=0;i<s.length;i++){ if(o==null)return undefined; o=o[s[i]]; } return o; }
 function axSet(path,val){ const s=path.split('.'); let o=LIB; for(let i=0;i<s.length-1;i++){ if(o[s[i]]==null)o[s[i]]={}; o=o[s[i]]; } o[s[s.length-1]]=val; }
 function axTmpl(seg){ return seg==='capabilities'?{id:uid(),label:'',description:''}: seg==='pipeline'?{id:uid(),step:'',title:'',description:'',tools:[]}: seg==='flow'?{id:uid(),num:'',title:'',sub:'',caption:''}: seg==='highlights'?{id:uid(),value:'',label:''}: seg==='stack'?{area:'',title:'',desc:''}: seg==='metrics'?{v:'',k:''}:{}; }
