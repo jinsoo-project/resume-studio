@@ -802,10 +802,12 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
       var icon = (span === " wide")
         ? '<span class="duo" aria-hidden="true">' + catIcon(w.category) + '<i' + (cm.dark ? '' : ' style="background:rgba(34,34,34,.3)"') + '></i>' + catIcon(w.category) + '</span>'
         : catIcon(w.category);
-      return '<div class="tile' + span + dark + ' rv" style="background:' + cm.c + '">' + icon + kp
+      return '<div class="tile' + span + dark + ' rv" data-pj-open style="cursor:pointer;background:' + cm.c + '">' + icon + kp
         + '<span class="lb"><b>' + esc(w.title) + '</b><span>' + esc(cm.en) + ' · ' + esc(dispName(co)) + ' ' + esc(yearOf(w)) + '</span></span></div>';
     }).join("");
-    var projectsInner = '<div class="cnt"><div class="mosaic">' + mosaic + '</div></div>';
+    var projectsInner = '<div class="cnt"><div class="mosaic">' + mosaic + '</div>'
+      + (works.length > pick.length ? '<button class="pj-more" data-pj-open>전체 프로젝트 ' + works.length + '개 보기 <span>→</span></button>' : '')
+      + '</div>';
 
     // ── EXPERIENCE (+ 스탯)
     var expSorted = companies.filter(function (c) { return (c.works || []).length; }).slice()
@@ -930,13 +932,38 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
       + '.contact h3{font-size:20px;line-height:150%;max-width:380px}.contact .meta{margin-top:26px}.avail{margin-top:34px;display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600}.avail i{width:8px;height:8px;border-radius:50%;background:var(--mint)}'
       + '.socials{margin-top:16px;display:flex;gap:10px}.socials a{width:30px;height:30px;border:1px solid var(--bd);border-radius:9px;display:grid;place-items:center;color:var(--ink);transition:.2s}.socials a:hover{background:var(--bd2)}.socials svg{width:15px;height:15px}.foot{margin-top:130px;text-align:center;font-size:12px;color:var(--gray)}'
       + '.dock{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);z-index:100;display:flex;gap:3px;padding:7px;border-radius:18px;background:rgba(34,34,34,.9);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);box-shadow:0 12px 32px -12px rgba(0,0,0,.4);max-width:calc(100vw - 20px);overflow-x:auto;scrollbar-width:none}.dock::-webkit-scrollbar{display:none}'
-      + '.dock a{font-size:12px;font-weight:600;line-height:1;letter-spacing:-.01em;color:rgba(255,255,255,.6);padding:11px 13px;border-radius:11px;white-space:nowrap;transition:.2s var(--ez)}.dock a:hover{color:#fff}.dock a[aria-current="true"]{color:#fff;background:rgba(255,255,255,.16)}';
+      + '.dock a{font-size:12px;font-weight:600;line-height:1;letter-spacing:-.01em;color:rgba(255,255,255,.6);padding:11px 13px;border-radius:11px;white-space:nowrap;transition:.2s var(--ez)}.dock a:hover{color:#fff}.dock a[aria-current="true"]{color:#fff;background:rgba(255,255,255,.16)}'
+      + '.pj-more{margin-top:20px;font-size:13px;font-weight:600;color:var(--ink);background:transparent;border:1px solid var(--bd);border-radius:999px;padding:11px 20px;cursor:pointer;transition:.2s var(--ez);display:inline-flex;align-items:center;gap:8px}.pj-more:hover{background:var(--ink);color:#fff;border-color:var(--ink)}.pj-more span{transition:transform .2s}.pj-more:hover span{transform:translateX(3px)}'
+      + '.pj-modal{position:fixed;inset:0;z-index:200;display:none;align-items:flex-start;justify-content:center;background:rgba(34,34,34,.34);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);padding:clamp(16px,4vw,56px) 16px;overflow-y:auto}.pj-modal.open{display:flex}'
+      + '.pj-sheet{background:#fff;border-radius:24px;width:100%;max-width:1040px;box-shadow:0 30px 80px -20px rgba(0,0,0,.4);overflow:hidden;animation:pjIn .3s var(--ez)}@keyframes pjIn{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}'
+      + '.pj-head{display:flex;align-items:center;justify-content:space-between;padding:22px 26px 14px}.pj-head b{font-size:18px;font-weight:600}.pj-x{width:34px;height:34px;border-radius:50%;border:1px solid var(--bd);background:transparent;font-size:15px;cursor:pointer;color:var(--ink);line-height:1}.pj-x:hover{background:var(--bd2)}'
+      + '.pj-filters{display:flex;gap:7px;flex-wrap:wrap;padding:0 26px 16px;border-bottom:1px solid var(--bd)}.pj-chip{font-size:12px;font-weight:600;padding:7px 13px;border-radius:999px;border:1px solid var(--bd);background:transparent;color:var(--gray);cursor:pointer;transition:.15s}.pj-chip:hover{color:var(--ink)}.pj-chip.on{background:var(--ink);color:#fff;border-color:var(--ink)}'
+      + '.pj-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:14px;padding:20px 26px 30px}@media(max-width:640px){.pj-grid{grid-template-columns:1fr 1fr;gap:10px;padding:16px}}@media(max-width:420px){.pj-grid{grid-template-columns:1fr}}'
+      + '.pj-card{border:1px solid var(--bd);border-radius:16px;overflow:hidden;display:flex;flex-direction:column;background:#fff;transition:transform .25s var(--ez),box-shadow .25s}.pj-card:hover{transform:translateY(-3px);box-shadow:0 14px 30px -14px rgba(0,0,0,.22)}'
+      + '.pj-thumb{aspect-ratio:16/10;display:grid;place-items:center;position:relative}.pj-thumb svg{width:38px;height:38px}.pj-kp{position:absolute;right:10px;top:10px;font-size:10.5px;font-weight:600;background:rgba(255,255,255,.8);border-radius:999px;padding:4px 9px;line-height:1;max-width:82%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}'
+      + '.pj-body{padding:13px 15px 15px;display:flex;flex-direction:column;flex:1}.pj-body .pj-cat{font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--gray);margin-bottom:5px}.pj-body h4{font-size:14.5px;font-weight:600;line-height:1.3}.pj-co{margin-top:5px;font-size:11.5px;color:var(--gray)}'
+      + '.pj-d{margin-top:9px;font-size:12px;line-height:1.55;color:var(--ink50);display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}.pj-links{margin-top:auto;padding-top:11px;display:flex;flex-wrap:wrap;gap:4px 12px}.pj-links a{font-size:11.5px;font-weight:500;color:var(--ink);text-decoration:underline;text-underline-offset:2px}.pj-links a:hover{color:var(--gray)}';
 
     var KJS = '(function(){"use strict";var reduce=matchMedia("(prefers-reduced-motion: reduce)").matches;'
       + 'var rvs=document.querySelectorAll(".rv");if("IntersectionObserver" in window&&!reduce){var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){e.target.classList.add("in");io.unobserve(e.target);}});},{threshold:.05,rootMargin:"9999px 0px -5% 0px"});rvs.forEach(function(el){io.observe(el);});}else{rvs.forEach(function(el){el.classList.add("in");});}'
       + 'var links=document.querySelectorAll(".dock a[data-sec]");if("IntersectionObserver" in window){var nio=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){links.forEach(function(a){a.setAttribute("aria-current",a.dataset.sec===e.target.id?"true":"false");});}});},{rootMargin:"-35% 0px -55% 0px"});links.forEach(function(a){var s=document.getElementById(a.dataset.sec);if(s)nio.observe(s);});}'
       + 'function countUp(el){var target=parseInt(el.dataset.count,10);if(!target||reduce)return;var tpl=el.innerHTML,t0=null,dur=900;function step(t){if(!t0)t0=t;var k=Math.min((t-t0)/dur,1);k=1-Math.pow(1-k,3);el.innerHTML=tpl.replace(String(target),String(Math.round(target*k)));if(k<1)requestAnimationFrame(step);else el.innerHTML=tpl;}requestAnimationFrame(step);}'
-      + 'if("IntersectionObserver" in window){var sio=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){countUp(e.target);sio.unobserve(e.target);}});},{threshold:.6});document.querySelectorAll("[data-count]").forEach(function(s){sio.observe(s);});}})();';
+      + 'if("IntersectionObserver" in window){var sio=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){countUp(e.target);sio.unobserve(e.target);}});},{threshold:.6});document.querySelectorAll("[data-count]").forEach(function(s){sio.observe(s);});}'
+      + 'var pjm=document.getElementById("pj-modal");function pjOpen(){if(pjm){pjm.classList.add("open");document.body.style.overflow="hidden";}}function pjClose(){if(pjm){pjm.classList.remove("open");document.body.style.overflow="";}}document.addEventListener("click",function(e){if(e.target.closest("[data-pj-open]")){pjOpen();return;}if(e.target.closest("[data-pj-close]")||e.target===pjm){pjClose();return;}var f=e.target.closest("[data-pjf]");if(f&&pjm){var cat=f.getAttribute("data-pjf");[].forEach.call(pjm.querySelectorAll(".pj-chip"),function(c){c.classList.toggle("on",c===f);});[].forEach.call(pjm.querySelectorAll(".pj-card"),function(c){c.style.display=(cat==="__all"||c.getAttribute("data-cat")===cat)?"":"none";});}});document.addEventListener("keydown",function(e){if(e.key==="Escape")pjClose();});'
+      + '})();';
+
+    // ── 전체 프로젝트 갤러리 모달
+    var pjCat = {}; works.forEach(function (x) { var c = x.w.category || "기타"; pjCat[c] = (pjCat[c] || 0) + 1; });
+    var pjChips = '<button class="pj-chip on" data-pjf="__all">전체 ' + works.length + '</button>' + Object.keys(pjCat).map(function (c) { return '<button class="pj-chip" data-pjf="' + esc(c) + '">' + esc(catMeta(c).en) + ' ' + pjCat[c] + '</button>'; }).join("");
+    var pjCards = works.map(function (x) {
+      var w = x.w, co = x.co, cm = catMeta(w.category);
+      var m0 = (w.metrics || [])[0];
+      var kp = m0 ? '<span class="pj-kp">' + esc(m0.value || m0.label || "") + '</span>' : '';
+      var links = (w.links || []).slice(0, 4).map(function (l) { return '<a href="' + esc(l.url) + '" target="_blank" rel="noopener">' + esc(l.label || "link") + '</a>'; }).join("");
+      var desc = w.detail || w.summary || "";
+      return '<div class="pj-card" data-cat="' + esc(w.category || "") + '"><div class="pj-thumb' + (cm.dark ? ' dark' : '') + '" style="background:' + cm.c + '">' + catIcon(w.category) + kp + '</div><div class="pj-body"><div class="pj-cat">' + esc(cm.en) + '</div><h4>' + esc(w.title) + '</h4><div class="pj-co">' + esc(dispName(co)) + ' · ' + esc(yearOf(w)) + '</div>' + (desc ? '<p class="pj-d">' + esc(desc) + '</p>' : '') + (links ? '<div class="pj-links">' + links + '</div>' : '') + '</div></div>';
+    }).join("");
+    var pjModal = '<div id="pj-modal" class="pj-modal"><div class="pj-sheet"><div class="pj-head"><b>프로젝트 · ' + works.length + '</b><button class="pj-x" data-pj-close aria-label="닫기">✕</button></div><div class="pj-filters">' + pjChips + '</div><div class="pj-grid">' + pjCards + '</div></div></div>';
 
     return '<!doctype html><html lang="ko"><head><script>document.documentElement.classList.add("js")<\/script>'
       + '<meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/>'
@@ -948,7 +975,7 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
       + '<style>' + KCSS + '</style></head><body>'
       + '<div class="page">' + home + sectionsHtml
       + '<p class="foot">© ' + new Date().getFullYear() + ' — ' + esc(nameEn || P.nameKo || "") + ', Marketing Portfolio</p></div>'
-      + dock + '<script>' + KJS + '<\/script></body></html>';
+      + pjModal + dock + '<script>' + KJS + '<\/script></body></html>';
   }
 
   /* ---------- doc wrapper ---------- */
