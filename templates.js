@@ -824,22 +824,38 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
     var experienceInner = '<div class="cnt">' + exp
       + (hs ? '<div class="cards3 mt rv">' + hs + '</div>' : '') + '</div>';
 
-    // ── ARCHIVE (전체 작업)
-    var CATORDER = ["AX", "그로스", "성과", "퍼포먼스", "콘텐츠", "영상", "브랜딩", "커머스", "제휴", "CRM"];
-    var arSorted = works.slice().sort(function (a, b) {
-      var ca = CATORDER.indexOf(a.w.category), cb = CATORDER.indexOf(b.w.category);
-      if (ca < 0) ca = 99; if (cb < 0) cb = 99;
-      if (ca !== cb) return ca - cb;
-      return String(b.w.startDate || "").localeCompare(String(a.w.startDate || ""));
-    });
-    var arch = arSorted.map(function (x) {
-      var w = x.w, co = x.co, cm = catMeta(w.category);
-      var links = (w.links || []).map(function (l) { return '<a href="' + esc(l.url) + '" target="_blank" rel="noopener">' + esc(l.label || "link") + '</a>'; }).join("");
-      var desc = w.detail || w.summary || "";
-      return '<div class="ent rv"><h3>' + esc(w.title) + '</h3><p class="sub">' + esc(cm.en) + ' · ' + esc(dispName(co)) + ' — ' + esc(wPeriod(w)) + '</p>'
-        + (desc ? '<p class="d">' + esc(desc) + '</p>' : '') + (links ? '<div class="links">' + links + '</div>' : '') + '</div>';
+    // ── AX (예전 Archive 자리) — AI 전환 핵심을 klio 톤으로
+    var axLoopArr = (d.axLoop || []).filter(function (x) { return x.visible !== false; });
+    var axScreensArr = (d.axScreens || []).filter(function (x) { return x.visible !== false; });
+    var axNotesArr = (d.axNotes || []).filter(function (x) { return x.visible !== false; });
+    var axIntro = (d.klio && d.klio.text && d.klio.text.axIntro) ? d.klio.text.axIntro
+      : (((axNotesArr.filter(function (n) { return n.section === "principle"; })[0]) || {}).body
+        || "AI로 마케팅을 자동화하고 확장합니다 — 수집·측정·실행·영업이 하나의 콘솔에서 이어지도록 직접 설계·구축·운영합니다.");
+    var axLoopCards = axLoopArr.map(function (s, i) {
+      var its = (s.items || []).slice(0, 3).map(function (it) { return '<li>' + esc(it) + '</li>'; }).join("");
+      return '<div class="ax-loop"><span class="ax-num">' + esc(s.num || String(i + 1)) + '</span><b>' + esc(s.title) + '</b>' + (its ? '<ul>' + its + '</ul>' : '') + '</div>';
     }).join("");
-    var archiveInner = '<div class="cnt">' + arch + '</div>';
+    var axStackChips = (P.stack || []).map(function (s) { return '<span class="ax-chip">' + esc(s.title || s.area) + '</span>'; }).join("");
+    var axInner = '<div class="cnt">'
+      + '<p class="rv" style="font-size:16px;line-height:1.75;color:var(--ink50);margin-bottom:6px">' + esc(axIntro) + '</p>'
+      + (axLoopCards ? '<div class="ax-loops rv">' + axLoopCards + '</div>' : '')
+      + (axStackChips ? '<div class="ax-chips rv">' + axStackChips + '</div>' : '')
+      + '<div class="ax-morerow rv"><button class="pj-more" data-axm-open>AX 상세 보기' + (axScreensArr.length ? ' · ' + axScreensArr.length + ' 화면' : '') + ' <span>→</span></button>'
+      + '<a class="ax-clink" href="https://kimjinsoo-mkt-ax.vercel.app/ax" target="_blank" rel="noopener">AX 콘솔 ↗</a></div>'
+      + '</div>';
+    // AX 상세 드로어 데이터
+    var axSCats = {}; axScreensArr.forEach(function (s) { var c = s.category || "기타"; axSCats[c] = (axSCats[c] || 0) + 1; });
+    var axFilters = axScreensArr.length ? ('<button class="pj-chip on" data-axf="__all">전체 ' + axScreensArr.length + '</button>' + Object.keys(axSCats).map(function (c) { return '<button class="pj-chip" data-axf="' + esc(c) + '">' + esc(c) + ' ' + axSCats[c] + '</button>'; }).join("")) : "";
+    var axSCards = axScreensArr.map(function (s) {
+      var chips = (s.chips || []).map(function (ch) { return '<span>' + esc(ch) + '</span>'; }).join("");
+      return '<div class="ax-scard" data-axcat="' + esc(s.category || "") + '"><div class="ax-sctop">' + (s.badge ? '<span class="ax-badge">' + esc(s.badge) + '</span>' : '<span></span>') + '<span class="ax-sccat">' + esc(s.category || "") + '</span></div><h4>' + esc(s.name) + '</h4>' + (s.description ? '<p>' + esc(s.description) + '</p>' : '') + (chips ? '<div class="ax-scchips">' + chips + '</div>' : '') + '</div>';
+    }).join("");
+    var axLoopFull = axLoopArr.length ? ('<div class="ax-block"><div class="ax-blockh">운영 루프</div>' + axLoopArr.map(function (s) { return '<div class="ax-note"><b>' + esc(s.num || "") + ' ' + esc(s.title) + '</b>' + ((s.items || []).length ? '<ul>' + (s.items || []).map(function (it) { return '<li>' + esc(it) + '</li>'; }).join("") + '</ul>' : '') + '</div>'; }).join("") + '</div>') : "";
+    var axNotesFull = axNotesArr.length ? ('<div class="ax-block"><div class="ax-blockh">운영 사상 · 정의</div>' + axNotesArr.map(function (n) { return '<div class="ax-note"><b>' + esc(n.title) + '</b><p>' + esc(n.body) + '</p></div>'; }).join("") + '</div>') : "";
+    var axEmpty = (!axScreensArr.length && !axLoopArr.length && !axNotesArr.length) ? '<div style="padding:28px;color:var(--gray);font-size:14px">AX 상세 콘텐츠는 준비 중입니다. <a href="https://kimjinsoo-mkt-ax.vercel.app/ax" target="_blank" rel="noopener" style="color:var(--ink);text-decoration:underline">AX 콘솔 열기 ↗</a></div>' : "";
+    var axModal = '<div id="ax-more-modal" class="pj-modal"><div class="pj-sheet"><div class="pj-head"><b>AX' + (axScreensArr.length ? ' · ' + axScreensArr.length + ' 화면' : '') + '</b><button class="pj-x" data-axm-close aria-label="닫기">✕</button></div>'
+      + (axFilters ? '<div class="pj-filters">' + axFilters + '</div>' : '')
+      + '<div class="ax-body">' + (axSCards ? '<div class="ax-sgrid">' + axSCards + '</div>' : '') + axLoopFull + axNotesFull + axEmpty + '</div></div></div>';
 
     // ── TECHSTACK (마퀴 3행)
     var toolset = []; works.forEach(function (x) { (x.w.stack || []).forEach(function (t) { if (t && toolset.indexOf(t) < 0) toolset.push(t); }); });
@@ -889,15 +905,15 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
       about: { label: "About", cls: "", inner: aboutInner },
       projects: { label: "Projects", cls: "", inner: projectsInner },
       experience: { label: "Experience", cls: "", inner: experienceInner },
-      archive: { label: "Archive", cls: " arch", inner: archiveInner },
+      ax: { label: "AX", cls: "", inner: axInner },
       techstack: { label: "Techstack", cls: "", inner: techstackInner },
       skills: { label: "Skills", cls: "", inner: skillsInner },
       contact: { label: "Contact", cls: " contact", inner: contactInner }
     };
-    var DEFORDER = ["about", "projects", "experience", "archive", "techstack", "skills", "contact"];
+    var DEFORDER = ["about", "projects", "experience", "ax", "techstack", "skills", "contact"];
     var kcfg = (d.klio && Array.isArray(d.klio.sections)) ? d.klio.sections : [];
     var seenK = {}, order = [];
-    kcfg.forEach(function (s) { if (s && SECDEF[s.key] && !seenK[s.key]) { seenK[s.key] = 1; order.push({ key: s.key, label: (s.label != null && s.label !== "") ? s.label : SECDEF[s.key].label, on: s.on !== false }); } });
+    kcfg.forEach(function (s) { if (!s) return; var k = s.key === "archive" ? "ax" : s.key; if (SECDEF[k] && !seenK[k]) { seenK[k] = 1; order.push({ key: k, label: (s.label != null && s.label !== "") ? s.label : SECDEF[k].label, on: s.on !== false }); } });
     DEFORDER.forEach(function (k) { if (!seenK[k]) order.push({ key: k, label: SECDEF[k].label, on: true }); });
     var visibleSec = order.filter(function (s) { return s.on; });
     var sectionsHtml = visibleSec.map(function (s) { var def = SECDEF[s.key]; return '<section class="row' + def.cls + '" id="' + s.key + '"><h2 class="rv">' + esc(s.label) + '</h2>' + def.inner + '</section>'; }).join("");
@@ -950,7 +966,11 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
       + '.pj-dcnt{padding:22px clamp(22px,4vw,38px) 34px}.pj-ddesc{font-size:14.5px;line-height:1.75;color:var(--ink50)}.pj-pars{display:grid;grid-template-columns:repeat(auto-fit,minmax(158px,1fr));gap:10px;margin:20px 0}.pj-par{border:1px solid var(--bd);border-left:3px solid var(--gray);border-radius:12px;padding:13px 15px}.pj-parl{font-size:10.5px;font-weight:700;letter-spacing:.08em;margin-bottom:6px}.pj-par p{font-size:13px;line-height:1.6;color:var(--ink50)}'
       + '.pj-tags{display:flex;flex-wrap:wrap;gap:6px;margin:16px 0}.pj-tag{font-size:11.5px;padding:5px 11px;border-radius:999px;background:rgba(144,144,144,.13);color:var(--ink)}'
       + '.pj-media{display:grid;grid-template-columns:repeat(auto-fill,minmax(178px,1fr));gap:10px;margin-top:18px}.pj-media img{width:100%;border-radius:12px;display:block;border:1px solid var(--bd)}.pj-vid{position:relative;aspect-ratio:16/9;border-radius:12px;background-size:cover;background-position:center;display:flex;align-items:flex-end;padding:10px;text-decoration:none;overflow:hidden}.pj-vid::before{content:"";position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,.62),transparent 60%)}.pj-vid b{position:relative;z-index:1;color:#fff;font-size:11.5px;font-weight:600}.pj-play{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);z-index:1;width:42px;height:42px;border-radius:50%;background:rgba(0,0,0,.5);border:1px solid rgba(255,255,255,.55)}.pj-play::after{content:"";position:absolute;top:50%;left:53%;transform:translate(-50%,-50%);border-left:12px solid #fff;border-top:7px solid transparent;border-bottom:7px solid transparent}'
-      + '.pj-dlinks{margin-top:20px;display:flex;flex-wrap:wrap;gap:6px 16px}.pj-dlinks a{font-size:12.5px;font-weight:500;color:var(--ink);text-decoration:underline;text-underline-offset:2px}.pj-dlinks a:hover{color:var(--gray)}';
+      + '.pj-dlinks{margin-top:20px;display:flex;flex-wrap:wrap;gap:6px 16px}.pj-dlinks a{font-size:12.5px;font-weight:500;color:var(--ink);text-decoration:underline;text-underline-offset:2px}.pj-dlinks a:hover{color:var(--gray)}'
+      + '.ax-loops{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:22px}@media(max-width:520px){.ax-loops{grid-template-columns:1fr}}.ax-loop{border:1px solid var(--bd);border-radius:14px;padding:14px 16px}.ax-loop .ax-num{font-size:11px;font-weight:700;color:var(--gray);letter-spacing:.1em}.ax-loop b{display:block;font-size:14px;font-weight:600;margin:4px 0 6px}.ax-loop ul{margin:0;padding-left:16px}.ax-loop li{font-size:12px;line-height:1.6;color:var(--ink50)}'
+      + '.ax-chips{display:flex;flex-wrap:wrap;gap:7px;margin-top:16px}.ax-chip{font-size:12px;font-weight:600;padding:6px 12px;border-radius:999px;background:var(--mint);color:var(--ink)}.ax-morerow{display:flex;align-items:center;gap:16px;margin-top:22px;flex-wrap:wrap}.ax-clink{font-size:13px;font-weight:600;color:var(--ink);text-decoration:underline;text-underline-offset:3px}.ax-clink:hover{color:var(--gray)}'
+      + '.ax-body{flex:1;overflow-y:auto;padding:20px 28px 40px}.ax-sgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px}@media(max-width:560px){.ax-sgrid{grid-template-columns:1fr}}.ax-scard{border:1px solid var(--bd);border-radius:14px;padding:14px 15px}.ax-sctop{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px;min-height:18px}.ax-badge{font-size:10px;font-weight:700;letter-spacing:.05em;padding:3px 8px;border-radius:999px;background:var(--lav);color:var(--ink)}.ax-sccat{font-size:10px;font-weight:600;color:var(--gray);text-transform:uppercase;letter-spacing:.06em}.ax-scard h4{font-size:14px;font-weight:600;line-height:1.3}.ax-scard p{font-size:12px;line-height:1.55;color:var(--ink50);margin-top:6px}.ax-scchips{display:flex;flex-wrap:wrap;gap:5px;margin-top:9px}.ax-scchips span{font-size:10.5px;padding:3px 8px;border-radius:6px;background:var(--bd2);color:var(--ink50)}'
+      + '.ax-block{margin-top:26px}.ax-blockh{font-size:13px;font-weight:700;color:var(--ink);margin-bottom:8px;padding-bottom:8px;border-bottom:1px solid var(--bd)}.ax-note{padding:11px 0;border-bottom:1px solid var(--bd2)}.ax-note b{font-size:13.5px;font-weight:600}.ax-note p{font-size:12.5px;line-height:1.65;color:var(--ink50);margin-top:5px}.ax-note ul{margin:6px 0 0;padding-left:16px}.ax-note li{font-size:12.5px;line-height:1.6;color:var(--ink50)}';
 
     var KJS = '(function(){"use strict";var reduce=matchMedia("(prefers-reduced-motion: reduce)").matches;'
       + 'var rvs=document.querySelectorAll(".rv");if("IntersectionObserver" in window&&!reduce){var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){e.target.classList.add("in");io.unobserve(e.target);}});},{threshold:.05,rootMargin:"9999px 0px -5% 0px"});rvs.forEach(function(el){io.observe(el);});}else{rvs.forEach(function(el){el.classList.add("in");});}'
@@ -958,6 +978,7 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
       + 'function countUp(el){var target=parseInt(el.dataset.count,10);if(!target||reduce)return;var tpl=el.innerHTML,t0=null,dur=900;function step(t){if(!t0)t0=t;var k=Math.min((t-t0)/dur,1);k=1-Math.pow(1-k,3);el.innerHTML=tpl.replace(String(target),String(Math.round(target*k)));if(k<1)requestAnimationFrame(step);else el.innerHTML=tpl;}requestAnimationFrame(step);}'
       + 'if("IntersectionObserver" in window){var sio=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){countUp(e.target);sio.unobserve(e.target);}});},{threshold:.6});document.querySelectorAll("[data-count]").forEach(function(s){sio.observe(s);});}'
       + 'var pjm=document.getElementById("pj-modal"),pjd=document.getElementById("pj-detail");function pjOpen(){if(pjm){pjm.classList.add("open");document.body.style.overflow="hidden";}}function pjCloseAll(){if(pjm)pjm.classList.remove("open");if(pjd)pjd.classList.remove("open");document.body.style.overflow="";}function pjDOpen(di){var src=document.getElementById("pjd-"+di),body=document.getElementById("pj-dbody");if(src&&body){body.innerHTML=src.innerHTML;if(body.parentNode)body.parentNode.scrollTop=0;}if(pjd)pjd.classList.add("open");}function pjDClose(){if(pjd)pjd.classList.remove("open");}document.addEventListener("click",function(e){if(e.target.closest("[data-pj-open]")){pjOpen();return;}var card=e.target.closest(".pj-card[data-di]");if(card){pjDOpen(card.getAttribute("data-di"));return;}if(e.target.closest("[data-pjd-close]")||e.target===pjd){pjDClose();return;}if(e.target.closest("[data-pj-close]")||e.target===pjm){pjCloseAll();return;}var f=e.target.closest("[data-pjf]");if(f&&pjm){var cat=f.getAttribute("data-pjf");[].forEach.call(pjm.querySelectorAll(".pj-chip"),function(c){c.classList.toggle("on",c===f);});[].forEach.call(pjm.querySelectorAll(".pj-card"),function(c){c.style.display=(cat==="__all"||c.getAttribute("data-cat")===cat)?"":"none";});}});document.addEventListener("keydown",function(e){if(e.key==="Escape"){if(pjd&&pjd.classList.contains("open"))pjDClose();else pjCloseAll();}});'
+      + 'var axmm=document.getElementById("ax-more-modal");function axmOpen(){if(axmm){axmm.classList.add("open");document.body.style.overflow="hidden";}}function axmClose(){if(axmm){axmm.classList.remove("open");document.body.style.overflow="";}}document.addEventListener("click",function(e){if(e.target.closest("[data-axm-open]")){axmOpen();return;}if(e.target.closest("[data-axm-close]")||e.target===axmm){axmClose();return;}var af=e.target.closest("[data-axf]");if(af&&axmm){var cat=af.getAttribute("data-axf");[].forEach.call(axmm.querySelectorAll(".pj-chip"),function(c){c.classList.toggle("on",c===af);});[].forEach.call(axmm.querySelectorAll(".ax-scard"),function(c){c.style.display=(cat==="__all"||c.getAttribute("data-axcat")===cat)?"":"none";});}});document.addEventListener("keydown",function(e){if(e.key==="Escape"&&axmm&&axmm.classList.contains("open"))axmClose();});'
       + '})();';
 
     // ── 전체 프로젝트: 우측 슬라이드 드로어 갤러리 + 카드별 상세 모달
@@ -999,7 +1020,7 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
       + '<style>' + KCSS + '</style></head><body>'
       + '<div class="page">' + home + sectionsHtml
       + '<p class="foot">© ' + new Date().getFullYear() + ' — ' + esc(nameEn || P.nameKo || "") + ', Marketing Portfolio</p></div>'
-      + pjModal + pjStore + pjDetailModal + dock + '<script>' + KJS + '<\/script></body></html>';
+      + pjModal + pjStore + pjDetailModal + axModal + dock + '<script>' + KJS + '<\/script></body></html>';
   }
 
   /* ---------- doc wrapper ---------- */
