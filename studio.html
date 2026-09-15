@@ -1129,55 +1129,63 @@ function renderAXAdmin(){
   const add=(p,t)=>`<button data-add="${p}" class="mini" style="margin-top:2px">＋ ${t}</button>`;
   const two=(a,b)=>`<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">${a}${b}</div>`;
 
-  // Hero
-  const stats=(LIB.highlights||[]).map((h,i)=>item(two(ti(`highlights.${i}.value`,h.value,'값 (예:187%)'),ti(`highlights.${i}.label`,h.label,'라벨 (예:ROAS 개선)')),`highlights.${i}`)).join('')+add('highlights','지표 추가');
+  // ── klio가 실제로 쓰는 재료들 ──
+  const stats=(LIB.highlights||[]).map((h,i)=>item(two(ti(`highlights.${i}.value`,h.value,'값 (예:9년+)'),ti(`highlights.${i}.label`,h.label,'라벨 (예:마케팅 경력)')),`highlights.${i}`)).join('')+add('highlights','지표 추가');
   const stack=(LIB.profile.stack||[]).map((s,i)=>item(two(ti(`profile.stack.${i}.area`,s.area,'영역 (예:Ads)'),ti(`profile.stack.${i}.title`,s.title,'제목'))+lbl('설명')+ta(`profile.stack.${i}.desc`,s.desc,'설명'),`profile.stack.${i}`)).join('')+add('profile.stack','스택 추가');
-  const hero=sec('Hero (히어로)',
-    lbl('헤드라인 (여러 줄 가능 · {rot} 자리에 회전문구가 들어감)')+ta('profile.heroHeadline',LIB.profile.heroHeadline,'데이터로 설계하고,\n{rot}로 증명하는\n풀스택 마케터.',3)+
-    lbl('회전 문구 ({rot} 자리에서 순환 · 줄바꿈 = 항목)')+taLines('profile.rotWords',LIB.profile.rotWords,'AI 자동화\n트래킹 설계\nCRM 시나리오')+
-    lbl('히어로 아래 설명 (lede · 헤드라인 밑 문단)')+ta('profile.summary',LIB.profile.summary,'매체 운영부터 트래킹 설계, CRM, 콘텐츠 제작까지 퍼널 전 구간을 직접 다룹니다.',4)+
-    lbl('히어로 지표 (앞 3개가 히어로에 큰 숫자로 표시)')+stats+
-    lbl('AI·자동화 스택 (AX 탭 하단 그리드)')+stack);
+  const caps=(LIB.capabilities||[]).map((c,i)=>item(ti(`capabilities.${i}.label`,c.label,'역량명 (예: 매체 운영·최적화)')+lbl('설명(선택)')+ta(`capabilities.${i}.description`,c.description,''),`capabilities.${i}`)).join('')+add('capabilities','역량 추가');
 
-  // capabilities
-  const caps=(LIB.capabilities||[]).map((c,i)=>item(ti(`capabilities.${i}.label`,c.label,'역량명 (예: 매체 운영·최적화)')+lbl('설명')+ta(`capabilities.${i}.description`,c.description,'이 역량을 한두 문장으로'),`capabilities.${i}`)).join('')+add('capabilities','역량 추가');
-  const capSec=sec('역량칩 (Capabilities)',caps,'프로젝트 태그와 이름이 같으면 케이스 수가 자동 집계');
+  // 기본 정보 (Home / Contact)
+  const basicSec=sec('기본 정보 · Home / Contact',
+    two(ti('profile.nameKo',LIB.profile.nameKo,'이름(국문)'),ti('profile.nameEn',LIB.profile.nameEn,'이름(영문·히어로 큰 글씨)'))+
+    lbl('직함 (role line)')+ti('profile.title',LIB.profile.title,'마케팅 × AI 프로덕트 빌더')+
+    lbl('히어로 한 줄 (tagline)')+ta('profile.tagline',LIB.profile.tagline,'마케팅의 문제를 AI와 코드로 푸는 그로스 빌더',2)+
+    two(ti('profile.location',LIB.profile.location,'위치 (Seoul, KR)'),ti('profile.email',LIB.profile.email,'이메일'))+
+    lbl('전화')+ti('profile.phone',LIB.profile.phone,'010-0000-0000'),'Home 상단 · Contact');
 
-  // pipeline
-  const pipe=(LIB.pipeline||[]).map((p,i)=>item(two(ti(`pipeline.${i}.step`,p.step,'단계 (예: STEP 01)'),ti(`pipeline.${i}.title`,p.title,'제목 (예: 기획·리서치)'))+lbl('설명')+ta(`pipeline.${i}.description`,p.description,'이 단계에서 하는 일')+lbl('도구 (쉼표로 구분)')+comma(`pipeline.${i}.tools`,p.tools,'Claude, n8n, GA4'),`pipeline.${i}`)).join('')+add('pipeline','단계 추가');
-  const pipeSec=sec('AX 파이프라인 (Pipeline)',pipe);
+  // 소개 (About)
+  const aboutSec=sec('소개 · About',lbl('소개 문단 (About 섹션 + 히어로 밑 설명 · 문장 단위로 2분할)')+ta('profile.summary',LIB.profile.summary,'',7));
 
-  // flow
-  const flow=(LIB.flow||[]).map((f,i)=>item(two(ti(`flow.${i}.num`,f.num,'번호 (예: 01)'),ti(`flow.${i}.title`,f.title,'제목 (예: 퍼포먼스)'))+two(ti(`flow.${i}.sub`,f.sub,'서브 (예: PAID MEDIA)'),ti(`flow.${i}.caption`,f.caption,'캡션')),`flow.${i}`)).join('')+add('flow','플로우 추가');
-  const flowSec=sec('풀퍼널 플로우 (Flow)',flow,'홈 상단 애니메이션 좌측 리스트');
+  // 지표 (Experience 하단 Stats)
+  const statsSec=sec('지표 · Stats (Experience 하단)',stats,'앞 3개가 큰 숫자로 표시');
 
-  // companies / works
+  // 회사 · 경력 / 프로젝트 (Experience · Projects · Archive)
+  const CATOPTS=['퍼포먼스','성과','브랜딩','커머스','콘텐츠','그로스','영상','CRM','제휴','AX'];
   const cos=(LIB.companies||[]).map((c,ci)=>{
-    const mets=(c.metrics||[]).map((m,mi)=>item(two(ti(`companies.${ci}.metrics.${mi}.v`,m.v,'값 (예:+187%)'),ti(`companies.${ci}.metrics.${mi}.k`,m.k,'라벨 (예:ROAS)')),`companies.${ci}.metrics.${mi}`)).join('')+add(`companies.${ci}.metrics`,'회사 지표 추가');
-    const works=(c.works||[]).map((w,wi)=>`<div style="border-left:2px solid var(--line);padding-left:12px;margin:10px 0"><div style="font-size:12.5px;font-weight:700;margin-bottom:4px">${axText(w.title||'(제목없음)')}</div>${two(ti(`companies.${ci}.works.${wi}.code`,w.code,'코드 (예: A-01)'),comma(`companies.${ci}.works.${wi}.tags`,w.tags,'태그: 매체 운영·최적화, ...'))}${lbl('PROBLEM')}${ta(`companies.${ci}.works.${wi}.problem`,w.problem,'문제 상황')}${lbl('ACTION')}${ta(`companies.${ci}.works.${wi}.action`,w.action,'실행')}${lbl('RESULT')}${ta(`companies.${ci}.works.${wi}.result`,w.result,'결과')}</div>`).join('');
-    var moverow='<div style="display:flex;align-items:center;gap:6px;margin-bottom:3px"><button data-ax-moveco="'+ci+':up" class="mini" style="padding:2px 9px"'+(ci===0?' disabled':'')+'>▲</button><button data-ax-moveco="'+ci+':down" class="mini" style="padding:2px 9px"'+(ci===(LIB.companies.length-1)?' disabled':'')+'>▼</button><span class="mono" style="font-size:10.5px;color:var(--muted)">탭 순서 '+(ci+1)+' / '+LIB.companies.length+'</span></div>';
-    return '<div style="margin-bottom:10px">'+moverow+`<details style="border:1px solid var(--line);border-radius:8px"><summary style="padding:10px 12px;font-weight:700;font-size:13px;cursor:pointer">${axText(c.nameKo||c.nameEn||'회사')}</summary><div style="padding:10px 12px">${lbl('표시 기간 (비우면 날짜에서 자동)')}${ti(`companies.${ci}.periodText`,c.periodText,'2023 — 현재')}${lbl('회사 지표 (케이스 좌측)')}${mets}${lbl('프로젝트별 상세 (Problem/Action/Result·코드·태그)')}${works||'<div style="font-size:12px;color:var(--muted)">이 회사에 작업이 없습니다. 이력서 관리 탭에서 추가하세요.</div>'}</div></details></div>`;
+    const mets=(c.metrics||[]).map((m,mi)=>item(two(ti(`companies.${ci}.metrics.${mi}.v`,m.v,'값'),ti(`companies.${ci}.metrics.${mi}.k`,m.k,'라벨')),`companies.${ci}.metrics.${mi}`)).join('')+add(`companies.${ci}.metrics`,'회사 지표 추가');
+    const works=(c.works||[]).map((w,wi)=>{
+      const catsel='<select data-p="companies.'+ci+'.works.'+wi+'.category" style="'+iS+'">'+[''].concat(CATOPTS).map(function(o){return '<option value="'+axAttr(o)+'"'+(String(w.category||'')===o?' selected':'')+'>'+(o||'(카테고리)')+'</option>';}).join('')+'</select>';
+      const feat='<label style="display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;margin:7px 0 2px"><input type="checkbox" data-ax-featured="'+ci+':'+wi+'" '+(w.featured?'checked':'')+' style="width:15px;height:15px"> 대표작 (상단 모자이크 노출)</label>';
+      return '<div style="border-left:2px solid var(--line);padding-left:12px;margin:12px 0">'+
+        lbl('제목')+ti(`companies.${ci}.works.${wi}.title`,w.title,'프로젝트 제목')+
+        two(catsel,comma(`companies.${ci}.works.${wi}.tags`,w.tags,'태그'))+feat+
+        lbl('요약 (카드·아카이브 설명)')+ta(`companies.${ci}.works.${wi}.detail`,w.detail,'한두 문장')+
+        lbl('PROBLEM')+ta(`companies.${ci}.works.${wi}.problem`,w.problem,'문제 상황')+
+        lbl('ACTION')+ta(`companies.${ci}.works.${wi}.action`,w.action,'실행')+
+        lbl('RESULT')+ta(`companies.${ci}.works.${wi}.result`,w.result,'결과')+'</div>';
+    }).join('');
+    var moverow='<div style="display:flex;align-items:center;gap:6px;margin-bottom:3px"><button data-ax-moveco="'+ci+':up" class="mini" style="flex:none;padding:2px 11px"'+(ci===0?' disabled':'')+'>▲</button><button data-ax-moveco="'+ci+':down" class="mini" style="flex:none;padding:2px 11px"'+(ci===(LIB.companies.length-1)?' disabled':'')+'>▼</button><span class="mono" style="font-size:10.5px;color:var(--muted)">회사 순서 '+(ci+1)+' / '+LIB.companies.length+'</span></div>';
+    return '<div style="margin-bottom:10px">'+moverow+`<details style="border:1px solid var(--line);border-radius:8px"><summary style="padding:10px 12px;font-weight:700;font-size:13px;cursor:pointer">${axText(c.nameKo||c.nameEn||'회사')}</summary><div style="padding:10px 12px">${two(ti(`companies.${ci}.role`,c.role,'역할 (Experience 제목)'),ti(`companies.${ci}.periodText`,c.periodText,'기간 (비우면 자동)'))}${lbl('회사 요약 (Experience 설명)')}${ta(`companies.${ci}.summary`,c.summary,'')}${lbl('회사 지표')}${mets}${lbl('프로젝트')}${works||'<div style="font-size:12px;color:var(--muted)">이 회사에 작업이 없습니다. 이력서 관리 탭에서 추가하세요.</div>'}</div></details></div>`;
   }).join('');
-  const coSec=sec('회사 · 프로젝트 (Cases)',cos,'▲▼로 프로젝트 탭 순서 · 제목/요약은 이력서 관리 탭에서');
+  const coSec=sec('회사 · 경력 / 프로젝트','<div style="font-size:11.5px;color:var(--muted);margin-bottom:8px">Experience·Projects·Archive에 사용 · 대표작 체크 = 상단 모자이크</div>'+cos);
 
-  var NAVLB={home:'홈 (Hero)',cases:'프로젝트',resume:'이력서',ax:'AX'};
-  var navrows=(LIB.profile.navOrder||[]).map(function(k,i){ return '<div style="display:flex;align-items:center;gap:8px;border:1px solid var(--line);border-radius:8px;padding:8px 12px;margin-bottom:6px"><span class="mono" style="font-size:11px;color:var(--muted);width:14px">'+(i+1)+'</span><span style="flex:1;font-size:13px;font-weight:600">'+(NAVLB[k]||k)+'</span><button data-ax-movenav="'+i+':up" class="mini" style="padding:2px 9px"'+(i===0?' disabled':'')+'>▲</button><button data-ax-movenav="'+i+':down" class="mini" style="padding:2px 9px"'+(i===LIB.profile.navOrder.length-1?' disabled':'')+'>▼</button></div>'; }).join('');
-  var navSec=sec('상단 탭 순서 (AX 템플릿)','<div style="font-size:11.5px;color:var(--muted);margin-bottom:10px">화면 상단 네비게이션 탭 순서 (홈 = Hero 화면)</div>'+navrows);
+  // 테크스택 · 스킬 재료
+  const techSec=sec('테크스택 · 스킬 재료',lbl('역량칩 (Techstack 마퀴 + 스킬 집계)')+caps+lbl('스택 (영역·제목·설명)')+stack,'프로젝트 stack 툴 + 아래 항목이 마퀴로');
 
   var kd=axDoc().klio, KL={about:'About',projects:'Projects',experience:'Experience',archive:'Archive',techstack:'Techstack',skills:'Skills',contact:'Contact'};
   var krows=kd.sections.map(function(s,i){ var def=KL[s.key]||s.key;
-    return '<div style="display:flex;align-items:center;gap:8px;border:1px solid var(--line);border-radius:8px;padding:7px 10px;margin-bottom:6px"><input type="checkbox" data-ax-klio-on="'+i+'" '+(s.on!==false?'checked':'')+' title="표시" style="width:16px;height:16px;flex:none;cursor:pointer"><input data-ax-klio-label="'+i+'" value="'+axAttr(s.label||'')+'" placeholder="'+axAttr(def)+'" style="flex:1;min-width:0;padding:6px 8px;border:1px solid var(--line);border-radius:6px;font-size:13px;background:transparent;color:inherit;font-family:inherit"><button data-ax-moveklio="'+i+':up" class="mini" style="padding:2px 9px"'+(i===0?' disabled':'')+'>▲</button><button data-ax-moveklio="'+i+':down" class="mini" style="padding:2px 9px"'+(i===kd.sections.length-1?' disabled':'')+'>▼</button></div>';
+    return '<div style="display:flex;align-items:center;gap:8px;border:1px solid var(--line);border-radius:8px;padding:7px 10px;margin-bottom:6px"><input type="checkbox" data-ax-klio-on="'+i+'" '+(s.on!==false?'checked':'')+' title="표시" style="width:16px;height:16px;flex:none;cursor:pointer"><input data-ax-klio-label="'+i+'" value="'+axAttr(s.label||'')+'" placeholder="'+axAttr(def)+'" style="flex:1;min-width:0;padding:6px 8px;border:1px solid var(--line);border-radius:6px;font-size:13px;background:transparent;color:inherit;font-family:inherit"><button data-ax-moveklio="'+i+':up" class="mini" style="flex:none;padding:2px 11px"'+(i===0?' disabled':'')+'>▲</button><button data-ax-moveklio="'+i+':down" class="mini" style="flex:none;padding:2px 11px"'+(i===kd.sections.length-1?' disabled':'')+'>▼</button></div>';
   }).join('');
   var ktext=lbl('Contact 문구 (비우면 기본값)')+'<input data-ax-klio-text="contactIntro" value="'+axAttr(kd.text.contactIntro||'')+'" placeholder="새 프로젝트나 협업, 채용 문의가 있다면 편하게 연락 주세요." style="'+iS+'">'+lbl('Available 배지 텍스트')+'<input data-ax-klio-text="available" value="'+axAttr(kd.text.available||'')+'" placeholder="Available for work" style="'+iS+'">';
   var klioSec=sec('화면 구성 · Klio (/portfolio)','<div style="font-size:11.5px;color:var(--muted);margin-bottom:10px">체크=표시 · 라벨=섹션 제목+하단바 텍스트(비우면 기본) · ▲▼=순서(하단바 같이 변경)</div>'+krows+ktext,'/portfolio 화면에 즉시 반영');
 
-  $('#axLeft').innerHTML=klioSec+navSec+hero+capSec+pipeSec+flowSec+coSec;
+  $('#axLeft').innerHTML=klioSec+basicSec+aboutSec+statsSec+coSec+techSec;
 
   if(!axWired){
     axWired=true;
     const left=$('#axLeft');
     left.addEventListener('input',e=>{ const t=e.target; const kl=t.dataset.axKlioLabel, ktx=t.dataset.axKlioText; if(kl!=null){ if(axDoc().klio&&axDoc().klio.sections[+kl])axDoc().klio.sections[+kl].label=t.value; axSchedule(); return; } if(ktx){ if(axDoc().klio)axDoc().klio.text[ktx]=t.value; axSchedule(); return; } const p=t.dataset.p; if(!p)return; let v=t.value; if(t.dataset.arr==='lines')v=v.split('\n').map(s=>s.trim()).filter(Boolean); else if(t.dataset.arr==='comma')v=v.split(',').map(s=>s.trim()).filter(Boolean); axSet(p,v); axSchedule(); });
-    left.addEventListener('click',e=>{ const a=e.target.closest('[data-add]'),d=e.target.closest('[data-del]'),mv=e.target.closest('[data-ax-movenav]'),mc=e.target.closest('[data-ax-moveco]'),mk=e.target.closest('[data-ax-moveklio]'),kon=e.target.closest('[data-ax-klio-on]'); if(a){ axAdd(a.dataset.add); renderAXAdmin(); save(); updateAXPreview(); } else if(d){ axDel(d.dataset.del); renderAXAdmin(); save(); updateAXPreview(); } else if(mv){ var pp=mv.getAttribute('data-ax-movenav').split(':'); axMove(LIB.profile.navOrder,+pp[0],pp[1]); renderAXAdmin(); save(); updateAXPreview(); } else if(mc){ var qq=mc.getAttribute('data-ax-moveco').split(':'); axMove(LIB.companies,+qq[0],qq[1]); renderAXAdmin(); save(); updateAXPreview(); } else if(mk){ var kk=mk.getAttribute('data-ax-moveklio').split(':'); axMove(axDoc().klio.sections,+kk[0],kk[1]); renderAXAdmin(); save(); updateAXPreview(); } else if(kon){ var ki=+kon.getAttribute('data-ax-klio-on'); if(axDoc().klio&&axDoc().klio.sections[ki])axDoc().klio.sections[ki].on=kon.checked; save(); updateAXPreview(); } });
+    left.addEventListener('click',e=>{ const a=e.target.closest('[data-add]'),d=e.target.closest('[data-del]'),mv=e.target.closest('[data-ax-movenav]'),mc=e.target.closest('[data-ax-moveco]'),mk=e.target.closest('[data-ax-moveklio]'),kon=e.target.closest('[data-ax-klio-on]'),fe=e.target.closest('[data-ax-featured]'); if(a){ axAdd(a.dataset.add); renderAXAdmin(); save(); updateAXPreview(); } else if(d){ axDel(d.dataset.del); renderAXAdmin(); save(); updateAXPreview(); } else if(mv){ var pp=mv.getAttribute('data-ax-movenav').split(':'); axMove(LIB.profile.navOrder,+pp[0],pp[1]); renderAXAdmin(); save(); updateAXPreview(); } else if(mc){ var qq=mc.getAttribute('data-ax-moveco').split(':'); axMove(LIB.companies,+qq[0],qq[1]); renderAXAdmin(); save(); updateAXPreview(); } else if(mk){ var kk=mk.getAttribute('data-ax-moveklio').split(':'); axMove(axDoc().klio.sections,+kk[0],kk[1]); renderAXAdmin(); save(); updateAXPreview(); } else if(kon){ var ki=+kon.getAttribute('data-ax-klio-on'); if(axDoc().klio&&axDoc().klio.sections[ki])axDoc().klio.sections[ki].on=kon.checked; save(); updateAXPreview(); } else if(fe){ var gg=fe.getAttribute('data-ax-featured').split(':'); var cc=LIB.companies[+gg[0]]; if(cc&&cc.works&&cc.works[+gg[1]])cc.works[+gg[1]].featured=fe.checked; save(); updateAXPreview(); } });
+    left.addEventListener('change',e=>{ var t=e.target; if(t.tagName==='SELECT'&&t.dataset.p){ axSet(t.dataset.p,t.value); axSchedule(); } });
     const pub=$('#axPublish'); if(pub)pub.onclick=()=>{ const d=axDoc(); d.updated=Date.now(); save(); const u=viewURL(d); if(navigator.clipboard)navigator.clipboard.writeText(u).then(()=>toast('발행됨 · 링크 복사: '+u)).catch(()=>toast('발행됨: '+u)); else toast('발행됨: '+u); };
     const vo=$('#axViewOpen'); if(vo)vo.onclick=()=>{ const d=axDoc(); save(); setTimeout(()=>window.open(viewURL(d),'_blank'),300); };
   }
