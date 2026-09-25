@@ -806,12 +806,13 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
     var mainH1 = "저는 " + esc(P.nameKo || nameEn) + " — " + esc(tagline) + (/[.。]$/.test(tagline) ? "" : ".");
     var dimH1 = esc(txt("heroSub", sents[0] || ""));
     var photoOn = shown("home", "photo", false) && !!P.avatar;
+    var dimRaw = parseFloat((K.ui || {}).photoDim), photoDim = isNaN(dimRaw) ? 0.25 : Math.max(0, Math.min(80, dimRaw)) / 100; // 사진 딤(어둡게) — KILO 대시보드에서 조절
     var home = '<header class="home" id="home">'
       + '<div class="rv"><div class="sig">' + esc(nameEn) + '</div>'
       + '<div class="meta">' + (shown("home", "location", true) ? '<span>' + esc(P.location || "Seoul, Korea") + '</span>' : '')
       + (shown("home", "email", true) && P.email ? '<a href="mailto:' + esc(P.email) + '">' + esc(P.email) + '</a>' : '')
       + (shown("home", "site", true) ? '<a href="' + esc(siteHref) + '" target="_blank" rel="noopener">' + esc(siteLabel) + '</a>' : '') + '</div></div>'
-      + '<div class="cnt"><div class="photo rv" style="--d:80ms"><div class="card' + (photoOn ? ' img" style="background-image:url(\'' + esc(P.avatar) + '\')">' : '"><b>' + esc(initials) + '</b>') + '</div>'
+      + '<div class="cnt"><div class="photo rv" style="--d:80ms"><div class="card' + (photoOn ? ' img" style="background-image:url(\'' + esc(P.avatar) + '\');--dim:' + photoDim + '">' : '"><b>' + esc(initials) + '</b>') + '</div>'
       + '<svg class="orbit" viewBox="0 0 150 150" aria-hidden="true"><defs><path id="orb" d="M75,75 m-63,0 a63,63 0 1,1 126,0 a63,63 0 1,1 -126,0"/></defs><text><textPath href="#orb">' + orbit + '</textPath></text></svg></div>'
       + '<h1 class="rv" style="--d:160ms">' + mainH1 + ' <span class="dim">' + dimH1 + '</span></h1></div></header>';
 
@@ -871,8 +872,12 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
       var per = coPeriod(co), dur = /년|개월/.test(per) ? "" : durOf(co);
       var mets = XS.metrics ? (co.metrics || []).map(function (m) { return { v: m.v != null ? m.v : m.value, k: m.k != null ? m.k : m.label }; })
         .filter(function (m) { return m.v || m.k; }).map(function (m) { return '<span class="xp-met"><b>' + esc(m.v) + '</b>' + esc(m.k) + '</span>'; }).join("") : "";
-      var pjs = XS.projects ? works.filter(function (x) { return x.co === co; }).slice(0, 5).map(function (x) {
-        return '<li data-di="' + works.indexOf(x) + '">' + esc(x.w.title) + '<span>' + esc(yearOf(x.w)) + '</span></li>'; }).join("") : "";
+      // 주요 프로젝트 목록: KILO 대시보드에서 회사별 직접 편집(klio.expPj[회사id]) — 없으면 이 회사 프로젝트에서 자동. 클릭 모달 없음(모달은 Projects 전용)
+      var xpj = (K.expPj && Array.isArray(K.expPj[co.id]))
+        ? K.expPj[co.id].filter(function (it) { return it && it.visible !== false && String(it.title || "").trim(); })
+        : works.filter(function (x) { return x.co === co; }).map(function (x) { return { title: x.w.title, period: wPeriod(x.w) }; });
+      var pjs = XS.projects ? xpj.map(function (it) {
+        return '<li><span class="t">' + esc(it.title) + '</span>' + (it.period ? '<span class="p">' + esc(it.period) + '</span>' : '') + '</li>'; }).join("") : "";
       return '<div class="xp rv"><div class="xp-hd">' + logo + '<div class="xp-tt"><h3>' + esc(nm) + (alt ? '<small>' + esc(alt) + '</small>' : '') + '</h3>'
         + (XS.role && co.role ? '<p class="xp-role">' + esc(co.role) + '</p>' : '') + '</div></div>'
         + (XS.period && per ? '<p class="xp-per">' + esc(per) + (dur ? ' · ' + esc(dur) : '') + '</p>' : '')
@@ -997,8 +1002,12 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
       + '.xp-tt{min-width:0}.xp-tt h3{font-size:19px;line-height:1.3}.xp-tt h3 small{font-size:12px;font-weight:500;color:var(--gray);margin-left:7px;letter-spacing:0}.xp-role{margin-top:3px;font-size:13px;line-height:1.45;color:var(--ink50);font-weight:500}'
       + '.xp-per{margin-top:14px;font-size:12px;color:var(--gray);font-variant-numeric:tabular-nums}.xp-sum{margin-top:10px;font-size:14px;line-height:1.75;color:var(--ink50)}'
       + '.xp-mets{display:flex;flex-wrap:wrap;gap:7px;margin-top:16px}.xp-met{border:1px solid var(--bd);border-radius:999px;padding:6px 12px;font-size:12px;line-height:1.2;color:var(--ink50)}.xp-met b{color:var(--ink);font-weight:700;margin-right:6px}'
-      + '.xp-pj{list-style:none;margin:16px 0 0;padding:0;display:flex;flex-direction:column;gap:7px}.xp-pj li{display:flex;gap:10px;font-size:13px;line-height:1.5;cursor:pointer;color:var(--ink)}.xp-pj li::before{content:"—";color:var(--gray)}.xp-pj li:hover{text-decoration:underline;text-underline-offset:3px}.xp-pj li span{margin-left:auto;padding-left:10px;font-size:11.5px;color:var(--gray);white-space:nowrap}'
-      + '.photo .card.img{background-size:cover;background-position:center}'
+      // 주요 프로젝트: 점 타임라인(링 점 + 가는 세로선) · 제목 / 기간
+      + '.xp-pj{list-style:none;margin:18px 0 0;padding:0}.xp-pj li{position:relative;display:flex;align-items:baseline;gap:12px;padding:0 0 12px 22px;font-size:13.5px;line-height:1.5}.xp-pj li:last-child{padding-bottom:0}'
+      + '.xp-pj li::before{content:"";position:absolute;left:0;top:calc(.75em - 4.5px);width:9px;height:9px;border-radius:50%;border:2px solid var(--ink);background:#fff;box-sizing:border-box}'
+      + '.xp-pj li:not(:last-child)::after{content:"";position:absolute;left:4px;top:calc(.75em + 4.5px);bottom:calc(4.5px - .75em);width:1px;background:var(--light)}'
+      + '.xp-pj .t{flex:1;min-width:0;color:var(--ink);font-weight:500}.xp-pj .p{flex:none;font-size:11.5px;color:var(--gray);font-variant-numeric:tabular-nums;white-space:nowrap}@media(max-width:520px){.xp-pj li{flex-direction:column;gap:1px}}'
+      + '.photo .card.img{position:relative;background-size:cover;background-position:center}.photo .card.img::after{content:"";position:absolute;inset:0;background:rgba(17,17,20,var(--dim,.25));pointer-events:none}'
       + '.cards3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}.cards3.mt{margin-top:64px}.cards3+.cards3{margin-top:16px}.dcard{background:var(--ink);border-radius:32px;min-height:144px;padding:20px;display:flex;flex-direction:column;justify-content:space-between}.dcard h4{font-size:32px;font-weight:600;line-height:1;color:#fff}.dcard p{font-size:12px;line-height:145%;color:var(--light)}@media(max-width:520px){.cards3{grid-template-columns:1fr 1fr}}'
       + '.stack-rows{display:flex;flex-direction:column;gap:26px}.mq{overflow:hidden;-webkit-mask-image:linear-gradient(90deg,transparent,#000 10%,#000 90%,transparent);mask-image:linear-gradient(90deg,transparent,#000 10%,#000 90%,transparent)}.mq .tk{display:flex;align-items:center;gap:34px;width:max-content;animation:mqL 34s linear infinite}.mq.rev .tk{animation-name:mqR}.mq:hover .tk{animation-play-state:paused}@keyframes mqL{to{transform:translateX(-50%)}}@keyframes mqR{from{transform:translateX(-50%)}to{transform:translateX(0)}}.mq .tk span{flex-shrink:0;font-size:16px;font-weight:500;color:var(--gray);white-space:nowrap}.mq .tk span.on{color:var(--ink);font-weight:600}'
       + '@media(prefers-reduced-motion:reduce){.mq .tk,.mq.rev .tk{animation:none;flex-wrap:wrap;width:auto}.mq{mask-image:none;-webkit-mask-image:none}.mq .dup{display:none}}'
