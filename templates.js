@@ -782,19 +782,11 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
       if (extras.length) rows.push({ label: "기타 · DB", items: extras, visible: true });
       return rows;
     };
-    var DEFAULT_AXLOOP = [
-      { num: "01", title: "수집 · Ingest", items: ["매체·GA4·BigQuery 수집", "Metabase→시트 파이프라인", "UTM 3분류 정규화"] },
-      { num: "02", title: "측정 · Measure", items: ["3레이어 성과 대시보드", "CAC·ROAS·유닛 이코노믹스", "코호트·리텐션"] },
-      { num: "03", title: "실행 · Activate", items: ["규칙 기반 캠페인 빌더", "콘텐츠 퍼포먼스 자동화", "카탈로그 피드"] },
-      { num: "04", title: "운영 · Operate", items: ["성과운영 자동 리포트", "이상탐지·알림", "라이프사이클 CRM"] }
-    ];
-    var DEFAULT_AXSCREENS = [
-      { category: "대시보드", name: "통합 성과 대시보드", badge: "L1", description: "매체·채널·전환을 한 화면에서. 정의를 고정한 단일 지표 소스.", chips: ["GA4", "BigQuery", "Metabase"] },
-      { category: "대시보드", name: "유닛 이코노믹스", badge: "L3", description: "LTV·CAC·회수기간을 SQL로 계산해 의사결정에 연결.", chips: ["SQL", "BigQuery"] },
-      { category: "콘텐츠 퍼포먼스 자동화", name: "콘텐츠 성과 파이프라인", badge: "", description: "콘텐츠별 성과를 자동 수집·집계해 순위·개선점을 도출.", chips: ["AI SDK", "Sheets"] },
-      { category: "콘텐츠 퍼포먼스 자동화", name: "카피·크리에이티브 생성", badge: "", description: "LLM으로 카피/변형을 생성하고 실제 성과와 연결.", chips: ["Anthropic", "OpenAI"] },
-      { category: "성과운영 자동화", name: "캠페인 빌더", badge: "", description: "규칙 기반으로 캠페인을 자동 집행·최적화.", chips: ["Meta", "Google Ads"] },
-      { category: "성과운영 자동화", name: "자동 리포트·알림", badge: "", description: "성과는 정기 리포트로, 이상은 즉시 알림으로.", chips: ["GitHub Actions", "Slack"] }
+    // AX 콘솔(/ax) CORE CAPABILITIES 대표 3 — klio에는 이 핵심만, 전체 구조는 콘솔로
+    var DEFAULT_AXCORE = [
+      { num: "01", title: "통합 대시보드", desc: "서비스지표와 마케팅지표를 한 판에서, 같은 정의로 비교·결정." },
+      { num: "02", title: "마케팅 자동화", desc: "기획·집행·최적화를 화면 안에서 — 반복은 규칙과 알림으로 자동화." },
+      { num: "03", title: "히스토리 워크플로우", desc: "메일·회의·배포 기록이 자동으로 남는 업무 구조." }
     ];
 
     // ── HOME
@@ -865,35 +857,20 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
     var experienceInner = '<div class="cnt">' + exp
       + (hs ? '<div class="cards3 mt rv">' + hs + '</div>' : '') + '</div>';
 
-    // ── AX (예전 Archive 자리) — 프로젝트 UI처럼 인페이지 도구 쇼케이스 (모달 없음)
-    var axLoopArr0 = (d.axLoop || []).filter(function (x) { return x.visible !== false; });
-    var axScreensArr0 = (d.axScreens || []).filter(function (x) { return x.visible !== false; });
+    // ── AX (예전 Archive 자리) — 핵심만: AX 콘솔 대표 3 기능 + 콘솔로 연결 (전체 구조는 /ax)
     var axNotesArr = (d.axNotes || []).filter(function (x) { return x.visible !== false; });
-    var axLoopArr = axLoopArr0.length ? axLoopArr0 : DEFAULT_AXLOOP;      // 데이터 없으면 기본 시드로 표시
-    var axScreensArr = axScreensArr0.length ? axScreensArr0 : DEFAULT_AXSCREENS;
     var axIntro = (d.klio && d.klio.text && d.klio.text.axIntro) ? d.klio.text.axIntro
       : (((axNotesArr.filter(function (n) { return n.section === "principle"; })[0]) || {}).body
-        || "AI로 마케팅을 자동화하고 확장합니다 — 수집·측정·실행·운영이 하나의 콘솔에서 이어지도록 직접 설계·구축·운영합니다.");
-    // 운영 파이프라인 (핵심 요약 flow) — 수집 → 측정 → 실행 → 운영
-    var axFlow = axLoopArr.length ? ('<div class="ax-flow rv">' + axLoopArr.map(function (s, i) {
-      var sub = (s.items || []).slice(0, 2).join(" · ");
-      return '<div class="ax-step"><span class="ax-snum">' + esc(s.num || String(i + 1)) + '</span><b>' + esc(s.title) + '</b>' + (sub ? '<small>' + esc(sub) + '</small>' : '') + '</div>';
-    }).join("") + '</div>') : "";
-    // 도구 카드 — 카테고리(레이아웃)별 그룹 · 뭐하는 도구인지 핵심요약
-    var axGroups = [], axGmap = {};
-    axScreensArr.forEach(function (s) { var c = s.category || "기타"; if (!axGmap[c]) { axGmap[c] = { cat: c, items: [] }; axGroups.push(axGmap[c]); } axGmap[c].items.push(s); });
-    var axToolsHtml = axGroups.map(function (g) {
-      var cards = g.items.map(function (s) {
-        var chips = (s.chips || []).map(function (ch) { return '<span>' + esc(ch) + '</span>'; }).join("");
-        return '<div class="ax-tool"><div class="ax-ttop"><b>' + esc(s.name) + '</b>' + (s.badge ? '<span class="ax-badge">' + esc(s.badge) + '</span>' : '') + '</div>' + (s.description ? '<p>' + esc(s.description) + '</p>' : '') + (chips ? '<div class="ax-tchips">' + chips + '</div>' : '') + '</div>';
-      }).join("");
-      return '<div class="ax-group"><div class="ax-grouph"><span class="ax-gdot"></span>' + esc(g.cat) + '<em>' + g.items.length + '</em></div><div class="ax-tools">' + cards + '</div></div>';
+        || "흩어진 도구와 지표를 하나의 마케팅 콘솔로 — 통합 대시보드·자동화·히스토리까지 직접 설계·구축·운영합니다.");
+    var axCore = (d.klio && Array.isArray(d.klio.axCore) && d.klio.axCore.length) ? d.klio.axCore : DEFAULT_AXCORE;
+    var axCoreArr = axCore.filter(function (x) { return x && x.visible !== false && (x.title || x.desc); });
+    var axCoreHtml = axCoreArr.map(function (c, i) {
+      return '<div class="ax-core"><span class="ax-cno">' + esc(c.num || ("0" + (i + 1))) + '</span><h4>' + esc(c.title) + '</h4>' + (c.desc ? '<p>' + esc(c.desc) + '</p>' : '') + '</div>';
     }).join("");
     var axInner = '<div class="cnt ax-cnt">'
       + '<p class="rv" style="font-size:16px;line-height:1.75;color:var(--ink50);margin-bottom:4px">' + esc(axIntro) + '</p>'
-      + axFlow
-      + (axToolsHtml ? '<div class="ax-groups rv">' + axToolsHtml + '</div>' : '')
-      + '<a class="ax-clink rv" href="https://kimjinsoo-mkt-ax.vercel.app/ax" target="_blank" rel="noopener">실제 AX 콘솔 열기 ↗</a>'
+      + (axCoreHtml ? '<div class="ax-cores rv">' + axCoreHtml + '</div>' : '')
+      + '<a class="ax-console rv" href="https://kimjinsoo-mkt-ax.vercel.app/ax" target="_blank" rel="noopener">AX 콘솔에서 전체 구조 보기 <span aria-hidden="true">→</span></a>'
       + '</div>';
 
     // ── TECHSTACK (편집 가능한 행 데이터: klio.techstack, 없으면 큐레이션 3행 + 현재 DB 데이터 전부 덤프)
@@ -1003,10 +980,8 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
       + '.pj-tags{display:flex;flex-wrap:wrap;gap:6px;margin:16px 0}.pj-tag{font-size:11.5px;padding:5px 11px;border-radius:999px;background:rgba(144,144,144,.13);color:var(--ink)}'
       + '.pj-media{display:grid;grid-template-columns:repeat(auto-fill,minmax(178px,1fr));gap:10px;margin-top:18px}.pj-media img{width:100%;border-radius:12px;display:block;border:1px solid var(--bd)}.pj-vid{position:relative;aspect-ratio:16/9;border-radius:12px;background-size:cover;background-position:center;display:flex;align-items:flex-end;padding:10px;text-decoration:none;overflow:hidden}.pj-vid::before{content:"";position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,.62),transparent 60%)}.pj-vid b{position:relative;z-index:1;color:#fff;font-size:11.5px;font-weight:600}.pj-play{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);z-index:1;width:42px;height:42px;border-radius:50%;background:rgba(0,0,0,.5);border:1px solid rgba(255,255,255,.55)}.pj-play::after{content:"";position:absolute;top:50%;left:53%;transform:translate(-50%,-50%);border-left:12px solid #fff;border-top:7px solid transparent;border-bottom:7px solid transparent}'
       + '.pj-dlinks{margin-top:20px;display:flex;flex-wrap:wrap;gap:6px 16px}.pj-dlinks a{font-size:12.5px;font-weight:500;color:var(--ink);text-decoration:underline;text-underline-offset:2px}.pj-dlinks a:hover{color:var(--gray)}'
-      + '.ax-cnt{max-width:440px}.ax-flow{display:flex;flex-wrap:wrap;gap:8px;margin:20px 0 6px}.ax-step{flex:1 1 46%;min-width:150px;border:1px solid var(--bd);border-radius:14px;padding:12px 14px;background:linear-gradient(180deg,rgba(171,220,209,.10),transparent)}.ax-step .ax-snum{font-size:10.5px;font-weight:700;letter-spacing:.12em;color:var(--gray)}.ax-step b{display:block;font-size:13.5px;font-weight:600;margin-top:3px}.ax-step small{display:block;font-size:11px;line-height:1.5;color:var(--ink50);margin-top:4px}'
-      + '.ax-groups{display:flex;flex-direction:column;gap:22px;margin-top:26px}.ax-grouph{display:flex;align-items:center;gap:8px;font-size:12.5px;font-weight:700;color:var(--ink);padding-bottom:10px;border-bottom:1px solid var(--bd)}.ax-grouph .ax-gdot{width:8px;height:8px;border-radius:50%;background:var(--coral)}.ax-grouph em{font-style:normal;font-size:11px;font-weight:600;color:var(--gray);background:var(--bd2);border-radius:999px;padding:2px 8px}'
-      + '.ax-tools{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}@media(max-width:520px){.ax-tools{grid-template-columns:1fr}}.ax-tool{border:1px solid var(--bd);border-radius:14px;padding:14px 15px;background:#fff;transition:transform .25s var(--ez),box-shadow .25s}.ax-tool:hover{transform:translateY(-3px);box-shadow:0 14px 30px -16px rgba(0,0,0,.22)}.ax-ttop{display:flex;align-items:flex-start;justify-content:space-between;gap:8px}.ax-ttop b{font-size:14px;font-weight:600;line-height:1.3}.ax-badge{flex:none;font-size:9.5px;font-weight:700;letter-spacing:.05em;padding:3px 7px;border-radius:999px;background:var(--lav);color:var(--ink)}.ax-tool p{font-size:12px;line-height:1.55;color:var(--ink50);margin-top:7px}.ax-tchips{display:flex;flex-wrap:wrap;gap:5px;margin-top:10px}.ax-tchips span{font-size:10.5px;padding:3px 8px;border-radius:6px;background:var(--bd2);color:var(--ink50)}'
-      + '.ax-clink{display:inline-block;margin-top:22px;font-size:13px;font-weight:600;color:var(--ink);text-decoration:underline;text-underline-offset:3px}.ax-clink:hover{color:var(--gray)}'
+      + '.ax-cnt{max-width:440px}.ax-cores{display:flex;flex-direction:column;gap:10px;margin:22px 0 18px}.ax-core{position:relative;border:1px solid var(--bd);border-radius:16px;padding:16px 18px 16px 52px;transition:transform .25s var(--ez),box-shadow .25s}.ax-core:hover{transform:translateY(-2px);box-shadow:0 14px 30px -18px rgba(0,0,0,.2)}.ax-core .ax-cno{position:absolute;left:18px;top:17px;font-size:12px;font-weight:700;letter-spacing:.08em;color:var(--coral)}.ax-core h4{font-size:15px;font-weight:600;line-height:1.3}.ax-core p{font-size:12.5px;line-height:1.6;color:var(--ink50);margin-top:5px}'
+      + '.ax-console{display:inline-flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:#fff;background:var(--ink);border-radius:999px;padding:11px 20px;transition:.2s var(--ez)}.ax-console:hover{opacity:.85}.ax-console span{transition:transform .2s}.ax-console:hover span{transform:translateX(3px)}'
       + '.mosaic-more{display:grid;grid-template-rows:0fr;transition:grid-template-rows .55s var(--ez)}.pj-cnt.exp .mosaic-more{grid-template-rows:1fr}.mm-in{overflow:hidden;min-height:0}.mm-grid{padding-top:12px}.mm-grid .tile{opacity:0;transform:translateY(30px) scale(.9);transition:opacity .5s var(--ez),transform .5s var(--ez)}.pj-cnt.exp .mm-grid .tile{opacity:1;transform:none;transition-delay:calc(var(--i,0)*55ms)}@media(prefers-reduced-motion:reduce){.mosaic-more{transition:none}.mm-grid .tile{transition:none;opacity:1;transform:none}}'
       + '.pj-more-a{display:inline-block;transition:transform .25s var(--ez)}.pj-more:hover .pj-more-a{transform:translateY(2px)}.pj-cnt.exp .pj-more[data-pj-expand] .pj-more-a{transform:rotate(180deg)}';
 
