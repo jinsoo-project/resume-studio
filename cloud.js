@@ -151,6 +151,22 @@
       const { data } = c.storage.from("media").getPublicUrl(path);
       return data.publicUrl;
     },
+    // 조회수 (page_views: slug·day(서울 날짜)·count) — 방문 +1은 track_view RPC(익명 가능), 읽기는 공개
+    kstDay() { return new Date(Date.now() + 9 * 3600e3).toISOString().slice(0, 10); },
+    async trackView(slug) {
+      const c = client(); if (!c) throw new Error("클라이언트 없음");
+      const { error } = await c.rpc("track_view", { p_slug: slug });
+      if (error) throw error;
+      return true;
+    },
+    async getViews(slug) {
+      const c = client(); if (!c) throw new Error("클라이언트 없음");
+      const { data, error } = await c.from("page_views").select("day,count").eq("slug", slug);
+      if (error) throw error;
+      const today = this.kstDay(); let total = 0, t = 0;
+      (data || []).forEach(r => { const n = Number(r.count) || 0; total += n; if (String(r.day).slice(0, 10) === today) t = n; });
+      return { total, today: t };
+    },
     async tableRows(table, limit) {
       const c = client(); if (!c || !user) return null;
       const { data, error } = await c.from(table).select("*").limit(limit || 200);
