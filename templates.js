@@ -740,8 +740,13 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
     var yearOf = function (w) { return String(w.endDate || w.startDate || "").slice(0, 4); };
 
     var companies = d.companies || [];
+    // klio 표시 설정(스튜디오 편집 → d.klio): text=문구 덮어쓰기 · show=표시 항목 · hidden=개별 숨김(id 목록)
+    var K = d.klio || {}, KT = K.text || {}, KS = K.show || {}, KH = K.hidden || null;
+    var txt = function (k, def) { var v = KT[k]; return (v != null && String(v).trim() !== "") ? String(v) : def; };
+    var shown = function (g, k, def) { var o = KS[g] || {}; return o[k] == null ? def : o[k] !== false; };
+    var isHidden = function (b, id) { return !!(KH && id != null && (KH[b] || []).indexOf(id) >= 0); };
     var works = [];
-    companies.forEach(function (co) { (co.works || []).forEach(function (w) { works.push({ co: co, w: w }); }); });
+    companies.forEach(function (co) { (co.works || []).forEach(function (w) { if (!isHidden("works", w.id)) works.push({ co: co, w: w }); }); });
 
     var PAL = ["var(--mint)", "var(--beige)", "var(--sand)", "var(--lav)", "var(--coral)"];
     var CATMETA = {
@@ -791,27 +796,31 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
 
     // ── HOME
     var nameEn = P.nameEn || P.nameKo || "";
-    var initials = (nameEn.split(/\s+/).map(function (x) { return x[0] || ""; }).join("") || "JK").slice(0, 2).toUpperCase();
-    var siteUrl = "https://kimjinsoo-mkt-ax.vercel.app";
-    var orbit = (nameEn.toUpperCase() + " · MARKETER · ").replace(/ /g, "&#160;");
+    var initials = txt("initials", (nameEn.split(/\s+/).map(function (x) { return x[0] || ""; }).join("") || "JK").slice(0, 2).toUpperCase());
+    var siteUrl = txt("siteUrl", "https://kimjinsoo-mkt-ax.vercel.app");
+    var siteHref = /^https?:\/\//i.test(siteUrl) ? siteUrl : "https://" + siteUrl;
+    var siteLabel = siteHref.replace(/^https?:\/\//i, "").replace(/\/$/, "");
+    var orbit = esc(txt("orbit", nameEn.toUpperCase() + " · MARKETER · ")).replace(/ /g, "&#160;");
     var sents = (P.summary || "").split(/(?<=다\.)\s+/).filter(Boolean);
     var tagline = P.tagline || P.title || "";
     var mainH1 = "저는 " + esc(P.nameKo || nameEn) + " — " + esc(tagline) + (/[.。]$/.test(tagline) ? "" : ".");
-    var dimH1 = esc(sents[0] || "");
+    var dimH1 = esc(txt("heroSub", sents[0] || ""));
+    var photoOn = shown("home", "photo", false) && !!P.avatar;
     var home = '<header class="home" id="home">'
       + '<div class="rv"><div class="sig">' + esc(nameEn) + '</div>'
-      + '<div class="meta"><span>' + esc(P.location || "Seoul, Korea") + '</span>'
-      + (P.email ? '<a href="mailto:' + esc(P.email) + '">' + esc(P.email) + '</a>' : '')
-      + '<a href="' + siteUrl + '" target="_blank" rel="noopener">' + siteUrl.replace(/^https?:\/\//, "") + '</a></div></div>'
-      + '<div class="cnt"><div class="photo rv" style="--d:80ms"><div class="card"><b>' + esc(initials) + '</b></div>'
+      + '<div class="meta">' + (shown("home", "location", true) ? '<span>' + esc(P.location || "Seoul, Korea") + '</span>' : '')
+      + (shown("home", "email", true) && P.email ? '<a href="mailto:' + esc(P.email) + '">' + esc(P.email) + '</a>' : '')
+      + (shown("home", "site", true) ? '<a href="' + esc(siteHref) + '" target="_blank" rel="noopener">' + esc(siteLabel) + '</a>' : '') + '</div></div>'
+      + '<div class="cnt"><div class="photo rv" style="--d:80ms"><div class="card' + (photoOn ? ' img" style="background-image:url(\'' + esc(P.avatar) + '\')">' : '"><b>' + esc(initials) + '</b>') + '</div>'
       + '<svg class="orbit" viewBox="0 0 150 150" aria-hidden="true"><defs><path id="orb" d="M75,75 m-63,0 a63,63 0 1,1 126,0 a63,63 0 1,1 -126,0"/></defs><text><textPath href="#orb">' + orbit + '</textPath></text></svg></div>'
       + '<h1 class="rv" style="--d:160ms">' + mainH1 + ' <span class="dim">' + dimH1 + '</span></h1></div></header>';
 
-    // ── ABOUT
-    var half = Math.ceil(sents.length / 2);
-    var ab1 = esc(sents.slice(0, half).join(" ")), ab2 = esc(sents.slice(half).join(" "));
-    var aboutInner = '<div class="cnt about">'
-      + '<p class="rv">' + ab1 + '</p>' + (ab2 ? '<p class="g rv">' + ab2 + '</p>' : '') + '</div>';
+    // ── ABOUT (포트폴리오 전용 문구가 있으면 그걸로 — 빈 줄=문단 구분, 없으면 요약을 문장 기준 2문단)
+    var aboutOv = txt("about", "");
+    var aboutParas;
+    if (aboutOv) aboutParas = aboutOv.split(/\n\s*\n/).map(function (s) { return s.trim(); }).filter(Boolean);
+    else { var half = Math.ceil(sents.length / 2); aboutParas = [sents.slice(0, half).join(" "), sents.slice(half).join(" ")].filter(Boolean); }
+    var aboutInner = '<div class="cnt about">' + aboutParas.map(function (p, i) { return '<p class="' + (i ? 'g ' : '') + 'rv">' + esc(p).replace(/\n/g, "<br>") + '</p>'; }).join("") + '</div>';
 
     // ── PROJECTS (모자이크 대표작 5 + 인페이지 '더보기' depth 확장 · 모달 없음)
     var feat = works.filter(function (x) { return x.w.featured; });
@@ -842,18 +851,41 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
         : '')
       + '</div>';
 
-    // ── EXPERIENCE (+ 스탯)
-    var expSorted = companies.filter(function (c) { return (c.works || []).length; }).slice()
-      .sort(function (a, b) { return String(b.startDate || "").localeCompare(String(a.startDate || "")); });
-    var exp = expSorted.map(function (co) {
-      var svc = (co.serviceKo || co.serviceEn) ? " — " + esc(co.serviceKo || co.serviceEn) : "";
-      return '<div class="ent rv"><h3>' + esc(co.role || dispName(co)) + '</h3>'
-        + '<p class="sub">' + esc(co.nameKo || co.nameEn) + svc + '<br>' + esc(coPeriod(co)) + '</p>'
-        + (co.summary ? '<p class="d">' + esc(co.summary) + '</p>' : '') + '</div>';
+    // ── EXPERIENCE — 이력서처럼 회사별 로고 + 텍스트. 순서 = 스튜디오 회사 순서(▲▼), 회사별 노출·표시 항목은 스튜디오에서
+    var XS = { logo: shown("exp", "logo", true), role: shown("exp", "role", true), period: shown("exp", "period", true), summary: shown("exp", "summary", true), metrics: shown("exp", "metrics", true), projects: shown("exp", "projects", false), stats: shown("exp", "stats", true) };
+    var ymOf = function (s) { var m = String(s || "").match(/^(\d{4})-(\d{1,2})/); return m ? { y: +m[1], m: +m[2] } : null; };
+    var durOf = function (co) {
+      var a = ymOf(co.startDate); if (!a) return "";
+      var b = ymOf(co.endDate); if (!b) { var t = new Date(); b = { y: t.getFullYear(), m: t.getMonth() + 1 }; }
+      var n = (b.y - a.y) * 12 + (b.m - a.m) + 1; if (n <= 0) return "";
+      var y = Math.floor(n / 12), mo = n % 12;
+      return (y ? y + "년" : "") + (y && mo ? " " : "") + (mo ? mo + "개월" : "");
+    };
+    var expCos = companies.filter(function (co) { return (co.nameKo || co.nameEn || co.serviceKo || co.serviceEn) && !isHidden("companies", co.id); });
+    var exp = expCos.map(function (co) {
+      var nm = dispName(co) || co.nameKo || co.nameEn || "";
+      var alt = co.useService ? (co.nameKo || co.nameEn || "") : "";
+      if (alt === nm) alt = "";
+      var logo = XS.logo ? (co.logo ? '<span class="xp-logo"><img src="' + esc(co.logo) + '" alt="" loading="lazy"></span>'
+        : '<span class="xp-logo fb" style="background:' + catMeta(nm).c + '">' + esc(String(nm).slice(0, 1)) + '</span>') : '';
+      var per = coPeriod(co), dur = /년|개월/.test(per) ? "" : durOf(co);
+      var mets = XS.metrics ? (co.metrics || []).map(function (m) { return { v: m.v != null ? m.v : m.value, k: m.k != null ? m.k : m.label }; })
+        .filter(function (m) { return m.v || m.k; }).map(function (m) { return '<span class="xp-met"><b>' + esc(m.v) + '</b>' + esc(m.k) + '</span>'; }).join("") : "";
+      var pjs = XS.projects ? works.filter(function (x) { return x.co === co; }).slice(0, 5).map(function (x) {
+        return '<li data-di="' + works.indexOf(x) + '">' + esc(x.w.title) + '<span>' + esc(yearOf(x.w)) + '</span></li>'; }).join("") : "";
+      return '<div class="xp rv"><div class="xp-hd">' + logo + '<div class="xp-tt"><h3>' + esc(nm) + (alt ? '<small>' + esc(alt) + '</small>' : '') + '</h3>'
+        + (XS.role && co.role ? '<p class="xp-role">' + esc(co.role) + '</p>' : '') + '</div></div>'
+        + (XS.period && per ? '<p class="xp-per">' + esc(per) + (dur ? ' · ' + esc(dur) : '') + '</p>' : '')
+        + (XS.summary && co.summary ? '<p class="xp-sum">' + esc(co.summary) + '</p>' : '')
+        + (mets ? '<div class="xp-mets">' + mets + '</div>' : '')
+        + (pjs ? '<ul class="xp-pj">' + pjs + '</ul>' : '') + '</div>';
     }).join("");
-    var hs = (d.highlights || []).slice(0, 3).map(function (h) {
+    // 하단 스탯 카드: 스튜디오에서 개별 노출 선택(설정 전엔 앞 3개)
+    var hlist = (d.highlights || []).filter(function (h) { return h && (h.value || h.label); });
+    var hsArr = KH ? hlist.filter(function (h) { return !isHidden("stats", h.id); }) : hlist.slice(0, 3);
+    var hs = XS.stats ? hsArr.map(function (h) {
       return '<div class="dcard"><h4 data-count="' + esc(String(h.value).replace(/[^0-9]/g, "")) + '">' + esc(h.value) + '</h4><p>' + esc(h.label) + '</p></div>';
-    }).join("");
+    }).join("") : "";
     var experienceInner = '<div class="cnt">' + exp
       + (hs ? '<div class="cards3 mt rv">' + hs + '</div>' : '') + '</div>';
 
@@ -870,7 +902,7 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
     var axInner = '<div class="cnt ax-cnt">'
       + '<p class="rv" style="font-size:16px;line-height:1.75;color:var(--ink50);margin-bottom:4px">' + esc(axIntro) + '</p>'
       + (axCoreHtml ? '<div class="ax-cores rv">' + axCoreHtml + '</div>' : '')
-      + '<a class="ax-console rv" href="https://kimjinsoo-mkt-ax.vercel.app/ax" target="_blank" rel="noopener">AX 콘솔에서 전체 구조 보기 <span aria-hidden="true">→</span></a>'
+      + (shown("ax", "link", true) ? '<a class="ax-console rv" href="' + esc(txt("axLink", "https://kimjinsoo-mkt-ax.vercel.app/ax")) + '" target="_blank" rel="noopener">' + esc(txt("axLinkText", "AX 콘솔에서 전체 구조 보기")) + ' <span aria-hidden="true">→</span></a>' : '')
       + '</div>';
 
     // ── TECHSTACK (편집 가능한 행 데이터: klio.techstack, 없으면 큐레이션 3행 + 현재 DB 데이터 전부 덤프)
@@ -888,29 +920,33 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
     // ── SKILLS (역량별 프로젝트 수)
     var catCount = {}; works.forEach(function (x) { var c = x.w.category || "기타"; catCount[c] = (catCount[c] || 0) + 1; });
     var catArr = Object.keys(catCount).map(function (k) { return { cat: k, n: catCount[k] }; }).sort(function (a, b) { return b.n - a.n; }).slice(0, 6);
+    // 스튜디오에서 편집한 카드(klio.skills: 값·라벨·보조·노출)가 있으면 그걸로, 없으면 카테고리별 프로젝트 수
+    var skItems = (Array.isArray(K.skills) && K.skills.length)
+      ? K.skills.filter(function (s) { return s && s.visible !== false && (s.value || s.label); })
+      : catArr.map(function (o) { return { value: String(o.n), label: o.cat, sub: catMeta(o.cat).en }; });
     var skRows = "";
-    for (var si = 0; si < catArr.length; si += 3) {
-      skRows += '<div class="cards3 rv">' + catArr.slice(si, si + 3).map(function (o) {
-        var cm = catMeta(o.cat);
-        return '<div class="dcard"><h4 data-count="' + o.n + '">' + o.n + '</h4><p>' + esc(o.cat) + '<br>' + esc(cm.en) + '</p></div>';
+    for (var si = 0; si < skItems.length; si += 3) {
+      skRows += '<div class="cards3 rv">' + skItems.slice(si, si + 3).map(function (s) {
+        var num = String(s.value == null ? "" : s.value).replace(/[^0-9]/g, "");
+        return '<div class="dcard"><h4' + (num ? ' data-count="' + num + '"' : '') + '>' + esc(s.value) + '</h4><p>' + esc(s.label || "") + (s.sub ? '<br>' + esc(s.sub) : '') + '</p></div>';
       }).join("") + '</div>';
     }
     var skillsInner = '<div class="cnt">' + skRows + '</div>';
 
-    // ── CONTACT (인트로·available 텍스트는 klio.text로 수정 가능)
-    var KT = (d.klio && d.klio.text) || {};
-    var contactIntro = (KT.contactIntro != null && KT.contactIntro !== "") ? KT.contactIntro : "새 프로젝트나 협업, 채용 문의가 있다면 편하게 연락 주세요.";
-    var availLabel = (KT.available != null && KT.available !== "") ? KT.available : "Available for work";
+    // ── CONTACT (문구·표시 항목 모두 스튜디오에서)
+    var contactIntro = txt("contactIntro", "새 프로젝트나 협업, 채용 문의가 있다면 편하게 연락 주세요.");
+    var availLabel = txt("available", "Available for work");
+    var cEmail = shown("contact", "email", true) && P.email, cPhone = shown("contact", "phone", true) && P.phone, cSite = shown("contact", "site", true);
     var contactInner = '<div class="cnt">'
       + '<h3 class="rv">' + esc(contactIntro) + '</h3>'
-      + '<div class="meta rv"><span>' + esc(P.location || "Seoul, Korea") + '</span>'
-      + (P.email ? '<a href="mailto:' + esc(P.email) + '">' + esc(P.email) + '</a>' : '')
-      + (P.phone ? '<a href="tel:' + esc(String(P.phone).replace(/[^0-9]/g, "")) + '">' + esc(P.phone) + '</a>' : '') + '</div>'
-      + '<div class="avail rv"><i></i>' + esc(availLabel) + '</div>'
+      + '<div class="meta rv">' + (shown("contact", "location", true) ? '<span>' + esc(P.location || "Seoul, Korea") + '</span>' : '')
+      + (cEmail ? '<a href="mailto:' + esc(P.email) + '">' + esc(P.email) + '</a>' : '')
+      + (cPhone ? '<a href="tel:' + esc(String(P.phone).replace(/[^0-9]/g, "")) + '">' + esc(P.phone) + '</a>' : '') + '</div>'
+      + (shown("contact", "avail", true) ? '<div class="avail rv"><i></i>' + esc(availLabel) + '</div>' : '')
       + '<div class="socials rv">'
-      + (P.email ? '<a href="mailto:' + esc(P.email) + '" aria-label="이메일"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="3"/><path d="M3.5 7l8.5 6 8.5-6"/></svg></a>' : '')
-      + '<a href="' + siteUrl + '" target="_blank" rel="noopener" aria-label="포트폴리오 사이트"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.6 3.8 5.7 3.8 9S14.5 18.4 12 21M12 3C9.5 5.6 8.2 8.7 8.2 12s1.3 6.4 3.8 9"/></svg></a>'
-      + (P.phone ? '<a href="tel:' + esc(String(P.phone).replace(/[^0-9]/g, "")) + '" aria-label="전화"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4h4l2 5-2.5 1.5a12 12 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2z"/></svg></a>' : '')
+      + (cEmail ? '<a href="mailto:' + esc(P.email) + '" aria-label="이메일"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="3"/><path d="M3.5 7l8.5 6 8.5-6"/></svg></a>' : '')
+      + (cSite ? '<a href="' + esc(siteHref) + '" target="_blank" rel="noopener" aria-label="포트폴리오 사이트"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.6 3.8 5.7 3.8 9S14.5 18.4 12 21M12 3C9.5 5.6 8.2 8.7 8.2 12s1.3 6.4 3.8 9"/></svg></a>' : '')
+      + (cPhone ? '<a href="tel:' + esc(String(P.phone).replace(/[^0-9]/g, "")) + '" aria-label="전화"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4h4l2 5-2.5 1.5a12 12 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2z"/></svg></a>' : '')
       + '</div></div>';
 
     // ── 섹션 레지스트리 + 사용자 구성(klio.sections: 순서·표시·라벨). 하단 독도 같은 구성 사용.
@@ -955,6 +991,14 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
       + '.ent{padding:44px 0}.ent+.ent{border-top:1px solid var(--bd)}.ent:first-child{padding-top:0}.ent h3{font-size:20px;line-height:130%}.ent .sub{margin-top:6px;font-size:12px;line-height:150%;color:var(--gray)}.ent p.d{margin-top:22px;font-size:14px;line-height:175%;color:var(--ink50)}'
       + '.ent .links{margin-top:12px;display:flex;gap:4px 16px;flex-wrap:wrap}.ent .links a{font-size:12px;font-weight:500;color:var(--ink);text-decoration:underline;text-underline-offset:2px;text-decoration-thickness:1px}.ent .links a:hover{color:var(--gray)}'
       + '.arch .ent{padding:30px 0}.arch .ent h3{font-size:17px}.arch .ent p.d{margin-top:12px}'
+      // Experience: 이력서처럼 회사 로고 + 텍스트
+      + '.xp{padding:36px 0}.xp+.xp{border-top:1px solid var(--bd)}.xp:first-child{padding-top:0}.xp-hd{display:flex;align-items:center;gap:14px}'
+      + '.xp-logo{width:46px;height:46px;border-radius:12px;border:1px solid var(--bd);background:#fff;overflow:hidden;flex:none;display:grid;place-items:center;font-size:17px;font-weight:700;color:var(--ink)}.xp-logo img{width:100%;height:100%;object-fit:cover;display:block}'
+      + '.xp-tt{min-width:0}.xp-tt h3{font-size:19px;line-height:1.3}.xp-tt h3 small{font-size:12px;font-weight:500;color:var(--gray);margin-left:7px;letter-spacing:0}.xp-role{margin-top:3px;font-size:13px;line-height:1.45;color:var(--ink50);font-weight:500}'
+      + '.xp-per{margin-top:14px;font-size:12px;color:var(--gray);font-variant-numeric:tabular-nums}.xp-sum{margin-top:10px;font-size:14px;line-height:1.75;color:var(--ink50)}'
+      + '.xp-mets{display:flex;flex-wrap:wrap;gap:7px;margin-top:16px}.xp-met{border:1px solid var(--bd);border-radius:999px;padding:6px 12px;font-size:12px;line-height:1.2;color:var(--ink50)}.xp-met b{color:var(--ink);font-weight:700;margin-right:6px}'
+      + '.xp-pj{list-style:none;margin:16px 0 0;padding:0;display:flex;flex-direction:column;gap:7px}.xp-pj li{display:flex;gap:10px;font-size:13px;line-height:1.5;cursor:pointer;color:var(--ink)}.xp-pj li::before{content:"—";color:var(--gray)}.xp-pj li:hover{text-decoration:underline;text-underline-offset:3px}.xp-pj li span{margin-left:auto;padding-left:10px;font-size:11.5px;color:var(--gray);white-space:nowrap}'
+      + '.photo .card.img{background-size:cover;background-position:center}'
       + '.cards3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}.cards3.mt{margin-top:64px}.cards3+.cards3{margin-top:16px}.dcard{background:var(--ink);border-radius:32px;min-height:144px;padding:20px;display:flex;flex-direction:column;justify-content:space-between}.dcard h4{font-size:32px;font-weight:600;line-height:1;color:#fff}.dcard p{font-size:12px;line-height:145%;color:var(--light)}@media(max-width:520px){.cards3{grid-template-columns:1fr 1fr}}'
       + '.stack-rows{display:flex;flex-direction:column;gap:26px}.mq{overflow:hidden;-webkit-mask-image:linear-gradient(90deg,transparent,#000 10%,#000 90%,transparent);mask-image:linear-gradient(90deg,transparent,#000 10%,#000 90%,transparent)}.mq .tk{display:flex;align-items:center;gap:34px;width:max-content;animation:mqL 34s linear infinite}.mq.rev .tk{animation-name:mqR}.mq:hover .tk{animation-play-state:paused}@keyframes mqL{to{transform:translateX(-50%)}}@keyframes mqR{from{transform:translateX(-50%)}to{transform:translateX(0)}}.mq .tk span{flex-shrink:0;font-size:16px;font-weight:500;color:var(--gray);white-space:nowrap}.mq .tk span.on{color:var(--ink);font-weight:600}'
       + '@media(prefers-reduced-motion:reduce){.mq .tk,.mq.rev .tk{animation:none;flex-wrap:wrap;width:auto}.mq{mask-image:none;-webkit-mask-image:none}.mq .dup{display:none}}'
@@ -1029,7 +1073,7 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
       + '<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css"/>'
       + '<style>' + KCSS + '</style></head><body>'
       + '<div class="page">' + home + sectionsHtml
-      + '<p class="foot">© ' + new Date().getFullYear() + ' — ' + esc(nameEn || P.nameKo || "") + ', Marketing Portfolio</p></div>'
+      + '<p class="foot">' + esc(txt("footer", "© " + new Date().getFullYear() + " — " + (nameEn || P.nameKo || "") + ", Marketing Portfolio")) + '</p></div>'
       + pjStore + pjDetailModal + dock + '<script>' + KJS + '<\/script></body></html>';
   }
 
