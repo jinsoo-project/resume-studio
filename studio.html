@@ -1305,6 +1305,7 @@ function renderAXAdmin(){
   const P_home=()=>intro('맨 위 첫 화면이에요. 비워 둔 칸은 기본값으로 보여요.')
     +card('이름 · 문장',G2(F('영문 이름',ti('profile.nameEn',LIB.profile.nameEn,'Jinsoo Kim'),'좌상단 서명'),F('이름 (국문)',ti('profile.nameKo',LIB.profile.nameKo,'김진수')))
       +F('대표 문장',ta('profile.tagline',LIB.profile.tagline,'마케팅의 문제를 AI와 코드로 푸는 그로스 빌더',2),'“저는 {이름} — {이 문장}.”')
+      +F('첫 문장 직접 쓰기',kta('heroMain','저는 '+(LIB.profile.nameKo||'이름')+' — '+(LIB.profile.tagline||'대표 문장')+'.',2),'선택 · 쓰면 위 형식 대신 이 문장이 크게 보여요 (예: 안녕하세요. 김진수입니다.)')
       +F('회색 보조 문장',kta('heroSub',sum0,2),'비우면 소개 첫 문장')
       +F('직함',ti('profile.title',LIB.profile.title,'마케팅 × AI 프로덕트 빌더'),'대표 문장이 비었을 때 대신 사용'))
     +card('사진 카드',`<div class="kd-row" style="margin-bottom:12px">${thumb(LIB.profile.avatar,48)}<div style="flex:1;min-width:0">${ti('profile.avatar',LIB.profile.avatar,'사진 URL (또는 업로드)')}</div>${upl('avatar','업로드')}</div>`
