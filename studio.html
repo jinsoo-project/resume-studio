@@ -1152,6 +1152,7 @@ function klioNormalize(d){
   // ui(사진 딤 등) · expPj(회사별 Experience 주요 프로젝트 목록, 회사 id → 항목) — 없을 때만 빈 그릇 생성(기존 값 유지)
   if(!d.klio.ui||typeof d.klio.ui!=='object')d.klio.ui={};
   if(!d.klio.expPj||typeof d.klio.expPj!=='object'||Array.isArray(d.klio.expPj))d.klio.expPj={};
+  if(!d.klio.expColor||typeof d.klio.expColor!=='object'||Array.isArray(d.klio.expColor))d.klio.expColor={};
   return d.klio;
 }
 // Experience 주요 프로젝트 목록 — 회사별. 직접 편집 전엔 그 회사 프로젝트(노출된 것)에서 자동, 첫 수정 때 목록을 고정
@@ -1231,11 +1232,12 @@ function renderAXAdmin(){
 
   // ① 화면 구성 — 섹션 순서·노출·이름 (하단 바 동기화)
   const krows=kd.sections.map((s,i)=>`<div data-pv="${axAttr(s.key)}" style="display:flex;align-items:center;gap:8px;border:1px solid var(--line);border-radius:8px;padding:7px 10px;margin-bottom:6px"><input type="checkbox" data-ax-klio-on="${i}" ${s.on!==false?'checked':''} title="노출" style="width:16px;height:16px;flex:none;cursor:pointer"><input data-ax-klio-label="${i}" value="${axAttr(s.label||'')}" placeholder="${axAttr(KL[s.key]||s.key)}" style="${iS};flex:1;min-width:0;padding:6px 8px">${mvb('data-ax-moveklio',i,i===0,i===kd.sections.length-1)}</div>`).join('');
-  const klioSec=sec('화면 구성 · 섹션 순서 / 노출 / 이름',note('체크 = 섹션 노출 · 이름 = 섹션 제목 + 하단 바 텍스트(비우면 기본값) · ▲▼ = 순서(하단 바도 같이). 아래 편집 패널도 이 순서를 따라요.')+krows,'/portfolio 전체');
+  const fxRow=lbl('모션 · 효과 (포트폴리오 전체)')+`<div>${showChk('fx','intro',true,'등장 애니메이션 (서명·제목·사진)')}${showChk('fx','aura',true,'배경 오로라')}${showChk('fx','tilt',true,'3D 기울기 · 자석 버튼')}${showChk('fx','progress',true,'스크롤 진행바')}</div>`;
+  const klioSec=sec('화면 구성 · 섹션 순서 / 노출 / 이름',note('체크 = 섹션 노출 · 이름 = 섹션 제목 + 하단 바 텍스트(비우면 기본값) · ▲▼ = 순서(하단 바도 같이). 아래 편집 패널도 이 순서를 따라요.')+krows+fxRow,'/portfolio 전체');
 
   // ② Home — 맨 위
   const sum0=(String(LIB.profile.summary||'').split(/(?<=다\.)\s+/)[0]||'').trim();
-  const dimV=(kd.ui&&kd.ui.photoDim!=null&&!isNaN(+kd.ui.photoDim))?+kd.ui.photoDim:25;
+  const dimV=(kd.ui&&kd.ui.photoDim!=null&&!isNaN(+kd.ui.photoDim))?+kd.ui.photoDim:35;
   const homeSec=sec('Home · 맨 위',
     note('서명·대표 문장·카드·회전 문구·상단 연락처. 비워 둔 칸은 기본값으로 표시돼요.')
     +two(ti('profile.nameEn',LIB.profile.nameEn,'영문 이름 (좌상단 서명)'),ti('profile.nameKo',LIB.profile.nameKo,'이름 (국문)'))
@@ -1243,7 +1245,8 @@ function renderAXAdmin(){
     +lbl('회색 보조 문장 (비우면 소개 첫 문장)')+kta('heroSub',sum0,2)
     +lbl('카드 · 회전 문구')+showChk('home','photo',false,'프로필 사진 사용 (끄면 이니셜)')
     +`<div style="display:flex;align-items:center;gap:8px;margin:4px 0 8px">${thumb(LIB.profile.avatar,40)}<div style="flex:1;min-width:0">${ti('profile.avatar',LIB.profile.avatar,'사진 URL (또는 업로드)')}</div>${upl('avatar','업로드')}</div>`
-    +`<div style="display:flex;align-items:center;gap:10px;margin:0 0 8px"><span style="font-size:12px;font-weight:600;white-space:nowrap">사진 딤(어둡게)</span><input type="range" min="0" max="60" step="5" value="${dimV}" data-knum="ui.photoDim" style="flex:1;accent-color:var(--acc)"><b data-knum-out="ui.photoDim" style="font-size:12px;min-width:34px;text-align:right">${dimV}%</b></div>`
+    +`<div style="display:flex;align-items:center;gap:10px;margin:0 0 6px"><span style="font-size:12px;font-weight:600;white-space:nowrap">사진 딤(어둡게)</span><input type="range" min="0" max="60" step="5" value="${dimV}" data-knum="ui.photoDim" style="flex:1;accent-color:var(--acc)"><b data-knum-out="ui.photoDim" style="font-size:12px;min-width:34px;text-align:right">${dimV}%</b></div>`
+    +`<div style="display:flex;align-items:center;gap:10px;margin:0 0 8px"><span style="font-size:12px;font-weight:600;white-space:nowrap">딤 방식</span><select data-ksel="ui.photoDimMode" style="${iS};flex:1"><option value="bg"${(kd.ui||{}).photoDimMode!=='all'?' selected':''}>배경만 어둡게 (가장자리 · 얼굴은 밝게)</option><option value="all"${(kd.ui||{}).photoDimMode==='all'?' selected':''}>사진 전체 어둡게</option></select></div>`
     +two(kt('initials','이니셜 (예: JK)'),kt('orbit','회전 문구 (예: JINSOO KIM · MARKETER · )'))
     +lbl('상단 정보 노출')+showChk('home','location',true,'위치')+showChk('home','email',true,'이메일')+showChk('home','site',true,'사이트 링크')
     +two(ti('profile.location',LIB.profile.location,'위치 (Seoul, KR)'),ti('profile.email',LIB.profile.email,'이메일'))
@@ -1303,6 +1306,7 @@ function renderAXAdmin(){
       +`<div style="display:flex;align-items:center;gap:8px">${hideChk('companies',c.id,'')}${thumb(c.logo,30)}<div style="flex:1;min-width:0"><div style="font-weight:700;font-size:13.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${axText(coName(c))}</div><div style="font-size:11px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${axText(c.role||'역할 미입력')}</div></div>${mvb('data-ax-moveco',ci,ci===0,ci===cos.length-1)}</div>`
       +fold(`xp-${c.id||ci}`,'내용 편집 — 로고·회사명·역할·기간·요약·지표',
         lbl('로고')+`<div style="display:flex;align-items:center;gap:8px">${thumb(c.logo,40)}<div style="flex:1;min-width:0">${ti(`${P}.logo`,c.logo,'로고 이미지 URL (또는 업로드)')}</div>${upl(`logo:${ci}`,'업로드')}</div>`
+        +lbl('카드 색 (비워 두면 로고 대표색 자동)')+(()=>{ const cv=((kd.expColor||{})[c.id])||''; return `<div style="display:flex;align-items:center;gap:8px"><input type="color" data-kcolor="${axAttr(c.id)}" value="${axAttr(cv||'#909090')}" style="width:44px;height:30px;padding:0;border:1px solid var(--line);border-radius:6px;background:transparent;cursor:pointer"><span style="font-size:12px;color:var(--muted)">${cv?axText(cv.toUpperCase())+' · 직접 지정':'자동 (로고 대표색)'}</span>${cv?`<button data-kcolor-clear="${axAttr(c.id)}" class="mini" style="flex:none">자동으로</button>`:''}</div>`; })()
         +lbl('회사명 · 서비스명')+two(ti(`${P}.nameKo`,c.nameKo,'회사명 (국문)'),ti(`${P}.nameEn`,c.nameEn,'회사명 (영문)'))
         +`<div style="margin-top:8px">`+two(ti(`${P}.serviceKo`,c.serviceKo,'서비스명 (예: 매일새옷)'),`<div style="display:flex;align-items:center">${chk(`data-pchk="${P}.useService"`,!!c.useService,'서비스명으로 표시')}</div>`)+`</div>`
         +lbl('역할')+ti(`${P}.role`,c.role,'예: 퍼포먼스 마케팅 매니저')
@@ -1377,6 +1381,7 @@ function renderAXAdmin(){
       if(ds.axCoreDesc!=null){ if(k.axCore[+ds.axCoreDesc])k.axCore[+ds.axCoreDesc].desc=t.value; axSchedule(); return; }
       if(ds.kl){ const [n,i,f]=ds.kl.split(':'), L=klList(n); if(L[+i])L[+i][f]=t.value; axSchedule(); return; }
       if(ds.knum){ const v=+t.value; kSet(ds.knum,v); const o=left.querySelector(`[data-knum-out="${ds.knum}"]`); if(o)o.textContent=v+'%'; axSchedule(); return; }
+      if(ds.kcolor){ kSet('expColor.'+ds.kcolor,t.value); axSchedule(); return; }
       if(ds.xpj){ const [ci,i,f]=ds.xpj.split(':'), L=xpjList(+ci,true); if(L&&L[+i])L[+i][f]=t.value; axSchedule(); return; }
       const p=ds.p; if(!p)return;
       let v=t.value; if(ds.arr==='lines')v=v.split('\n').map(s=>s.trim()).filter(Boolean); else if(ds.arr==='comma')v=v.split(',').map(s=>s.trim()).filter(Boolean);
@@ -1403,6 +1408,7 @@ function renderAXAdmin(){
       if((el=q('[data-ax-core-del]'))){ k.axCore.splice(+el.dataset.axCoreDel,1); rerender(); return; }
       if((el=q('[data-ax-core-reset]'))){ k.axCore=axCoreSeed(); rerender(); return; }
       if((el=q('[data-ax-movecore]'))){ const [i,dir]=el.dataset.axMovecore.split(':'); axMove(k.axCore,+i,dir); rerender(); return; }
+      if((el=q('[data-kcolor-clear]'))){ if(k.expColor)delete k.expColor[el.dataset.kcolorClear]; rerender(); return; }
       if((el=q('[data-xpj-on]'))){ const [ci,i]=el.dataset.xpjOn.split(':'), L=xpjList(+ci,true); if(L&&L[+i])L[+i].visible=el.checked; rerender(); return; }
       if((el=q('[data-xpj-add]'))){ const L=xpjList(+el.dataset.xpjAdd,true); if(L)L.push({title:'',period:'',visible:true}); rerender(); return; }
       if((el=q('[data-xpj-del]'))){ const [ci,i]=el.dataset.xpjDel.split(':'), L=xpjList(+ci,true); if(L)L.splice(+i,1); rerender(); return; }
@@ -1416,6 +1422,8 @@ function renderAXAdmin(){
     });
     left.addEventListener('change',async e=>{
       const t=e.target;
+      if(t.dataset.ksel){ kSet(t.dataset.ksel,t.value); axSchedule(); return; }
+      if(t.dataset.kcolor){ kSet('expColor.'+t.dataset.kcolor,t.value); rerender(); return; }
       if(t.tagName==='SELECT'&&t.dataset.p){ axSet(t.dataset.p,t.value); axSchedule(); return; }
       const up=t.dataset&&t.dataset.axUpload; if(!up||!t.files||!t.files.length)return;
       if(!(window.CLOUD&&CLOUD.user())){ toast('이미지 업로드는 로그인이 필요해요'); t.value=''; return; }
