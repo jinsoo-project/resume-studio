@@ -853,7 +853,7 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
       + '</div>';
 
     // ── EXPERIENCE — 이력서처럼 회사별 로고 + 텍스트. 순서 = 스튜디오 회사 순서(▲▼), 회사별 노출·표시 항목은 스튜디오에서
-    var XS = { logo: shown("exp", "logo", true), role: shown("exp", "role", true), period: shown("exp", "period", true), summary: shown("exp", "summary", true), metrics: shown("exp", "metrics", true), projects: shown("exp", "projects", false), stats: shown("exp", "stats", true) };
+    var XS = { logo: shown("exp", "logo", true), role: shown("exp", "role", true), period: shown("exp", "period", true), summary: shown("exp", "summary", true), metrics: shown("exp", "metrics", true), projects: shown("exp", "projects", false), pjPeriod: shown("exp", "pjPeriod", true), stats: shown("exp", "stats", true) };
     var ymOf = function (s) { var m = String(s || "").match(/^(\d{4})-(\d{1,2})/); return m ? { y: +m[1], m: +m[2] } : null; };
     var durOf = function (co) {
       var a = ymOf(co.startDate); if (!a) return "";
@@ -877,7 +877,7 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
         ? K.expPj[co.id].filter(function (it) { return it && it.visible !== false && String(it.title || "").trim(); })
         : works.filter(function (x) { return x.co === co; }).map(function (x) { return { title: x.w.title, period: wPeriod(x.w) }; });
       var pjs = XS.projects ? xpj.map(function (it) {
-        return '<li><span class="t">' + esc(it.title) + '</span>' + (it.period ? '<span class="p">' + esc(it.period) + '</span>' : '') + '</li>'; }).join("") : "";
+        return '<li><span class="t">' + esc(it.title) + '</span>' + (XS.pjPeriod && it.period ? '<span class="p">' + esc(it.period) + '</span>' : '') + '</li>'; }).join("") : "";
       return '<div class="xp rv"><div class="xp-hd">' + logo + '<div class="xp-tt"><h3>' + esc(nm) + (alt ? '<small>' + esc(alt) + '</small>' : '') + '</h3>'
         + (XS.role && co.role ? '<p class="xp-role">' + esc(co.role) + '</p>' : '') + '</div></div>'
         + (XS.period && per ? '<p class="xp-per">' + esc(per) + (dur ? ' · ' + esc(dur) : '') + '</p>' : '')
@@ -1003,9 +1003,9 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
       + '.xp-per{margin-top:14px;font-size:12px;color:var(--gray);font-variant-numeric:tabular-nums}.xp-sum{margin-top:10px;font-size:14px;line-height:1.75;color:var(--ink50)}'
       + '.xp-mets{display:flex;flex-wrap:wrap;gap:7px;margin-top:16px}.xp-met{border:1px solid var(--bd);border-radius:999px;padding:6px 12px;font-size:12px;line-height:1.2;color:var(--ink50)}.xp-met b{color:var(--ink);font-weight:700;margin-right:6px}'
       // 주요 프로젝트: 점 타임라인(링 점 + 가는 세로선) · 제목 / 기간
-      + '.xp-pj{list-style:none;margin:18px 0 0;padding:0}.xp-pj li{position:relative;display:flex;align-items:baseline;gap:12px;padding:0 0 12px 22px;font-size:13.5px;line-height:1.5}.xp-pj li:last-child{padding-bottom:0}'
-      + '.xp-pj li::before{content:"";position:absolute;left:0;top:calc(.75em - 4.5px);width:9px;height:9px;border-radius:50%;border:2px solid var(--ink);background:#fff;box-sizing:border-box}'
-      + '.xp-pj li:not(:last-child)::after{content:"";position:absolute;left:4px;top:calc(.75em + 4.5px);bottom:calc(4.5px - .75em);width:1px;background:var(--light)}'
+      + '.xp-pj{list-style:none;margin:18px 0 0;padding:0}.xp-pj li{position:relative;display:flex;align-items:baseline;gap:12px;padding:0 0 12px 20px;font-size:13.5px;line-height:1.5}.xp-pj li:last-child{padding-bottom:0}'
+      + '.xp-pj li::before{content:"";position:absolute;left:0;top:calc(.75em - 3.5px);width:7px;height:7px;border-radius:50%;background:var(--ink)}'
+      + '.xp-pj li:not(:last-child)::after{content:"";position:absolute;left:3px;top:calc(.75em + 3.5px);bottom:calc(3.5px - .75em);width:1px;background:var(--light)}'
       + '.xp-pj .t{flex:1;min-width:0;color:var(--ink);font-weight:500}.xp-pj .p{flex:none;font-size:11.5px;color:var(--gray);font-variant-numeric:tabular-nums;white-space:nowrap}@media(max-width:520px){.xp-pj li{flex-direction:column;gap:1px}}'
       + '.photo .card.img{position:relative;background-size:cover;background-position:center}.photo .card.img::after{content:"";position:absolute;inset:0;background:rgba(17,17,20,var(--dim,.25));pointer-events:none}'
       + '.cards3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}.cards3.mt{margin-top:64px}.cards3+.cards3{margin-top:16px}.dcard{background:var(--ink);border-radius:32px;min-height:144px;padding:20px;display:flex;flex-direction:column;justify-content:space-between}.dcard h4{font-size:32px;font-weight:600;line-height:1;color:#fff}.dcard p{font-size:12px;line-height:145%;color:var(--light)}@media(max-width:520px){.cards3{grid-template-columns:1fr 1fr}}'
