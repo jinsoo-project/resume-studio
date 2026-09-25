@@ -803,7 +803,8 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
     var orbit = esc(txt("orbit", nameEn.toUpperCase() + " · MARKETER · ")).replace(/ /g, "&#160;");
     var sents = (P.summary || "").split(/(?<=다\.)\s+/).filter(Boolean);
     var tagline = P.tagline || P.title || "";
-    var mainH1 = "저는 " + esc(P.nameKo || nameEn) + " — " + esc(tagline) + (/[.。]$/.test(tagline) ? "" : ".");
+    // 첫 문장: KILO 대시보드에서 직접 쓴 문장(klio.text.heroMain)이 있으면 그대로, 없으면 "저는 {이름} — {대표 문장}."
+    var mainH1 = txt("heroMain", "") ? esc(txt("heroMain", "")) : "저는 " + esc(P.nameKo || nameEn) + " — " + esc(tagline) + (/[.。]$/.test(tagline) ? "" : ".");
     var dimH1 = esc(txt("heroSub", sents[0] || ""));
     var photoOn = shown("home", "photo", false) && !!P.avatar;
     var dimRaw = parseFloat((K.ui || {}).photoDim), photoDim = isNaN(dimRaw) ? 0.35 : Math.max(0, Math.min(80, dimRaw)) / 100; // 사진 딤(어둡게) — KILO 대시보드에서 조절
