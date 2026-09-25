@@ -765,6 +765,38 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
       return S('<path d="M12 3l2.4 5.6L20 9l-4 4 1 6-5-3-5 3 1-6-4-4 5.6-.4z"/>');
     };
 
+    // ── 기본값 (draft 큐레이션 + AX 시드) ─ 스튜디오에서 편집/치환
+    var CURATED_TECH = [
+      { label: "마케팅 · 데이터", items: ["Meta Ads", "Google Ads", "GA4·GTM", "네이버 검색광고 API", "BigQuery", "Amplitude", "Airbridge"] },
+      { label: "개발", items: ["TypeScript", "Next.js", "React", "Tailwind", "Supabase", "SQL", "Metabase·Redash"] },
+      { label: "AI · 인프라", items: ["Anthropic", "OpenAI", "AI SDK·MCP", "Vertex AI", "Vercel", "GitHub Actions", "git worktree"] }
+    ];
+    // techstack 행 구성: klio.techstack 우선, 없으면 큐레이션 3행 + 현재 조회되는 DB 데이터 전부 '기타·DB' 행에 덤프
+    var defaultTechRows = function () {
+      var rows = CURATED_TECH.map(function (r) { return { label: r.label, items: r.items.slice(), visible: true }; });
+      var present = {}; rows.forEach(function (r) { r.items.forEach(function (t) { present[String(t).toLowerCase()] = 1; }); });
+      var extras = [], pushEx = function (t) { t = t && String(t).trim(); if (t && !present[t.toLowerCase()]) { present[t.toLowerCase()] = 1; extras.push(t); } };
+      works.forEach(function (x) { (x.w.stack || []).forEach(pushEx); });
+      (P.stack || []).forEach(function (s) { pushEx(s.title || s.area); });
+      (d.capabilities || []).filter(function (c) { return c.visible !== false; }).forEach(function (c) { pushEx(c.label); });
+      if (extras.length) rows.push({ label: "기타 · DB", items: extras, visible: true });
+      return rows;
+    };
+    var DEFAULT_AXLOOP = [
+      { num: "01", title: "수집 · Ingest", items: ["매체·GA4·BigQuery 수집", "Metabase→시트 파이프라인", "UTM 3분류 정규화"] },
+      { num: "02", title: "측정 · Measure", items: ["3레이어 성과 대시보드", "CAC·ROAS·유닛 이코노믹스", "코호트·리텐션"] },
+      { num: "03", title: "실행 · Activate", items: ["규칙 기반 캠페인 빌더", "콘텐츠 퍼포먼스 자동화", "카탈로그 피드"] },
+      { num: "04", title: "운영 · Operate", items: ["성과운영 자동 리포트", "이상탐지·알림", "라이프사이클 CRM"] }
+    ];
+    var DEFAULT_AXSCREENS = [
+      { category: "대시보드", name: "통합 성과 대시보드", badge: "L1", description: "매체·채널·전환을 한 화면에서. 정의를 고정한 단일 지표 소스.", chips: ["GA4", "BigQuery", "Metabase"] },
+      { category: "대시보드", name: "유닛 이코노믹스", badge: "L3", description: "LTV·CAC·회수기간을 SQL로 계산해 의사결정에 연결.", chips: ["SQL", "BigQuery"] },
+      { category: "콘텐츠 퍼포먼스 자동화", name: "콘텐츠 성과 파이프라인", badge: "", description: "콘텐츠별 성과를 자동 수집·집계해 순위·개선점을 도출.", chips: ["AI SDK", "Sheets"] },
+      { category: "콘텐츠 퍼포먼스 자동화", name: "카피·크리에이티브 생성", badge: "", description: "LLM으로 카피/변형을 생성하고 실제 성과와 연결.", chips: ["Anthropic", "OpenAI"] },
+      { category: "성과운영 자동화", name: "캠페인 빌더", badge: "", description: "규칙 기반으로 캠페인을 자동 집행·최적화.", chips: ["Meta", "Google Ads"] },
+      { category: "성과운영 자동화", name: "자동 리포트·알림", badge: "", description: "성과는 정기 리포트로, 이상은 즉시 알림으로.", chips: ["GitHub Actions", "Slack"] }
+    ];
+
     // ── HOME
     var nameEn = P.nameEn || P.nameKo || "";
     var initials = (nameEn.split(/\s+/).map(function (x) { return x[0] || ""; }).join("") || "JK").slice(0, 2).toUpperCase();
@@ -789,24 +821,33 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
     var aboutInner = '<div class="cnt about">'
       + '<p class="rv">' + ab1 + '</p>' + (ab2 ? '<p class="g rv">' + ab2 + '</p>' : '') + '</div>';
 
-    // ── PROJECTS (모자이크 — 대표작 5)
+    // ── PROJECTS (모자이크 대표작 5 + 인페이지 '더보기' depth 확장 · 모달 없음)
     var feat = works.filter(function (x) { return x.w.featured; });
     var featM = feat.filter(function (x) { return (x.w.metrics || []).length; });
     var pick = (featM.length >= 5 ? featM : feat.length ? feat : works).slice(0, 5);
-    var mosaic = pick.map(function (x, i) {
-      var w = x.w, co = x.co, cm = catMeta(w.category);
-      var span = i === 1 ? " tall" : (i === 3 || i === 4) ? " wide" : "";
+    var tileHtml = function (x, span, withRv, si) {
+      var w = x.w, co = x.co, cm = catMeta(w.category), gi = works.indexOf(x);
       var dark = cm.dark ? " dark" : "";
       var m0 = (w.metrics || [])[0];
       var kp = m0 ? '<span class="kp">' + esc(m0.value || m0.label || "") + '</span>' : '';
       var icon = (span === " wide")
         ? '<span class="duo" aria-hidden="true">' + catIcon(w.category) + '<i' + (cm.dark ? '' : ' style="background:rgba(34,34,34,.3)"') + '></i>' + catIcon(w.category) + '</span>'
         : catIcon(w.category);
-      return '<div class="tile' + span + dark + ' rv" data-pj-open style="cursor:pointer;background:' + cm.c + '">' + icon + kp
+      return '<div class="tile' + span + dark + (withRv ? ' rv' : '') + '" data-di="' + gi + '" style="' + (si != null ? '--i:' + si + ';' : '') + 'cursor:pointer;background:' + cm.c + '">' + icon + kp
         + '<span class="lb"><b>' + esc(w.title) + '</b><span>' + esc(cm.en) + ' · ' + esc(dispName(co)) + ' ' + esc(yearOf(w)) + '</span></span></div>';
+    };
+    var mosaic = pick.map(function (x, i) {
+      var span = i === 1 ? " tall" : (i === 3 || i === 4) ? " wide" : "";
+      return tileHtml(x, span, true, null);
     }).join("");
-    var projectsInner = '<div class="cnt"><div class="mosaic">' + mosaic + '</div>'
-      + (works.length > pick.length ? '<button class="pj-more" data-pj-open>전체 프로젝트 ' + works.length + '개 보기 <span>→</span></button>' : '')
+    var rest = works.filter(function (x) { return pick.indexOf(x) < 0; });
+    var restTiles = rest.map(function (x, i) { return tileHtml(x, "", false, i); }).join("");
+    var projectsInner = '<div class="cnt pj-cnt">'
+      + '<div class="mosaic">' + mosaic + '</div>'
+      + (rest.length
+        ? '<div class="mosaic-more"><div class="mm-in"><div class="mosaic mm-grid">' + restTiles + '</div></div></div>'
+        + '<button class="pj-more" data-pj-expand aria-expanded="false"><span class="pj-more-t">전체 프로젝트 ' + works.length + '개 보기</span> <span class="pj-more-a" aria-hidden="true">↓</span></button>'
+        : '')
       + '</div>';
 
     // ── EXPERIENCE (+ 스탯)
@@ -824,53 +865,48 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
     var experienceInner = '<div class="cnt">' + exp
       + (hs ? '<div class="cards3 mt rv">' + hs + '</div>' : '') + '</div>';
 
-    // ── AX (예전 Archive 자리) — AI 전환 핵심을 klio 톤으로
-    var axLoopArr = (d.axLoop || []).filter(function (x) { return x.visible !== false; });
-    var axScreensArr = (d.axScreens || []).filter(function (x) { return x.visible !== false; });
+    // ── AX (예전 Archive 자리) — 프로젝트 UI처럼 인페이지 도구 쇼케이스 (모달 없음)
+    var axLoopArr0 = (d.axLoop || []).filter(function (x) { return x.visible !== false; });
+    var axScreensArr0 = (d.axScreens || []).filter(function (x) { return x.visible !== false; });
     var axNotesArr = (d.axNotes || []).filter(function (x) { return x.visible !== false; });
+    var axLoopArr = axLoopArr0.length ? axLoopArr0 : DEFAULT_AXLOOP;      // 데이터 없으면 기본 시드로 표시
+    var axScreensArr = axScreensArr0.length ? axScreensArr0 : DEFAULT_AXSCREENS;
     var axIntro = (d.klio && d.klio.text && d.klio.text.axIntro) ? d.klio.text.axIntro
       : (((axNotesArr.filter(function (n) { return n.section === "principle"; })[0]) || {}).body
-        || "AI로 마케팅을 자동화하고 확장합니다 — 수집·측정·실행·영업이 하나의 콘솔에서 이어지도록 직접 설계·구축·운영합니다.");
-    var axLoopCards = axLoopArr.map(function (s, i) {
-      var its = (s.items || []).slice(0, 3).map(function (it) { return '<li>' + esc(it) + '</li>'; }).join("");
-      return '<div class="ax-loop"><span class="ax-num">' + esc(s.num || String(i + 1)) + '</span><b>' + esc(s.title) + '</b>' + (its ? '<ul>' + its + '</ul>' : '') + '</div>';
+        || "AI로 마케팅을 자동화하고 확장합니다 — 수집·측정·실행·운영이 하나의 콘솔에서 이어지도록 직접 설계·구축·운영합니다.");
+    // 운영 파이프라인 (핵심 요약 flow) — 수집 → 측정 → 실행 → 운영
+    var axFlow = axLoopArr.length ? ('<div class="ax-flow rv">' + axLoopArr.map(function (s, i) {
+      var sub = (s.items || []).slice(0, 2).join(" · ");
+      return '<div class="ax-step"><span class="ax-snum">' + esc(s.num || String(i + 1)) + '</span><b>' + esc(s.title) + '</b>' + (sub ? '<small>' + esc(sub) + '</small>' : '') + '</div>';
+    }).join("") + '</div>') : "";
+    // 도구 카드 — 카테고리(레이아웃)별 그룹 · 뭐하는 도구인지 핵심요약
+    var axGroups = [], axGmap = {};
+    axScreensArr.forEach(function (s) { var c = s.category || "기타"; if (!axGmap[c]) { axGmap[c] = { cat: c, items: [] }; axGroups.push(axGmap[c]); } axGmap[c].items.push(s); });
+    var axToolsHtml = axGroups.map(function (g) {
+      var cards = g.items.map(function (s) {
+        var chips = (s.chips || []).map(function (ch) { return '<span>' + esc(ch) + '</span>'; }).join("");
+        return '<div class="ax-tool"><div class="ax-ttop"><b>' + esc(s.name) + '</b>' + (s.badge ? '<span class="ax-badge">' + esc(s.badge) + '</span>' : '') + '</div>' + (s.description ? '<p>' + esc(s.description) + '</p>' : '') + (chips ? '<div class="ax-tchips">' + chips + '</div>' : '') + '</div>';
+      }).join("");
+      return '<div class="ax-group"><div class="ax-grouph"><span class="ax-gdot"></span>' + esc(g.cat) + '<em>' + g.items.length + '</em></div><div class="ax-tools">' + cards + '</div></div>';
     }).join("");
-    var axStackChips = (P.stack || []).map(function (s) { return '<span class="ax-chip">' + esc(s.title || s.area) + '</span>'; }).join("");
-    var axInner = '<div class="cnt">'
-      + '<p class="rv" style="font-size:16px;line-height:1.75;color:var(--ink50);margin-bottom:6px">' + esc(axIntro) + '</p>'
-      + (axLoopCards ? '<div class="ax-loops rv">' + axLoopCards + '</div>' : '')
-      + (axStackChips ? '<div class="ax-chips rv">' + axStackChips + '</div>' : '')
-      + '<div class="ax-morerow rv"><button class="pj-more" data-axm-open>AX 상세 보기' + (axScreensArr.length ? ' · ' + axScreensArr.length + ' 화면' : '') + ' <span>→</span></button>'
-      + '<a class="ax-clink" href="https://kimjinsoo-mkt-ax.vercel.app/ax" target="_blank" rel="noopener">AX 콘솔 ↗</a></div>'
+    var axInner = '<div class="cnt ax-cnt">'
+      + '<p class="rv" style="font-size:16px;line-height:1.75;color:var(--ink50);margin-bottom:4px">' + esc(axIntro) + '</p>'
+      + axFlow
+      + (axToolsHtml ? '<div class="ax-groups rv">' + axToolsHtml + '</div>' : '')
+      + '<a class="ax-clink rv" href="https://kimjinsoo-mkt-ax.vercel.app/ax" target="_blank" rel="noopener">실제 AX 콘솔 열기 ↗</a>'
       + '</div>';
-    // AX 상세 드로어 데이터
-    var axSCats = {}; axScreensArr.forEach(function (s) { var c = s.category || "기타"; axSCats[c] = (axSCats[c] || 0) + 1; });
-    var axFilters = axScreensArr.length ? ('<button class="pj-chip on" data-axf="__all">전체 ' + axScreensArr.length + '</button>' + Object.keys(axSCats).map(function (c) { return '<button class="pj-chip" data-axf="' + esc(c) + '">' + esc(c) + ' ' + axSCats[c] + '</button>'; }).join("")) : "";
-    var axSCards = axScreensArr.map(function (s) {
-      var chips = (s.chips || []).map(function (ch) { return '<span>' + esc(ch) + '</span>'; }).join("");
-      return '<div class="ax-scard" data-axcat="' + esc(s.category || "") + '"><div class="ax-sctop">' + (s.badge ? '<span class="ax-badge">' + esc(s.badge) + '</span>' : '<span></span>') + '<span class="ax-sccat">' + esc(s.category || "") + '</span></div><h4>' + esc(s.name) + '</h4>' + (s.description ? '<p>' + esc(s.description) + '</p>' : '') + (chips ? '<div class="ax-scchips">' + chips + '</div>' : '') + '</div>';
-    }).join("");
-    var axLoopFull = axLoopArr.length ? ('<div class="ax-block"><div class="ax-blockh">운영 루프</div>' + axLoopArr.map(function (s) { return '<div class="ax-note"><b>' + esc(s.num || "") + ' ' + esc(s.title) + '</b>' + ((s.items || []).length ? '<ul>' + (s.items || []).map(function (it) { return '<li>' + esc(it) + '</li>'; }).join("") + '</ul>' : '') + '</div>'; }).join("") + '</div>') : "";
-    var axNotesFull = axNotesArr.length ? ('<div class="ax-block"><div class="ax-blockh">운영 사상 · 정의</div>' + axNotesArr.map(function (n) { return '<div class="ax-note"><b>' + esc(n.title) + '</b><p>' + esc(n.body) + '</p></div>'; }).join("") + '</div>') : "";
-    var axEmpty = (!axScreensArr.length && !axLoopArr.length && !axNotesArr.length) ? '<div style="padding:28px;color:var(--gray);font-size:14px">AX 상세 콘텐츠는 준비 중입니다. <a href="https://kimjinsoo-mkt-ax.vercel.app/ax" target="_blank" rel="noopener" style="color:var(--ink);text-decoration:underline">AX 콘솔 열기 ↗</a></div>' : "";
-    var axModal = '<div id="ax-more-modal" class="pj-modal"><div class="pj-sheet"><div class="pj-head"><b>AX' + (axScreensArr.length ? ' · ' + axScreensArr.length + ' 화면' : '') + '</b><button class="pj-x" data-axm-close aria-label="닫기">✕</button></div>'
-      + (axFilters ? '<div class="pj-filters">' + axFilters + '</div>' : '')
-      + '<div class="ax-body">' + (axSCards ? '<div class="ax-sgrid">' + axSCards + '</div>' : '') + axLoopFull + axNotesFull + axEmpty + '</div></div></div>';
 
-    // ── TECHSTACK (마퀴 3행)
-    var toolset = []; works.forEach(function (x) { (x.w.stack || []).forEach(function (t) { if (t && toolset.indexOf(t) < 0) toolset.push(t); }); });
-    var stitles = (P.stack || []).map(function (s) { return s.title; });
-    var caps = (d.capabilities || []).filter(function (c) { return c.visible !== false; }).map(function (c) { return c.label; });
-    var allTech = toolset.concat(stitles).concat(caps);
+    // ── TECHSTACK (편집 가능한 행 데이터: klio.techstack, 없으면 큐레이션 3행 + 현재 DB 데이터 전부 덤프)
     var mqRow = function (items, rev) {
       if (!items.length) return "";
       var one = items.map(function (t, i) { return '<span class="' + (i % 2 ? "on" : "") + '">' + esc(t) + '</span>'; }).join("");
       var dup = items.map(function (t, i) { return '<span class="dup ' + (i % 2 ? "on" : "") + '">' + esc(t) + '</span>'; }).join("");
       return '<div class="mq' + (rev ? " rev" : "") + '"><div class="tk">' + one + dup + '</div></div>';
     };
-    var t3 = Math.ceil(allTech.length / 3) || 1;
+    var techCfg = (d.klio && Array.isArray(d.klio.techstack) && d.klio.techstack.length) ? d.klio.techstack : defaultTechRows();
+    var techRows = techCfg.filter(function (r) { return r && r.visible !== false && (r.items || []).filter(Boolean).length; });
     var techstackInner = '<div class="cnt stack-rows rv">'
-      + mqRow(allTech.slice(0, t3), false) + mqRow(allTech.slice(t3, t3 * 2), true) + mqRow(allTech.slice(t3 * 2), false) + '</div>';
+      + techRows.map(function (r, ri) { return mqRow((r.items || []).filter(Boolean), ri % 2 === 1); }).join("") + '</div>';
 
     // ── SKILLS (역량별 프로젝트 수)
     var catCount = {}; works.forEach(function (x) { var c = x.w.category || "기타"; catCount[c] = (catCount[c] || 0) + 1; });
@@ -967,31 +1003,23 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
       + '.pj-tags{display:flex;flex-wrap:wrap;gap:6px;margin:16px 0}.pj-tag{font-size:11.5px;padding:5px 11px;border-radius:999px;background:rgba(144,144,144,.13);color:var(--ink)}'
       + '.pj-media{display:grid;grid-template-columns:repeat(auto-fill,minmax(178px,1fr));gap:10px;margin-top:18px}.pj-media img{width:100%;border-radius:12px;display:block;border:1px solid var(--bd)}.pj-vid{position:relative;aspect-ratio:16/9;border-radius:12px;background-size:cover;background-position:center;display:flex;align-items:flex-end;padding:10px;text-decoration:none;overflow:hidden}.pj-vid::before{content:"";position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,.62),transparent 60%)}.pj-vid b{position:relative;z-index:1;color:#fff;font-size:11.5px;font-weight:600}.pj-play{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);z-index:1;width:42px;height:42px;border-radius:50%;background:rgba(0,0,0,.5);border:1px solid rgba(255,255,255,.55)}.pj-play::after{content:"";position:absolute;top:50%;left:53%;transform:translate(-50%,-50%);border-left:12px solid #fff;border-top:7px solid transparent;border-bottom:7px solid transparent}'
       + '.pj-dlinks{margin-top:20px;display:flex;flex-wrap:wrap;gap:6px 16px}.pj-dlinks a{font-size:12.5px;font-weight:500;color:var(--ink);text-decoration:underline;text-underline-offset:2px}.pj-dlinks a:hover{color:var(--gray)}'
-      + '.ax-loops{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:22px}@media(max-width:520px){.ax-loops{grid-template-columns:1fr}}.ax-loop{border:1px solid var(--bd);border-radius:14px;padding:14px 16px}.ax-loop .ax-num{font-size:11px;font-weight:700;color:var(--gray);letter-spacing:.1em}.ax-loop b{display:block;font-size:14px;font-weight:600;margin:4px 0 6px}.ax-loop ul{margin:0;padding-left:16px}.ax-loop li{font-size:12px;line-height:1.6;color:var(--ink50)}'
-      + '.ax-chips{display:flex;flex-wrap:wrap;gap:7px;margin-top:16px}.ax-chip{font-size:12px;font-weight:600;padding:6px 12px;border-radius:999px;background:var(--mint);color:var(--ink)}.ax-morerow{display:flex;align-items:center;gap:16px;margin-top:22px;flex-wrap:wrap}.ax-clink{font-size:13px;font-weight:600;color:var(--ink);text-decoration:underline;text-underline-offset:3px}.ax-clink:hover{color:var(--gray)}'
-      + '.ax-body{flex:1;overflow-y:auto;padding:20px 28px 40px}.ax-sgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px}@media(max-width:560px){.ax-sgrid{grid-template-columns:1fr}}.ax-scard{border:1px solid var(--bd);border-radius:14px;padding:14px 15px}.ax-sctop{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px;min-height:18px}.ax-badge{font-size:10px;font-weight:700;letter-spacing:.05em;padding:3px 8px;border-radius:999px;background:var(--lav);color:var(--ink)}.ax-sccat{font-size:10px;font-weight:600;color:var(--gray);text-transform:uppercase;letter-spacing:.06em}.ax-scard h4{font-size:14px;font-weight:600;line-height:1.3}.ax-scard p{font-size:12px;line-height:1.55;color:var(--ink50);margin-top:6px}.ax-scchips{display:flex;flex-wrap:wrap;gap:5px;margin-top:9px}.ax-scchips span{font-size:10.5px;padding:3px 8px;border-radius:6px;background:var(--bd2);color:var(--ink50)}'
-      + '.ax-block{margin-top:26px}.ax-blockh{font-size:13px;font-weight:700;color:var(--ink);margin-bottom:8px;padding-bottom:8px;border-bottom:1px solid var(--bd)}.ax-note{padding:11px 0;border-bottom:1px solid var(--bd2)}.ax-note b{font-size:13.5px;font-weight:600}.ax-note p{font-size:12.5px;line-height:1.65;color:var(--ink50);margin-top:5px}.ax-note ul{margin:6px 0 0;padding-left:16px}.ax-note li{font-size:12.5px;line-height:1.6;color:var(--ink50)}';
+      + '.ax-cnt{max-width:440px}.ax-flow{display:flex;flex-wrap:wrap;gap:8px;margin:20px 0 6px}.ax-step{flex:1 1 46%;min-width:150px;border:1px solid var(--bd);border-radius:14px;padding:12px 14px;background:linear-gradient(180deg,rgba(171,220,209,.10),transparent)}.ax-step .ax-snum{font-size:10.5px;font-weight:700;letter-spacing:.12em;color:var(--gray)}.ax-step b{display:block;font-size:13.5px;font-weight:600;margin-top:3px}.ax-step small{display:block;font-size:11px;line-height:1.5;color:var(--ink50);margin-top:4px}'
+      + '.ax-groups{display:flex;flex-direction:column;gap:22px;margin-top:26px}.ax-grouph{display:flex;align-items:center;gap:8px;font-size:12.5px;font-weight:700;color:var(--ink);padding-bottom:10px;border-bottom:1px solid var(--bd)}.ax-grouph .ax-gdot{width:8px;height:8px;border-radius:50%;background:var(--coral)}.ax-grouph em{font-style:normal;font-size:11px;font-weight:600;color:var(--gray);background:var(--bd2);border-radius:999px;padding:2px 8px}'
+      + '.ax-tools{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}@media(max-width:520px){.ax-tools{grid-template-columns:1fr}}.ax-tool{border:1px solid var(--bd);border-radius:14px;padding:14px 15px;background:#fff;transition:transform .25s var(--ez),box-shadow .25s}.ax-tool:hover{transform:translateY(-3px);box-shadow:0 14px 30px -16px rgba(0,0,0,.22)}.ax-ttop{display:flex;align-items:flex-start;justify-content:space-between;gap:8px}.ax-ttop b{font-size:14px;font-weight:600;line-height:1.3}.ax-badge{flex:none;font-size:9.5px;font-weight:700;letter-spacing:.05em;padding:3px 7px;border-radius:999px;background:var(--lav);color:var(--ink)}.ax-tool p{font-size:12px;line-height:1.55;color:var(--ink50);margin-top:7px}.ax-tchips{display:flex;flex-wrap:wrap;gap:5px;margin-top:10px}.ax-tchips span{font-size:10.5px;padding:3px 8px;border-radius:6px;background:var(--bd2);color:var(--ink50)}'
+      + '.ax-clink{display:inline-block;margin-top:22px;font-size:13px;font-weight:600;color:var(--ink);text-decoration:underline;text-underline-offset:3px}.ax-clink:hover{color:var(--gray)}'
+      + '.mosaic-more{display:grid;grid-template-rows:0fr;transition:grid-template-rows .55s var(--ez)}.pj-cnt.exp .mosaic-more{grid-template-rows:1fr}.mm-in{overflow:hidden;min-height:0}.mm-grid{padding-top:12px}.mm-grid .tile{opacity:0;transform:translateY(30px) scale(.9);transition:opacity .5s var(--ez),transform .5s var(--ez)}.pj-cnt.exp .mm-grid .tile{opacity:1;transform:none;transition-delay:calc(var(--i,0)*55ms)}@media(prefers-reduced-motion:reduce){.mosaic-more{transition:none}.mm-grid .tile{transition:none;opacity:1;transform:none}}'
+      + '.pj-more-a{display:inline-block;transition:transform .25s var(--ez)}.pj-more:hover .pj-more-a{transform:translateY(2px)}.pj-cnt.exp .pj-more[data-pj-expand] .pj-more-a{transform:rotate(180deg)}';
 
     var KJS = '(function(){"use strict";var reduce=matchMedia("(prefers-reduced-motion: reduce)").matches;'
       + 'var rvs=document.querySelectorAll(".rv");if("IntersectionObserver" in window&&!reduce){var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){e.target.classList.add("in");io.unobserve(e.target);}});},{threshold:.05,rootMargin:"9999px 0px -5% 0px"});rvs.forEach(function(el){io.observe(el);});}else{rvs.forEach(function(el){el.classList.add("in");});}'
       + 'var links=document.querySelectorAll(".dock a[data-sec]");if("IntersectionObserver" in window){var nio=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){links.forEach(function(a){a.setAttribute("aria-current",a.dataset.sec===e.target.id?"true":"false");});}});},{rootMargin:"-35% 0px -55% 0px"});links.forEach(function(a){var s=document.getElementById(a.dataset.sec);if(s)nio.observe(s);});}'
       + 'function countUp(el){var target=parseInt(el.dataset.count,10);if(!target||reduce)return;var tpl=el.innerHTML,t0=null,dur=900;function step(t){if(!t0)t0=t;var k=Math.min((t-t0)/dur,1);k=1-Math.pow(1-k,3);el.innerHTML=tpl.replace(String(target),String(Math.round(target*k)));if(k<1)requestAnimationFrame(step);else el.innerHTML=tpl;}requestAnimationFrame(step);}'
       + 'if("IntersectionObserver" in window){var sio=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){countUp(e.target);sio.unobserve(e.target);}});},{threshold:.6});document.querySelectorAll("[data-count]").forEach(function(s){sio.observe(s);});}'
-      + 'var pjm=document.getElementById("pj-modal"),pjd=document.getElementById("pj-detail");function pjOpen(){if(pjm){pjm.classList.add("open");document.body.style.overflow="hidden";}}function pjCloseAll(){if(pjm)pjm.classList.remove("open");if(pjd)pjd.classList.remove("open");document.body.style.overflow="";}function pjDOpen(di){var src=document.getElementById("pjd-"+di),body=document.getElementById("pj-dbody");if(src&&body){body.innerHTML=src.innerHTML;if(body.parentNode)body.parentNode.scrollTop=0;}if(pjd)pjd.classList.add("open");}function pjDClose(){if(pjd)pjd.classList.remove("open");}document.addEventListener("click",function(e){if(e.target.closest("[data-pj-open]")){pjOpen();return;}var card=e.target.closest(".pj-card[data-di]");if(card){pjDOpen(card.getAttribute("data-di"));return;}if(e.target.closest("[data-pjd-close]")||e.target===pjd){pjDClose();return;}if(e.target.closest("[data-pj-close]")||e.target===pjm){pjCloseAll();return;}var f=e.target.closest("[data-pjf]");if(f&&pjm){var cat=f.getAttribute("data-pjf");[].forEach.call(pjm.querySelectorAll(".pj-chip"),function(c){c.classList.toggle("on",c===f);});[].forEach.call(pjm.querySelectorAll(".pj-card"),function(c){c.style.display=(cat==="__all"||c.getAttribute("data-cat")===cat)?"":"none";});}});document.addEventListener("keydown",function(e){if(e.key==="Escape"){if(pjd&&pjd.classList.contains("open"))pjDClose();else pjCloseAll();}});'
-      + 'var axmm=document.getElementById("ax-more-modal");function axmOpen(){if(axmm){axmm.classList.add("open");document.body.style.overflow="hidden";}}function axmClose(){if(axmm){axmm.classList.remove("open");document.body.style.overflow="";}}document.addEventListener("click",function(e){if(e.target.closest("[data-axm-open]")){axmOpen();return;}if(e.target.closest("[data-axm-close]")||e.target===axmm){axmClose();return;}var af=e.target.closest("[data-axf]");if(af&&axmm){var cat=af.getAttribute("data-axf");[].forEach.call(axmm.querySelectorAll(".pj-chip"),function(c){c.classList.toggle("on",c===af);});[].forEach.call(axmm.querySelectorAll(".ax-scard"),function(c){c.style.display=(cat==="__all"||c.getAttribute("data-axcat")===cat)?"":"none";});}});document.addEventListener("keydown",function(e){if(e.key==="Escape"&&axmm&&axmm.classList.contains("open"))axmClose();});'
+      + 'var pjd=document.getElementById("pj-detail");function pjDOpen(di){var src=document.getElementById("pjd-"+di),body=document.getElementById("pj-dbody");if(src&&body){body.innerHTML=src.innerHTML;if(body.parentNode)body.parentNode.scrollTop=0;}if(pjd){pjd.classList.add("open");document.body.style.overflow="hidden";}}function pjDClose(){if(pjd){pjd.classList.remove("open");document.body.style.overflow="";}}document.addEventListener("click",function(e){var ex=e.target.closest("[data-pj-expand]");if(ex){var cnt=ex.closest(".pj-cnt"),t=ex.querySelector(".pj-more-t");if(t&&!t.getAttribute("data-all"))t.setAttribute("data-all",t.textContent);if(cnt){var on=cnt.classList.toggle("exp");ex.setAttribute("aria-expanded",on?"true":"false");if(t)t.textContent=on?"프로젝트 접기":t.getAttribute("data-all");}return;}var tile=e.target.closest("[data-di]");if(tile){pjDOpen(tile.getAttribute("data-di"));return;}if(e.target.closest("[data-pjd-close]")||e.target===pjd){pjDClose();return;}});document.addEventListener("keydown",function(e){if(e.key==="Escape"&&pjd&&pjd.classList.contains("open"))pjDClose();});'
       + '})();';
 
-    // ── 전체 프로젝트: 우측 슬라이드 드로어 갤러리 + 카드별 상세 모달
+    // ── 프로젝트 상세: 카드별 상세 드로어 (전체 보기 갤러리 모달 제거 → 인페이지 확장으로 대체)
     var ytId = function (u) { if (!u) return null; var m = String(u).match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|shorts\/|embed\/))([\w-]{6,})/); return m ? m[1] : null; };
-    var pjCat = {}; works.forEach(function (x) { var c = x.w.category || "기타"; pjCat[c] = (pjCat[c] || 0) + 1; });
-    var pjChips = '<button class="pj-chip on" data-pjf="__all">전체 ' + works.length + '</button>' + Object.keys(pjCat).map(function (c) { return '<button class="pj-chip" data-pjf="' + esc(c) + '">' + esc(catMeta(c).en) + ' ' + pjCat[c] + '</button>'; }).join("");
-    var pjCards = works.map(function (x, i) {
-      var w = x.w, co = x.co, cm = catMeta(w.category);
-      var m0 = (w.metrics || [])[0];
-      var kp = m0 ? '<span class="pj-kp">' + esc(m0.value || m0.label || "") + '</span>' : '';
-      var desc = w.detail || w.summary || "";
-      return '<button class="pj-card" data-cat="' + esc(w.category || "") + '" data-di="' + i + '"><div class="pj-thumb' + (cm.dark ? ' dark' : '') + '" style="background:' + cm.c + '">' + catIcon(w.category) + kp + '</div><div class="pj-body"><div class="pj-cat">' + esc(cm.en) + '</div><h4>' + esc(w.title) + '</h4><div class="pj-co">' + esc(dispName(co)) + ' · ' + esc(yearOf(w)) + '</div>' + (desc ? '<p class="pj-d">' + esc(desc) + '</p>' : '') + '<span class="pj-cardmore">자세히 →</span></div></button>';
-    }).join("");
     function pjDetailHtml(x) {
       var w = x.w, co = x.co, cm = catMeta(w.category);
       var mets = (w.metrics || []).map(function (m) { return '<div class="pj-met"><b>' + esc(m.value || "") + '</b><span>' + esc(m.label || "") + '</span></div>'; }).join("");
@@ -1007,7 +1035,6 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
         + '<div class="pj-dcnt">' + (desc ? '<p class="pj-ddesc">' + esc(desc) + '</p>' : '') + pars + (tags ? '<div class="pj-tags">' + tags + '</div>' : '') + mediaGrid + (otherLinks ? '<div class="pj-dlinks">' + otherLinks + '</div>' : '') + '</div>';
     }
     var pjStore = '<div id="pj-dstore" style="display:none">' + works.map(function (x, i) { return '<div id="pjd-' + i + '">' + pjDetailHtml(x) + '</div>'; }).join("") + '</div>';
-    var pjModal = '<div id="pj-modal" class="pj-modal"><div class="pj-sheet"><div class="pj-head"><b>프로젝트 · ' + works.length + '</b><button class="pj-x" data-pj-close aria-label="닫기">✕</button></div><div class="pj-filters">' + pjChips + '</div><div class="pj-grid">' + pjCards + '</div></div></div>';
     var pjDetailModal = '<div id="pj-detail" class="pj-dmodal"><div class="pj-dsheet"><button class="pj-dx" data-pjd-close aria-label="닫기">✕</button><div id="pj-dbody" class="pj-dbody"></div></div></div>';
 
     return '<!doctype html><html lang="ko"><head><script>document.documentElement.classList.add("js")<\/script>'
@@ -1020,7 +1047,7 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
       + '<style>' + KCSS + '</style></head><body>'
       + '<div class="page">' + home + sectionsHtml
       + '<p class="foot">© ' + new Date().getFullYear() + ' — ' + esc(nameEn || P.nameKo || "") + ', Marketing Portfolio</p></div>'
-      + pjModal + pjStore + pjDetailModal + axModal + dock + '<script>' + KJS + '<\/script></body></html>';
+      + pjStore + pjDetailModal + dock + '<script>' + KJS + '<\/script></body></html>';
   }
 
   /* ---------- doc wrapper ---------- */
