@@ -9,7 +9,11 @@
     { "source": "/r/:slug", "destination": "/view?slug=:slug" },
     { "source": "/p/:slug", "destination": "/view?slug=:slug" },
     { "source": "/portfolio", "destination": "/view" },
-    { "source": "/mkt/portfolio", "destination": "/view" }
+    { "source": "/mkt/portfolio", "destination": "/view" },
+    { "source": "/mkt/portfolio/projects", "destination": "/view" },
+    { "source": "/p/:slug/projects", "destination": "/view" },
+    { "source": "/r/:slug/projects", "destination": "/view" },
+    { "source": "/:slug/projects", "destination": "/view" }
   ],
   "headers": [
     {

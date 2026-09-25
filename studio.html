@@ -214,6 +214,9 @@ select.kd-in{cursor:pointer}
 .kd-add{border-style:dashed;color:var(--muted)}
 .kd-add:hover,.kd-btn:hover{border-color:var(--ring);color:var(--fg)}
 .kd-acts{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+.kd-seg{display:flex;flex-wrap:wrap;gap:6px}
+.kd-seg .kd-btn{text-decoration:none}
+.kd-btn.on{background:var(--acc-soft);border-color:var(--acc);color:var(--acc)}
 .kd-item{border:1px solid var(--border);border-radius:10px;padding:8px 10px;margin-bottom:6px;background:var(--surface)}
 .kd-item.off{opacity:.55}
 .kd-thumb{flex:none;object-fit:cover;background:#fff;border:1px solid var(--border);box-sizing:border-box}
@@ -1243,17 +1246,39 @@ function axMove(arr,i,dir){ var j=dir==='up'?i-1:i+1; if(!Array.isArray(arr)||j<
 function axDoc(){ let d=DOCS.find(x=>x.template==='klio')||DOCS.find(x=>x.template==='ax'); if(!d){ d={id:uid(),kind:'portfolio',template:'klio',title:'마케팅 포트폴리오',subtitle:'',intro:'',cover:'',slug:'portfolio',visibility:'unlisted',updated:Date.now()}; DOCS.unshift(d); } d.kind='portfolio'; d.template='klio'; if(!d.slug||d.slug==='ax')d.slug='portfolio'; if(!d.title||d.title==='AX 포트폴리오')d.title='마케팅 포트폴리오'; if(!d.visibility)d.visibility='unlisted'; return d; }
 let axPvTimer,axSaveTimer;
 let axPvRendered=false, axPvSec='';
+// 미리보기 화면: 'main' = 포트폴리오 / 'projects' = 전체 프로젝트 페이지(/portfolio/projects) · 보던 카드·돌아갈 섹션 기억
+let axPvPage='main', axPvShown='', axPvCard='', axPvBack='';
 function updateAXPreview(){ clearTimeout(axPvTimer); axPvTimer=setTimeout(()=>{
   const f=$('#axPreview'); if(!f) return;
-  let html=TEMPLATES.render(Object.assign({template:'klio',klio:(axDoc().klio||null)},LIB)), y=0;
-  if(axPvRendered){
+  const pp=axPvPage==='projects', same=axPvRendered&&axPvShown===axPvPage, back=axPvBack; axPvBack='';
+  let html=TEMPLATES.render(Object.assign({template:'klio',klio:(axDoc().klio||null)},LIB,{slug:axDoc().slug||'portfolio',hostStudio:true,page:pp?'projects':''})), y=0;
+  if(same){
     // 편집 중 재렌더: 보던 위치 유지 + 등장 애니메이션 생략(깜빡임 방지)
-    try{ y=f.contentWindow?Math.round(f.contentWindow.scrollY||0):0; }catch(e){}
-    html=html.replace('document.documentElement.classList.add("js")','');
+    if(pp) html=html.replace('<body data-host="studio"','<body data-host="studio" data-still');
+    else {
+      try{ y=f.contentWindow?Math.round(f.contentWindow.scrollY||0):0; }catch(e){}
+      html=html.replace('document.documentElement.classList.add("js")','');
+    }
   }
-  f.onload=()=>{ postPreviewViews(); if(!y)return; try{ f.contentWindow.scrollTo({top:y,behavior:'instant'}); }catch(e){ try{ f.contentWindow.scrollTo(0,y); }catch(_){} } };
-  f.setAttribute('srcdoc',html); axPvRendered=true;
+  f.onload=()=>{
+    postPreviewViews();
+    const w=f.contentWindow; if(!w)return;
+    if(pp){ if(axPvCard) try{ w.postMessage({klio:'goto-card',id:axPvCard},'*'); }catch(e){} return; }
+    if(back){ axPvSec=back; try{ w.postMessage({klio:'goto',id:back,instant:true},'*'); }catch(e){} return; }
+    if(!y)return; try{ w.scrollTo({top:y,behavior:'instant'}); }catch(e){ try{ w.scrollTo(0,y); }catch(_){} }
+  };
+  f.setAttribute('srcdoc',html); axPvRendered=true; axPvShown=axPvPage;
 },220); }
+// 미리보기 화면 전환 (Projects 탭 버튼 · 미리보기 안 타일/전체보기/돌아가기 클릭)
+function axPvSetPage(page,opt){
+  opt=opt||{}; axPvPage=page==='projects'?'projects':'main';
+  if(axPvPage==='projects'&&opt.card!=null) axPvCard=opt.card;
+  if(axPvPage==='main') axPvBack=opt.back||'';
+  const onAx=!!document.querySelector('#v-ax:not(.hidden)');
+  // 미리보기에서 프로젝트를 열면 대시보드도 Projects 탭으로 (섹션이 있을 때)
+  if(onAx&&axPvPage==='projects'&&axTab!=='projects'&&((axDoc().klio||{}).sections||[]).some(s=>s.key==='projects')){ axTab='projects'; try{ localStorage.setItem('kilo-tab',axTab); }catch(_){} }
+  if(onAx&&axTab==='projects') renderAXAdmin(); else updateAXPreview();
+}
 // 편집 패널 ↔ 미리보기 연동: 패널(data-pv)에 들어가면 미리보기가 그 섹션으로 이동
 function axPvGoto(sec,force){ if(!sec||(!force&&sec===axPvSec))return; axPvSec=sec; const f=$('#axPreview'); try{ if(f&&f.contentWindow)f.contentWindow.postMessage({klio:'goto',id:sec},'*'); }catch(e){} }
 function axSchedule(){ clearTimeout(axSaveTimer); axSaveTimer=setTimeout(()=>{ save(); updateAXPreview(); },400); }
@@ -1350,7 +1375,15 @@ function renderAXAdmin(){
 
   // ── Projects: 회사 → 작업 (작업은 제목 줄에서 노출·대표, ▸로 세부)
   const CATOPTS=['퍼포먼스','성과','브랜딩','커머스','콘텐츠','그로스','영상','CRM','제휴','AX'];
-  const P_projects=()=>intro('회사를 눌러 작업을 편집해요. <b>노출</b> = 포트폴리오에 표시 · <b>대표</b> = 상단 모자이크(최대 5개) · 나머지는 ‘더보기’로 펼쳐져요. 타일 배지는 첫 번째 지표예요.')
+  const ppN=cos.reduce((n,c)=>n+(c.works||[]).filter(w=>!kHidden('works',w.id)).length,0);
+  const ppUrl='https://kimjinsoo-mkt-ax.vercel.app/'+encodeURIComponent(axDoc().slug||'portfolio')+'/projects';
+  const ppCard=card('전체 프로젝트 페이지',
+    `<div class="kd-seg" style="margin-bottom:12px"><button class="kd-btn${axPvPage!=='projects'?' on':''}" data-kpv="main">메인 화면</button><button class="kd-btn${axPvPage==='projects'?' on':''}" data-kpv="projects">전체 프로젝트 페이지</button><a class="kd-btn" href="${ppUrl}" target="_blank" rel="noopener" title="${axAttr(ppUrl)}">새 탭 ↗</a></div>`
+    +G2(F('버튼 제목',kt('pjAllTitle','전체 프로젝트 보기')),F('버튼 보조 문구',kt('pjAllSub','새 페이지에서 큰 카드로 한 장씩 넘겨보기'),`큰 숫자 = 노출 프로젝트 수(${ppN})`))
+    +G2(F('페이지 제목',kt('ppTitle','Projects')),F('돌아가기 버튼',kt('ppBack','포트폴리오')))
+    +`<p class="kd-note">주소 <code>${axText(ppUrl.replace(/^https:\/\//,''))}</code> — 노출된 프로젝트 ${ppN}개가 큰 카드로 넘어가요(← → · 휠 · 아래 썸네일). 모자이크 타일을 누르면 그 카드로 바로 열려요. 미리보기에서도 타일을 누르면 이 페이지로 바뀌어요.</p>`,'새 URL');
+  const P_projects=()=>intro('회사를 눌러 작업을 편집해요. <b>노출</b> = 포트폴리오·전체 프로젝트 페이지에 표시 · <b>대표</b> = 상단 모자이크(최대 5개). 타일 배지는 첫 번째 지표, 썸네일은 첫 번째 이미지(없으면 유튜브 링크)예요.')
+    +ppCard
     +cos.map((c,ci)=>{
       const ws=c.works||[]; if(!ws.length)return '';
       const key=c.id||String(ci), open=axOpenPj===key;
@@ -1368,8 +1401,8 @@ function renderAXAdmin(){
             +F('요약',ta(`${P}.detail`,w.detail,'카드·상세 설명',2))
             +`<div class="kd-sec-t">지표 <span>첫 번째 = 타일 배지</span></div>`+mets+addB(`${P}.metrics`,'지표 추가')
             +`<div class="kd-sec-t">문제 · 실행 · 결과</div>`+F('PROBLEM',ta(`${P}.problem`,w.problem,'문제 상황'))+F('ACTION',ta(`${P}.action`,w.action,'실행'))+F('RESULT',ta(`${P}.result`,w.result,'결과'))
-            +`<div class="kd-sec-t">링크 <span>유튜브는 상세에서 썸네일로</span></div>`+links+addB(`${P}.links`,'링크 추가')
-            +`<div class="kd-sec-t">이미지</div><div class="kd-row" style="flex-wrap:wrap;gap:12px">${media}${upl(`work:${ci}:${wi}`,'＋ 이미지',true)}</div>`
+            +`<div class="kd-sec-t">링크 <span>유튜브 링크 = 썸네일 + 카드 안에서 재생</span></div>`+links+addB(`${P}.links`,'링크 추가')
+            +`<div class="kd-sec-t">이미지 <span>첫 번째 = 타일·카드 대표 이미지</span></div><div class="kd-row" style="flex-wrap:wrap;gap:12px">${media}${upl(`work:${ci}:${wi}`,'＋ 이미지',true)}</div>`
             +`</div>`;
         }
         return `<div class="kd-item${off?' off':''}" data-row data-pv="projects"><div class="kd-row">${hideSw('works',w.id,'노출')}${sw(`data-ax-featured="${ci}:${wi}"`,!!w.featured,'대표','상단 모자이크에 노출')}${ti(`${P}.title`,w.title,'프로젝트 제목')}<button class="kd-ib" data-kd-w="${axAttr(wkey)}" title="세부 편집">${wOpen?'▾':'▸'}</button></div>${detail}</div>`;
@@ -1385,9 +1418,8 @@ function renderAXAdmin(){
       const CO=(kd.expCo||{})[c.id]||{};
       const pjOn=CO.pj!=null?CO.pj!==false:kShown('exp','projects',false);
       const pjpOn=CO.pjPeriod!=null?CO.pjPeriod!==false:kShown('exp','pjPeriod',true);
-      const thOn=CO.thumbs!=null?CO.thumbs!==false:kShown('exp','thumbs',true);
       const hd=`<div class="kd-acc-hd" data-kd-co="${axAttr(key)}"><span class="kd-car">▶</span>${thumb(c.logo,30)}<div class="kd-acc-tt"><b>${axText(coName(c))}</b><small>${axText(c.role||'역할 미입력')}</small></div>${upDown('data-ax-moveco',ci,ci===0,ci===cos.length-1)}${hideSw('companies',c.id,'노출')}</div>`;
-      const sub=c.id?`<div class="kd-acc-sub">${sw(`data-kco="${axAttr(c.id)}:pj"`,pjOn,'프로젝트 목록')}${sw(`data-kco="${axAttr(c.id)}:pjPeriod"`,pjpOn,'프로젝트 기간')}${sw(`data-kco="${axAttr(c.id)}:thumbs"`,thOn,'썸네일')}</div>`:'';
+      const sub=c.id?`<div class="kd-acc-sub">${sw(`data-kco="${axAttr(c.id)}:pj"`,pjOn,'프로젝트 목록')}${sw(`data-kco="${axAttr(c.id)}:pjPeriod"`,pjpOn,'프로젝트 기간')}</div>`:'';
       let body='';
       if(open){
         const cmets=(c.metrics||[]).map((m,mi)=>`<div class="kd-row" style="margin-bottom:6px">${ti(`${P}.metrics.${mi}.v`,m.v,'값 (예: 2배)')}${ti(`${P}.metrics.${mi}.k`,m.k,'라벨 (예: ROAS 개선)')}${delB('data-del',`${P}.metrics.${mi}`)}</div>`).join('');
@@ -1413,7 +1445,7 @@ function renderAXAdmin(){
     const hl=LIB.highlights||[];
     const stats=hl.map((h,i)=>`<div class="kd-item${kHidden('stats',h.id)?' off':''}" data-row><div class="kd-row">${hideSw('stats',h.id,'')}${ti(`highlights.${i}.value`,h.value,'9년+')}${ti(`highlights.${i}.label`,h.label,'마케팅 경력')}${delB('data-del',`highlights.${i}`)}</div></div>`).join('')+addB('highlights','스탯 추가');
     return intro('회사 행에서 <b>노출 · 프로젝트 목록 · 프로젝트 기간</b>을 바로 켜고 꺼요. 회사를 누르면 로고·이름·기간·요약·목록을 편집해요. ↑↓ = 화면 순서.')
-      +card('표시 항목',`<div class="kd-sws">${showSw('exp','logo',true,'로고')}${showSw('exp','role',true,'역할')}${showSw('exp','period',true,'재직 기간')}${showSw('exp','summary',true,'요약')}${showSw('exp','metrics',true,'회사 지표')}${showSw('exp','thumbs',true,'썸네일')}${showSw('exp','stats',true,'하단 스탯')}</div><p class="kd-note">썸네일 = 그 회사 작업의 이미지·영상(최대 4개). 회사마다 아래 스위치로 따로 켜고 끌 수 있어요.</p>`,'모든 회사 공통')
+      +card('표시 항목',`<div class="kd-sws">${showSw('exp','logo',true,'로고')}${showSw('exp','role',true,'역할')}${showSw('exp','period',true,'재직 기간')}${showSw('exp','summary',true,'요약')}${showSw('exp','metrics',true,'회사 지표')}${showSw('exp','stats',true,'하단 스탯')}</div>`,'모든 회사 공통')
       +rows
       +card('하단 스탯 카드',stats,'스위치 = 노출 · 3개씩 한 줄');
   };
@@ -1479,7 +1511,13 @@ function renderAXAdmin(){
     });
     left.addEventListener('click',e=>{
       const q=s=>e.target.closest(s), k=axDoc().klio; let el;
-      if((el=q('[data-kd-tab]'))){ axTab=el.dataset.kdTab; try{ localStorage.setItem('kilo-tab',axTab); }catch(_){} renderAXAdmin(); if(axTab!=='layout') axPvGoto(axTab==='home'?'home':axTab,true); if(axTab==='home') axFetchViews(); return; }
+      if((el=q('[data-kd-tab]'))){
+        axTab=el.dataset.kdTab; try{ localStorage.setItem('kilo-tab',axTab); }catch(_){}
+        const sec=axTab==='layout'?'':axTab==='home'?'home':axTab;
+        if(axPvPage==='projects'&&axTab!=='projects'){ axPvPage='main'; axPvBack=sec; } // 다른 탭 → 미리보기를 메인으로
+        renderAXAdmin(); if(sec) axPvGoto(sec,true); if(axTab==='home') axFetchViews(); return;
+      }
+      if((el=q('[data-kpv]'))){ axPvSetPage(el.dataset.kpv,{back:'projects'}); return; }
       if((el=q('[data-kd-w]'))){ axOpenW=axOpenW===el.dataset.kdW?'':el.dataset.kdW; renderAXAdmin(); return; }
       if((el=q('[data-add]'))){ axAdd(el.dataset.add); rerender(); return; }
       if((el=q('[data-del]'))){ axDel(el.dataset.del); rerender(); return; }
@@ -1538,7 +1576,14 @@ function renderAXAdmin(){
       t.value='';
     });
     const pub=$('#axPublish'); if(pub)pub.onclick=()=>{ const d=axDoc(); d.updated=Date.now(); save(); const u=viewURL(d); if(navigator.clipboard)navigator.clipboard.writeText(u).then(()=>toast('발행됨 · 링크 복사: '+u)).catch(()=>toast('발행됨: '+u)); else toast('발행됨: '+u); };
-    const vo=$('#axViewOpen'); if(vo)vo.onclick=()=>{ const d=axDoc(); save(); setTimeout(()=>window.open(viewURL(d),'_blank'),300); };
+    const vo=$('#axViewOpen'); if(vo)vo.onclick=()=>{ const d=axDoc(); save(); const u=viewURL(d), pu=axPvPage==='projects'&&!/[?#]/.test(u)?u.replace(/\/$/,'')+'/projects'+(axPvCard?'#p-'+encodeURIComponent(axPvCard):''):u; setTimeout(()=>window.open(pu,'_blank'),300); };
+    // 미리보기 안 클릭 → 화면 전환: 타일·전체보기 = 전체 프로젝트 페이지(그 카드) / 돌아가기 = 메인 Projects / 카드 넘김 = 기억
+    window.addEventListener('message',e=>{
+      const f=$('#axPreview'); if(!f||e.source!==f.contentWindow)return; const m=e.data||{};
+      if(m.klio==='pp') axPvSetPage('projects',{card:typeof m.id==='string'?m.id:''});
+      else if(m.klio==='pp-back') axPvSetPage('main',{back:'projects'});
+      else if(m.klio==='card'&&typeof m.id==='string') axPvCard=m.id;
+    });
   }
   updateAXPreview();
 }
