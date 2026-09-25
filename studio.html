@@ -1103,7 +1103,7 @@ function techSeedRows(){
   ((typeof LIB!=='undefined'&&LIB.companies)||[]).forEach(function(c){(c.works||[]).forEach(function(w){(w.stack||[]).forEach(push);});});
   ((typeof LIB!=='undefined'&&LIB.profile&&LIB.profile.stack)||[]).forEach(function(s){push(s.title||s.area);});
   ((typeof LIB!=='undefined'&&LIB.capabilities)||[]).forEach(function(c){if(c.visible!==false)push(c.label);});
-  if(extras.length)rows.push({label:'기타 · DB',items:extras,visible:true});
+  if(extras.length)rows.push({label:'후보 · DB (화면 미노출)',items:extras,visible:false});
   return rows;
 }
 // AX 대표 3 (AX 콘솔 /ax CORE CAPABILITIES) — klio AX 섹션엔 이 핵심만
@@ -1124,7 +1124,9 @@ function klioNormalize(d){
   d.klio.sections=out;
   // Techstack 편집 데이터: 없으면(최초) 시드, 있으면 형태 정규화(사용자가 전부 비운 경우는 존중)
   if(!Array.isArray(d.klio.techstack)) d.klio.techstack=techSeedRows();
-  d.klio.techstack=d.klio.techstack.map(function(r){ r=r||{}; return {label:(r.label!=null?String(r.label):''), items:Array.isArray(r.items)?r.items.filter(function(x){return x!=null&&String(x).trim();}).map(String):[], visible:r.visible!==false}; });
+  d.klio.techstack=d.klio.techstack.map(function(r){ r=r||{}; var lb=(r.label!=null?String(r.label):''), vis=r.visible!==false;
+    if(lb==='기타 · DB'){ lb='후보 · DB (화면 미노출)'; vis=false; } // 예전 자동 덤프 행은 화면에서 내리고 후보 목록으로만 유지
+    return {label:lb, items:Array.isArray(r.items)?r.items.filter(function(x){return x!=null&&String(x).trim();}).map(String):[], visible:vis}; });
   // AX 대표 3: 없으면 콘솔 대표값 시드, 있으면 정규화
   if(!Array.isArray(d.klio.axCore)) d.klio.axCore=axCoreSeed();
   d.klio.axCore=d.klio.axCore.map(function(c,i){ c=c||{}; return {num:(c.num!=null&&String(c.num).trim()?String(c.num):'0'+(i+1)), title:(c.title!=null?String(c.title):''), desc:(c.desc!=null?String(c.desc):''), visible:c.visible!==false}; });
@@ -1139,7 +1141,20 @@ function axDel(path){ const s=path.split('.'); const i=+s.pop(); const a=axGet(s
 function axMove(arr,i,dir){ var j=dir==='up'?i-1:i+1; if(!Array.isArray(arr)||j<0||j>=arr.length)return; var t=arr[i];arr[i]=arr[j];arr[j]=t; }
 function axDoc(){ let d=DOCS.find(x=>x.template==='klio')||DOCS.find(x=>x.template==='ax'); if(!d){ d={id:uid(),kind:'portfolio',template:'klio',title:'마케팅 포트폴리오',subtitle:'',intro:'',cover:'',slug:'portfolio',visibility:'unlisted',updated:Date.now()}; DOCS.unshift(d); } d.kind='portfolio'; d.template='klio'; if(!d.slug||d.slug==='ax')d.slug='portfolio'; if(!d.title||d.title==='AX 포트폴리오')d.title='마케팅 포트폴리오'; if(!d.visibility)d.visibility='unlisted'; return d; }
 let axPvTimer,axSaveTimer;
-function updateAXPreview(){ clearTimeout(axPvTimer); axPvTimer=setTimeout(()=>{ const f=$('#axPreview'); if(f) f.setAttribute('srcdoc',TEMPLATES.render(Object.assign({template:'klio',klio:(axDoc().klio||null)},LIB))); },220); }
+let axPvRendered=false, axPvSec='';
+function updateAXPreview(){ clearTimeout(axPvTimer); axPvTimer=setTimeout(()=>{
+  const f=$('#axPreview'); if(!f) return;
+  let html=TEMPLATES.render(Object.assign({template:'klio',klio:(axDoc().klio||null)},LIB)), y=0;
+  if(axPvRendered){
+    // 편집 중 재렌더: 보던 위치 유지 + 등장 애니메이션 생략(깜빡임 방지)
+    try{ y=f.contentWindow?Math.round(f.contentWindow.scrollY||0):0; }catch(e){}
+    html=html.replace('document.documentElement.classList.add("js")','');
+  }
+  f.onload=()=>{ if(!y)return; try{ f.contentWindow.scrollTo({top:y,behavior:'instant'}); }catch(e){ try{ f.contentWindow.scrollTo(0,y); }catch(_){} } };
+  f.setAttribute('srcdoc',html); axPvRendered=true;
+},220); }
+// 편집 패널 ↔ 미리보기 연동: 패널(data-pv)에 들어가면 미리보기가 그 섹션으로 이동
+function axPvGoto(sec,force){ if(!sec||(!force&&sec===axPvSec))return; axPvSec=sec; const f=$('#axPreview'); try{ if(f&&f.contentWindow)f.contentWindow.postMessage({klio:'goto',id:sec},'*'); }catch(e){} }
 function axSchedule(){ clearTimeout(axSaveTimer); axSaveTimer=setTimeout(()=>{ save(); updateAXPreview(); },400); }
 const axAttr=s=>String(s==null?'':s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 const axText=s=>String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
@@ -1152,7 +1167,7 @@ function renderAXAdmin(){
   const taLines=(p,arr,ph)=>`<textarea data-p="${p}" data-arr="lines" rows="4" placeholder="${axAttr(ph||'')}" style="${iS};resize:vertical">${axText((arr||[]).join('\n'))}</textarea>`;
   const comma=(p,arr,ph)=>`<input data-p="${p}" data-arr="comma" value="${axAttr((arr||[]).join(', '))}" placeholder="${axAttr(ph||'')}" style="${iS}">`;
   const lbl=t=>`<div style="font-size:11px;color:var(--muted);margin:9px 0 3px;font-weight:600">${t}</div>`;
-  const sec=(t,inner,sub)=>`<details open style="margin-bottom:14px;border:1px solid var(--line);border-radius:10px;overflow:hidden"><summary style="padding:12px 14px;font-weight:700;font-size:14px;cursor:pointer;background:var(--panel)">${t}${sub?`<span style="font-weight:400;font-size:11px;color:var(--muted);margin-left:8px">${sub}</span>`:''}</summary><div style="padding:12px 14px">${inner}</div></details>`;
+  const sec=(t,inner,sub,pv)=>`<details open${pv?` data-pv="${pv}"`:''} style="margin-bottom:14px;border:1px solid var(--line);border-radius:10px;overflow:hidden"><summary style="padding:12px 14px;font-weight:700;font-size:14px;cursor:pointer;background:var(--panel)">${t}${sub?`<span style="font-weight:400;font-size:11px;color:var(--muted);margin-left:8px">${sub}</span>`:''}</summary><div style="padding:12px 14px">${inner}</div></details>`;
   const item=(inner,del)=>`<div style="border:1px solid var(--line);border-radius:8px;padding:10px 12px;margin-bottom:8px;position:relative">${inner}<button data-del="${del}" style="position:absolute;top:9px;right:10px;font-size:11px;color:#c0392b;background:none;border:none;cursor:pointer">✕</button></div>`;
   const add=(p,t)=>`<button data-add="${p}" class="mini" style="margin-top:2px">＋ ${t}</button>`;
   const two=(a,b)=>`<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">${a}${b}</div>`;
@@ -1168,13 +1183,13 @@ function renderAXAdmin(){
     lbl('직함 (role line)')+ti('profile.title',LIB.profile.title,'마케팅 × AI 프로덕트 빌더')+
     lbl('히어로 한 줄 (tagline)')+ta('profile.tagline',LIB.profile.tagline,'마케팅의 문제를 AI와 코드로 푸는 그로스 빌더',2)+
     two(ti('profile.location',LIB.profile.location,'위치 (Seoul, KR)'),ti('profile.email',LIB.profile.email,'이메일'))+
-    lbl('전화')+ti('profile.phone',LIB.profile.phone,'010-0000-0000'),'Home 상단 · Contact');
+    lbl('전화')+ti('profile.phone',LIB.profile.phone,'010-0000-0000'),'Home 상단 · Contact','home');
 
   // 소개 (About)
-  const aboutSec=sec('소개 · About',lbl('소개 문단 (About 섹션 + 히어로 밑 설명 · 문장 단위로 2분할)')+ta('profile.summary',LIB.profile.summary,'',7));
+  const aboutSec=sec('소개 · About',lbl('소개 문단 (About 섹션 + 히어로 밑 설명 · 문장 단위로 2분할)')+ta('profile.summary',LIB.profile.summary,'',7),'','about');
 
   // 지표 (Experience 하단 Stats)
-  const statsSec=sec('지표 · Stats (Experience 하단)',stats,'앞 3개가 큰 숫자로 표시');
+  const statsSec=sec('지표 · Stats (Experience 하단)',stats,'앞 3개가 큰 숫자로 표시','experience');
 
   // 회사 · 경력 / 프로젝트 (Experience · Projects · Archive)
   const CATOPTS=['퍼포먼스','성과','브랜딩','커머스','콘텐츠','그로스','영상','CRM','제휴','AX'];
@@ -1183,7 +1198,7 @@ function renderAXAdmin(){
     const works=(c.works||[]).map((w,wi)=>{
       const catsel='<select data-p="companies.'+ci+'.works.'+wi+'.category" style="'+iS+'">'+[''].concat(CATOPTS).map(function(o){return '<option value="'+axAttr(o)+'"'+(String(w.category||'')===o?' selected':'')+'>'+(o||'(카테고리)')+'</option>';}).join('')+'</select>';
       const feat='<label style="display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;margin:7px 0 2px"><input type="checkbox" data-ax-featured="'+ci+':'+wi+'" '+(w.featured?'checked':'')+' style="width:15px;height:15px"> 대표작 (상단 모자이크 노출)</label>';
-      return '<div style="border-left:2px solid var(--line);padding-left:12px;margin:12px 0">'+
+      return '<div data-pv="projects" style="border-left:2px solid var(--line);padding-left:12px;margin:12px 0">'+
         lbl('제목')+ti(`companies.${ci}.works.${wi}.title`,w.title,'프로젝트 제목')+
         two(catsel,comma(`companies.${ci}.works.${wi}.tags`,w.tags,'태그'))+feat+
         lbl('요약 (카드·아카이브 설명)')+ta(`companies.${ci}.works.${wi}.detail`,w.detail,'한두 문장')+
@@ -1194,10 +1209,10 @@ function renderAXAdmin(){
     var moverow='<div style="display:flex;align-items:center;gap:6px;margin-bottom:3px"><button data-ax-moveco="'+ci+':up" class="mini" style="flex:none;padding:2px 11px"'+(ci===0?' disabled':'')+'>▲</button><button data-ax-moveco="'+ci+':down" class="mini" style="flex:none;padding:2px 11px"'+(ci===(LIB.companies.length-1)?' disabled':'')+'>▼</button><span class="mono" style="font-size:10.5px;color:var(--muted)">회사 순서 '+(ci+1)+' / '+LIB.companies.length+'</span></div>';
     return '<div style="margin-bottom:10px">'+moverow+`<details style="border:1px solid var(--line);border-radius:8px"><summary style="padding:10px 12px;font-weight:700;font-size:13px;cursor:pointer">${axText(c.nameKo||c.nameEn||'회사')}</summary><div style="padding:10px 12px">${two(ti(`companies.${ci}.role`,c.role,'역할 (Experience 제목)'),ti(`companies.${ci}.periodText`,c.periodText,'기간 (비우면 자동)'))}${lbl('회사 요약 (Experience 설명)')}${ta(`companies.${ci}.summary`,c.summary,'')}${lbl('회사 지표')}${mets}${lbl('프로젝트')}${works||'<div style="font-size:12px;color:var(--muted)">이 회사에 작업이 없습니다. 이력서 관리 탭에서 추가하세요.</div>'}</div></details></div>`;
   }).join('');
-  const coSec=sec('회사 · 경력 / 프로젝트','<div style="font-size:11.5px;color:var(--muted);margin-bottom:8px">Experience·Projects·Archive에 사용 · 대표작 체크 = 상단 모자이크</div>'+cos);
+  const coSec=sec('회사 · 경력 / 프로젝트','<div style="font-size:11.5px;color:var(--muted);margin-bottom:8px">Experience·Projects에 사용 · 대표작 체크 = 상단 모자이크</div>'+cos,'','experience');
 
   // 테크스택 · 스킬 재료
-  const techSec=sec('스킬 재료 · 역량/스택',lbl('역량칩 (Skills 집계 · Techstack 기본값 원본)')+caps+lbl('스택 (영역·제목·설명)')+stack,'Skills 섹션 집계 + Techstack “기본값 다시 채우기” 원본');
+  const techSec=sec('스킬 재료 · 역량/스택',lbl('역량칩 (Skills 집계 · Techstack 후보 원본)')+caps+lbl('스택 (영역·제목·설명)')+stack,'Skills 섹션 집계 + Techstack “기본값 다시 채우기” 원본','skills');
 
   // AX 섹션 에디터 (핵심만: 대표 3 + 콘솔 링크. 전체 구조는 /ax = ax.html)
   var kdax=axDoc().klio;
@@ -1219,11 +1234,13 @@ function renderAXAdmin(){
     lbl('AX 소개 문구 (비우면 기본값)')+'<input data-ax-klio-text="axIntro" value="'+axAttr((axDoc().klio.text||{}).axIntro||'')+'" placeholder="흩어진 도구와 지표를 하나의 마케팅 콘솔로…" style="'+iS+'">'
     +lbl('대표 기능 (AX 콘솔 CORE CAPABILITIES · 화면엔 이 카드만 노출)')+axCoreEd+axCoreActions
     +'<div style="font-size:11.5px;color:var(--muted);margin-top:10px;line-height:1.6">전체 구조(파이프라인·유닛 이코노믹스·자동화 규칙 등)는 <b>AX 콘솔 <code>/ax</code></b>에서 보여줍니다. 콘솔 내용은 <code>ax.html</code> 파일에서 관리해요.</div>',
-    'AX 콘솔 대표 3 + /ax 링크');
+    'AX 콘솔 대표 3 + /ax 링크','ax');
   // Techstack 마퀴 에디터 (klio.techstack)
   var tRows=(axDoc().klio.techstack||[]);
   var techEd=tRows.map(function(r,i){
-    return '<div style="border:1px solid var(--line);border-radius:8px;padding:10px 12px;margin-bottom:8px">'
+    var off=r.visible===false;
+    return '<div style="border:1px '+(off?'dashed':'solid')+' var(--line);border-radius:8px;padding:10px 12px;margin-bottom:8px'+(off?';background:color-mix(in oklch,var(--muted) 6%,transparent)':'')+'">'
+      +(off?'<div style="font-size:10.5px;font-weight:700;color:var(--muted);margin-bottom:6px">화면 미노출 · 후보 목록 — 쓸 항목만 위 행으로 옮기거나 체크해서 노출</div>':'')
       +'<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">'
       +'<input type="checkbox" data-ax-tech-on="'+i+'" '+(r.visible!==false?'checked':'')+' title="표시" style="width:16px;height:16px;flex:none;cursor:pointer">'
       +'<input data-ax-tech-label="'+i+'" value="'+axAttr(r.label||'')+'" placeholder="행 이름 (예: 마케팅·데이터)" style="flex:1;min-width:0;padding:6px 8px;border:1px solid var(--line);border-radius:6px;font-size:13px;background:transparent;color:inherit;font-family:inherit">'
@@ -1234,14 +1251,14 @@ function renderAXAdmin(){
       +'<textarea data-ax-tech-items="'+i+'" rows="3" placeholder="한 줄에 하나씩 (예: Meta Ads)" style="'+iS+';resize:vertical">'+axText((r.items||[]).join('\n'))+'</textarea>'
       +'</div>';
   }).join('');
-  var techActions='<div style="display:flex;gap:8px;margin-top:4px;flex-wrap:wrap"><button data-ax-tech-add class="mini">＋ 행 추가</button><button data-ax-tech-reset class="mini">기본값 다시 채우기 (DB 전체 덤프)</button></div>';
-  var techstackSec=sec('Techstack 마퀴 (편집)','<div style="font-size:11.5px;color:var(--muted);margin-bottom:8px">행 = 마퀴 한 줄 · 체크=표시 · 한 줄에 하나씩 입력 · 홀수 행은 반대 방향으로 흐름</div>'+techEd+techActions,'/portfolio Techstack에 즉시 반영');
+  var techActions='<div style="display:flex;gap:8px;margin-top:4px;flex-wrap:wrap"><button data-ax-tech-add class="mini">＋ 행 추가</button><button data-ax-tech-reset class="mini">기본값 다시 채우기 (큐레이션 3행 + DB 후보)</button></div>';
+  var techstackSec=sec('Techstack 마퀴 (편집)','<div style="font-size:11.5px;color:var(--muted);margin-bottom:8px">행 = 마퀴 한 줄 · 체크=화면 표시 · 한 줄에 하나씩 입력 · 홀수 행은 반대 방향으로 흐름 · 섹션 이름은 ‘화면 구성’에서 변경</div>'+techEd+techActions,'/portfolio Techstack에 즉시 반영','techstack');
 
   var kd=axDoc().klio, KL={about:'About',projects:'Projects',experience:'Experience',ax:'AX',techstack:'Techstack',skills:'Skills',contact:'Contact'};
   var krows=kd.sections.map(function(s,i){ var def=KL[s.key]||s.key;
-    return '<div style="display:flex;align-items:center;gap:8px;border:1px solid var(--line);border-radius:8px;padding:7px 10px;margin-bottom:6px"><input type="checkbox" data-ax-klio-on="'+i+'" '+(s.on!==false?'checked':'')+' title="표시" style="width:16px;height:16px;flex:none;cursor:pointer"><input data-ax-klio-label="'+i+'" value="'+axAttr(s.label||'')+'" placeholder="'+axAttr(def)+'" style="flex:1;min-width:0;padding:6px 8px;border:1px solid var(--line);border-radius:6px;font-size:13px;background:transparent;color:inherit;font-family:inherit"><button data-ax-moveklio="'+i+':up" class="mini" style="flex:none;padding:2px 11px"'+(i===0?' disabled':'')+'>▲</button><button data-ax-moveklio="'+i+':down" class="mini" style="flex:none;padding:2px 11px"'+(i===kd.sections.length-1?' disabled':'')+'>▼</button></div>';
+    return '<div data-pv="'+axAttr(s.key)+'" style="display:flex;align-items:center;gap:8px;border:1px solid var(--line);border-radius:8px;padding:7px 10px;margin-bottom:6px"><input type="checkbox" data-ax-klio-on="'+i+'" '+(s.on!==false?'checked':'')+' title="표시" style="width:16px;height:16px;flex:none;cursor:pointer"><input data-ax-klio-label="'+i+'" value="'+axAttr(s.label||'')+'" placeholder="'+axAttr(def)+'" style="flex:1;min-width:0;padding:6px 8px;border:1px solid var(--line);border-radius:6px;font-size:13px;background:transparent;color:inherit;font-family:inherit"><button data-ax-moveklio="'+i+':up" class="mini" style="flex:none;padding:2px 11px"'+(i===0?' disabled':'')+'>▲</button><button data-ax-moveklio="'+i+':down" class="mini" style="flex:none;padding:2px 11px"'+(i===kd.sections.length-1?' disabled':'')+'>▼</button></div>';
   }).join('');
-  var ktext=lbl('Contact 문구 (비우면 기본값)')+'<input data-ax-klio-text="contactIntro" value="'+axAttr(kd.text.contactIntro||'')+'" placeholder="새 프로젝트나 협업, 채용 문의가 있다면 편하게 연락 주세요." style="'+iS+'">'+lbl('Available 배지 텍스트')+'<input data-ax-klio-text="available" value="'+axAttr(kd.text.available||'')+'" placeholder="Available for work" style="'+iS+'">';
+  var ktext='<div data-pv="contact">'+lbl('Contact 문구 (비우면 기본값)')+'<input data-ax-klio-text="contactIntro" value="'+axAttr(kd.text.contactIntro||'')+'" placeholder="새 프로젝트나 협업, 채용 문의가 있다면 편하게 연락 주세요." style="'+iS+'">'+lbl('Available 배지 텍스트')+'<input data-ax-klio-text="available" value="'+axAttr(kd.text.available||'')+'" placeholder="Available for work" style="'+iS+'"></div>';
   var klioSec=sec('화면 구성 · Klio (/portfolio)','<div style="font-size:11.5px;color:var(--muted);margin-bottom:10px">체크=표시 · 라벨=섹션 제목+하단바 텍스트(비우면 기본) · ▲▼=순서(하단바 같이 변경)</div>'+krows+ktext,'/portfolio 화면에 즉시 반영');
 
   $('#axLeft').innerHTML=klioSec+basicSec+aboutSec+statsSec+coSec+axSec+techstackSec+techSec;
@@ -1249,6 +1266,9 @@ function renderAXAdmin(){
   if(!axWired){
     axWired=true;
     const left=$('#axLeft');
+    // 편집하는 패널의 섹션으로 미리보기 이동 (같은 섹션 안에서는 한 번만) · 패널 제목 클릭은 항상 이동
+    left.addEventListener('focusin',e=>{ const el=e.target.closest('[data-pv]'); if(el) axPvGoto(el.dataset.pv,false); });
+    left.addEventListener('click',e=>{ const sm=e.target.closest('summary'); if(!sm)return; const el=sm.closest('[data-pv]'); if(el) axPvGoto(el.dataset.pv,true); });
     left.addEventListener('input',e=>{ const t=e.target; const kl=t.dataset.axKlioLabel, ktx=t.dataset.axKlioText, tl=t.dataset.axTechLabel, tit=t.dataset.axTechItems, cn=t.dataset.axCoreNum, cti=t.dataset.axCoreTitle, cds=t.dataset.axCoreDesc; if(kl!=null){ if(axDoc().klio&&axDoc().klio.sections[+kl])axDoc().klio.sections[+kl].label=t.value; axSchedule(); return; } if(ktx){ if(axDoc().klio)axDoc().klio.text[ktx]=t.value; axSchedule(); return; } if(tl!=null){ var _k=axDoc().klio; if(_k&&_k.techstack&&_k.techstack[+tl])_k.techstack[+tl].label=t.value; axSchedule(); return; } if(tit!=null){ var _k2=axDoc().klio; if(_k2&&_k2.techstack&&_k2.techstack[+tit])_k2.techstack[+tit].items=t.value.split('\n').map(s=>s.trim()).filter(Boolean); axSchedule(); return; } if(cn!=null){ var _c=axDoc().klio; if(_c&&_c.axCore&&_c.axCore[+cn])_c.axCore[+cn].num=t.value; axSchedule(); return; } if(cti!=null){ var _c2=axDoc().klio; if(_c2&&_c2.axCore&&_c2.axCore[+cti])_c2.axCore[+cti].title=t.value; axSchedule(); return; } if(cds!=null){ var _c3=axDoc().klio; if(_c3&&_c3.axCore&&_c3.axCore[+cds])_c3.axCore[+cds].desc=t.value; axSchedule(); return; } const p=t.dataset.p; if(!p)return; let v=t.value; if(t.dataset.arr==='lines')v=v.split('\n').map(s=>s.trim()).filter(Boolean); else if(t.dataset.arr==='comma')v=v.split(',').map(s=>s.trim()).filter(Boolean); axSet(p,v); axSchedule(); });
     left.addEventListener('click',e=>{ const a=e.target.closest('[data-add]'),d=e.target.closest('[data-del]'),mv=e.target.closest('[data-ax-movenav]'),mc=e.target.closest('[data-ax-moveco]'),mk=e.target.closest('[data-ax-moveklio]'),kon=e.target.closest('[data-ax-klio-on]'),fe=e.target.closest('[data-ax-featured]'),ton=e.target.closest('[data-ax-tech-on]'),tadd=e.target.closest('[data-ax-tech-add]'),tdel=e.target.closest('[data-ax-tech-del]'),trst=e.target.closest('[data-ax-tech-reset]'),tmv=e.target.closest('[data-ax-movetech]'),con=e.target.closest('[data-ax-core-on]'),cad=e.target.closest('[data-ax-core-add]'),cdl=e.target.closest('[data-ax-core-del]'),crs=e.target.closest('[data-ax-core-reset]'),cmv=e.target.closest('[data-ax-movecore]'); if(a){ axAdd(a.dataset.add); renderAXAdmin(); save(); updateAXPreview(); } else if(d){ axDel(d.dataset.del); renderAXAdmin(); save(); updateAXPreview(); } else if(mv){ var pp=mv.getAttribute('data-ax-movenav').split(':'); axMove(LIB.profile.navOrder,+pp[0],pp[1]); renderAXAdmin(); save(); updateAXPreview(); } else if(mc){ var qq=mc.getAttribute('data-ax-moveco').split(':'); axMove(LIB.companies,+qq[0],qq[1]); renderAXAdmin(); save(); updateAXPreview(); } else if(mk){ var kk=mk.getAttribute('data-ax-moveklio').split(':'); axMove(axDoc().klio.sections,+kk[0],kk[1]); renderAXAdmin(); save(); updateAXPreview(); } else if(kon){ var ki=+kon.getAttribute('data-ax-klio-on'); if(axDoc().klio&&axDoc().klio.sections[ki])axDoc().klio.sections[ki].on=kon.checked; save(); updateAXPreview(); } else if(ton){ var kt=axDoc().klio; var tti=+ton.getAttribute('data-ax-tech-on'); if(kt&&kt.techstack&&kt.techstack[tti])kt.techstack[tti].visible=ton.checked; save(); updateAXPreview(); } else if(tadd){ var kt2=axDoc().klio; if(kt2){ if(!Array.isArray(kt2.techstack))kt2.techstack=[]; kt2.techstack.push({label:'',items:[],visible:true}); } renderAXAdmin(); save(); updateAXPreview(); } else if(tdel){ var kt3=axDoc().klio; if(kt3&&Array.isArray(kt3.techstack))kt3.techstack.splice(+tdel.getAttribute('data-ax-tech-del'),1); renderAXAdmin(); save(); updateAXPreview(); } else if(trst){ var kt4=axDoc().klio; if(kt4)kt4.techstack=techSeedRows(); renderAXAdmin(); save(); updateAXPreview(); } else if(tmv){ var tp=tmv.getAttribute('data-ax-movetech').split(':'); var kt5=axDoc().klio; if(kt5&&Array.isArray(kt5.techstack))axMove(kt5.techstack,+tp[0],tp[1]); renderAXAdmin(); save(); updateAXPreview(); } else if(con){ var cc0=axDoc().klio; var cci=+con.getAttribute('data-ax-core-on'); if(cc0&&cc0.axCore&&cc0.axCore[cci])cc0.axCore[cci].visible=con.checked; save(); updateAXPreview(); } else if(cad){ var cc1=axDoc().klio; if(cc1){ if(!Array.isArray(cc1.axCore))cc1.axCore=[]; cc1.axCore.push({num:'0'+(cc1.axCore.length+1),title:'',desc:'',visible:true}); } renderAXAdmin(); save(); updateAXPreview(); } else if(cdl){ var cc2=axDoc().klio; if(cc2&&Array.isArray(cc2.axCore))cc2.axCore.splice(+cdl.getAttribute('data-ax-core-del'),1); renderAXAdmin(); save(); updateAXPreview(); } else if(crs){ var cc3=axDoc().klio; if(cc3)cc3.axCore=axCoreSeed(); renderAXAdmin(); save(); updateAXPreview(); } else if(cmv){ var cp=cmv.getAttribute('data-ax-movecore').split(':'); var cc4=axDoc().klio; if(cc4&&Array.isArray(cc4.axCore))axMove(cc4.axCore,+cp[0],cp[1]); renderAXAdmin(); save(); updateAXPreview(); } else if(fe){ var gg=fe.getAttribute('data-ax-featured').split(':'); var cc=LIB.companies[+gg[0]]; if(cc&&cc.works&&cc.works[+gg[1]])cc.works[+gg[1]].featured=fe.checked; save(); updateAXPreview(); } });
     left.addEventListener('change',e=>{ var t=e.target; if(t.tagName==='SELECT'&&t.dataset.p){ axSet(t.dataset.p,t.value); axSchedule(); } });
