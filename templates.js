@@ -868,15 +868,13 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
       return (y ? y + "년" : "") + (y && mo ? " " : "") + (mo ? mo + "개월" : "");
     };
     var expCos = companies.filter(function (co) { return (co.nameKo || co.nameEn || co.serviceKo || co.serviceEn) && !isHidden("companies", co.id); });
-    // 회사별 카드 색: KILO 대시보드 지정색(klio.expColor[회사id]) > 로고 대표색(런타임 추출) > 파스텔
-    var PAL_RGB = ["171,220,209", "195,205,228", "221,142,110", "230,225,213", "234,230,218"];
-    var hexRgb = function (h) { var m = String(h || "").match(/^#?([0-9a-f]{6})$/i); if (!m) return ""; var n = parseInt(m[1], 16); return [(n >> 16) & 255, (n >> 8) & 255, n & 255].join(","); };
     var exp = expCos.map(function (co, ei) {
       var nm = dispName(co) || co.nameKo || co.nameEn || "";
       var alt = co.useService ? (co.nameKo || co.nameEn || "") : "";
       if (alt === nm) alt = "";
-      var accSet = hexRgb((K.expColor || {})[co.id]), hs0 = 0; for (var q = 0; q < nm.length; q++) hs0 += nm.charCodeAt(q);
-      var acc = accSet || PAL_RGB[hs0 % PAL_RGB.length];
+      // 회사별 설정(KILO 대시보드): 프로젝트 목록 · 프로젝트 기간 표시 — 없으면 전체 기본값
+      var CO = (K.expCo || {})[co.id] || {};
+      var showPj = CO.pj != null ? CO.pj !== false : XS.projects, showPjP = CO.pjPeriod != null ? CO.pjPeriod !== false : XS.pjPeriod;
       var logo = XS.logo ? (co.logo ? '<span class="xp-logo"><img src="' + esc(co.logo) + '" alt="" loading="lazy"></span>'
         : '<span class="xp-logo fb">' + esc(String(nm).slice(0, 1)) + '</span>') : '';
       var per = coPeriod(co), dur = /년|개월/.test(per) ? "" : durOf(co);
@@ -886,15 +884,14 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
       var xpj = (K.expPj && Array.isArray(K.expPj[co.id]))
         ? K.expPj[co.id].filter(function (it) { return it && it.visible !== false && String(it.title || "").trim(); })
         : works.filter(function (x) { return x.co === co; }).map(function (x) { return { title: x.w.title, period: wPeriod(x.w) }; });
-      var pjs = XS.projects ? xpj.map(function (it, k) {
-        return '<li style="--k:' + k + '"><span class="t">' + esc(it.title) + '</span>' + (XS.pjPeriod && it.period ? '<span class="p">' + esc(it.period) + '</span>' : '') + '</li>'; }).join("") : "";
-      return '<div class="xp rv" style="--d:' + (ei * 70) + 'ms"><div class="xp-in" style="--acc:' + acc + '"' + (!accSet && co.logo ? ' data-acc-src="' + esc(co.logo) + '"' : '') + '>'
-        + '<div class="xp-hd">' + logo + '<div class="xp-tt"><h3>' + esc(nm) + (alt ? '<small>' + esc(alt) + '</small>' : '') + '</h3>'
-        + (XS.role && co.role ? '<p class="xp-role">' + esc(co.role) + '</p>' : '') + '</div></div>'
-        + (XS.period && per ? '<div class="xp-meta"><span class="xp-per">' + esc(per) + '</span>' + (dur ? '<span class="xp-dur">' + esc(dur) + '</span>' : '') + '</div>' : '')
-        + (XS.summary && co.summary ? '<p class="xp-sum">' + esc(co.summary) + '</p>' : '')
-        + (mets ? '<div class="xp-mets">' + mets + '</div>' : '')
-        + (pjs ? '<ul class="xp-pj">' + pjs + '</ul>' : '') + '</div></div>';
+      var pjs = showPj ? xpj.map(function (it, k) {
+        return '<li style="--k:' + k + '"><span class="t">' + esc(it.title) + '</span>' + (showPjP && it.period ? '<span class="p">' + esc(it.period) + '</span>' : '') + '</li>'; }).join("") : "";
+      var sum = XS.summary && co.summary ? '<p class="xp-sum">' + esc(co.summary) + '</p>' : '';
+      return '<div class="xp rv' + (logo ? '' : ' nologo') + '" style="--d:' + (ei * 60) + 'ms"><div class="xp-hd">' + logo
+        + '<div class="xp-tt"><h3>' + esc(nm) + (alt ? '<small>' + esc(alt) + '</small>' : '') + '</h3>' + (XS.role && co.role ? '<p class="xp-role">' + esc(co.role) + '</p>' : '') + '</div>'
+        + (XS.period && per ? '<p class="xp-when">' + esc(per) + (dur ? '<small>' + esc(dur) + '</small>' : '') + '</p>' : '') + '</div>'
+        + (sum || mets || pjs ? '<div class="xp-bd">' + sum + (mets ? '<div class="xp-mets">' + mets + '</div>' : '') + (pjs ? '<ul class="xp-pj">' + pjs + '</ul>' : '') + '</div>' : '')
+        + '</div>';
     }).join("");
     // 하단 스탯 카드: 스튜디오에서 개별 노출 선택(설정 전엔 앞 3개)
     var hlist = (d.highlights || []).filter(function (h) { return h && (h.value || h.label); });
@@ -1007,21 +1004,18 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
       + '.ent{padding:44px 0}.ent+.ent{border-top:1px solid var(--bd)}.ent:first-child{padding-top:0}.ent h3{font-size:20px;line-height:130%}.ent .sub{margin-top:6px;font-size:12px;line-height:150%;color:var(--gray)}.ent p.d{margin-top:22px;font-size:14px;line-height:175%;color:var(--ink50)}'
       + '.ent .links{margin-top:12px;display:flex;gap:4px 16px;flex-wrap:wrap}.ent .links a{font-size:12px;font-weight:500;color:var(--ink);text-decoration:underline;text-underline-offset:2px;text-decoration-thickness:1px}.ent .links a:hover{color:var(--gray)}'
       + '.arch .ent{padding:30px 0}.arch .ent h3{font-size:17px}.arch .ent p.d{margin-top:12px}'
-      // Experience: 회사별 카드 — --acc(회사 색 rgb)로 배경·테두리·그림자 틴트, 로고 + 알약형 기간 + 작은 점 목록
-      + '.xp+.xp{margin-top:14px}.xp-in{position:relative;padding:22px 22px 20px;border-radius:22px;background:rgba(var(--acc),.08);border:1px solid rgba(var(--acc),.22);transition:transform .45s var(--ez),box-shadow .45s var(--ez),background-color .9s var(--ez),border-color .9s var(--ez)}'
-      + '.xp:hover .xp-in{transform:translateY(-4px);box-shadow:0 24px 46px -30px rgba(var(--acc),1)}'
-      + '.xp-hd{display:flex;align-items:center;gap:14px}.xp-logo{width:50px;height:50px;border-radius:15px;background:#fff;overflow:hidden;flex:none;display:grid;place-items:center;font-size:18px;font-weight:700;color:var(--ink);box-shadow:0 10px 22px -12px rgba(var(--acc),1),0 0 0 1px rgba(0,0,0,.05);transition:transform .5s var(--ez)}'
-      + '.xp:hover .xp-logo{transform:rotate(-6deg) scale(1.06)}.xp-logo img{width:100%;height:100%;object-fit:cover;display:block}.xp-logo.fb{background:rgba(var(--acc),.45)}'
-      + '.xp-tt{min-width:0}.xp-tt h3{font-size:18.5px;line-height:1.3;letter-spacing:-.025em}.xp-tt h3 small{font-size:12px;font-weight:500;color:var(--gray);margin-left:7px;letter-spacing:0}.xp-role{margin-top:3px;font-size:12.5px;line-height:1.45;color:var(--ink50);font-weight:500}'
-      + '.xp-meta{display:flex;flex-wrap:wrap;gap:6px;margin-top:16px}.xp-per,.xp-dur{font-size:11.5px;line-height:1;padding:6px 10px;border-radius:999px;font-weight:600;font-variant-numeric:tabular-nums;letter-spacing:0}.xp-per{background:#fff;color:var(--ink);box-shadow:inset 0 0 0 1px rgba(var(--acc),.28)}.xp-dur{background:rgba(var(--acc),.24);color:var(--ink)}'
-      + '.xp-sum{margin-top:14px;font-size:13.5px;line-height:1.75;color:var(--ink50)}'
-      + '.xp-mets{display:flex;flex-wrap:wrap;gap:6px;margin-top:14px}.xp-met{background:#fff;border-radius:12px;padding:8px 11px;font-size:11.5px;line-height:1.25;color:var(--ink50);box-shadow:inset 0 0 0 1px rgba(var(--acc),.2)}.xp-met b{display:block;font-size:15px;color:var(--ink);margin-bottom:2px}'
-      // 주요 프로젝트: 작은 점(연결선 없음) · 제목 / 기간 — 카드가 보일 때 순서대로 등장
-      + '.xp-pj{list-style:none;margin:16px 0 0;padding:14px 0 0;border-top:1px dashed rgba(var(--acc),.4)}.xp-pj li{position:relative;display:flex;align-items:baseline;gap:12px;padding:0 0 9px 14px;font-size:13px;line-height:1.5}.xp-pj li:last-child{padding-bottom:0}'
-      + '.xp-pj li::before{content:"";position:absolute;left:1px;top:calc(.75em - 2.5px);width:5px;height:5px;border-radius:50%;background:var(--ink)}'
-      + '.xp-pj .t{flex:1;min-width:0;color:var(--ink);font-weight:500}.xp-pj .p{flex:none;font-size:11px;color:var(--gray);font-variant-numeric:tabular-nums;white-space:nowrap}@media(max-width:520px){.xp-pj li{flex-direction:column;gap:1px}.xp-in{padding:18px 16px}}'
-      + '.js .xp .xp-pj li{opacity:0;transform:translateX(-8px);transition:opacity .5s var(--ez),transform .5s var(--ez);transition-delay:calc(var(--d,0ms) + 250ms + var(--k,0) * 55ms)}.js .xp.in .xp-pj li{opacity:1;transform:none}'
-      + '.js .xp .xp-pj li::before{transform:scale(0);transition:transform .45s cubic-bezier(.3,1.6,.5,1);transition-delay:calc(var(--d,0ms) + 320ms + var(--k,0) * 55ms)}.js .xp.in .xp-pj li::before{transform:scale(1)}'
+      // Experience: 깔끔한 이력서형 — [로고] 회사명/역할 · 오른쪽 재직기간 / 들여쓴 작은 점 목록 · 회사 사이 얇은 구분선
+      + '.xp{padding:28px 0}.xp+.xp{border-top:1px solid var(--bd)}.xp:first-child{padding-top:2px}'
+      + '.xp-hd{display:grid;grid-template-columns:40px minmax(0,1fr) auto;column-gap:14px;align-items:start}.xp.nologo .xp-hd{grid-template-columns:minmax(0,1fr) auto}'
+      + '.xp-logo{width:40px;height:40px;border-radius:11px;overflow:hidden;background:#fff;box-shadow:0 0 0 1px rgba(0,0,0,.07);display:grid;place-items:center;font-size:15px;font-weight:700;color:var(--ink)}.xp-logo img{width:100%;height:100%;object-fit:cover;display:block}.xp-logo.fb{background:var(--sand)}'
+      + '.xp-tt{min-width:0;padding-top:1px}.xp-tt h3{font-size:16px;font-weight:600;line-height:1.35;letter-spacing:-.02em}.xp-tt h3 small{font-size:12px;font-weight:500;color:var(--gray);margin-left:6px;letter-spacing:0}.xp-role{margin-top:3px;font-size:12.5px;line-height:1.5;color:var(--ink50)}'
+      + '.xp-when{padding-top:2px;text-align:right;font-size:12px;font-weight:500;line-height:1.35;color:var(--ink);font-variant-numeric:tabular-nums;white-space:nowrap}.xp-when small{display:block;margin-top:3px;font-size:11px;color:var(--gray)}'
+      + '.xp-bd{margin-left:54px}.xp.nologo .xp-bd{margin-left:0}.xp-sum{margin-top:12px;font-size:13.5px;line-height:1.75;color:var(--ink50)}'
+      + '.xp-mets{display:flex;flex-wrap:wrap;gap:4px 16px;margin-top:10px;font-size:12px;color:var(--ink50)}.xp-met b{color:var(--ink);font-weight:700;margin-right:5px}'
+      + '.xp-pj{list-style:none;margin:12px 0 0;padding:0}.xp-pj li{position:relative;display:flex;align-items:baseline;gap:12px;padding:4px 0 4px 13px;font-size:13px;line-height:1.55;color:var(--ink)}'
+      + '.xp-pj li::before{content:"";position:absolute;left:1px;top:calc(4px + .775em - 2px);width:4px;height:4px;border-radius:50%;background:var(--ink)}.xp-pj .t{flex:1;min-width:0}.xp-pj .p{flex:none;font-size:11px;color:var(--gray);font-variant-numeric:tabular-nums;white-space:nowrap}'
+      + '@media(max-width:560px){.xp-hd{grid-template-columns:36px minmax(0,1fr)}.xp-logo{width:36px;height:36px;border-radius:10px}.xp-when{grid-column:2;text-align:left;margin-top:6px}.xp-when small{display:inline;margin:0 0 0 6px}.xp.nologo .xp-when{grid-column:1}.xp-bd{margin-left:50px}.xp-pj li{flex-direction:column;gap:0}}'
+      + '.js .xp .xp-pj li{opacity:0;transform:translateY(6px);transition:opacity .5s var(--ez),transform .5s var(--ez);transition-delay:calc(var(--d,0ms) + 200ms + var(--k,0) * 45ms)}.js .xp.in .xp-pj li{opacity:1;transform:none}'
       // 사진 딤: 기본은 배경만(가장자리 비네트 — 얼굴은 밝게), 선택 시 사진 전체
       + '.photo .card{position:relative}.photo .card.img{background-size:cover;background-position:center}.photo .card.img::after{content:"";position:absolute;inset:0;pointer-events:none;border-radius:inherit}'
       + '.photo .card.img.dim-bg::after{background:radial-gradient(ellipse 62% 54% at 50% 40%,rgba(17,17,20,0) 46%,rgba(17,17,20,var(--dim,.25)) 100%)}.photo .card.img.dim-all::after{background:rgba(17,17,20,var(--dim,.25))}'
@@ -1103,11 +1097,6 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
       + 'function tilt(el,max,sc){var R=0,rx=0,ry=0,tm=0;el.addEventListener("pointermove",function(e){var r=el.getBoundingClientRect(),px=(e.clientX-r.left)/r.width,py=(e.clientY-r.top)/r.height;ry=(px-.5)*2*max;rx=(.5-py)*2*max;el.style.setProperty("--gx",(px*100).toFixed(1)+"%");el.style.setProperty("--gy",(py*100).toFixed(1)+"%");el.classList.add("tilt");clearTimeout(tm);if(!R)R=requestAnimationFrame(function(){R=0;el.style.transition="transform .12s ease-out";el.style.transform="perspective(800px) rotateX("+rx.toFixed(2)+"deg) rotateY("+ry.toFixed(2)+"deg) scale("+sc+")";});});el.addEventListener("pointerleave",function(){el.classList.remove("tilt");el.style.transition="transform .7s cubic-bezier(.25,.6,.3,1)";el.style.transform="";tm=setTimeout(function(){el.style.transition="";},720);});}'
       + 'function magnet(b){var tm=0;b.addEventListener("pointermove",function(e){var r=b.getBoundingClientRect(),dx=(e.clientX-(r.left+r.width/2))/r.width,dy=(e.clientY-(r.top+r.height/2))/r.height;clearTimeout(tm);b.style.transition="transform .2s ease-out,background-color .2s,color .2s,border-color .2s";b.style.transform="translate("+(dx*12).toFixed(1)+"px,"+(dy*10).toFixed(1)+"px)";});b.addEventListener("pointerleave",function(){b.style.transition="transform .6s cubic-bezier(.25,.6,.3,1),background-color .2s,color .2s,border-color .2s";b.style.transform="";tm=setTimeout(function(){b.style.transition="";},620);});}'
       + 'if(fine&&!reduce&&document.body.classList.contains("fx-tilt")){var pcard=document.querySelector(".photo .card");if(pcard)tilt(pcard,9,1.03);[].forEach.call(document.querySelectorAll(".tile"),function(t){tilt(t,6,1.02);});[].forEach.call(document.querySelectorAll(".pj-more,.ax-console,.socials a"),magnet);}'
-      // Experience 카드 색: 로고 대표색 추출(세션 캐시로 재렌더 깜빡임 방지)
-      + 'var AC={};try{AC=JSON.parse(sessionStorage.getItem("klio-acc2")||"{}");}catch(_){}'
-      // 검정·아주 어두운 로고는 카드가 무거워지지 않게 밝은 뉴트럴로 보정
-      + 'function accOf(img){try{var c=document.createElement("canvas");c.width=c.height=24;var x=c.getContext("2d");x.drawImage(img,0,0,24,24);var d=x.getImageData(0,0,24,24).data,r=0,g=0,b=0,n=0;for(var i=0;i<d.length;i+=4){var R=d[i],G=d[i+1],B=d[i+2],A=d[i+3];if(A<160)continue;var mx=Math.max(R,G,B),mn=Math.min(R,G,B);if(mn>228)continue;var s=mx?(mx-mn)/mx:0,w=.15+s*s*3;r+=R*w;g+=G*w;b+=B*w;n+=w;}if(!n)return null;var o=[r/n,g/n,b/n],L=.299*o[0]+.587*o[1]+.114*o[2];if(L<95)o=o.map(function(v){return v+(150-v)*.65;});return o.map(Math.round).join(",");}catch(_){return null;}}'
-      + '[].forEach.call(document.querySelectorAll(".xp-in[data-acc-src]"),function(el){var src=el.getAttribute("data-acc-src");if(AC[src]){el.style.setProperty("--acc",AC[src]);return;}var im=new Image();im.crossOrigin="anonymous";im.onload=function(){var c=accOf(im);if(!c)return;el.style.setProperty("--acc",c);AC[src]=c;try{sessionStorage.setItem("klio-acc2",JSON.stringify(AC));}catch(_){}};im.src=src;});'
       + 'function countUp(el){var target=parseInt(el.dataset.count,10);if(!target||reduce||still)return;var tpl=el.innerHTML,t0=null,dur=900;function step(t){if(!t0)t0=t;var k=Math.min((t-t0)/dur,1);k=1-Math.pow(1-k,3);el.innerHTML=tpl.replace(String(target),String(Math.round(target*k)));if(k<1)requestAnimationFrame(step);else el.innerHTML=tpl;}requestAnimationFrame(step);}'
       + 'if("IntersectionObserver" in window){var sio=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){countUp(e.target);sio.unobserve(e.target);}});},{threshold:.6});document.querySelectorAll("[data-count]").forEach(function(s){sio.observe(s);});}'
       + 'var pjd=document.getElementById("pj-detail");function pjDOpen(di){var src=document.getElementById("pjd-"+di),body=document.getElementById("pj-dbody");if(src&&body){body.innerHTML=src.innerHTML;if(body.parentNode)body.parentNode.scrollTop=0;}if(pjd){pjd.classList.add("open");document.body.style.overflow="hidden";}}function pjDClose(){if(pjd){pjd.classList.remove("open");document.body.style.overflow="";}}document.addEventListener("click",function(e){var ex=e.target.closest("[data-pj-expand]");if(ex){var cnt=ex.closest(".pj-cnt"),t=ex.querySelector(".pj-more-t");if(t&&!t.getAttribute("data-all"))t.setAttribute("data-all",t.textContent);if(cnt){var on=cnt.classList.toggle("exp");ex.setAttribute("aria-expanded",on?"true":"false");if(t)t.textContent=on?"프로젝트 접기":t.getAttribute("data-all");}return;}var tile=e.target.closest("[data-di]");if(tile){pjDOpen(tile.getAttribute("data-di"));return;}if(e.target.closest("[data-pjd-close]")||e.target===pjd){pjDClose();return;}});document.addEventListener("keydown",function(e){if(e.key==="Escape"&&pjd&&pjd.classList.contains("open"))pjDClose();});'

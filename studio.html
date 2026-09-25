@@ -173,6 +173,67 @@ select.dbin{min-width:120px;cursor:pointer}
 .modalcard{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:22px;width:340px;max-width:100%}
 .modalcard input{width:100%;border:1px solid var(--border);background:var(--bg);color:var(--fg);border-radius:8px;padding:10px;font-size:14px;margin-bottom:8px}
 @media(max-width:860px){.app{grid-template-columns:1fr}aside{display:none}.buildwrap{grid-template-columns:1fr;height:auto}.bcol.left{border-right:none;border-bottom:1px solid var(--border)}.previewframe{height:70vh}}
+/* ===== KILO 대시보드: 탭 · 카드 · 스위치 · 아코디언 ===== */
+#v-ax .libsplit{grid-template-columns:minmax(440px,50%) 1fr}
+#axLeft{padding:0!important;background:var(--bg)}
+.kd-tabs{position:sticky;top:0;z-index:5;display:flex;gap:4px;padding:10px 14px;background:var(--surface);border-bottom:1px solid var(--border);overflow-x:auto;scrollbar-width:none}
+.kd-tabs::-webkit-scrollbar{display:none}
+.kd-tab{flex:none;height:32px;padding:0 13px;border-radius:8px;border:1px solid transparent;background:transparent;color:var(--muted);font:600 13px/1 inherit;font-family:inherit;cursor:pointer;white-space:nowrap}
+.kd-tab:hover{color:var(--fg);background:var(--panel)}
+.kd-tab.on{color:var(--fg);background:var(--card);border-color:var(--border);box-shadow:0 1px 2px rgba(0,0,0,.06)}
+.kd-tab i{font-style:normal;font-size:10px;font-weight:700;color:#c0392b;margin-left:5px}
+.kd-pane{padding:16px 16px 120px}
+.kd-intro{font-size:12.5px;color:var(--muted);line-height:1.6;margin:0 2px 12px}
+.kd-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px 14px 12px;margin-bottom:12px}
+.kd-card>h4{margin:0 0 12px;font-size:13px;font-weight:700;display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
+.kd-card>h4 span{font-size:11.5px;font-weight:500;color:var(--muted)}
+.kd-f{margin-bottom:10px}.kd-f:last-child{margin-bottom:0}
+.kd-l{display:block;font-size:11.5px;font-weight:600;color:var(--muted);margin-bottom:4px}
+.kd-l em{font-style:normal;font-weight:400;margin-left:6px;opacity:.85}
+.kd-in{width:100%;box-sizing:border-box;padding:8px 10px;border:1px solid var(--border);border-radius:8px;background:var(--surface);color:var(--fg);font-size:13px;font-family:inherit;line-height:1.4;transition:border-color .15s,box-shadow .15s}
+.kd-in:focus{outline:none;border-color:var(--acc);box-shadow:0 0 0 3px var(--acc-soft)}
+textarea.kd-in{resize:vertical;min-height:38px}
+select.kd-in{cursor:pointer}
+.kd-g2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.kd-g2>.kd-f{margin-bottom:10px}
+.kd-row{display:flex;align-items:center;gap:8px}
+.kd-row>.kd-in{flex:1;min-width:0}
+.kd-sw{display:inline-flex;align-items:center;gap:7px;font-size:12.5px;font-weight:600;color:var(--fg);cursor:pointer;user-select:none;white-space:nowrap;position:relative;flex:none}
+.kd-sw input{position:absolute;opacity:0;width:1px;height:1px;margin:0;pointer-events:none}
+.kd-sw span{flex:none;width:30px;height:18px;border-radius:999px;background:var(--border);position:relative;transition:background .2s}
+.kd-sw span::after{content:"";position:absolute;left:2px;top:2px;width:14px;height:14px;border-radius:50%;background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.3);transition:transform .2s}
+.kd-sw input:checked+span{background:var(--acc)}
+.kd-sw input:checked+span::after{transform:translateX(12px)}
+.kd-sw input:focus-visible+span{box-shadow:0 0 0 3px var(--acc-soft)}
+.kd-sws{display:flex;flex-wrap:wrap;gap:10px 18px}
+.kd-ib{flex:none;width:28px;height:28px;border-radius:7px;border:1px solid var(--border);background:var(--surface);color:var(--muted);font-size:13px;cursor:pointer;line-height:1;display:inline-grid;place-items:center;font-family:inherit;padding:0}
+.kd-ib:hover:not(:disabled){color:var(--fg);border-color:var(--ring)}
+.kd-ib:disabled{opacity:.35;cursor:default}
+.kd-del:hover:not(:disabled){color:#c0392b;border-color:#c0392b}
+.kd-btn,.kd-add{display:inline-flex;align-items:center;gap:6px;height:30px;padding:0 12px;border-radius:8px;border:1px solid var(--border);background:var(--surface);color:var(--fg);font-size:12.5px;font-weight:600;cursor:pointer;font-family:inherit;white-space:nowrap;flex:none}
+.kd-add{border-style:dashed;color:var(--muted)}
+.kd-add:hover,.kd-btn:hover{border-color:var(--ring);color:var(--fg)}
+.kd-acts{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+.kd-item{border:1px solid var(--border);border-radius:10px;padding:8px 10px;margin-bottom:6px;background:var(--surface)}
+.kd-item.off{opacity:.55}
+.kd-thumb{flex:none;object-fit:cover;background:#fff;border:1px solid var(--border);box-sizing:border-box}
+.kd-note{font-size:11.5px;color:var(--muted);margin:6px 0 0;line-height:1.5}
+.kd-sec-t{display:flex;align-items:baseline;gap:8px;font-size:12px;font-weight:700;margin:16px 0 8px}
+.kd-sec-t:first-child{margin-top:0}
+.kd-sec-t span{font-size:11.5px;font-weight:500;color:var(--muted)}
+.kd-acc{border:1px solid var(--border);border-radius:12px;background:var(--card);margin-bottom:8px;overflow:hidden}
+.kd-acc.off{opacity:.6}
+.kd-acc-hd{display:flex;align-items:center;gap:10px;padding:10px 12px;cursor:pointer}
+.kd-acc-hd:hover{background:var(--panel)}
+.kd-car{flex:none;width:12px;color:var(--muted);font-size:10px;transition:transform .2s}
+.kd-acc.open .kd-car{transform:rotate(90deg)}
+.kd-acc-tt{flex:1;min-width:0}
+.kd-acc-tt b{display:block;font-size:13.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.kd-acc-tt small{display:block;font-size:11.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:1px}
+.kd-acc-sub{display:flex;flex-wrap:wrap;gap:8px 18px;padding:2px 12px 12px 34px}
+.kd-acc-bd{border-top:1px solid var(--border);padding:14px 12px;background:var(--bg)}
+.kd-wd{margin-top:10px;padding-top:10px;border-top:1px dashed var(--border)}
+.kd-dim{opacity:.45}
 </style>
 </head>
 <body>
@@ -1153,6 +1214,7 @@ function klioNormalize(d){
   if(!d.klio.ui||typeof d.klio.ui!=='object')d.klio.ui={};
   if(!d.klio.expPj||typeof d.klio.expPj!=='object'||Array.isArray(d.klio.expPj))d.klio.expPj={};
   if(!d.klio.expColor||typeof d.klio.expColor!=='object'||Array.isArray(d.klio.expColor))d.klio.expColor={};
+  if(!d.klio.expCo||typeof d.klio.expCo!=='object'||Array.isArray(d.klio.expCo))d.klio.expCo={}; // 회사별 설정(프로젝트 목록·기간 표시)
   return d.klio;
 }
 // Experience 주요 프로젝트 목록 — 회사별. 직접 편집 전엔 그 회사 프로젝트(노출된 것)에서 자동, 첫 수정 때 목록을 고정
@@ -1198,166 +1260,165 @@ function axSchedule(){ clearTimeout(axSaveTimer); axSaveTimer=setTimeout(()=>{ s
 const axAttr=s=>String(s==null?'':s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 const axText=s=>String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 let axWired=false;
+// KILO 대시보드 상태: 활성 탭(기억) · 펼친 회사/작업(아코디언, 한 번에 하나)
+let axTab=(()=>{ try{ return localStorage.getItem('kilo-tab')||'layout'; }catch(e){ return 'layout'; } })();
+let axOpenCo='', axOpenPj='', axOpenW='';
 function renderAXAdmin(){
   axEnsure(); klioEnsure();
   const leftEl=$('#axLeft'); if(!leftEl)return;
-  // 재렌더(추가·삭제·순서 변경) 때 펼쳐 둔 패널과 스크롤 위치 유지
-  const hadUI=!!leftEl.querySelector('details[data-ok]'), openState={}, keepTop=leftEl.scrollTop;
-  if(hadUI) leftEl.querySelectorAll('details[data-ok]').forEach(x=>{ openState[x.dataset.ok]=x.open; });
+  const sameTab=leftEl.dataset.tab===axTab, keepTop=leftEl.scrollTop;
   const kd=axDoc().klio, KT=kd.text||{}, cos=LIB.companies||[];
-  const iS='width:100%;padding:8px 10px;border:1px solid var(--line);border-radius:6px;font-size:13px;background:transparent;color:inherit;box-sizing:border-box;font-family:inherit';
-  const ti=(p,v,ph)=>`<input data-p="${p}" value="${axAttr(v)}" placeholder="${axAttr(ph||'')}" style="${iS}">`;
-  const tm=(p,v)=>`<input type="month" data-p="${p}" value="${axAttr(v)}" style="${iS}">`;
-  const ta=(p,v,ph,r)=>`<textarea data-p="${p}" rows="${r||2}" placeholder="${axAttr(ph||'')}" style="${iS};resize:vertical">${axText(v)}</textarea>`;
-  const comma=(p,arr,ph)=>`<input data-p="${p}" data-arr="comma" value="${axAttr((arr||[]).join(', '))}" placeholder="${axAttr(ph||'')}" style="${iS}">`;
-  const kt=(k,ph)=>`<input data-ax-klio-text="${k}" value="${axAttr(KT[k]||'')}" placeholder="${axAttr(ph||'')}" style="${iS}">`;
-  const kta=(k,ph,r)=>`<textarea data-ax-klio-text="${k}" rows="${r||3}" placeholder="${axAttr(ph||'')}" style="${iS};resize:vertical">${axText(KT[k]||'')}</textarea>`;
-  const lbl=t=>`<div style="font-size:11px;color:var(--muted);margin:10px 0 3px;font-weight:600">${t}</div>`;
-  const note=t=>`<div style="font-size:11.5px;color:var(--muted);margin-bottom:9px;line-height:1.55">${t}</div>`;
-  const sec=(t,inner,sub,pv)=>`<details open data-ok="sec-${pv||'klio'}"${pv?` data-pv="${pv}"`:''} style="margin-bottom:14px;border:1px solid var(--line);border-radius:10px;overflow:hidden"><summary style="padding:12px 14px;font-weight:700;font-size:14px;cursor:pointer;background:var(--panel)">${t}${sub?`<span style="font-weight:400;font-size:11px;color:var(--muted);margin-left:8px">${sub}</span>`:''}</summary><div style="padding:12px 14px">${inner}</div></details>`;
-  const fold=(ok,t,inner)=>`<details data-ok="${ok}" style="margin-top:6px"><summary style="font-size:12px;color:var(--muted);cursor:pointer">${t}</summary><div style="padding-top:4px">${inner}</div></details>`;
-  const item=(inner,del)=>`<div style="border:1px solid var(--line);border-radius:8px;padding:10px 34px 10px 12px;margin-bottom:8px;position:relative">${inner}<button data-del="${del}" title="삭제" style="position:absolute;top:9px;right:10px;font-size:11px;color:#c0392b;background:none;border:none;cursor:pointer">✕</button></div>`;
-  const add=(p,t)=>`<button data-add="${p}" class="mini" style="margin-top:2px">＋ ${t}</button>`;
-  const two=(a,b)=>`<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">${a}${b}</div>`;
-  const chk=(attr,on,label,title)=>`<label style="display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;margin:3px 14px 3px 0;cursor:pointer;white-space:nowrap"${title?` title="${axAttr(title)}"`:''}><input type="checkbox" ${attr} ${on?'checked':''} style="width:15px;height:15px;cursor:pointer;margin:0">${label?' '+label:''}</label>`;
-  const showChk=(g,k,def,label)=>chk(`data-kchk="show.${g}.${k}"`,kShown(g,k,def),label);
-  const hideChk=(b,id,label)=>id?chk(`data-khide="${b}" data-id="${axAttr(id)}"`,!kHidden(b,id),label,'포트폴리오에 노출'):'';
-  const mvb=(attr,key,first,last)=>`<button ${attr}="${key}:up" class="mini" style="flex:none;padding:2px 10px"${first?' disabled':''}>▲</button><button ${attr}="${key}:down" class="mini" style="flex:none;padding:2px 10px"${last?' disabled':''}>▼</button>`;
-  const delb=(attr,val)=>`<button ${attr}="${val}" title="삭제" class="mini" style="flex:none;padding:2px 9px;color:#c0392b">✕</button>`;
-  const thumb=(src,sz)=>src?`<img src="${axAttr(src)}" alt="" style="width:${sz}px;height:${sz}px;border-radius:${Math.round(sz/4)}px;object-fit:cover;border:1px solid var(--line);background:#fff;flex:none;vertical-align:middle">`:`<span style="width:${sz}px;height:${sz}px;border-radius:${Math.round(sz/4)}px;border:1px dashed var(--line);flex:none;display:inline-block;vertical-align:middle"></span>`;
-  const upl=(key,label,multi)=>`<label class="mini" style="flex:none;cursor:pointer;white-space:nowrap">${label}<input type="file" accept="image/*"${multi?' multiple':''} data-ax-upload="${key}" style="display:none"></label>`;
-  const coName=c=>(c.useService?(c.serviceKo||c.serviceEn):'')||c.nameKo||c.nameEn||'(이름 없음)';
   const KL={about:'About',projects:'Projects',experience:'Experience',ax:'AX',techstack:'Techstack',skills:'Skills',contact:'Contact'};
-  const ttl=(k,base)=>{ const s=kd.sections.find(x=>x.key===k)||{}; return base+(s.label?` <span style="font-weight:400;color:var(--muted)">“${axText(s.label)}”</span>`:'')+(s.on===false?' <span style="font-weight:600;font-size:11px;color:#c0392b">· 화면에서 숨김</span>':''); };
+  if(axTab!=='layout'&&axTab!=='home'&&!kd.sections.some(s=>s.key===axTab)) axTab='layout';
 
-  // ① 화면 구성 — 섹션 순서·노출·이름 (하단 바 동기화)
-  const krows=kd.sections.map((s,i)=>`<div data-pv="${axAttr(s.key)}" style="display:flex;align-items:center;gap:8px;border:1px solid var(--line);border-radius:8px;padding:7px 10px;margin-bottom:6px"><input type="checkbox" data-ax-klio-on="${i}" ${s.on!==false?'checked':''} title="노출" style="width:16px;height:16px;flex:none;cursor:pointer"><input data-ax-klio-label="${i}" value="${axAttr(s.label||'')}" placeholder="${axAttr(KL[s.key]||s.key)}" style="${iS};flex:1;min-width:0;padding:6px 8px">${mvb('data-ax-moveklio',i,i===0,i===kd.sections.length-1)}</div>`).join('');
-  const fxRow=lbl('모션 · 효과 (포트폴리오 전체)')+`<div>${showChk('fx','intro',true,'등장 애니메이션 (서명·제목·사진)')}${showChk('fx','aura',true,'배경 오로라')}${showChk('fx','tilt',true,'3D 기울기 · 자석 버튼')}${showChk('fx','progress',true,'스크롤 진행바')}</div>`;
-  const klioSec=sec('화면 구성 · 섹션 순서 / 노출 / 이름',note('체크 = 섹션 노출 · 이름 = 섹션 제목 + 하단 바 텍스트(비우면 기본값) · ▲▼ = 순서(하단 바도 같이). 아래 편집 패널도 이 순서를 따라요.')+krows+fxRow,'/portfolio 전체');
+  // ── 입력 컴포넌트 (모두 테마 변수 사용)
+  const ti=(p,v,ph)=>`<input class="kd-in" data-p="${p}" value="${axAttr(v)}" placeholder="${axAttr(ph||'')}">`;
+  const tm=(p,v)=>`<input class="kd-in" type="month" data-p="${p}" value="${axAttr(v)}">`;
+  const ta=(p,v,ph,r)=>`<textarea class="kd-in" data-p="${p}" rows="${r||2}" placeholder="${axAttr(ph||'')}">${axText(v)}</textarea>`;
+  const comma=(p,arr,ph)=>`<input class="kd-in" data-p="${p}" data-arr="comma" value="${axAttr((arr||[]).join(', '))}" placeholder="${axAttr(ph||'')}">`;
+  const kt=(k,ph)=>`<input class="kd-in" data-ax-klio-text="${k}" value="${axAttr(KT[k]||'')}" placeholder="${axAttr(ph||'')}">`;
+  const kta=(k,ph,r)=>`<textarea class="kd-in" data-ax-klio-text="${k}" rows="${r||3}" placeholder="${axAttr(ph||'')}">${axText(KT[k]||'')}</textarea>`;
+  const F=(label,control,hint)=>`<div class="kd-f"><span class="kd-l">${label}${hint?`<em>${hint}</em>`:''}</span>${control}</div>`;
+  const G2=(a,b)=>`<div class="kd-g2">${a}${b}</div>`;
+  const card=(title,inner,hint)=>`<section class="kd-card"><h4>${title}${hint?`<span>${hint}</span>`:''}</h4>${inner}</section>`;
+  const intro=t=>`<p class="kd-intro">${t}</p>`;
+  const sw=(attr,on,label,title)=>`<label class="kd-sw"${title?` title="${axAttr(title)}"`:''}><input type="checkbox" ${attr} ${on?'checked':''}><span></span>${label||''}</label>`;
+  const showSw=(g,k,def,label)=>sw(`data-kchk="show.${g}.${k}"`,kShown(g,k,def),label);
+  const hideSw=(b,id,label)=>id?sw(`data-khide="${b}" data-id="${axAttr(id)}"`,!kHidden(b,id),label,'포트폴리오에 노출'):'';
+  const ib=(attr,val,icon,title,dis)=>`<button class="kd-ib" ${attr}="${val}" title="${title}"${dis?' disabled':''}>${icon}</button>`;
+  const upDown=(attr,key,first,last)=>ib(attr,`${key}:up`,'↑','위로',first)+ib(attr,`${key}:down`,'↓','아래로',last);
+  const delB=(attr,val)=>`<button class="kd-ib kd-del" ${attr}="${val}" title="삭제">✕</button>`;
+  const addB=(p,t)=>`<button class="kd-add" data-add="${p}">＋ ${t}</button>`;
+  const thumb=(src,sz)=>src?`<img class="kd-thumb" src="${axAttr(src)}" alt="" style="width:${sz}px;height:${sz}px;border-radius:${Math.round(sz/4)}px">`:`<span class="kd-thumb" style="display:inline-block;width:${sz}px;height:${sz}px;border-radius:${Math.round(sz/4)}px;border-style:dashed"></span>`;
+  const upl=(key,label,multi)=>`<label class="kd-btn">${label}<input type="file" accept="image/*"${multi?' multiple':''} data-ax-upload="${key}" hidden></label>`;
+  const coName=c=>(c.useService?(c.serviceKo||c.serviceEn):'')||c.nameKo||c.nameEn||'(이름 없음)';
+  const secOn=k=>(kd.sections.find(s=>s.key===k)||{}).on!==false;
 
-  // ② Home — 맨 위
+  // ── 구성: 섹션 순서·노출·이름 + 모션·효과
+  const P_layout=()=>intro('섹션 순서·노출·이름과 전체 효과를 정해요. 이름을 비우면 기본 이름(About 등)으로 보여요. 하단 바도 같은 순서·이름을 써요.')
+    +card('섹션',kd.sections.map((s,i)=>`<div class="kd-item${s.on===false?' off':''}" data-row data-pv="${axAttr(s.key)}"><div class="kd-row">${sw(`data-ax-klio-on="${i}"`,s.on!==false,'','노출')}<input class="kd-in" data-ax-klio-label="${i}" value="${axAttr(s.label||'')}" placeholder="${axAttr(KL[s.key]||s.key)}">${upDown('data-ax-moveklio',i,i===0,i===kd.sections.length-1)}</div></div>`).join(''),'스위치 = 노출 · ↑↓ = 순서')
+    +card('모션 · 효과',`<div class="kd-sws">${showSw('fx','intro',true,'등장 애니메이션')}${showSw('fx','aura',true,'배경 오로라')}${showSw('fx','tilt',true,'3D 기울기·자석 버튼')}${showSw('fx','progress',true,'스크롤 진행바')}</div>`);
+
+  // ── Home
   const sum0=(String(LIB.profile.summary||'').split(/(?<=다\.)\s+/)[0]||'').trim();
   const dimV=(kd.ui&&kd.ui.photoDim!=null&&!isNaN(+kd.ui.photoDim))?+kd.ui.photoDim:35;
-  const homeSec=sec('Home · 맨 위',
-    note('서명·대표 문장·카드·회전 문구·상단 연락처. 비워 둔 칸은 기본값으로 표시돼요.')
-    +two(ti('profile.nameEn',LIB.profile.nameEn,'영문 이름 (좌상단 서명)'),ti('profile.nameKo',LIB.profile.nameKo,'이름 (국문)'))
-    +lbl('대표 문장 — “저는 {이름} — {이 문장}.”')+ta('profile.tagline',LIB.profile.tagline,'마케팅의 문제를 AI와 코드로 푸는 그로스 빌더',2)
-    +lbl('회색 보조 문장 (비우면 소개 첫 문장)')+kta('heroSub',sum0,2)
-    +lbl('카드 · 회전 문구')+showChk('home','photo',false,'프로필 사진 사용 (끄면 이니셜)')
-    +`<div style="display:flex;align-items:center;gap:8px;margin:4px 0 8px">${thumb(LIB.profile.avatar,40)}<div style="flex:1;min-width:0">${ti('profile.avatar',LIB.profile.avatar,'사진 URL (또는 업로드)')}</div>${upl('avatar','업로드')}</div>`
-    +`<div style="display:flex;align-items:center;gap:10px;margin:0 0 6px"><span style="font-size:12px;font-weight:600;white-space:nowrap">사진 딤(어둡게)</span><input type="range" min="0" max="60" step="5" value="${dimV}" data-knum="ui.photoDim" style="flex:1;accent-color:var(--acc)"><b data-knum-out="ui.photoDim" style="font-size:12px;min-width:34px;text-align:right">${dimV}%</b></div>`
-    +`<div style="display:flex;align-items:center;gap:10px;margin:0 0 8px"><span style="font-size:12px;font-weight:600;white-space:nowrap">딤 방식</span><select data-ksel="ui.photoDimMode" style="${iS};flex:1"><option value="bg"${(kd.ui||{}).photoDimMode!=='all'?' selected':''}>배경만 어둡게 (가장자리 · 얼굴은 밝게)</option><option value="all"${(kd.ui||{}).photoDimMode==='all'?' selected':''}>사진 전체 어둡게</option></select></div>`
-    +two(kt('initials','이니셜 (예: JK)'),kt('orbit','회전 문구 (예: JINSOO KIM · MARKETER · )'))
-    +lbl('상단 정보 노출')+showChk('home','location',true,'위치')+showChk('home','email',true,'이메일')+showChk('home','site',true,'사이트 링크')
-    +two(ti('profile.location',LIB.profile.location,'위치 (Seoul, KR)'),ti('profile.email',LIB.profile.email,'이메일'))
-    +lbl('사이트 링크 (비우면 기본 도메인 · Contact와 공유)')+kt('siteUrl','https://kimjinsoo-mkt-ax.vercel.app')
-    +lbl('직함 (대표 문장이 비었을 때 대신 사용)')+ti('profile.title',LIB.profile.title,'마케팅 × AI 프로덕트 빌더'),
-    '','home');
+  const P_home=()=>intro('맨 위 첫 화면이에요. 비워 둔 칸은 기본값으로 보여요.')
+    +card('이름 · 문장',G2(F('영문 이름',ti('profile.nameEn',LIB.profile.nameEn,'Jinsoo Kim'),'좌상단 서명'),F('이름 (국문)',ti('profile.nameKo',LIB.profile.nameKo,'김진수')))
+      +F('대표 문장',ta('profile.tagline',LIB.profile.tagline,'마케팅의 문제를 AI와 코드로 푸는 그로스 빌더',2),'“저는 {이름} — {이 문장}.”')
+      +F('회색 보조 문장',kta('heroSub',sum0,2),'비우면 소개 첫 문장')
+      +F('직함',ti('profile.title',LIB.profile.title,'마케팅 × AI 프로덕트 빌더'),'대표 문장이 비었을 때 대신 사용'))
+    +card('사진 카드',`<div class="kd-row" style="margin-bottom:12px">${thumb(LIB.profile.avatar,48)}<div style="flex:1;min-width:0">${ti('profile.avatar',LIB.profile.avatar,'사진 URL (또는 업로드)')}</div>${upl('avatar','업로드')}</div>`
+      +`<div class="kd-sws" style="margin-bottom:12px">${showSw('home','photo',false,'사진 사용 (끄면 이니셜)')}</div>`
+      +G2(F('사진 딤',`<div class="kd-row" style="height:36px"><input type="range" min="0" max="60" step="5" value="${dimV}" data-knum="ui.photoDim" style="flex:1;accent-color:var(--acc)"><b data-knum-out="ui.photoDim" style="font-size:12px;min-width:34px;text-align:right">${dimV}%</b></div>`),
+          F('딤 방식',`<select class="kd-in" data-ksel="ui.photoDimMode"><option value="bg"${(kd.ui||{}).photoDimMode!=='all'?' selected':''}>배경만 (얼굴은 밝게)</option><option value="all"${(kd.ui||{}).photoDimMode==='all'?' selected':''}>사진 전체</option></select>`))
+      +G2(F('이니셜',kt('initials','JK'),'사진 끌 때'),F('회전 문구',kt('orbit','JINSOO KIM · MARKETER · '))))
+    +card('상단 연락처',`<div class="kd-sws" style="margin-bottom:12px">${showSw('home','location',true,'위치')}${showSw('home','email',true,'이메일')}${showSw('home','site',true,'사이트 링크')}</div>`
+      +G2(F('위치',ti('profile.location',LIB.profile.location,'Seoul, KR')),F('이메일',ti('profile.email',LIB.profile.email,'you@mail.com')))
+      +F('사이트 링크',kt('siteUrl','https://kimjinsoo-mkt-ax.vercel.app'),'Contact와 공유 · 비우면 기본 도메인'));
 
-  // ③ About — 소개
-  const aboutSec=sec(ttl('about','About · 소개'),
-    lbl('소개 요약 (이력서와 공유 · 화면엔 문장 기준 2문단으로 자동 분할)')+ta('profile.summary',LIB.profile.summary,'',6)
-    +lbl('포트폴리오 전용 소개 (선택) — 쓰면 위 요약 대신 표시 · 빈 줄 = 문단 구분 · 2번째 문단부터 회색')+kta('about','비우면 위 요약을 사용',5),
-    '','about');
+  // ── About
+  const P_about=()=>intro('About 섹션 문단이에요.')
+    +card('소개',F('소개 요약',ta('profile.summary',LIB.profile.summary,'',7),'이력서와 공유 · 화면엔 문장 기준 2문단 자동')
+      +F('포트폴리오 전용 소개',kta('about','비우면 위 요약을 사용',6),'선택 · 빈 줄 = 문단 구분 · 2번째 문단부터 회색'));
 
-  // ④ Projects — 작업별 노출/대표 + 내용
+  // ── Projects: 회사 → 작업 (작업은 제목 줄에서 노출·대표, ▸로 세부)
   const CATOPTS=['퍼포먼스','성과','브랜딩','커머스','콘텐츠','그로스','영상','CRM','제휴','AX'];
-  const pjGroups=cos.map((c,ci)=>{
-    const ws=c.works||[]; if(!ws.length) return '';
-    const shownN=ws.filter(w=>!kHidden('works',w.id)).length, featN=ws.filter(w=>w.featured&&!kHidden('works',w.id)).length;
-    const rows=ws.map((w,wi)=>{
-      const P=`companies.${ci}.works.${wi}`, off=kHidden('works',w.id);
-      const catsel=`<select data-p="${P}.category" style="${iS}">`+[''].concat(CATOPTS).map(o=>`<option value="${axAttr(o)}"${String(w.category||'')===o?' selected':''}>${o||'(카테고리)'}</option>`).join('')+`</select>`;
-      const mets=(w.metrics||[]).map((m,mi)=>item(two(ti(`${P}.metrics.${mi}.value`,m.value,'값 (예: 2배)'),ti(`${P}.metrics.${mi}.label`,m.label,'라벨 (예: ROAS)')),`${P}.metrics.${mi}`)).join('')+add(`${P}.metrics`,'지표 추가');
-      const links=(w.links||[]).map((l,li)=>item(two(ti(`${P}.links.${li}.label`,l.label,'라벨 (예: 광고 영상)'),ti(`${P}.links.${li}.url`,l.url,'https://…')),`${P}.links.${li}`)).join('')+add(`${P}.links`,'링크 추가');
-      const media=`<div style="display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:4px 0">`+(w.media||[]).map((m,mi)=>`<span style="position:relative;display:inline-block">${thumb(m.url,54)}<button data-del="${P}.media.${mi}" title="이미지 삭제" style="position:absolute;top:-6px;right:-6px;width:18px;height:18px;border-radius:50%;border:none;background:#c0392b;color:#fff;font-size:10px;cursor:pointer;line-height:1;padding:0">✕</button></span>`).join('')+upl(`work:${ci}:${wi}`,'＋ 이미지',true)+`</div>`;
-      return `<div data-row data-pv="projects" style="border:1px solid var(--line);border-radius:8px;padding:8px 10px;margin-bottom:8px${off?';opacity:.55':''}">`
-        +`<div style="display:flex;align-items:center;flex-wrap:wrap">${hideChk('works',w.id,'노출')}${chk(`data-ax-featured="${ci}:${wi}"`,!!w.featured,'★ 대표 (상단 모자이크)')}</div>`
-        +ti(`${P}.title`,w.title,'프로젝트 제목')
-        +fold(`pj-${w.id||ci+'-'+wi}`,'세부 편집 — 카테고리·요약·지표·P/A/R·태그·링크·이미지',
-          two(catsel,comma(`${P}.tags`,w.tags,'태그 (쉼표로 구분)'))
-          +lbl('요약 (카드·상세 설명)')+ta(`${P}.detail`,w.detail,'한두 문장')
-          +lbl('지표 (첫 번째 = 타일 배지)')+mets
-          +lbl('PROBLEM')+ta(`${P}.problem`,w.problem,'문제 상황')
-          +lbl('ACTION')+ta(`${P}.action`,w.action,'실행')
-          +lbl('RESULT')+ta(`${P}.result`,w.result,'결과')
-          +lbl('링크 (유튜브는 상세에서 썸네일로 표시)')+links
-          +lbl('이미지 (상세에 표시)')+media)
-        +`</div>`;
+  const P_projects=()=>intro('회사를 눌러 작업을 편집해요. <b>노출</b> = 포트폴리오에 표시 · <b>대표</b> = 상단 모자이크(최대 5개) · 나머지는 ‘더보기’로 펼쳐져요. 타일 배지는 첫 번째 지표예요.')
+    +cos.map((c,ci)=>{
+      const ws=c.works||[]; if(!ws.length)return '';
+      const key=c.id||String(ci), open=axOpenPj===key;
+      const shownN=ws.filter(w=>!kHidden('works',w.id)).length, featN=ws.filter(w=>w.featured&&!kHidden('works',w.id)).length;
+      const rows=open?ws.map((w,wi)=>{
+        const P=`companies.${ci}.works.${wi}`, off=kHidden('works',w.id), wkey=w.id||`${ci}-${wi}`, wOpen=axOpenW===wkey;
+        let detail='';
+        if(wOpen){
+          const catsel=`<select class="kd-in" data-p="${P}.category">`+[''].concat(CATOPTS).map(o=>`<option value="${axAttr(o)}"${String(w.category||'')===o?' selected':''}>${o||'(카테고리)'}</option>`).join('')+`</select>`;
+          const mets=(w.metrics||[]).map((m,mi)=>`<div class="kd-row" style="margin-bottom:6px">${ti(`${P}.metrics.${mi}.value`,m.value,'값 (예: 2배)')}${ti(`${P}.metrics.${mi}.label`,m.label,'라벨 (예: ROAS)')}${delB('data-del',`${P}.metrics.${mi}`)}</div>`).join('');
+          const links=(w.links||[]).map((l,li)=>`<div class="kd-row" style="margin-bottom:6px">${ti(`${P}.links.${li}.label`,l.label,'라벨 (예: 광고 영상)')}${ti(`${P}.links.${li}.url`,l.url,'https://…')}${delB('data-del',`${P}.links.${li}`)}</div>`).join('');
+          const media=(w.media||[]).map((m,mi)=>`<span style="position:relative;display:inline-block">${thumb(m.url,56)}<button class="kd-ib kd-del" data-del="${P}.media.${mi}" title="이미지 삭제" style="position:absolute;top:-8px;right:-8px;width:22px;height:22px;border-radius:50%;background:var(--surface)">✕</button></span>`).join('');
+          detail=`<div class="kd-wd">`
+            +G2(F('카테고리',catsel),F('태그',comma(`${P}.tags`,w.tags,'쉼표로 구분')))
+            +F('요약',ta(`${P}.detail`,w.detail,'카드·상세 설명',2))
+            +`<div class="kd-sec-t">지표 <span>첫 번째 = 타일 배지</span></div>`+mets+addB(`${P}.metrics`,'지표 추가')
+            +`<div class="kd-sec-t">문제 · 실행 · 결과</div>`+F('PROBLEM',ta(`${P}.problem`,w.problem,'문제 상황'))+F('ACTION',ta(`${P}.action`,w.action,'실행'))+F('RESULT',ta(`${P}.result`,w.result,'결과'))
+            +`<div class="kd-sec-t">링크 <span>유튜브는 상세에서 썸네일로</span></div>`+links+addB(`${P}.links`,'링크 추가')
+            +`<div class="kd-sec-t">이미지</div><div class="kd-row" style="flex-wrap:wrap;gap:12px">${media}${upl(`work:${ci}:${wi}`,'＋ 이미지',true)}</div>`
+            +`</div>`;
+        }
+        return `<div class="kd-item${off?' off':''}" data-row data-pv="projects"><div class="kd-row">${hideSw('works',w.id,'노출')}${sw(`data-ax-featured="${ci}:${wi}"`,!!w.featured,'대표','상단 모자이크에 노출')}${ti(`${P}.title`,w.title,'프로젝트 제목')}<button class="kd-ib" data-kd-w="${axAttr(wkey)}" title="세부 편집">${wOpen?'▾':'▸'}</button></div>${detail}</div>`;
+      }).join(''):'';
+      return `<div class="kd-acc${open?' open':''}"><div class="kd-acc-hd" data-kd-pjco="${axAttr(key)}"><span class="kd-car">▶</span>${thumb(c.logo,28)}<div class="kd-acc-tt"><b>${axText(coName(c))}</b><small>작업 ${ws.length} · 노출 ${shownN} · 대표 ${featN}</small></div></div>${open?`<div class="kd-acc-bd">${rows}</div>`:''}</div>`;
     }).join('');
-    return `<details data-ok="pjco-${c.id||ci}" style="border:1px solid var(--line);border-radius:8px;margin-bottom:8px"><summary style="padding:9px 12px;font-weight:700;font-size:13px;cursor:pointer">${thumb(c.logo,20)} ${axText(coName(c))} <span style="font-weight:400;font-size:11px;color:var(--muted)">작업 ${ws.length} · 노출 ${shownN} · 대표 ${featN}</span></summary><div style="padding:8px 10px">${rows}</div></details>`;
-  }).join('');
-  const projSec=sec(ttl('projects','Projects · 프로젝트'),note('✓노출 = 포트폴리오에 표시 · ★대표 = 상단 모자이크(최대 5개) · 나머지는 ‘더보기’로 펼침 · 타일 배지 = 첫 번째 지표')+pjGroups,'','projects');
 
-  // ⑤ Experience — 이력서처럼 회사별 로고 + 텍스트
-  const expRows=cos.map((c,ci)=>{
-    if(!(c.nameKo||c.nameEn||c.serviceKo||c.serviceEn)) return '';
-    const P=`companies.${ci}`, off=kHidden('companies',c.id);
-    const cmets=(c.metrics||[]).map((m,mi)=>item(two(ti(`${P}.metrics.${mi}.v`,m.v,'값 (예: 2배)'),ti(`${P}.metrics.${mi}.k`,m.k,'라벨 (예: ROAS 개선)')),`${P}.metrics.${mi}`)).join('')+add(`${P}.metrics`,'회사 지표 추가');
-    // 이 회사의 Experience 주요 프로젝트 목록 (직접 편집 전엔 프로젝트에서 자동)
-    const xCustom=xpjList(ci,false), xl=xCustom||xpjDerived(ci);
-    const xpjRows=xl.map((it,i)=>`<div data-row style="padding:6px 0 8px;border-bottom:1px dashed var(--line);margin-bottom:6px${it.visible===false?';opacity:.55':''}"><div style="display:flex;align-items:center;gap:6px"><input type="checkbox" data-xpj-on="${ci}:${i}" ${it.visible!==false?'checked':''} title="노출" style="width:16px;height:16px;flex:none;cursor:pointer"><input data-xpj="${ci}:${i}:title" value="${axAttr(it.title)}" placeholder="프로젝트명 (예: 광고 캠페인 영상 기획·제작)" style="${iS};flex:1;min-width:0">${mvb('data-xpj-move',`${ci}:${i}`,i===0,i===xl.length-1)}${delb('data-xpj-del',`${ci}:${i}`)}</div><div style="display:flex;align-items:center;gap:8px;margin:5px 0 0 22px"><span style="font-size:11px;color:var(--muted);white-space:nowrap">기간</span><input data-xpj="${ci}:${i}:period" value="${axAttr(it.period)}" placeholder="예: 2021.04 – 2021.12 (비우면 표시 안 함)" style="${iS};padding:5px 8px;font-size:12px;max-width:260px"></div></div>`).join('')
-      ||`<div style="font-size:12px;color:var(--muted);margin-bottom:6px">항목이 없어요 — 추가하거나 프로젝트에서 채우세요.</div>`;
-    const xpjBlock=note(xCustom?'<b style="color:var(--acc)">직접 편집 중</b> · Projects 쪽 작업을 바꿔도 이 목록은 그대로예요.':'자동 · 이 회사 프로젝트(노출된 것)에서 가져오는 중 — 한 칸이라도 수정하면 이 회사 목록이 직접 편집으로 고정돼요.')
-      +(kShown('exp','projects',false)?'':'<div style="font-size:11.5px;color:#c0392b;margin:-4px 0 8px">위 ‘표시 항목’에서 ‘주요 프로젝트 목록’이 꺼져 있어 화면엔 안 보여요.</div>')
-      +(kShown('exp','pjPeriod',true)?'':'<div style="font-size:11.5px;color:var(--muted);margin:-4px 0 8px">‘프로젝트 기간’ 표시가 꺼져 있어 기간은 저장만 되고 화면엔 안 보여요.</div>')
-      +xpjRows+`<div style="display:flex;gap:8px;margin-top:4px;flex-wrap:wrap"><button data-xpj-add="${ci}" class="mini">＋ 항목 추가</button>${xCustom?`<button data-xpj-reset="${ci}" class="mini">프로젝트에서 다시 채우기</button>`:''}</div>`;
-    return `<div data-row data-pv="experience" style="border:1px solid var(--line);border-radius:8px;padding:8px 10px;margin-bottom:8px${off?';opacity:.55':''}">`
-      +`<div style="display:flex;align-items:center;gap:8px">${hideChk('companies',c.id,'')}${thumb(c.logo,30)}<div style="flex:1;min-width:0"><div style="font-weight:700;font-size:13.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${axText(coName(c))}</div><div style="font-size:11px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${axText(c.role||'역할 미입력')}</div></div>${mvb('data-ax-moveco',ci,ci===0,ci===cos.length-1)}</div>`
-      +fold(`xp-${c.id||ci}`,'내용 편집 — 로고·회사명·역할·기간·요약·지표',
-        lbl('로고')+`<div style="display:flex;align-items:center;gap:8px">${thumb(c.logo,40)}<div style="flex:1;min-width:0">${ti(`${P}.logo`,c.logo,'로고 이미지 URL (또는 업로드)')}</div>${upl(`logo:${ci}`,'업로드')}</div>`
-        +lbl('카드 색 (비워 두면 로고 대표색 자동)')+(()=>{ const cv=((kd.expColor||{})[c.id])||''; return `<div style="display:flex;align-items:center;gap:8px"><input type="color" data-kcolor="${axAttr(c.id)}" value="${axAttr(cv||'#909090')}" style="width:44px;height:30px;padding:0;border:1px solid var(--line);border-radius:6px;background:transparent;cursor:pointer"><span style="font-size:12px;color:var(--muted)">${cv?axText(cv.toUpperCase())+' · 직접 지정':'자동 (로고 대표색)'}</span>${cv?`<button data-kcolor-clear="${axAttr(c.id)}" class="mini" style="flex:none">자동으로</button>`:''}</div>`; })()
-        +lbl('회사명 · 서비스명')+two(ti(`${P}.nameKo`,c.nameKo,'회사명 (국문)'),ti(`${P}.nameEn`,c.nameEn,'회사명 (영문)'))
-        +`<div style="margin-top:8px">`+two(ti(`${P}.serviceKo`,c.serviceKo,'서비스명 (예: 매일새옷)'),`<div style="display:flex;align-items:center">${chk(`data-pchk="${P}.useService"`,!!c.useService,'서비스명으로 표시')}</div>`)+`</div>`
-        +lbl('역할')+ti(`${P}.role`,c.role,'예: 퍼포먼스 마케팅 매니저')
-        +lbl('기간 — 시작 / 종료 (종료 비우면 재직중)')+two(tm(`${P}.startDate`,c.startDate),tm(`${P}.endDate`,c.endDate))
-        +`<div style="margin-top:8px">`+ti(`${P}.periodText`,c.periodText,'표시 문구로 덮어쓰기 (선택 · 예: 2025.06 — 현재)')+`</div>`
-        +lbl('요약')+ta(`${P}.summary`,c.summary,'회사에서 한 일 요약',3)
-        +lbl('회사 지표 (칩으로 표시)')+cmets)
-      +fold(`xpj-${c.id||ci}`,`주요 프로젝트 목록 — ${xl.filter(it=>it.visible!==false&&String(it.title||'').trim()).length}개 표시${xCustom?' · 직접 편집':' · 자동'}`,xpjBlock)
-      +`</div>`;
-  }).join('');
-  const hl=LIB.highlights||[];
-  const statRows=hl.map((h,i)=>`<div data-row style="display:flex;align-items:center;gap:8px;margin-bottom:6px${kHidden('stats',h.id)?';opacity:.55':''}">${hideChk('stats',h.id,'')}<div style="flex:1;min-width:0">${two(ti(`highlights.${i}.value`,h.value,'값 (예: 9년+)'),ti(`highlights.${i}.label`,h.label,'라벨 (예: 마케팅 경력)'))}</div>${delb('data-del',`highlights.${i}`)}</div>`).join('')+add('highlights','스탯 추가');
-  const expSec=sec(ttl('experience','Experience · 경력'),
-    lbl('표시 항목 (모든 회사 공통)')+`<div style="margin-bottom:4px">${showChk('exp','logo',true,'로고')}${showChk('exp','role',true,'역할')}${showChk('exp','period',true,'기간')}${showChk('exp','summary',true,'요약')}${showChk('exp','metrics',true,'회사 지표')}${showChk('exp','projects',false,'주요 프로젝트 목록')}${showChk('exp','pjPeriod',true,'프로젝트 기간(목록 오른쪽)')}${showChk('exp','stats',true,'하단 스탯 카드')}</div>`
-    +lbl('회사 — ✓노출 · ▲▼ 순서(화면 순서 그대로) · ‘내용 편집’을 펼쳐 수정')+expRows
-    +lbl('하단 스탯 카드 — ✓노출 (3개씩 한 줄)')+statRows,
-    '','experience');
+  // ── Experience: 표시 항목(공통) · 회사(행에서 노출·목록·기간 바로 설정, 펼쳐서 내용) · 스탯
+  const P_experience=()=>{
+    const rows=cos.map((c,ci)=>{
+      if(!(c.nameKo||c.nameEn||c.serviceKo||c.serviceEn))return '';
+      const key=c.id||String(ci), open=axOpenCo===key, off=kHidden('companies',c.id), P=`companies.${ci}`;
+      const CO=(kd.expCo||{})[c.id]||{};
+      const pjOn=CO.pj!=null?CO.pj!==false:kShown('exp','projects',false);
+      const pjpOn=CO.pjPeriod!=null?CO.pjPeriod!==false:kShown('exp','pjPeriod',true);
+      const hd=`<div class="kd-acc-hd" data-kd-co="${axAttr(key)}"><span class="kd-car">▶</span>${thumb(c.logo,30)}<div class="kd-acc-tt"><b>${axText(coName(c))}</b><small>${axText(c.role||'역할 미입력')}</small></div>${upDown('data-ax-moveco',ci,ci===0,ci===cos.length-1)}${hideSw('companies',c.id,'노출')}</div>`;
+      const sub=c.id?`<div class="kd-acc-sub">${sw(`data-kco="${axAttr(c.id)}:pj"`,pjOn,'프로젝트 목록')}${sw(`data-kco="${axAttr(c.id)}:pjPeriod"`,pjpOn,'프로젝트 기간')}</div>`:'';
+      let body='';
+      if(open){
+        const cmets=(c.metrics||[]).map((m,mi)=>`<div class="kd-row" style="margin-bottom:6px">${ti(`${P}.metrics.${mi}.v`,m.v,'값 (예: 2배)')}${ti(`${P}.metrics.${mi}.k`,m.k,'라벨 (예: ROAS 개선)')}${delB('data-del',`${P}.metrics.${mi}`)}</div>`).join('');
+        const xCustom=xpjList(ci,false), xl=xCustom||xpjDerived(ci);
+        const xrows=xl.map((it,i)=>`<div class="kd-item${it.visible===false?' off':''}" data-row><div class="kd-row">${sw(`data-xpj-on="${ci}:${i}"`,it.visible!==false,'','노출')}<input class="kd-in" data-xpj="${ci}:${i}:title" value="${axAttr(it.title)}" placeholder="프로젝트명">${upDown('data-xpj-move',`${ci}:${i}`,i===0,i===xl.length-1)}${delB('data-xpj-del',`${ci}:${i}`)}</div><div class="kd-row${pjpOn?'':' kd-dim'}" style="margin-top:6px;padding-left:38px"><span class="kd-l" style="margin:0;white-space:nowrap">기간</span><input class="kd-in" data-xpj="${ci}:${i}:period" value="${axAttr(it.period)}" placeholder="2021.04 – 2021.12" style="max-width:220px"></div></div>`).join('')
+          ||`<p class="kd-note" style="margin:0 0 6px">항목이 없어요 — 추가하거나 프로젝트에서 채우세요.</p>`;
+        body=`<div class="kd-acc-bd">`
+          +`<div class="kd-sec-t">기본 정보</div>`
+          +`<div class="kd-row" style="margin-bottom:10px">${thumb(c.logo,44)}<div style="flex:1;min-width:0">${ti(`${P}.logo`,c.logo,'로고 이미지 URL')}</div>${upl(`logo:${ci}`,'로고 업로드')}</div>`
+          +G2(F('회사명',ti(`${P}.nameKo`,c.nameKo,'회사명 (국문)')),F('영문명',ti(`${P}.nameEn`,c.nameEn,'Company')))
+          +G2(F('서비스명',ti(`${P}.serviceKo`,c.serviceKo,'예: 매일새옷')),F('표시 이름',`<div class="kd-row" style="height:36px">${sw(`data-pchk="${P}.useService"`,!!c.useService,'서비스명으로 표시')}</div>`))
+          +F('역할',ti(`${P}.role`,c.role,'예: 퍼포먼스 마케팅 매니저'))
+          +G2(F('시작',tm(`${P}.startDate`,c.startDate)),F('종료',tm(`${P}.endDate`,c.endDate),'비우면 재직중'))
+          +F('기간 표시 문구',ti(`${P}.periodText`,c.periodText,'예: 2025.06 — 현재'),'선택 · 쓰면 날짜 대신 그대로 표시')
+          +F('요약',ta(`${P}.summary`,c.summary,'회사에서 한 일',3),'표시 항목에서 ‘요약’을 켜야 보여요')
+          +`<div class="kd-sec-t">회사 지표 <span>표시 항목에서 ‘회사 지표’를 켜야 보여요</span></div>`+cmets+addB(`${P}.metrics`,'지표 추가')
+          +`<div class="kd-sec-t">프로젝트 목록 <span>${xCustom?'직접 편집 중':'자동 — 이 회사 프로젝트에서 가져옴 · 수정하면 고정'}${pjOn?'':' · 지금 목록 숨김'}${pjpOn?'':' · 기간 숨김'}</span></div>`
+          +xrows+`<div class="kd-acts"><button class="kd-add" data-xpj-add="${ci}">＋ 항목 추가</button>${xCustom?`<button class="kd-btn" data-xpj-reset="${ci}">프로젝트에서 다시 채우기</button>`:''}</div>`
+          +`</div>`;
+      }
+      return `<div class="kd-acc${open?' open':''}${off?' off':''}" data-row data-pv="experience">${hd}${sub}${body}</div>`;
+    }).join('');
+    const hl=LIB.highlights||[];
+    const stats=hl.map((h,i)=>`<div class="kd-item${kHidden('stats',h.id)?' off':''}" data-row><div class="kd-row">${hideSw('stats',h.id,'')}${ti(`highlights.${i}.value`,h.value,'9년+')}${ti(`highlights.${i}.label`,h.label,'마케팅 경력')}${delB('data-del',`highlights.${i}`)}</div></div>`).join('')+addB('highlights','스탯 추가');
+    return intro('회사 행에서 <b>노출 · 프로젝트 목록 · 프로젝트 기간</b>을 바로 켜고 꺼요. 회사를 누르면 로고·이름·기간·요약·목록을 편집해요. ↑↓ = 화면 순서.')
+      +card('표시 항목',`<div class="kd-sws">${showSw('exp','logo',true,'로고')}${showSw('exp','role',true,'역할')}${showSw('exp','period',true,'재직 기간')}${showSw('exp','summary',true,'요약')}${showSw('exp','metrics',true,'회사 지표')}${showSw('exp','stats',true,'하단 스탯')}</div>`,'모든 회사 공통')
+      +rows
+      +card('하단 스탯 카드',stats,'스위치 = 노출 · 3개씩 한 줄');
+  };
 
-  // ⑥ AX — 핵심 + 콘솔 연결
-  const axCoreEd=(kd.axCore||[]).map((c,i)=>`<div data-row style="border:1px solid var(--line);border-radius:8px;padding:10px 12px;margin-bottom:8px${c.visible===false?';opacity:.55':''}"><div style="display:flex;align-items:center;gap:8px;margin-bottom:6px"><input type="checkbox" data-ax-core-on="${i}" ${c.visible!==false?'checked':''} title="노출" style="width:16px;height:16px;flex:none;cursor:pointer"><input data-ax-core-num="${i}" value="${axAttr(c.num||'')}" placeholder="01" style="${iS};width:52px;flex:none"><input data-ax-core-title="${i}" value="${axAttr(c.title||'')}" placeholder="대표 기능명 (예: 통합 대시보드)" style="${iS};flex:1;min-width:0">${mvb('data-ax-movecore',i,i===0,i===kd.axCore.length-1)}${delb('data-ax-core-del',i)}</div><textarea data-ax-core-desc="${i}" rows="2" placeholder="한 줄 설명" style="${iS};resize:vertical">${axText(c.desc||'')}</textarea></div>`).join('');
-  const axSec=sec(ttl('ax','AX · 핵심 + 콘솔 연결'),
-    lbl('AX 소개 문구 (비우면 기본값)')+kt('axIntro','흩어진 도구와 지표를 하나의 마케팅 콘솔로…')
-    +lbl('대표 기능 카드 (AX 콘솔 CORE CAPABILITIES)')+axCoreEd
-    +`<div style="display:flex;gap:8px;margin-top:4px;flex-wrap:wrap"><button data-ax-core-add class="mini">＋ 대표 기능 추가</button><button data-ax-core-reset class="mini">콘솔 대표값으로 초기화</button></div>`
-    +lbl('콘솔 버튼')+showChk('ax','link',true,'버튼 노출')+two(kt('axLinkText','AX 콘솔에서 전체 구조 보기'),kt('axLink','https://kimjinsoo-mkt-ax.vercel.app/ax'))
-    +`<div style="font-size:11.5px;color:var(--muted);margin-top:10px;line-height:1.6">전체 구조(파이프라인·유닛 이코노믹스·자동화 규칙 등)는 AX 콘솔 <code>/ax</code>(ax.html)에서 관리해요.</div>`,
-    '','ax');
+  // ── AX
+  const P_ax=()=>intro('AX 섹션은 AX 콘솔(/ax)의 대표 기능만 보여주고, 전체 구조는 콘솔로 연결해요.')
+    +card('소개 문구',F('소개',kt('axIntro','흩어진 도구와 지표를 하나의 마케팅 콘솔로…'),'비우면 기본값'))
+    +card('대표 기능 카드',(kd.axCore||[]).map((c,i)=>`<div class="kd-item${c.visible===false?' off':''}" data-row><div class="kd-row">${sw(`data-ax-core-on="${i}"`,c.visible!==false,'','노출')}<input class="kd-in" data-ax-core-num="${i}" value="${axAttr(c.num||'')}" placeholder="01" style="flex:none;width:56px"><input class="kd-in" data-ax-core-title="${i}" value="${axAttr(c.title||'')}" placeholder="대표 기능명">${upDown('data-ax-movecore',i,i===0,i===kd.axCore.length-1)}${delB('data-ax-core-del',i)}</div><textarea class="kd-in" data-ax-core-desc="${i}" rows="2" placeholder="한 줄 설명" style="margin-top:6px">${axText(c.desc||'')}</textarea></div>`).join('')
+      +`<div class="kd-acts"><button class="kd-add" data-ax-core-add>＋ 대표 기능 추가</button><button class="kd-btn" data-ax-core-reset>콘솔 대표값으로 초기화</button></div>`)
+    +card('콘솔 버튼',`<div class="kd-sws" style="margin-bottom:12px">${showSw('ax','link',true,'버튼 노출')}</div>`+G2(F('버튼 문구',kt('axLinkText','AX 콘솔에서 전체 구조 보기')),F('링크',kt('axLink','https://kimjinsoo-mkt-ax.vercel.app/ax'))));
 
-  // ⑦ Techstack — 마퀴 행
-  const tRows=kd.techstack||[];
-  const techEd=tRows.map((r,i)=>{ const off=r.visible===false; return `<div style="border:1px ${off?'dashed':'solid'} var(--line);border-radius:8px;padding:10px 12px;margin-bottom:8px${off?';background:color-mix(in oklch,var(--muted) 6%,transparent)':''}">${off?'<div style="font-size:10.5px;font-weight:700;color:var(--muted);margin-bottom:6px">화면 미노출 · 후보 목록 — 쓸 항목만 위 행으로 옮기거나 체크해서 노출</div>':''}<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px"><input type="checkbox" data-ax-tech-on="${i}" ${!off?'checked':''} title="노출" style="width:16px;height:16px;flex:none;cursor:pointer"><input data-ax-tech-label="${i}" value="${axAttr(r.label||'')}" placeholder="행 이름 (예: 마케팅·데이터)" style="${iS};flex:1;min-width:0">${mvb('data-ax-movetech',i,i===0,i===tRows.length-1)}${delb('data-ax-tech-del',i)}</div><textarea data-ax-tech-items="${i}" rows="3" placeholder="한 줄에 하나씩 (예: Meta Ads)" style="${iS};resize:vertical">${axText((r.items||[]).join('\n'))}</textarea></div>`; }).join('');
-  const techstackSec=sec(ttl('techstack','Techstack · 마퀴'),note('행 = 마퀴 한 줄 · 체크 = 화면 노출 · 한 줄에 하나씩 입력 · 홀수 행은 반대 방향으로 흐름')+techEd
-    +`<div style="display:flex;gap:8px;margin-top:4px;flex-wrap:wrap"><button data-ax-tech-add class="mini">＋ 행 추가</button><button data-ax-tech-reset class="mini">기본값 다시 채우기 (큐레이션 3행 + DB 후보)</button></div>`,'','techstack');
+  // ── Techstack
+  const P_techstack=()=>intro('흐르는 줄(마퀴) 한 개 = 한 줄 목록. 스위치를 켠 줄만 화면에 나오고, 항목은 한 줄에 하나씩 적어요.')
+    +card('줄 목록',(kd.techstack||[]).map((r,i)=>`<div class="kd-item${r.visible===false?' off':''}" data-row><div class="kd-row">${sw(`data-ax-tech-on="${i}"`,r.visible!==false,'','노출')}<input class="kd-in" data-ax-tech-label="${i}" value="${axAttr(r.label||'')}" placeholder="줄 이름 (예: 마케팅·데이터)">${upDown('data-ax-movetech',i,i===0,i===kd.techstack.length-1)}${delB('data-ax-tech-del',i)}</div><textarea class="kd-in" data-ax-tech-items="${i}" rows="3" placeholder="한 줄에 하나씩" style="margin-top:6px">${axText((r.items||[]).join('\n'))}</textarea>${r.visible===false?'<p class="kd-note">화면에 안 나오는 후보 목록이에요 — 쓸 항목만 위 줄로 옮기세요.</p>':''}</div>`).join('')
+      +`<div class="kd-acts"><button class="kd-add" data-ax-tech-add>＋ 줄 추가</button><button class="kd-btn" data-ax-tech-reset>기본값 다시 채우기</button></div>`);
 
-  // ⑧ Skills — 카드 직접 편집
-  const sk=kd.skills||[];
-  const skEd=sk.map((s,i)=>`<div data-row style="display:flex;align-items:center;gap:6px;margin-bottom:6px${s.visible===false?';opacity:.55':''}"><input type="checkbox" data-kl-on="skills:${i}" ${s.visible!==false?'checked':''} title="노출" style="width:16px;height:16px;flex:none;cursor:pointer"><input data-kl="skills:${i}:value" value="${axAttr(s.value)}" placeholder="값" style="${iS};width:64px;flex:none"><input data-kl="skills:${i}:label" value="${axAttr(s.label)}" placeholder="라벨 (예: 퍼포먼스)" style="${iS};flex:1;min-width:0"><input data-kl="skills:${i}:sub" value="${axAttr(s.sub)}" placeholder="보조 (예: Performance)" style="${iS};flex:1;min-width:0">${mvb('data-kl-move',`skills:${i}`,i===0,i===sk.length-1)}${delb('data-kl-del',`skills:${i}`)}</div>`).join('');
-  const skillsSec=sec(ttl('skills','Skills · 스킬 카드'),note('카드 = 큰 값 + 라벨 2줄 · ✓노출 · 3개씩 한 줄 · 기본값은 카테고리별 프로젝트 수')+skEd
-    +`<div style="display:flex;gap:8px;margin-top:4px;flex-wrap:wrap"><button data-kl-add="skills" class="mini">＋ 카드 추가</button><button data-kl-reset="skills" class="mini">프로젝트 수로 다시 채우기</button></div>`,'','skills');
+  // ── Skills
+  const P_skills=()=>intro('검은 카드 3개씩 한 줄이에요. 값은 크게, 라벨 두 줄은 작게 보여요.')
+    +card('카드',(kd.skills||[]).map((s,i)=>`<div class="kd-item${s.visible===false?' off':''}" data-row><div class="kd-row">${sw(`data-kl-on="skills:${i}"`,s.visible!==false,'','노출')}<input class="kd-in" data-kl="skills:${i}:value" value="${axAttr(s.value)}" placeholder="값" style="flex:none;width:64px"><input class="kd-in" data-kl="skills:${i}:label" value="${axAttr(s.label)}" placeholder="라벨"><input class="kd-in" data-kl="skills:${i}:sub" value="${axAttr(s.sub)}" placeholder="보조">${upDown('data-kl-move',`skills:${i}`,i===0,i===kd.skills.length-1)}${delB('data-kl-del',`skills:${i}`)}</div></div>`).join('')
+      +`<div class="kd-acts"><button class="kd-add" data-kl-add="skills">＋ 카드 추가</button><button class="kd-btn" data-kl-reset="skills">프로젝트 수로 다시 채우기</button></div>`);
 
-  // ⑨ Contact — 연락처 + 맨 아래 문구
-  const contactSec=sec(ttl('contact','Contact · 연락처'),
-    lbl('문구 (비우면 기본값)')+kt('contactIntro','새 프로젝트나 협업, 채용 문의가 있다면 편하게 연락 주세요.')
-    +lbl('노출 항목')+`<div>${showChk('contact','location',true,'위치')}${showChk('contact','email',true,'이메일')}${showChk('contact','phone',true,'전화')}${showChk('contact','site',true,'사이트 링크')}${showChk('contact','avail',true,'Available 배지')}</div>`
-    +two(ti('profile.phone',LIB.profile.phone,'전화 (010-0000-0000)'),kt('available','Available for work'))
-    +lbl('맨 아래 문구 (비우면 “© 연도 — 이름, Marketing Portfolio”)')+kt('footer','© '+new Date().getFullYear()+' — '+(LIB.profile.nameEn||LIB.profile.nameKo||'')+', Marketing Portfolio'),
-    '위치·이메일·사이트 링크 값은 Home과 공유','contact');
+  // ── Contact
+  const P_contact=()=>intro('맨 아래 연락처 영역이에요. 위치·이메일·사이트 링크 값은 Home과 공유돼요.')
+    +card('문구',F('안내 문구',kt('contactIntro','새 프로젝트나 협업, 채용 문의가 있다면 편하게 연락 주세요.'))+G2(F('전화',ti('profile.phone',LIB.profile.phone,'010-0000-0000')),F('Available 배지',kt('available','Available for work'))))
+    +card('노출 항목',`<div class="kd-sws">${showSw('contact','location',true,'위치')}${showSw('contact','email',true,'이메일')}${showSw('contact','phone',true,'전화')}${showSw('contact','site',true,'사이트 링크')}${showSw('contact','avail',true,'Available 배지')}</div>`)
+    +card('맨 아래 문구',F('저작권 문구',kt('footer','© '+new Date().getFullYear()+' — '+(LIB.profile.nameEn||LIB.profile.nameKo||'')+', Marketing Portfolio'),'비우면 기본값'));
 
-  const PANELS={about:aboutSec,projects:projSec,experience:expSec,ax:axSec,techstack:techstackSec,skills:skillsSec,contact:contactSec};
-  leftEl.innerHTML=klioSec+homeSec+kd.sections.map(s=>PANELS[s.key]||'').join('');
-  if(hadUI){ leftEl.querySelectorAll('details[data-ok]').forEach(x=>{ const k=x.dataset.ok; if(k in openState) x.open=openState[k]; }); leftEl.scrollTop=keepTop; }
+  const PANES={layout:P_layout,home:P_home,about:P_about,projects:P_projects,experience:P_experience,ax:P_ax,techstack:P_techstack,skills:P_skills,contact:P_contact};
+  const TABS=[['layout','구성'],['home','Home']].concat(kd.sections.map(s=>[s.key,s.label||KL[s.key]||s.key]));
+  const tabs=`<nav class="kd-tabs">`+TABS.map(([k,l])=>`<button class="kd-tab${axTab===k?' on':''}" data-kd-tab="${k}">${axText(l)}${k!=='layout'&&k!=='home'&&!secOn(k)?'<i>숨김</i>':''}</button>`).join('')+`</nav>`;
+  leftEl.innerHTML=tabs+`<div class="kd-pane"${axTab!=='layout'?` data-pv="${axTab}"`:''}>${(PANES[axTab]||P_layout)()}</div>`;
+  leftEl.dataset.tab=axTab;
+  leftEl.scrollTop=sameTab?keepTop:0;
 
   if(!axWired){
     axWired=true;
@@ -1365,13 +1426,12 @@ function renderAXAdmin(){
     const klList=n=>{ const k=axDoc().klio; if(!Array.isArray(k[n]))k[n]=[]; return k[n]; };
     const KL_NEW={skills:()=>({value:'',label:'',sub:'',visible:true})}, KL_SEED={skills:()=>skillsSeed(axDoc())};
     const rerender=()=>{ renderAXAdmin(); save(); updateAXPreview(); };
-    const dim=(el,on)=>{ const row=el.closest('[data-row]'); if(row) row.style.opacity=on?'':'.55'; };
-    // 편집하는 패널의 섹션으로 미리보기 이동 (같은 섹션 안에서는 한 번만) · 패널 제목 클릭은 항상 이동
+    const dim=(el,on)=>{ const row=el.closest('[data-row]'); if(row) row.classList.toggle('off',!on); };
+    // 편집 중인 섹션으로 미리보기 이동(같은 섹션 안에서는 한 번만)
     left.addEventListener('focusin',e=>{ const el=e.target.closest('[data-pv]'); if(el) axPvGoto(el.dataset.pv,false); });
-    left.addEventListener('click',e=>{ const sm=e.target.closest('summary'); if(!sm)return; const el=sm.closest('[data-pv]'); if(el) axPvGoto(el.dataset.pv,true); });
     left.addEventListener('input',e=>{
       const t=e.target, ds=t.dataset, k=axDoc().klio;
-      if(t.type==='checkbox'||t.type==='file'||t.tagName==='SELECT') return; // 체크박스=click, 파일·선택=change에서 처리
+      if(t.type==='checkbox'||t.type==='file'||t.tagName==='SELECT') return; // 체크=click, 파일·선택=change
       if(ds.axKlioLabel!=null){ if(k.sections[+ds.axKlioLabel])k.sections[+ds.axKlioLabel].label=t.value; axSchedule(); return; }
       if(ds.axKlioText){ k.text[ds.axKlioText]=t.value; axSchedule(); return; }
       if(ds.axTechLabel!=null){ if(k.techstack[+ds.axTechLabel])k.techstack[+ds.axTechLabel].label=t.value; axSchedule(); return; }
@@ -1381,7 +1441,6 @@ function renderAXAdmin(){
       if(ds.axCoreDesc!=null){ if(k.axCore[+ds.axCoreDesc])k.axCore[+ds.axCoreDesc].desc=t.value; axSchedule(); return; }
       if(ds.kl){ const [n,i,f]=ds.kl.split(':'), L=klList(n); if(L[+i])L[+i][f]=t.value; axSchedule(); return; }
       if(ds.knum){ const v=+t.value; kSet(ds.knum,v); const o=left.querySelector(`[data-knum-out="${ds.knum}"]`); if(o)o.textContent=v+'%'; axSchedule(); return; }
-      if(ds.kcolor){ kSet('expColor.'+ds.kcolor,t.value); axSchedule(); return; }
       if(ds.xpj){ const [ci,i,f]=ds.xpj.split(':'), L=xpjList(+ci,true); if(L&&L[+i])L[+i][f]=t.value; axSchedule(); return; }
       const p=ds.p; if(!p)return;
       let v=t.value; if(ds.arr==='lines')v=v.split('\n').map(s=>s.trim()).filter(Boolean); else if(ds.arr==='comma')v=v.split(',').map(s=>s.trim()).filter(Boolean);
@@ -1389,15 +1448,18 @@ function renderAXAdmin(){
     });
     left.addEventListener('click',e=>{
       const q=s=>e.target.closest(s), k=axDoc().klio; let el;
+      if((el=q('[data-kd-tab]'))){ axTab=el.dataset.kdTab; try{ localStorage.setItem('kilo-tab',axTab); }catch(_){} renderAXAdmin(); if(axTab!=='layout') axPvGoto(axTab==='home'?'home':axTab,true); return; }
+      if((el=q('[data-kd-w]'))){ axOpenW=axOpenW===el.dataset.kdW?'':el.dataset.kdW; renderAXAdmin(); return; }
       if((el=q('[data-add]'))){ axAdd(el.dataset.add); rerender(); return; }
       if((el=q('[data-del]'))){ axDel(el.dataset.del); rerender(); return; }
       if((el=q('[data-ax-moveco]'))){ const [i,dir]=el.dataset.axMoveco.split(':'); axMove(LIB.companies,+i,dir); rerender(); return; }
       if((el=q('[data-ax-moveklio]'))){ const [i,dir]=el.dataset.axMoveklio.split(':'); axMove(k.sections,+i,dir); rerender(); return; }
       if((el=q('[data-ax-klio-on]'))){ const s=k.sections[+el.dataset.axKlioOn]; if(s)s.on=el.checked; rerender(); return; }
-      if((el=q('[data-ax-featured]'))){ const [ci,wi]=el.dataset.axFeatured.split(':').map(Number); const w=((LIB.companies[ci]||{}).works||[])[wi]; if(w)w.featured=el.checked; save(); updateAXPreview(); return; }
+      if((el=q('[data-ax-featured]'))){ const [ci,wi]=el.dataset.axFeatured.split(':').map(Number); const w=((LIB.companies[ci]||{}).works||[])[wi]; if(w)w.featured=el.checked; rerender(); return; }
       if((el=q('[data-kchk]'))){ kSet(el.dataset.kchk,el.checked); rerender(); return; }
-      if((el=q('[data-khide]'))){ kSetHidden(el.dataset.khide,el.dataset.id,!el.checked); dim(el,el.checked); save(); updateAXPreview(); return; }
-      if((el=q('[data-pchk]'))){ axSet(el.dataset.pchk,el.checked); axSchedule(); return; }
+      if((el=q('[data-khide]'))){ kSetHidden(el.dataset.khide,el.dataset.id,!el.checked); rerender(); return; }
+      if((el=q('[data-kco]'))){ const [id,key]=el.dataset.kco.split(':'); if(!k.expCo||typeof k.expCo!=='object')k.expCo={}; k.expCo[id]=Object.assign({},k.expCo[id]||{}); k.expCo[id][key]=el.checked; rerender(); return; }
+      if((el=q('[data-pchk]'))){ axSet(el.dataset.pchk,el.checked); rerender(); return; }
       if((el=q('[data-ax-tech-on]'))){ const r=k.techstack[+el.dataset.axTechOn]; if(r)r.visible=el.checked; rerender(); return; }
       if((el=q('[data-ax-tech-add]'))){ k.techstack.push({label:'',items:[],visible:true}); rerender(); return; }
       if((el=q('[data-ax-tech-del]'))){ k.techstack.splice(+el.dataset.axTechDel,1); rerender(); return; }
@@ -1408,7 +1470,6 @@ function renderAXAdmin(){
       if((el=q('[data-ax-core-del]'))){ k.axCore.splice(+el.dataset.axCoreDel,1); rerender(); return; }
       if((el=q('[data-ax-core-reset]'))){ k.axCore=axCoreSeed(); rerender(); return; }
       if((el=q('[data-ax-movecore]'))){ const [i,dir]=el.dataset.axMovecore.split(':'); axMove(k.axCore,+i,dir); rerender(); return; }
-      if((el=q('[data-kcolor-clear]'))){ if(k.expColor)delete k.expColor[el.dataset.kcolorClear]; rerender(); return; }
       if((el=q('[data-xpj-on]'))){ const [ci,i]=el.dataset.xpjOn.split(':'), L=xpjList(+ci,true); if(L&&L[+i])L[+i].visible=el.checked; rerender(); return; }
       if((el=q('[data-xpj-add]'))){ const L=xpjList(+el.dataset.xpjAdd,true); if(L)L.push({title:'',period:'',visible:true}); rerender(); return; }
       if((el=q('[data-xpj-del]'))){ const [ci,i]=el.dataset.xpjDel.split(':'), L=xpjList(+ci,true); if(L)L.splice(+i,1); rerender(); return; }
@@ -1419,11 +1480,14 @@ function renderAXAdmin(){
       if((el=q('[data-kl-del]'))){ const [n,i]=el.dataset.klDel.split(':'); klList(n).splice(+i,1); rerender(); return; }
       if((el=q('[data-kl-move]'))){ const [n,i,dir]=el.dataset.klMove.split(':'); axMove(klList(n),+i,dir); rerender(); return; }
       if((el=q('[data-kl-reset]'))){ const n=el.dataset.klReset; k[n]=KL_SEED[n](); rerender(); return; }
+      // 아코디언 머리(안의 버튼·스위치·입력 클릭은 제외)
+      if(e.target.closest('input,button,label,select,textarea,a'))return;
+      if((el=q('[data-kd-co]'))){ axOpenCo=axOpenCo===el.dataset.kdCo?'':el.dataset.kdCo; renderAXAdmin(); axPvGoto('experience',true); return; }
+      if((el=q('[data-kd-pjco]'))){ axOpenPj=axOpenPj===el.dataset.kdPjco?'':el.dataset.kdPjco; axOpenW=''; renderAXAdmin(); axPvGoto('projects',true); return; }
     });
     left.addEventListener('change',async e=>{
       const t=e.target;
       if(t.dataset.ksel){ kSet(t.dataset.ksel,t.value); axSchedule(); return; }
-      if(t.dataset.kcolor){ kSet('expColor.'+t.dataset.kcolor,t.value); rerender(); return; }
       if(t.tagName==='SELECT'&&t.dataset.p){ axSet(t.dataset.p,t.value); axSchedule(); return; }
       const up=t.dataset&&t.dataset.axUpload; if(!up||!t.files||!t.files.length)return;
       if(!(window.CLOUD&&CLOUD.user())){ toast('이미지 업로드는 로그인이 필요해요'); t.value=''; return; }
