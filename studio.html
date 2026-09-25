@@ -1087,21 +1087,6 @@ function axEnsure(){
   LIB.profile.navOrder=LIB.profile.navOrder.filter(function(k){return NK.indexOf(k)>=0;});
   NK.forEach(function(k){if(LIB.profile.navOrder.indexOf(k)<0)LIB.profile.navOrder.push(k);});
   LIB.capabilities=LIB.capabilities||[]; LIB.pipeline=LIB.pipeline||[]; LIB.flow=LIB.flow||[]; LIB.highlights=LIB.highlights||[]; LIB.axLoop=LIB.axLoop||[]; LIB.axScreens=LIB.axScreens||[]; LIB.axNotes=LIB.axNotes||[];
-  // AX 데이터가 비어 있으면 기본 시드 (대시보드 / 콘텐츠 퍼포먼스 자동화 / 성과운영 자동화) — 이후 자유 편집
-  if(!LIB.axLoop.length){ LIB.axLoop=[
-    {id:uid(),num:'01',title:'수집 · Ingest',items:['매체·GA4·BigQuery 수집','Metabase→시트 파이프라인','UTM 3분류 정규화']},
-    {id:uid(),num:'02',title:'측정 · Measure',items:['3레이어 성과 대시보드','CAC·ROAS·유닛 이코노믹스','코호트·리텐션']},
-    {id:uid(),num:'03',title:'실행 · Activate',items:['규칙 기반 캠페인 빌더','콘텐츠 퍼포먼스 자동화','카탈로그 피드']},
-    {id:uid(),num:'04',title:'운영 · Operate',items:['성과운영 자동 리포트','이상탐지·알림','라이프사이클 CRM']}
-  ]; }
-  if(!LIB.axScreens.length){ LIB.axScreens=[
-    {id:uid(),category:'대시보드',name:'통합 성과 대시보드',badge:'L1',description:'매체·채널·전환을 한 화면에서. 정의를 고정한 단일 지표 소스.',chips:['GA4','BigQuery','Metabase']},
-    {id:uid(),category:'대시보드',name:'유닛 이코노믹스',badge:'L3',description:'LTV·CAC·회수기간을 SQL로 계산해 의사결정에 연결.',chips:['SQL','BigQuery']},
-    {id:uid(),category:'콘텐츠 퍼포먼스 자동화',name:'콘텐츠 성과 파이프라인',badge:'',description:'콘텐츠별 성과를 자동 수집·집계해 순위·개선점을 도출.',chips:['AI SDK','Sheets']},
-    {id:uid(),category:'콘텐츠 퍼포먼스 자동화',name:'카피·크리에이티브 생성',badge:'',description:'LLM으로 카피/변형을 생성하고 실제 성과와 연결.',chips:['Anthropic','OpenAI']},
-    {id:uid(),category:'성과운영 자동화',name:'캠페인 빌더',badge:'',description:'규칙 기반으로 캠페인을 자동 집행·최적화.',chips:['Meta','Google Ads']},
-    {id:uid(),category:'성과운영 자동화',name:'자동 리포트·알림',badge:'',description:'성과는 정기 리포트로, 이상은 즉시 알림으로.',chips:['GitHub Actions','Slack']}
-  ]; }
   (LIB.companies||[]).forEach(c=>{ if(!Array.isArray(c.metrics))c.metrics=[]; if(c.periodText==null)c.periodText=''; (c.works||[]).forEach(w=>{ if(!Array.isArray(w.tags))w.tags=[]; }); });
 }
 const KLIO_SEC=[['about','About'],['projects','Projects'],['experience','Experience'],['ax','AX'],['techstack','Techstack'],['skills','Skills'],['contact','Contact']];
@@ -1121,6 +1106,12 @@ function techSeedRows(){
   if(extras.length)rows.push({label:'기타 · DB',items:extras,visible:true});
   return rows;
 }
+// AX 대표 3 (AX 콘솔 /ax CORE CAPABILITIES) — klio AX 섹션엔 이 핵심만
+function axCoreSeed(){ return [
+  {num:'01',title:'통합 대시보드',desc:'서비스지표와 마케팅지표를 한 판에서, 같은 정의로 비교·결정.',visible:true},
+  {num:'02',title:'마케팅 자동화',desc:'기획·집행·최적화를 화면 안에서 — 반복은 규칙과 알림으로 자동화.',visible:true},
+  {num:'03',title:'히스토리 워크플로우',desc:'메일·회의·배포 기록이 자동으로 남는 업무 구조.',visible:true}
+]; }
 function klioNormalize(d){
   if(!d)return null;
   var KEYS=KLIO_SEC.map(function(p){return p[0];});
@@ -1134,6 +1125,9 @@ function klioNormalize(d){
   // Techstack 편집 데이터: 없으면(최초) 시드, 있으면 형태 정규화(사용자가 전부 비운 경우는 존중)
   if(!Array.isArray(d.klio.techstack)) d.klio.techstack=techSeedRows();
   d.klio.techstack=d.klio.techstack.map(function(r){ r=r||{}; return {label:(r.label!=null?String(r.label):''), items:Array.isArray(r.items)?r.items.filter(function(x){return x!=null&&String(x).trim();}).map(String):[], visible:r.visible!==false}; });
+  // AX 대표 3: 없으면 콘솔 대표값 시드, 있으면 정규화
+  if(!Array.isArray(d.klio.axCore)) d.klio.axCore=axCoreSeed();
+  d.klio.axCore=d.klio.axCore.map(function(c,i){ c=c||{}; return {num:(c.num!=null&&String(c.num).trim()?String(c.num):'0'+(i+1)), title:(c.title!=null?String(c.title):''), desc:(c.desc!=null?String(c.desc):''), visible:c.visible!==false}; });
   return d.klio;
 }
 function klioEnsure(){ return klioNormalize(axDoc()); }
@@ -1205,11 +1199,27 @@ function renderAXAdmin(){
   // 테크스택 · 스킬 재료
   const techSec=sec('스킬 재료 · 역량/스택',lbl('역량칩 (Skills 집계 · Techstack 기본값 원본)')+caps+lbl('스택 (영역·제목·설명)')+stack,'Skills 섹션 집계 + Techstack “기본값 다시 채우기” 원본');
 
-  // AX 섹션 에디터 (Archive 자리 → AX)
-  const axLoopEd=(LIB.axLoop||[]).map((x,i)=>item(two(ti(`axLoop.${i}.num`,x.num,'번호 (01)'),ti(`axLoop.${i}.title`,x.title,'단계명 (수집·Ingest)'))+lbl('항목 (줄바꿈)')+taLines(`axLoop.${i}.items`,x.items,'Metabase→시트\nGA4/BigQuery'),`axLoop.${i}`)).join('')+add('axLoop','루프 단계 추가');
-  const axScrEd=(LIB.axScreens||[]).map((x,i)=>item(two(ti(`axScreens.${i}.category`,x.category,'카테고리 (성과·매출)'),ti(`axScreens.${i}.badge`,x.badge,'뱃지 (L1·선택)'))+lbl('화면명')+ti(`axScreens.${i}.name`,x.name,'통합 성과 대시보드')+lbl('설명')+ta(`axScreens.${i}.description`,x.description,'')+lbl('칩 (쉼표)')+comma(`axScreens.${i}.chips`,x.chips,'GA4, BigQuery'),`axScreens.${i}`)).join('')+add('axScreens','화면 추가');
-  const axNoteEd=(LIB.axNotes||[]).map((x,i)=>item(lbl('구분')+'<select data-p="axNotes.'+i+'.section" style="'+iS+'"><option value="principle"'+(x.section!=='definition'?' selected':'')+'>사상(principle)</option><option value="definition"'+(x.section==='definition'?' selected':'')+'>정의(definition)</option></select>'+lbl('제목')+ti(`axNotes.${i}.title`,x.title,'')+lbl('내용')+ta(`axNotes.${i}.body`,x.body,''),`axNotes.${i}`)).join('')+add('axNotes','사상/정의 추가');
-  const axSec=sec('AX 섹션 (Archive 자리)',lbl('AX 소개 문구 (비우면 사상 첫 문장/기본값)')+'<input data-ax-klio-text="axIntro" value="'+axAttr((axDoc().klio.text||{}).axIntro||'')+'" placeholder="AI로 마케팅을 자동화·확장…" style="'+iS+'">'+lbl('운영 파이프라인 (수집→측정→실행 flow · 카테고리 순서와 무관)')+axLoopEd+lbl('도구·화면 카드 (카테고리로 그룹 · 프로젝트형)')+axScrEd+lbl('운영 사상·정의 (첫 principle이 소개 문구 대체)')+axNoteEd,'AX 섹션 · 인페이지 도구 카드');
+  // AX 섹션 에디터 (핵심만: 대표 3 + 콘솔 링크. 전체 구조는 /ax = ax.html)
+  var kdax=axDoc().klio;
+  var axCoreEd=(kdax.axCore||[]).map(function(c,i){
+    return '<div style="border:1px solid var(--line);border-radius:8px;padding:10px 12px;margin-bottom:8px">'
+      +'<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">'
+      +'<input type="checkbox" data-ax-core-on="'+i+'" '+(c.visible!==false?'checked':'')+' title="표시" style="width:16px;height:16px;flex:none;cursor:pointer">'
+      +'<input data-ax-core-num="'+i+'" value="'+axAttr(c.num||'')+'" placeholder="01" style="width:48px;flex:none;padding:6px 8px;border:1px solid var(--line);border-radius:6px;font-size:13px;background:transparent;color:inherit;font-family:inherit">'
+      +'<input data-ax-core-title="'+i+'" value="'+axAttr(c.title||'')+'" placeholder="대표 기능명 (예: 통합 대시보드)" style="flex:1;min-width:0;padding:6px 8px;border:1px solid var(--line);border-radius:6px;font-size:13px;background:transparent;color:inherit;font-family:inherit">'
+      +'<button data-ax-movecore="'+i+':up" class="mini" style="flex:none;padding:2px 11px"'+(i===0?' disabled':'')+'>▲</button>'
+      +'<button data-ax-movecore="'+i+':down" class="mini" style="flex:none;padding:2px 11px"'+(i===(kdax.axCore.length-1)?' disabled':'')+'>▼</button>'
+      +'<button data-ax-core-del="'+i+'" class="mini" style="flex:none;padding:2px 10px;color:#c0392b">✕</button>'
+      +'</div>'
+      +'<textarea data-ax-core-desc="'+i+'" rows="2" placeholder="한 줄 설명" style="'+iS+';resize:vertical">'+axText(c.desc||'')+'</textarea>'
+      +'</div>';
+  }).join('');
+  var axCoreActions='<div style="display:flex;gap:8px;margin-top:4px;flex-wrap:wrap"><button data-ax-core-add class="mini">＋ 대표 기능 추가</button><button data-ax-core-reset class="mini">콘솔 대표값으로 초기화</button></div>';
+  const axSec=sec('AX 섹션 (핵심 + 콘솔 연결)',
+    lbl('AX 소개 문구 (비우면 기본값)')+'<input data-ax-klio-text="axIntro" value="'+axAttr((axDoc().klio.text||{}).axIntro||'')+'" placeholder="흩어진 도구와 지표를 하나의 마케팅 콘솔로…" style="'+iS+'">'
+    +lbl('대표 기능 (AX 콘솔 CORE CAPABILITIES · 화면엔 이 카드만 노출)')+axCoreEd+axCoreActions
+    +'<div style="font-size:11.5px;color:var(--muted);margin-top:10px;line-height:1.6">전체 구조(파이프라인·유닛 이코노믹스·자동화 규칙 등)는 <b>AX 콘솔 <code>/ax</code></b>에서 보여줍니다. 콘솔 내용은 <code>ax.html</code> 파일에서 관리해요.</div>',
+    'AX 콘솔 대표 3 + /ax 링크');
   // Techstack 마퀴 에디터 (klio.techstack)
   var tRows=(axDoc().klio.techstack||[]);
   var techEd=tRows.map(function(r,i){
@@ -1239,8 +1249,8 @@ function renderAXAdmin(){
   if(!axWired){
     axWired=true;
     const left=$('#axLeft');
-    left.addEventListener('input',e=>{ const t=e.target; const kl=t.dataset.axKlioLabel, ktx=t.dataset.axKlioText, tl=t.dataset.axTechLabel, tit=t.dataset.axTechItems; if(kl!=null){ if(axDoc().klio&&axDoc().klio.sections[+kl])axDoc().klio.sections[+kl].label=t.value; axSchedule(); return; } if(ktx){ if(axDoc().klio)axDoc().klio.text[ktx]=t.value; axSchedule(); return; } if(tl!=null){ var _k=axDoc().klio; if(_k&&_k.techstack&&_k.techstack[+tl])_k.techstack[+tl].label=t.value; axSchedule(); return; } if(tit!=null){ var _k2=axDoc().klio; if(_k2&&_k2.techstack&&_k2.techstack[+tit])_k2.techstack[+tit].items=t.value.split('\n').map(s=>s.trim()).filter(Boolean); axSchedule(); return; } const p=t.dataset.p; if(!p)return; let v=t.value; if(t.dataset.arr==='lines')v=v.split('\n').map(s=>s.trim()).filter(Boolean); else if(t.dataset.arr==='comma')v=v.split(',').map(s=>s.trim()).filter(Boolean); axSet(p,v); axSchedule(); });
-    left.addEventListener('click',e=>{ const a=e.target.closest('[data-add]'),d=e.target.closest('[data-del]'),mv=e.target.closest('[data-ax-movenav]'),mc=e.target.closest('[data-ax-moveco]'),mk=e.target.closest('[data-ax-moveklio]'),kon=e.target.closest('[data-ax-klio-on]'),fe=e.target.closest('[data-ax-featured]'),ton=e.target.closest('[data-ax-tech-on]'),tadd=e.target.closest('[data-ax-tech-add]'),tdel=e.target.closest('[data-ax-tech-del]'),trst=e.target.closest('[data-ax-tech-reset]'),tmv=e.target.closest('[data-ax-movetech]'); if(a){ axAdd(a.dataset.add); renderAXAdmin(); save(); updateAXPreview(); } else if(d){ axDel(d.dataset.del); renderAXAdmin(); save(); updateAXPreview(); } else if(mv){ var pp=mv.getAttribute('data-ax-movenav').split(':'); axMove(LIB.profile.navOrder,+pp[0],pp[1]); renderAXAdmin(); save(); updateAXPreview(); } else if(mc){ var qq=mc.getAttribute('data-ax-moveco').split(':'); axMove(LIB.companies,+qq[0],qq[1]); renderAXAdmin(); save(); updateAXPreview(); } else if(mk){ var kk=mk.getAttribute('data-ax-moveklio').split(':'); axMove(axDoc().klio.sections,+kk[0],kk[1]); renderAXAdmin(); save(); updateAXPreview(); } else if(kon){ var ki=+kon.getAttribute('data-ax-klio-on'); if(axDoc().klio&&axDoc().klio.sections[ki])axDoc().klio.sections[ki].on=kon.checked; save(); updateAXPreview(); } else if(ton){ var kt=axDoc().klio; var tti=+ton.getAttribute('data-ax-tech-on'); if(kt&&kt.techstack&&kt.techstack[tti])kt.techstack[tti].visible=ton.checked; save(); updateAXPreview(); } else if(tadd){ var kt2=axDoc().klio; if(kt2){ if(!Array.isArray(kt2.techstack))kt2.techstack=[]; kt2.techstack.push({label:'',items:[],visible:true}); } renderAXAdmin(); save(); updateAXPreview(); } else if(tdel){ var kt3=axDoc().klio; if(kt3&&Array.isArray(kt3.techstack))kt3.techstack.splice(+tdel.getAttribute('data-ax-tech-del'),1); renderAXAdmin(); save(); updateAXPreview(); } else if(trst){ var kt4=axDoc().klio; if(kt4)kt4.techstack=techSeedRows(); renderAXAdmin(); save(); updateAXPreview(); } else if(tmv){ var tp=tmv.getAttribute('data-ax-movetech').split(':'); var kt5=axDoc().klio; if(kt5&&Array.isArray(kt5.techstack))axMove(kt5.techstack,+tp[0],tp[1]); renderAXAdmin(); save(); updateAXPreview(); } else if(fe){ var gg=fe.getAttribute('data-ax-featured').split(':'); var cc=LIB.companies[+gg[0]]; if(cc&&cc.works&&cc.works[+gg[1]])cc.works[+gg[1]].featured=fe.checked; save(); updateAXPreview(); } });
+    left.addEventListener('input',e=>{ const t=e.target; const kl=t.dataset.axKlioLabel, ktx=t.dataset.axKlioText, tl=t.dataset.axTechLabel, tit=t.dataset.axTechItems, cn=t.dataset.axCoreNum, cti=t.dataset.axCoreTitle, cds=t.dataset.axCoreDesc; if(kl!=null){ if(axDoc().klio&&axDoc().klio.sections[+kl])axDoc().klio.sections[+kl].label=t.value; axSchedule(); return; } if(ktx){ if(axDoc().klio)axDoc().klio.text[ktx]=t.value; axSchedule(); return; } if(tl!=null){ var _k=axDoc().klio; if(_k&&_k.techstack&&_k.techstack[+tl])_k.techstack[+tl].label=t.value; axSchedule(); return; } if(tit!=null){ var _k2=axDoc().klio; if(_k2&&_k2.techstack&&_k2.techstack[+tit])_k2.techstack[+tit].items=t.value.split('\n').map(s=>s.trim()).filter(Boolean); axSchedule(); return; } if(cn!=null){ var _c=axDoc().klio; if(_c&&_c.axCore&&_c.axCore[+cn])_c.axCore[+cn].num=t.value; axSchedule(); return; } if(cti!=null){ var _c2=axDoc().klio; if(_c2&&_c2.axCore&&_c2.axCore[+cti])_c2.axCore[+cti].title=t.value; axSchedule(); return; } if(cds!=null){ var _c3=axDoc().klio; if(_c3&&_c3.axCore&&_c3.axCore[+cds])_c3.axCore[+cds].desc=t.value; axSchedule(); return; } const p=t.dataset.p; if(!p)return; let v=t.value; if(t.dataset.arr==='lines')v=v.split('\n').map(s=>s.trim()).filter(Boolean); else if(t.dataset.arr==='comma')v=v.split(',').map(s=>s.trim()).filter(Boolean); axSet(p,v); axSchedule(); });
+    left.addEventListener('click',e=>{ const a=e.target.closest('[data-add]'),d=e.target.closest('[data-del]'),mv=e.target.closest('[data-ax-movenav]'),mc=e.target.closest('[data-ax-moveco]'),mk=e.target.closest('[data-ax-moveklio]'),kon=e.target.closest('[data-ax-klio-on]'),fe=e.target.closest('[data-ax-featured]'),ton=e.target.closest('[data-ax-tech-on]'),tadd=e.target.closest('[data-ax-tech-add]'),tdel=e.target.closest('[data-ax-tech-del]'),trst=e.target.closest('[data-ax-tech-reset]'),tmv=e.target.closest('[data-ax-movetech]'),con=e.target.closest('[data-ax-core-on]'),cad=e.target.closest('[data-ax-core-add]'),cdl=e.target.closest('[data-ax-core-del]'),crs=e.target.closest('[data-ax-core-reset]'),cmv=e.target.closest('[data-ax-movecore]'); if(a){ axAdd(a.dataset.add); renderAXAdmin(); save(); updateAXPreview(); } else if(d){ axDel(d.dataset.del); renderAXAdmin(); save(); updateAXPreview(); } else if(mv){ var pp=mv.getAttribute('data-ax-movenav').split(':'); axMove(LIB.profile.navOrder,+pp[0],pp[1]); renderAXAdmin(); save(); updateAXPreview(); } else if(mc){ var qq=mc.getAttribute('data-ax-moveco').split(':'); axMove(LIB.companies,+qq[0],qq[1]); renderAXAdmin(); save(); updateAXPreview(); } else if(mk){ var kk=mk.getAttribute('data-ax-moveklio').split(':'); axMove(axDoc().klio.sections,+kk[0],kk[1]); renderAXAdmin(); save(); updateAXPreview(); } else if(kon){ var ki=+kon.getAttribute('data-ax-klio-on'); if(axDoc().klio&&axDoc().klio.sections[ki])axDoc().klio.sections[ki].on=kon.checked; save(); updateAXPreview(); } else if(ton){ var kt=axDoc().klio; var tti=+ton.getAttribute('data-ax-tech-on'); if(kt&&kt.techstack&&kt.techstack[tti])kt.techstack[tti].visible=ton.checked; save(); updateAXPreview(); } else if(tadd){ var kt2=axDoc().klio; if(kt2){ if(!Array.isArray(kt2.techstack))kt2.techstack=[]; kt2.techstack.push({label:'',items:[],visible:true}); } renderAXAdmin(); save(); updateAXPreview(); } else if(tdel){ var kt3=axDoc().klio; if(kt3&&Array.isArray(kt3.techstack))kt3.techstack.splice(+tdel.getAttribute('data-ax-tech-del'),1); renderAXAdmin(); save(); updateAXPreview(); } else if(trst){ var kt4=axDoc().klio; if(kt4)kt4.techstack=techSeedRows(); renderAXAdmin(); save(); updateAXPreview(); } else if(tmv){ var tp=tmv.getAttribute('data-ax-movetech').split(':'); var kt5=axDoc().klio; if(kt5&&Array.isArray(kt5.techstack))axMove(kt5.techstack,+tp[0],tp[1]); renderAXAdmin(); save(); updateAXPreview(); } else if(con){ var cc0=axDoc().klio; var cci=+con.getAttribute('data-ax-core-on'); if(cc0&&cc0.axCore&&cc0.axCore[cci])cc0.axCore[cci].visible=con.checked; save(); updateAXPreview(); } else if(cad){ var cc1=axDoc().klio; if(cc1){ if(!Array.isArray(cc1.axCore))cc1.axCore=[]; cc1.axCore.push({num:'0'+(cc1.axCore.length+1),title:'',desc:'',visible:true}); } renderAXAdmin(); save(); updateAXPreview(); } else if(cdl){ var cc2=axDoc().klio; if(cc2&&Array.isArray(cc2.axCore))cc2.axCore.splice(+cdl.getAttribute('data-ax-core-del'),1); renderAXAdmin(); save(); updateAXPreview(); } else if(crs){ var cc3=axDoc().klio; if(cc3)cc3.axCore=axCoreSeed(); renderAXAdmin(); save(); updateAXPreview(); } else if(cmv){ var cp=cmv.getAttribute('data-ax-movecore').split(':'); var cc4=axDoc().klio; if(cc4&&Array.isArray(cc4.axCore))axMove(cc4.axCore,+cp[0],cp[1]); renderAXAdmin(); save(); updateAXPreview(); } else if(fe){ var gg=fe.getAttribute('data-ax-featured').split(':'); var cc=LIB.companies[+gg[0]]; if(cc&&cc.works&&cc.works[+gg[1]])cc.works[+gg[1]].featured=fe.checked; save(); updateAXPreview(); } });
     left.addEventListener('change',e=>{ var t=e.target; if(t.tagName==='SELECT'&&t.dataset.p){ axSet(t.dataset.p,t.value); axSchedule(); } });
     const pub=$('#axPublish'); if(pub)pub.onclick=()=>{ const d=axDoc(); d.updated=Date.now(); save(); const u=viewURL(d); if(navigator.clipboard)navigator.clipboard.writeText(u).then(()=>toast('발행됨 · 링크 복사: '+u)).catch(()=>toast('발행됨: '+u)); else toast('발행됨: '+u); };
     const vo=$('#axViewOpen'); if(vo)vo.onclick=()=>{ const d=axDoc(); save(); setTimeout(()=>window.open(viewURL(d),'_blank'),300); };
