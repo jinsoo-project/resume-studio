@@ -1184,16 +1184,26 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
         try { var bg = getComputedStyle(card.querySelector(".pp-media")).backgroundColor.match(/\d+/g); if (bg) { var mx = function (x) { return Math.round(+x + (247 - x) * 0.8); }; document.body.style.backgroundColor = "rgb(" + mx(bg[0]) + "," + mx(bg[1]) + "," + mx(bg[2]) + ")"; } } catch (e) {}
         if (ready) { try { if (window.parent && window.parent !== window) window.parent.postMessage({ klio: "card", id: card.getAttribute("data-id") }, "*"); } catch (e) {} }
       }
+      var lockT = null, lockUntil = 0; // 버튼·키로 넘기는 동안엔 목표 카드만 활성(지나가는 카드로 깜빡임 방지)
       function go(card, instant) {
         if (!card) return;
         var left = card.offsetLeft - (track.clientWidth - card.offsetWidth) / 2;
+        lockT = card; lockUntil = Date.now() + (instant ? 200 : 1000);
         try { track.scrollTo({ left: left, behavior: (instant || reduce) ? "instant" : "smooth" }); } catch (e) { track.scrollLeft = left; }
         setActive(card);
       }
       function step(dir) { var v = vis(); go(v[Math.max(0, Math.min(v.length - 1, cur + dir))]); }
       function goId(id) { var c = cards.filter(function (x) { return x.getAttribute("data-id") === id; })[0]; if (!c) return; if (c.hidden) { var all = document.querySelector('.pp-chip[data-f="*"]'); if (all) all.click(); } go(c, true); }
       if ("IntersectionObserver" in window) {
-        var io = new IntersectionObserver(function (es) { es.forEach(function (e) { if (e.isIntersecting && e.intersectionRatio > 0.55) setActive(e.target); }); }, { root: track, threshold: [0.55, 0.8] });
+        // 카드가 80% 이상 보일 때(들어올 때)만 활성 — 나가는 카드가 0.8을 지나며 다시 켜지는 문제 방지
+        var io = new IntersectionObserver(function (es) {
+          es.forEach(function (e) {
+            if (!e.isIntersecting || e.intersectionRatio < 0.8) return;
+            if (lockT && Date.now() < lockUntil && e.target !== lockT) return;
+            if (e.target === lockT) lockT = null;
+            if (!e.target.classList.contains("on")) setActive(e.target);
+          });
+        }, { root: track, threshold: [0.8] });
         cards.forEach(function (c) { io.observe(c); });
       }
       document.addEventListener("click", function (e) {
