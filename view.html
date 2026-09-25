@@ -41,6 +41,22 @@ function render(doc,sec){
   f.style.display='block';
 }
 function fail(t){var f=document.getElementById('frame');f.style.display='none';var m=document.getElementById('msg');m.style.display='grid';m.textContent=t;}
+// 조회수: 브라우저 세션당 1회 +1 (?kilo-owner=1 로 연 브라우저는 '내 방문'으로 영구 제외, =0 해제) → 누적·오늘을 포트폴리오로 전달
+async function trackViews(slug){
+  var q=new URLSearchParams(location.search), owner=false, seen=false, key='kv:'+slug;
+  try{
+    if(q.get('kilo-owner')==='1')localStorage.setItem('kilo-owner','1');
+    if(q.get('kilo-owner')==='0')localStorage.removeItem('kilo-owner');
+    owner=localStorage.getItem('kilo-owner')==='1';
+    if(q.has('kilo-owner')){ q.delete('kilo-owner'); history.replaceState(null,'',location.pathname+(q.toString()?'?'+q:'')+location.hash); }
+  }catch(e){}
+  try{ seen=sessionStorage.getItem(key)==='1'; }catch(e){}
+  if(!owner&&!seen){ try{ await window.CLOUD.trackView(slug); try{ sessionStorage.setItem(key,'1'); }catch(e){} }catch(e){} }
+  var v=null; try{ v=await window.CLOUD.getViews(slug); }catch(e){}
+  var f=document.getElementById('frame');
+  var post=function(){ try{ f.contentWindow.postMessage({klio:'views',total:v?v.total:null,today:v?v.today:null},'*'); }catch(e){} };
+  if(f.contentDocument&&f.contentDocument.readyState==='complete'&&f.contentDocument.querySelector('.page')) post(); else f.addEventListener('load',post,{once:true});
+}
 // 포트폴리오 하단 독 이동 → 주소창 해시 동기화(공유 가능한 /portfolio#projects), 해시 변경 → 해당 섹션 이동
 window.addEventListener('message',function(e){var f=document.getElementById('frame');if(!f||e.source!==f.contentWindow)return;var m=e.data;if(m&&m.klio==='sec'&&typeof m.id==='string'&&SEC_RE.test(m.id)){try{history.replaceState(null,'',location.pathname+location.search+(m.id==='home'?'':'#'+m.id));}catch(_){}}});
 window.addEventListener('hashchange',function(){var h=location.hash.slice(1);if(SEC_RE.test(h))gotoSec(h,false);});
@@ -68,7 +84,7 @@ window.addEventListener('hashchange',function(){var h=location.hash.slice(1);if(
       // 슬러그별 템플릿 강제 (DB 재발행 없이 표시 템플릿 교체). ?tpl= 로도 override 가능.
       var FORCE_TPL={portfolio:"klio"};
       var tplOverride=params.get('tpl')||FORCE_TPL[slug];
-      if(row&&row.snapshot){ if(tplOverride) row.snapshot.template=tplOverride; render(row.snapshot,secHash); return; }
+      if(row&&row.snapshot){ if(tplOverride) row.snapshot.template=tplOverride; render(row.snapshot,secHash); if(row.snapshot.template==='klio') trackViews(slug); return; }
       fail('해당 주소의 이력서를 찾을 수 없어요. (비공개이거나 삭제됨)');
     }catch(e){ fail('불러오지 못했어요: '+(e.message||e)); }
     return;

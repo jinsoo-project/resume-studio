@@ -1199,7 +1199,7 @@ function klioNormalize(d){
     return {label:lb, items:Array.isArray(r.items)?r.items.filter(function(x){return x!=null&&String(x).trim();}).map(String):[], visible:vis}; });
   // AX 대표 3: 없으면 콘솔 대표값 시드, 있으면 정규화
   if(!Array.isArray(d.klio.axCore)) d.klio.axCore=axCoreSeed();
-  d.klio.axCore=d.klio.axCore.map(function(c,i){ c=c||{}; return {num:(c.num!=null&&String(c.num).trim()?String(c.num):'0'+(i+1)), title:(c.title!=null?String(c.title):''), desc:(c.desc!=null?String(c.desc):''), visible:c.visible!==false}; });
+  d.klio.axCore=d.klio.axCore.map(function(c,i){ c=c||{}; return {num:(c.num!=null&&String(c.num).trim()?String(c.num):'0'+(i+1)), title:(c.title!=null?String(c.title):''), desc:(c.desc!=null?String(c.desc):''), img:(c.img?String(c.img):''), visible:c.visible!==false}; });
   // 표시 설정: show(표시 항목 on/off) · hidden(개별 숨김 id 목록) · skills(스킬 카드)
   if(!d.klio.show||typeof d.klio.show!=='object')d.klio.show={};
   if(!d.klio.hidden||typeof d.klio.hidden!=='object'){
@@ -1251,7 +1251,7 @@ function updateAXPreview(){ clearTimeout(axPvTimer); axPvTimer=setTimeout(()=>{
     try{ y=f.contentWindow?Math.round(f.contentWindow.scrollY||0):0; }catch(e){}
     html=html.replace('document.documentElement.classList.add("js")','');
   }
-  f.onload=()=>{ if(!y)return; try{ f.contentWindow.scrollTo({top:y,behavior:'instant'}); }catch(e){ try{ f.contentWindow.scrollTo(0,y); }catch(_){} } };
+  f.onload=()=>{ postPreviewViews(); if(!y)return; try{ f.contentWindow.scrollTo({top:y,behavior:'instant'}); }catch(e){ try{ f.contentWindow.scrollTo(0,y); }catch(_){} } };
   f.setAttribute('srcdoc',html); axPvRendered=true;
 },220); }
 // 편집 패널 ↔ 미리보기 연동: 패널(data-pv)에 들어가면 미리보기가 그 섹션으로 이동
@@ -1263,6 +1263,19 @@ let axWired=false;
 // KILO 대시보드 상태: 활성 탭(기억) · 펼친 회사/작업(아코디언, 한 번에 하나)
 let axTab=(()=>{ try{ return localStorage.getItem('kilo-tab')||'layout'; }catch(e){ return 'layout'; } })();
 let axOpenCo='', axOpenPj='', axOpenW='';
+// 조회수 실제 집계(트래커) — Home 탭에서 확인·보정, 미리보기에도 전달
+let axViews={data:null,err:null,loading:false,at:0};
+function kstToday(){ return new Date(Date.now()+9*3600e3).toISOString().slice(0,10); }
+function postPreviewViews(){ const f=$('#axPreview'); try{ if(f&&f.contentWindow)f.contentWindow.postMessage({klio:'views',total:axViews.data?axViews.data.total:null,today:axViews.data?axViews.data.today:null},'*'); }catch(e){} }
+async function axFetchViews(force){
+  if(axViews.loading)return; if(!force&&axViews.at&&Date.now()-axViews.at<30000){ postPreviewViews(); return; }
+  if(!(window.CLOUD&&CLOUD.enabled())){ axViews={data:null,err:'offline',loading:false,at:Date.now()}; return; }
+  axViews.loading=true;
+  try{ axViews.data=await CLOUD.getViews(axDoc().slug||'portfolio'); axViews.err=null; }
+  catch(e){ axViews.data=null; axViews.err=(e&&e.message)||String(e); }
+  axViews.loading=false; axViews.at=Date.now();
+  if(axTab==='home'&&document.querySelector('#v-ax:not(.hidden)')) renderAXAdmin(); else postPreviewViews();
+}
 function renderAXAdmin(){
   axEnsure(); klioEnsure();
   const leftEl=$('#axLeft'); if(!leftEl)return;
@@ -1302,10 +1315,22 @@ function renderAXAdmin(){
   // ── Home
   const sum0=(String(LIB.profile.summary||'').split(/(?<=다\.)\s+/)[0]||'').trim();
   const dimV=(kd.ui&&kd.ui.photoDim!=null&&!isNaN(+kd.ui.photoDim))?+kd.ui.photoDim:35;
+  // 첫 문장 자동값(템플릿과 동일 규칙: 숨은 고정 문구 없음, 이름이 문장으로 끝나면 대시 없이 이어 붙임)
+  const hN=String(LIB.profile.nameKo||LIB.profile.nameEn||'').trim(), hT=String(LIB.profile.tagline||LIB.profile.title||'').trim();
+  const heroAuto=(hN?hN+(hT?(/[.!?。]$/.test(hN)?' ':' — '):''):'')+hT+(hT&&!/[.!?。]$/.test(hT)?'.':'');
+  // 조회수: 실제 집계(트래커) + 표시 보정(klio.views) — 숫자를 고치면 보정값으로 저장
+  const KV=kd.views||{}, kToday=kstToday(), vReal=axViews.data||{total:0,today:0};
+  const vTa=+KV.totalAdj||0, vTda=KV.todayDay===kToday?(+KV.todayAdj||0):0;
+  const vState=axViews.loading?'실제 집계 불러오는 중…':axViews.err?`<b style="color:#c0392b">트래커 미연결</b> — Supabase에서 <code>supabase/schema_v5_views.sql</code>을 한 번 실행해야 방문이 집계돼요. (지금은 아래 숫자만 표시)`:`<b style="color:var(--ok)">트래커 연결됨</b> · 실제 집계 누적 ${vReal.total.toLocaleString('ko-KR')} · 오늘 ${vReal.today.toLocaleString('ko-KR')}`;
+  const viewsCard=card('조회수',`<div class="kd-sws" style="margin-bottom:12px">${showSw('home','views',true,'조회수 표시')}</div>`
+    +G2(F('누적 (화면에 보일 숫자)',`<input class="kd-in" type="number" min="0" data-kview="total" value="${vReal.total+vTa}">`),F('오늘 (화면에 보일 숫자)',`<input class="kd-in" type="number" min="0" data-kview="today" value="${vReal.today+vTda}">`))
+    +`<p class="kd-note">${vState}</p><p class="kd-note">숫자를 고치면 “실제 집계 + 보정값”으로 저장돼요 — 이후 방문도 이어서 더해져요. 오늘 보정은 오늘 하루만 적용돼요.</p>`
+    +`<div class="kd-acts"><a class="kd-btn" href="https://kimjinsoo-mkt-ax.vercel.app/portfolio?kilo-owner=1" target="_blank" rel="noopener" title="이 브라우저에서 여는 포트폴리오 방문은 집계하지 않아요">이 브라우저 방문 제외</a><button class="kd-btn" data-kview-reset>보정 지우기</button><button class="kd-btn" data-kview-refresh>새로 고침</button></div>`
+    +G2(F('누적 라벨',kt('viewsTotal','누적')),F('오늘 라벨',kt('viewsToday','오늘'))));
   const P_home=()=>intro('맨 위 첫 화면이에요. 비워 둔 칸은 기본값으로 보여요.')
     +card('이름 · 문장',G2(F('영문 이름',ti('profile.nameEn',LIB.profile.nameEn,'Jinsoo Kim'),'좌상단 서명'),F('이름 (국문)',ti('profile.nameKo',LIB.profile.nameKo,'김진수')))
-      +F('대표 문장',ta('profile.tagline',LIB.profile.tagline,'마케팅의 문제를 AI와 코드로 푸는 그로스 빌더',2),'“저는 {이름} — {이 문장}.”')
-      +F('첫 문장 직접 쓰기',kta('heroMain','저는 '+(LIB.profile.nameKo||'이름')+' — '+(LIB.profile.tagline||'대표 문장')+'.',2),'선택 · 쓰면 위 형식 대신 이 문장이 크게 보여요 (예: 안녕하세요. 김진수입니다.)')
+      +F('대표 문장',ta('profile.tagline',LIB.profile.tagline,'마케팅의 문제를 AI와 코드로 푸는 그로스 빌더',2),'첫 문장 = “{이름} — {대표 문장}.”')
+      +F('첫 문장 직접 쓰기',kta('heroMain',heroAuto,2),'선택 · 비우면 위 칸들로 자동(회색 글씨가 지금 모습) · 쓰면 이 문장 그대로')
       +F('회색 보조 문장',kta('heroSub',sum0,2),'비우면 소개 첫 문장')
       +F('직함',ti('profile.title',LIB.profile.title,'마케팅 × AI 프로덕트 빌더'),'대표 문장이 비었을 때 대신 사용'))
     +card('사진 카드',`<div class="kd-row" style="margin-bottom:12px">${thumb(LIB.profile.avatar,48)}<div style="flex:1;min-width:0">${ti('profile.avatar',LIB.profile.avatar,'사진 URL (또는 업로드)')}</div>${upl('avatar','업로드')}</div>`
@@ -1315,7 +1340,8 @@ function renderAXAdmin(){
       +G2(F('이니셜',kt('initials','JK'),'사진 끌 때'),F('회전 문구',kt('orbit','JINSOO KIM · MARKETER · '))))
     +card('상단 연락처',`<div class="kd-sws" style="margin-bottom:12px">${showSw('home','location',true,'위치')}${showSw('home','email',true,'이메일')}${showSw('home','site',true,'사이트 링크')}</div>`
       +G2(F('위치',ti('profile.location',LIB.profile.location,'Seoul, KR')),F('이메일',ti('profile.email',LIB.profile.email,'you@mail.com')))
-      +F('사이트 링크',kt('siteUrl','https://kimjinsoo-mkt-ax.vercel.app'),'Contact와 공유 · 비우면 기본 도메인'));
+      +F('사이트 링크',kt('siteUrl','https://kimjinsoo-mkt-ax.vercel.app'),'Contact와 공유 · 비우면 기본 도메인'))
+    +viewsCard;
 
   // ── About
   const P_about=()=>intro('About 섹션 문단이에요.')
@@ -1359,8 +1385,9 @@ function renderAXAdmin(){
       const CO=(kd.expCo||{})[c.id]||{};
       const pjOn=CO.pj!=null?CO.pj!==false:kShown('exp','projects',false);
       const pjpOn=CO.pjPeriod!=null?CO.pjPeriod!==false:kShown('exp','pjPeriod',true);
+      const thOn=CO.thumbs!=null?CO.thumbs!==false:kShown('exp','thumbs',true);
       const hd=`<div class="kd-acc-hd" data-kd-co="${axAttr(key)}"><span class="kd-car">▶</span>${thumb(c.logo,30)}<div class="kd-acc-tt"><b>${axText(coName(c))}</b><small>${axText(c.role||'역할 미입력')}</small></div>${upDown('data-ax-moveco',ci,ci===0,ci===cos.length-1)}${hideSw('companies',c.id,'노출')}</div>`;
-      const sub=c.id?`<div class="kd-acc-sub">${sw(`data-kco="${axAttr(c.id)}:pj"`,pjOn,'프로젝트 목록')}${sw(`data-kco="${axAttr(c.id)}:pjPeriod"`,pjpOn,'프로젝트 기간')}</div>`:'';
+      const sub=c.id?`<div class="kd-acc-sub">${sw(`data-kco="${axAttr(c.id)}:pj"`,pjOn,'프로젝트 목록')}${sw(`data-kco="${axAttr(c.id)}:pjPeriod"`,pjpOn,'프로젝트 기간')}${sw(`data-kco="${axAttr(c.id)}:thumbs"`,thOn,'썸네일')}</div>`:'';
       let body='';
       if(open){
         const cmets=(c.metrics||[]).map((m,mi)=>`<div class="kd-row" style="margin-bottom:6px">${ti(`${P}.metrics.${mi}.v`,m.v,'값 (예: 2배)')}${ti(`${P}.metrics.${mi}.k`,m.k,'라벨 (예: ROAS 개선)')}${delB('data-del',`${P}.metrics.${mi}`)}</div>`).join('');
@@ -1386,15 +1413,15 @@ function renderAXAdmin(){
     const hl=LIB.highlights||[];
     const stats=hl.map((h,i)=>`<div class="kd-item${kHidden('stats',h.id)?' off':''}" data-row><div class="kd-row">${hideSw('stats',h.id,'')}${ti(`highlights.${i}.value`,h.value,'9년+')}${ti(`highlights.${i}.label`,h.label,'마케팅 경력')}${delB('data-del',`highlights.${i}`)}</div></div>`).join('')+addB('highlights','스탯 추가');
     return intro('회사 행에서 <b>노출 · 프로젝트 목록 · 프로젝트 기간</b>을 바로 켜고 꺼요. 회사를 누르면 로고·이름·기간·요약·목록을 편집해요. ↑↓ = 화면 순서.')
-      +card('표시 항목',`<div class="kd-sws">${showSw('exp','logo',true,'로고')}${showSw('exp','role',true,'역할')}${showSw('exp','period',true,'재직 기간')}${showSw('exp','summary',true,'요약')}${showSw('exp','metrics',true,'회사 지표')}${showSw('exp','stats',true,'하단 스탯')}</div>`,'모든 회사 공통')
+      +card('표시 항목',`<div class="kd-sws">${showSw('exp','logo',true,'로고')}${showSw('exp','role',true,'역할')}${showSw('exp','period',true,'재직 기간')}${showSw('exp','summary',true,'요약')}${showSw('exp','metrics',true,'회사 지표')}${showSw('exp','thumbs',true,'썸네일')}${showSw('exp','stats',true,'하단 스탯')}</div><p class="kd-note">썸네일 = 그 회사 작업의 이미지·영상(최대 4개). 회사마다 아래 스위치로 따로 켜고 끌 수 있어요.</p>`,'모든 회사 공통')
       +rows
       +card('하단 스탯 카드',stats,'스위치 = 노출 · 3개씩 한 줄');
   };
 
   // ── AX
-  const P_ax=()=>intro('AX 섹션은 AX 콘솔(/ax)의 대표 기능만 보여주고, 전체 구조는 콘솔로 연결해요.')
+  const P_ax=()=>intro('AX 섹션은 AX 콘솔(/ax)의 대표 기능만 보여주고, 전체 구조는 콘솔로 연결해요. 카드 썸네일은 이미지를 올리면 그 이미지, 아니면 기능에 맞는 미니 화면 일러스트(대시보드·자동화·히스토리)가 자동으로 들어가요.')
     +card('소개 문구',F('소개',kt('axIntro','흩어진 도구와 지표를 하나의 마케팅 콘솔로…'),'비우면 기본값'))
-    +card('대표 기능 카드',(kd.axCore||[]).map((c,i)=>`<div class="kd-item${c.visible===false?' off':''}" data-row><div class="kd-row">${sw(`data-ax-core-on="${i}"`,c.visible!==false,'','노출')}<input class="kd-in" data-ax-core-num="${i}" value="${axAttr(c.num||'')}" placeholder="01" style="flex:none;width:56px"><input class="kd-in" data-ax-core-title="${i}" value="${axAttr(c.title||'')}" placeholder="대표 기능명">${upDown('data-ax-movecore',i,i===0,i===kd.axCore.length-1)}${delB('data-ax-core-del',i)}</div><textarea class="kd-in" data-ax-core-desc="${i}" rows="2" placeholder="한 줄 설명" style="margin-top:6px">${axText(c.desc||'')}</textarea></div>`).join('')
+    +card('대표 기능 카드',(kd.axCore||[]).map((c,i)=>`<div class="kd-item${c.visible===false?' off':''}" data-row><div class="kd-row">${sw(`data-ax-core-on="${i}"`,c.visible!==false,'','노출')}<input class="kd-in" data-ax-core-num="${i}" value="${axAttr(c.num||'')}" placeholder="01" style="flex:none;width:56px"><input class="kd-in" data-ax-core-title="${i}" value="${axAttr(c.title||'')}" placeholder="대표 기능명">${upDown('data-ax-movecore',i,i===0,i===kd.axCore.length-1)}${delB('data-ax-core-del',i)}</div><textarea class="kd-in" data-ax-core-desc="${i}" rows="2" placeholder="한 줄 설명" style="margin-top:6px">${axText(c.desc||'')}</textarea><div class="kd-row" style="margin-top:6px">${c.img?thumb(c.img,40):`<span class="kd-thumb" style="display:inline-grid;place-items:center;width:40px;height:40px;border-radius:10px;font-size:10px;color:var(--muted)">기본</span>`}<input class="kd-in" data-ax-core-img="${i}" value="${axAttr(c.img||'')}" placeholder="썸네일 이미지 URL (비우면 기본 일러스트)">${upl(`axcore:${i}`,'업로드')}${c.img?`<button class="kd-ib" data-ax-core-imgclear="${i}" title="기본 일러스트로">↺</button>`:''}</div></div>`).join('')
       +`<div class="kd-acts"><button class="kd-add" data-ax-core-add>＋ 대표 기능 추가</button><button class="kd-btn" data-ax-core-reset>콘솔 대표값으로 초기화</button></div>`)
     +card('콘솔 버튼',`<div class="kd-sws" style="margin-bottom:12px">${showSw('ax','link',true,'버튼 노출')}</div>`+G2(F('버튼 문구',kt('axLinkText','AX 콘솔에서 전체 구조 보기')),F('링크',kt('axLink','https://kimjinsoo-mkt-ax.vercel.app/ax'))));
 
@@ -1420,6 +1447,7 @@ function renderAXAdmin(){
   leftEl.innerHTML=tabs+`<div class="kd-pane"${axTab!=='layout'?` data-pv="${axTab}"`:''}>${(PANES[axTab]||P_layout)()}</div>`;
   leftEl.dataset.tab=axTab;
   leftEl.scrollTop=sameTab?keepTop:0;
+  if(!axViews.at&&!axViews.loading) axFetchViews(); // 첫 진입: 조회수 실제 집계 불러와 Home 탭·미리보기에 반영
 
   if(!axWired){
     axWired=true;
@@ -1440,6 +1468,8 @@ function renderAXAdmin(){
       if(ds.axCoreNum!=null){ if(k.axCore[+ds.axCoreNum])k.axCore[+ds.axCoreNum].num=t.value; axSchedule(); return; }
       if(ds.axCoreTitle!=null){ if(k.axCore[+ds.axCoreTitle])k.axCore[+ds.axCoreTitle].title=t.value; axSchedule(); return; }
       if(ds.axCoreDesc!=null){ if(k.axCore[+ds.axCoreDesc])k.axCore[+ds.axCoreDesc].desc=t.value; axSchedule(); return; }
+      if(ds.axCoreImg!=null){ if(k.axCore[+ds.axCoreImg])k.axCore[+ds.axCoreImg].img=t.value.trim(); axSchedule(); return; }
+      if(ds.kview){ const v=Math.max(0,parseInt(t.value,10)||0), real=axViews.data||{total:0,today:0}; if(!k.views||typeof k.views!=='object')k.views={}; if(ds.kview==='total')k.views.totalAdj=v-real.total; else { k.views.todayAdj=v-real.today; k.views.todayDay=kstToday(); } axSchedule(); return; }
       if(ds.kl){ const [n,i,f]=ds.kl.split(':'), L=klList(n); if(L[+i])L[+i][f]=t.value; axSchedule(); return; }
       if(ds.knum){ const v=+t.value; kSet(ds.knum,v); const o=left.querySelector(`[data-knum-out="${ds.knum}"]`); if(o)o.textContent=v+'%'; axSchedule(); return; }
       if(ds.xpj){ const [ci,i,f]=ds.xpj.split(':'), L=xpjList(+ci,true); if(L&&L[+i])L[+i][f]=t.value; axSchedule(); return; }
@@ -1449,7 +1479,7 @@ function renderAXAdmin(){
     });
     left.addEventListener('click',e=>{
       const q=s=>e.target.closest(s), k=axDoc().klio; let el;
-      if((el=q('[data-kd-tab]'))){ axTab=el.dataset.kdTab; try{ localStorage.setItem('kilo-tab',axTab); }catch(_){} renderAXAdmin(); if(axTab!=='layout') axPvGoto(axTab==='home'?'home':axTab,true); return; }
+      if((el=q('[data-kd-tab]'))){ axTab=el.dataset.kdTab; try{ localStorage.setItem('kilo-tab',axTab); }catch(_){} renderAXAdmin(); if(axTab!=='layout') axPvGoto(axTab==='home'?'home':axTab,true); if(axTab==='home') axFetchViews(); return; }
       if((el=q('[data-kd-w]'))){ axOpenW=axOpenW===el.dataset.kdW?'':el.dataset.kdW; renderAXAdmin(); return; }
       if((el=q('[data-add]'))){ axAdd(el.dataset.add); rerender(); return; }
       if((el=q('[data-del]'))){ axDel(el.dataset.del); rerender(); return; }
@@ -1470,6 +1500,9 @@ function renderAXAdmin(){
       if((el=q('[data-ax-core-add]'))){ k.axCore.push({num:'0'+(k.axCore.length+1),title:'',desc:'',visible:true}); rerender(); return; }
       if((el=q('[data-ax-core-del]'))){ k.axCore.splice(+el.dataset.axCoreDel,1); rerender(); return; }
       if((el=q('[data-ax-core-reset]'))){ k.axCore=axCoreSeed(); rerender(); return; }
+      if((el=q('[data-ax-core-imgclear]'))){ const c=k.axCore[+el.dataset.axCoreImgclear]; if(c)c.img=''; rerender(); return; }
+      if((el=q('[data-kview-reset]'))){ k.views={}; rerender(); return; }
+      if((el=q('[data-kview-refresh]'))){ axFetchViews(true); return; }
       if((el=q('[data-ax-movecore]'))){ const [i,dir]=el.dataset.axMovecore.split(':'); axMove(k.axCore,+i,dir); rerender(); return; }
       if((el=q('[data-xpj-on]'))){ const [ci,i]=el.dataset.xpjOn.split(':'), L=xpjList(+ci,true); if(L&&L[+i])L[+i].visible=el.checked; rerender(); return; }
       if((el=q('[data-xpj-add]'))){ const L=xpjList(+el.dataset.xpjAdd,true); if(L)L.push({title:'',period:'',visible:true}); rerender(); return; }
@@ -1497,6 +1530,7 @@ function renderAXAdmin(){
         const [kind,a,b]=up.split(':');
         if(kind==='logo'){ LIB.companies[+a].logo=await CLOUD.uploadFile(t.files[0]); }
         else if(kind==='avatar'){ LIB.profile.avatar=await CLOUD.uploadFile(t.files[0]); kSet('show.home.photo',true); }
+        else if(kind==='axcore'){ const c=axDoc().klio.axCore[+a]; if(c)c.img=await CLOUD.uploadFile(t.files[0]); }
         else if(kind==='work'){ const w=LIB.companies[+a].works[+b]; if(!Array.isArray(w.media))w.media=[]; for(const f of t.files){ w.media.push({id:uid(),type:'image',url:await CLOUD.uploadFile(f)}); } }
         if(typeof normalizeIds==='function')normalizeIds();
         rerender(); toast('업로드 완료 ✓');
