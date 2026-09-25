@@ -1297,6 +1297,7 @@ function renderAXAdmin(){
       ||`<div style="font-size:12px;color:var(--muted);margin-bottom:6px">항목이 없어요 — 추가하거나 프로젝트에서 채우세요.</div>`;
     const xpjBlock=note(xCustom?'<b style="color:var(--acc)">직접 편집 중</b> · Projects 쪽 작업을 바꿔도 이 목록은 그대로예요.':'자동 · 이 회사 프로젝트(노출된 것)에서 가져오는 중 — 한 칸이라도 수정하면 이 회사 목록이 직접 편집으로 고정돼요.')
       +(kShown('exp','projects',false)?'':'<div style="font-size:11.5px;color:#c0392b;margin:-4px 0 8px">위 ‘표시 항목’에서 ‘주요 프로젝트 목록’이 꺼져 있어 화면엔 안 보여요.</div>')
+      +(kShown('exp','pjPeriod',true)?'':'<div style="font-size:11.5px;color:var(--muted);margin:-4px 0 8px">‘프로젝트 기간’ 표시가 꺼져 있어 기간은 저장만 되고 화면엔 안 보여요.</div>')
       +xpjRows+`<div style="display:flex;gap:8px;margin-top:4px;flex-wrap:wrap"><button data-xpj-add="${ci}" class="mini">＋ 항목 추가</button>${xCustom?`<button data-xpj-reset="${ci}" class="mini">프로젝트에서 다시 채우기</button>`:''}</div>`;
     return `<div data-row data-pv="experience" style="border:1px solid var(--line);border-radius:8px;padding:8px 10px;margin-bottom:8px${off?';opacity:.55':''}">`
       +`<div style="display:flex;align-items:center;gap:8px">${hideChk('companies',c.id,'')}${thumb(c.logo,30)}<div style="flex:1;min-width:0"><div style="font-weight:700;font-size:13.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${axText(coName(c))}</div><div style="font-size:11px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${axText(c.role||'역할 미입력')}</div></div>${mvb('data-ax-moveco',ci,ci===0,ci===cos.length-1)}</div>`
@@ -1315,7 +1316,7 @@ function renderAXAdmin(){
   const hl=LIB.highlights||[];
   const statRows=hl.map((h,i)=>`<div data-row style="display:flex;align-items:center;gap:8px;margin-bottom:6px${kHidden('stats',h.id)?';opacity:.55':''}">${hideChk('stats',h.id,'')}<div style="flex:1;min-width:0">${two(ti(`highlights.${i}.value`,h.value,'값 (예: 9년+)'),ti(`highlights.${i}.label`,h.label,'라벨 (예: 마케팅 경력)'))}</div>${delb('data-del',`highlights.${i}`)}</div>`).join('')+add('highlights','스탯 추가');
   const expSec=sec(ttl('experience','Experience · 경력'),
-    lbl('표시 항목 (모든 회사 공통)')+`<div style="margin-bottom:4px">${showChk('exp','logo',true,'로고')}${showChk('exp','role',true,'역할')}${showChk('exp','period',true,'기간')}${showChk('exp','summary',true,'요약')}${showChk('exp','metrics',true,'회사 지표')}${showChk('exp','projects',false,'주요 프로젝트 목록')}${showChk('exp','stats',true,'하단 스탯 카드')}</div>`
+    lbl('표시 항목 (모든 회사 공통)')+`<div style="margin-bottom:4px">${showChk('exp','logo',true,'로고')}${showChk('exp','role',true,'역할')}${showChk('exp','period',true,'기간')}${showChk('exp','summary',true,'요약')}${showChk('exp','metrics',true,'회사 지표')}${showChk('exp','projects',false,'주요 프로젝트 목록')}${showChk('exp','pjPeriod',true,'프로젝트 기간(목록 오른쪽)')}${showChk('exp','stats',true,'하단 스탯 카드')}</div>`
     +lbl('회사 — ✓노출 · ▲▼ 순서(화면 순서 그대로) · ‘내용 편집’을 펼쳐 수정')+expRows
     +lbl('하단 스탯 카드 — ✓노출 (3개씩 한 줄)')+statRows,
     '','experience');
@@ -1389,7 +1390,7 @@ function renderAXAdmin(){
       if((el=q('[data-ax-moveklio]'))){ const [i,dir]=el.dataset.axMoveklio.split(':'); axMove(k.sections,+i,dir); rerender(); return; }
       if((el=q('[data-ax-klio-on]'))){ const s=k.sections[+el.dataset.axKlioOn]; if(s)s.on=el.checked; rerender(); return; }
       if((el=q('[data-ax-featured]'))){ const [ci,wi]=el.dataset.axFeatured.split(':').map(Number); const w=((LIB.companies[ci]||{}).works||[])[wi]; if(w)w.featured=el.checked; save(); updateAXPreview(); return; }
-      if((el=q('[data-kchk]'))){ kSet(el.dataset.kchk,el.checked); save(); updateAXPreview(); return; }
+      if((el=q('[data-kchk]'))){ kSet(el.dataset.kchk,el.checked); rerender(); return; }
       if((el=q('[data-khide]'))){ kSetHidden(el.dataset.khide,el.dataset.id,!el.checked); dim(el,el.checked); save(); updateAXPreview(); return; }
       if((el=q('[data-pchk]'))){ axSet(el.dataset.pchk,el.checked); axSchedule(); return; }
       if((el=q('[data-ax-tech-on]'))){ const r=k.techstack[+el.dataset.axTechOn]; if(r)r.visible=el.checked; rerender(); return; }
