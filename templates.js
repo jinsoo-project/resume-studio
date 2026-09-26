@@ -745,6 +745,20 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
     var txt = function (k, def) { var v = KT[k]; return (v != null && String(v).trim() !== "") ? String(v) : def; };
     var shown = function (g, k, def) { var o = KS[g] || {}; return o[k] == null ? def : o[k] !== false; };
     var isHidden = function (b, id) { return !!(KH && id != null && (KH[b] || []).indexOf(id) >= 0); };
+    // 글꼴 프리셋(KILO 대시보드 '구성 → 글꼴' = klio.ui.font): editorial(기본 · 큰 제목 세리프 + 본문 Pretendard) · modern · soft(SUIT) · classic(이전 Figtree)
+    var PRET = "https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css";
+    var SANS_KR = '"Pretendard Variable",Pretendard,-apple-system,BlinkMacSystemFont,system-ui,"Apple SD Gothic Neo","Noto Sans KR",sans-serif';
+    var GF = "https://fonts.googleapis.com/css2?family=Caveat:wght@600";
+    var FONTS = {
+      editorial: { body: SANS_KR, disp: '"Instrument Serif","Noto Serif KR",Georgia,serif', w: 400, ls: "-.01em", css: [GF + "&family=Instrument+Serif:ital@0;1&family=Noto+Serif+KR:wght@500;600&display=swap", PRET] },
+      modern: { body: SANS_KR, disp: SANS_KR, w: 800, ls: "-.05em", css: [GF + "&display=swap", PRET] },
+      soft: { body: '"SUIT Variable",' + SANS_KR, disp: '"SUIT Variable",' + SANS_KR, w: 800, ls: "-.045em", css: [GF + "&display=swap", "https://cdn.jsdelivr.net/gh/sun-typeface/SUIT@2/fonts/variable/woff2/SUIT-Variable.css", PRET] },
+      classic: { body: '"Figtree",' + SANS_KR, disp: '"Figtree",' + SANS_KR, w: 800, ls: "-.055em", css: [GF + "&family=Figtree:wght@400;500;600;700;800&display=swap", PRET] }
+    };
+    var FKEY = FONTS[(K.ui || {}).font] ? (K.ui || {}).font : "editorial", FNT = FONTS[FKEY];
+    var fontHead = '<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>'
+      + FNT.css.map(function (h) { return '<link rel="stylesheet" href="' + h + '"/>'; }).join("");
+    var fontVars = ':root{--font:' + FNT.body + ';--disp:' + FNT.disp + ';--dispw:' + FNT.w + ';--displs:' + FNT.ls + '}';
     var works = [];
     companies.forEach(function (co) { (co.works || []).forEach(function (w) { if (!isHidden("works", w.id)) works.push({ co: co, w: w }); }); });
 
@@ -1140,7 +1154,9 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
       + '.photo .card,.tile,.pj-all,.pj-deck i,.dcard,.ax-core,.ax-th,.xp-logo,.socials a{corner-shape:squircle}'
       + '.photo .card{border-radius:42px}.tile{border-radius:40px}.pj-all{border-radius:40px}.pj-deck i{border-radius:14px}.dcard{border-radius:48px}'
       + '.ax-core{border-radius:30px}.ax-th{border-radius:19px}.xp-logo{border-radius:16px}.socials a{border-radius:13px}'
-      + '@media(max-width:560px){.xp-logo{border-radius:15px}}}';
+      + '@media(max-width:560px){.xp-logo{border-radius:15px}}}'
+      // 글꼴 프리셋의 제목용 글꼴(--disp): 큰 숫자·스킬 카드 값 — 세리프(editorial)는 한 단계 크게
+      + '.pj-num,.dcard h4{font-family:var(--disp);font-weight:var(--dispw);letter-spacing:var(--displs)}.ft-editorial .pj-num{font-size:clamp(48px,4.6vw,62px);line-height:.82}.ft-editorial .dcard h4{font-size:40px;line-height:.95}';
 
     var KJS = '(function(){"use strict";var reduce=matchMedia("(prefers-reduced-motion: reduce)").matches,still=!document.documentElement.classList.contains("js");'
       + 'var rvs=document.querySelectorAll(".rv");if("IntersectionObserver" in window&&!reduce){var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){e.target.classList.add("in");io.unobserve(e.target);}});},{threshold:.12,rootMargin:"0px 0px -8% 0px"});rvs.forEach(function(el){io.observe(el);});}else{rvs.forEach(function(el){el.classList.add("in");});}'
@@ -1196,17 +1212,21 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
       // 배치: 카드 크기 · 원 반지름 · 원 중심(화면 아래) · 카드 간 각도
       function layout() {
         W = innerWidth; H = innerHeight; mob = W < 760;
-        var cw = mob ? clamp(Math.min(W * 0.36, H * 0.19), 110, 170) : clamp(Math.min(W * 0.165, H * 0.29), 150, 262), ch = Math.round(cw * (mob ? 1.4 : 1.32));
-        R = mob ? Math.max(W * 1.12, 400) : Math.max(W * 0.62, 640);
-        var top;
-        if (mob) { var hb = document.querySelector(".wh-chips"); top = (hb ? hb.getBoundingClientRect().bottom : 180) + 40; }
-        else top = H * (H < 780 ? 0.37 : 0.4) - ch / 2;
-        var apex = top + ch / 2;
+        var cw, top, lift = mob ? 10 : 18;
+        if (mob) { cw = clamp(Math.min(W * 0.42, H * 0.2), 118, 180); R = Math.max(W * 1.2, 420); var hb = document.querySelector(".wh-chips"); top = (hb ? hb.getBoundingClientRect().bottom : 180) + 34; }
+        else { cw = clamp(Math.min(W * 0.19, (H * 0.6 - 24) / 1.32), 170, 430); R = Math.max(W * 0.62, 700); top = Math.max(26, H * 0.05); } // 큰 카드: 휠 꼭대기를 화면 위쪽으로 · 큰 모니터(QHD)에서도 크게
+        var ch = Math.round(cw * (mob ? 1.4 : 1.32)), hw = cw / 2, hh = ch / 2;
+        var apex = top + hh * 1.07 + lift; // 꼭대기 카드는 떠오르고(lift) 커지므로(1.07) 그만큼 아래로
         ring.style.top = Math.round(apex + R) + "px";
         stage.style.setProperty("--cw", Math.round(cw) + "px");
         stage.style.setProperty("--ch", ch + "px");
-        stage.style.setProperty("--info", Math.round(apex + ch / 2 + (mob ? 56 : H < 780 ? 48 : 66)) + "px");
         S = (cw + (mob ? 14 : 28)) / R * DEG;
+        // 정보 패널: 꼭대기 카드 아래 끝과, 패널 폭 안으로 들어오는 옆 카드(±1)의 아래 모서리 중 더 낮은 곳 바로 아래
+        var s = S / DEG, cs = Math.cos(s), sn = Math.sin(s), cx = W / 2 + R * sn, cy = apex + R * (1 - cs);
+        var blx = cx - hw * cs - hh * sn, bly = cy - hw * sn + hh * cs, brx = cx + hw * cs - hh * sn, bry = cy + hw * sn + hh * cs;
+        var infoEl = document.querySelector(".wh-info"), xr = W / 2 + ((infoEl && infoEl.offsetWidth) || Math.min(mob ? W - 32 : 560, W - 40)) / 2, edge = 0;
+        if (xr > blx) edge = xr >= brx ? bry : bly + (xr - blx) / (brx - blx) * (bry - bly);
+        stage.style.setProperty("--info", Math.round(Math.max(apex - lift + hh * 1.07, edge) + (mob ? 22 : 18)) + "px");
         loop = N * S >= 200;
       }
       function wrapA(a) { if (!loop) return a; var T = N * S; return ((a + T / 2) % T + T) % T - T / 2; }
@@ -1390,40 +1410,55 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
       var N = works.length, pad2 = function (n) { return (n < 10 ? "0" : "") + n; };
       var yrs = works.map(function (x) { return yearOf(x.w); }).filter(Boolean).sort();
       var yrTxt = yrs.length ? (yrs[0] === yrs[yrs.length - 1] ? yrs[0] : yrs[0] + " — " + yrs[yrs.length - 1]) : "";
-      // 분류 묶음(KILO 대시보드 '프로젝트 그룹'): 분야(카테고리)를 4~5개로 묶고, 프로젝트별로 따로 옮길 수도(groupOf)
-      // 카드는 묶음 순서대로 휠에 놓임(같은 묶음끼리 이웃) · 어느 묶음에도 없으면 '기타'
+      // 묶음·카드 편집(KILO 대시보드 '전체 프로젝트' 탭)
+      //  groups = 분야(카테고리)를 4~5개로 묶음 · groupOf = 카드별 묶음 예외 · cards[id] = {title 카드 이름, off 숨김, kpi 대표 지표 번호(-1 없음), thumb 썸네일 번호(-1 색+아이콘)}
+      //  cardOrder = 카드 순서(작업 id 목록). 휠에는 묶음 순서 → 카드 순서로 놓임, 어느 묶음에도 없으면 '기타'
       var GR = (Array.isArray(K.groups) ? K.groups : DEFAULT_GROUPS).filter(function (g) { return g && g.id; });
-      var GO = K.groupOf || {}, catG = {}, gIdx = {};
+      var GO = K.groupOf || {}, KC = K.cards || {}, ORD = Array.isArray(K.cardOrder) ? K.cardOrder : [], catG = {}, gIdx = {}, oIdx = {};
       GR.forEach(function (g, gi) { gIdx[g.id] = gi; (g.cats || []).forEach(function (c) { if (!catG[c]) catG[c] = g.id; }); });
+      ORD.forEach(function (id, k) { if (oIdx[id] == null) oIdx[id] = k; });
       var gidOf = function (w) { var o = GO[w.id]; if (o && gIdx[o] != null) return o; return catG[w.category || "기타"] || "etc"; };
-      var list = works.map(function (x, o) { return { x: x, g: gidOf(x.w), o: o }; });
-      list.sort(function (a, b) { var ga = gIdx[a.g] != null ? gIdx[a.g] : 99, gb = gIdx[b.g] != null ? gIdx[b.g] : 99; return ga - gb || a.o - b.o; });
+      var list = works.filter(function (x) { return !(KC[x.w.id] && KC[x.w.id].off); }).map(function (x, o) { return { x: x, g: gidOf(x.w), o: o }; });
+      list.sort(function (a, b) {
+        var ga = gIdx[a.g] != null ? gIdx[a.g] : 99, gb = gIdx[b.g] != null ? gIdx[b.g] : 99;
+        var oa = oIdx[a.x.w.id] != null ? oIdx[a.x.w.id] : 1e4 + a.o, ob = oIdx[b.x.w.id] != null ? oIdx[b.x.w.id] : 1e4 + b.o;
+        return ga - gb || oa - ob;
+      });
+      N = list.length;
       var gCnt = {}; list.forEach(function (y) { gCnt[y.g] = (gCnt[y.g] || 0) + 1; });
       var gChips = GR.filter(function (g) { return g.on !== false && gCnt[g.id]; }).map(function (g) { return '<button class="wh-chip" type="button" data-f="' + esc(g.id) + '">' + esc(g.label || "묶음") + '<i>' + gCnt[g.id] + '</i></button>'; }).join("");
       var chips = '<button class="wh-chip on" type="button" data-f="*">전체<i>' + N + '</i></button>' + gChips
         + (gChips && gCnt.etc ? '<button class="wh-chip" type="button" data-f="etc">기타<i>' + gCnt.etc + '</i></button>' : '');
       var cardsHtml = "", tpls = "";
       list.forEach(function (y, i) {
-        var x = y.x, w = x.w, co = x.co, cm = catMeta(w.category), md = mediaOf(w), main = md[0], id = w.id || String(i);
-        var mets = (w.metrics || []).filter(function (m) { return m && m.value; }), m0 = mets[0], per = wPeriod(w), yr = yearOf(w);
+        var x = y.x, w = x.w, co = x.co, cm = catMeta(w.category), id = w.id || String(i), CC = KC[w.id] || {};
+        var title = (CC.title && String(CC.title).trim()) || w.title || "";
+        // 썸네일: 카드별 선택(번호) 우선, -1이면 색+아이콘, 없으면 첫 이미지·영상
+        var md = mediaOf(w), ti = CC.thumb != null ? +CC.thumb : 0, main = ti >= 0 && md[ti] ? md[ti] : (ti >= 0 ? md[0] : null);
+        if (main && md.indexOf(main) > 0) { md = [main].concat(md.filter(function (m) { return m !== main; })); } // 상세에서도 고른 걸 먼저
+        // 대표 지표: 카드별 선택(번호) 우선, -1이면 표시 안 함
+        var mets = (w.metrics || []).filter(function (m) { return m && m.value; }), ki = CC.kpi != null ? +CC.kpi : 0;
+        var m0 = ki >= 0 ? (mets[ki] || mets[0]) : null;
+        if (m0 && mets.indexOf(m0) > 0) mets = [m0].concat(mets.filter(function (m) { return m !== m0; }));
+        var per = wPeriod(w), yr = yearOf(w);
         // 휠 카드 = 상품카드: 위 썸네일(이미지·영상 ▶ / 없으면 분야 색 + 아이콘) · 아래 분야·제목·회사·대표 지표
         var thumb = main
           ? '<span class="wh-th img" style="background-image:url(\'' + esc(main.src) + '\')">' + (main.yt ? '<i class="wh-play" aria-hidden="true"></i>' : '') + '</span>'
           : '<span class="wh-th"><span class="wh-big">' + catIcon(w.category) + '</span></span>';
-        var info = '<span class="wh-bd"><em class="wh-cat">' + esc(cm.en) + '</em><b class="wh-t">' + esc(w.title) + '</b>'
+        var info = '<span class="wh-bd"><em class="wh-cat">' + esc(cm.en) + '</em><b class="wh-t">' + esc(title) + '</b>'
           + '<span class="wh-m">' + esc(dispName(co)) + (yr ? ' · ' + esc(yr) : '') + '</span>'
           + (m0 ? '<span class="wh-p"><b>' + esc(m0.value) + '</b>' + (m0.label ? ' ' + esc(m0.label) : '') + '</span>' : '') + '</span>';
-        cardsHtml += '<button class="wh-card' + (cm.dark ? ' dk' : '') + '" type="button" data-i="' + i + '" data-id="' + esc(id) + '" data-cat="' + esc(w.category || "기타") + '" data-grp="' + esc(y.g) + '" style="--c:' + cm.c + '" aria-label="' + esc(w.title) + '"><span class="wh-face">' + thumb + info + '</span></button>';
-        // 선택 카드 정보(아치 안쪽)
-        var kp = mets.slice(0, 3).map(function (m) { return '<span class="wh-kpi"><b>' + esc(m.value) + '</b>' + esc(m.label || "") + '</span>'; }).join("");
+        cardsHtml += '<button class="wh-card' + (cm.dark ? ' dk' : '') + '" type="button" data-i="' + i + '" data-id="' + esc(id) + '" data-cat="' + esc(w.category || "기타") + '" data-grp="' + esc(y.g) + '" style="--c:' + cm.c + '" aria-label="' + esc(title) + '"><span class="wh-face">' + thumb + info + '</span></button>';
+        // 선택 카드 정보(휠 아래): 분야·회사·기간 · 제목(큰 화면에서만) · 지표 알약
+        var kp = (m0 ? mets : []).slice(0, 3).map(function (m) { return '<span class="wh-kpi"><b>' + esc(m.value) + '</b>' + esc(m.label || "") + '</span>'; }).join("");
         tpls += '<template id="whi-' + i + '"><p class="wh-meta">' + esc(cm.en) + '<span> · ' + esc(dispName(co)) + (per ? ' · ' + esc(per) : '') + '</span></p>'
-          + '<h2 class="wh-name">' + esc(w.title) + '</h2>' + (kp ? '<div class="wh-kpis">' + kp + '</div>' : '') + '</template>';
+          + '<h2 class="wh-name">' + esc(title) + '</h2>' + (kp ? '<div class="wh-kpis">' + kp + '</div>' : '') + '</template>';
         // 상세 시트
         var media = main
           ? '<div class="wd-main' + (main.yt ? ' yt' : ' img') + '" style="background-image:url(\'' + esc(main.src) + '\')"' + (main.yt ? ' data-yt="' + esc(main.yt) + '"' : '') + '>' + (main.yt ? '<span class="wd-play" aria-hidden="true"></span>' : '') + '</div>'
             + (md.length > 1 ? '<div class="wd-ths">' + md.slice(0, 8).map(function (m, k) { return '<button class="wd-th' + (k ? '' : ' on') + '" type="button" style="background-image:url(\'' + esc(m.src) + '\')" data-src="' + esc(m.src) + '"' + (m.yt ? ' data-yt="' + esc(m.yt) + '"' : '') + ' aria-label="미디어 ' + (k + 1) + '"></button>'; }).join("") + '</div>' : '')
           : '<div class="wd-main art">' + (m0 ? '<span class="wd-ic">' + catIcon(w.category) + '</span><span class="wd-kv"><b>' + esc(m0.value) + '</b>' + (m0.label ? '<span>' + esc(m0.label) + '</span>' : '') + '</span>' : '<span class="wd-big">' + catIcon(w.category) + '</span>') + '</div>';
-        var kpis = mets.slice(0, 4).map(function (m) { return '<div class="wd-kpi"><b>' + esc(m.value) + '</b><span>' + esc(m.label || "") + '</span></div>'; }).join("");
+        var kpis = (w.metrics || []).filter(function (m) { return m && m.value; }).sort(function (a, b) { return (a === m0 ? -1 : 0) - (b === m0 ? -1 : 0); }).slice(0, 4).map(function (m) { return '<div class="wd-kpi"><b>' + esc(m.value) + '</b><span>' + esc(m.label || "") + '</span></div>'; }).join("");
         var par = function (k, v) { return v ? '<div class="wd-par"><em>' + k + '</em><p>' + esc(v) + '</p></div>' : ''; };
         var pars = par("Problem", w.problem) + par("Action", w.action) + par("Result", w.result);
         var tags = (w.tags || []).filter(Boolean).map(function (t) { return '<span>' + esc(t) + '</span>'; }).join("");
@@ -1431,7 +1466,7 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
         var desc = w.detail || w.summary || "";
         tpls += '<template id="whd-' + i + '"><div class="wd-media' + (cm.dark ? ' dk' : '') + '" style="--c:' + cm.c + '">' + media + '</div><div class="wd-body">'
           + '<span class="wd-cat' + (cm.dark ? ' dk' : '') + '" style="--c:' + cm.c + '">' + esc(cm.en) + '</span>'
-          + '<h2 class="wd-title">' + esc(w.title) + '</h2>'
+          + '<h2 class="wd-title">' + esc(title) + '</h2>'
           + '<p class="wd-co">' + esc(dispName(co)) + (co.role ? ' · ' + esc(co.role) : '') + (per ? ' · ' + esc(per) : '') + '</p>'
           + (kpis ? '<div class="wd-kpis">' + kpis + '</div>' : '') + (desc ? '<p class="wd-desc">' + esc(desc) + '</p>' : '')
           + (pars ? '<div class="wd-pars">' + pars + '</div>' : '') + (tags ? '<div class="wd-tags">' + tags + '</div>' : '') + (links ? '<div class="wd-links">' + links + '</div>' : '')
@@ -1446,8 +1481,11 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
         + '.wh-back{display:inline-flex;align-items:center;height:36px;padding:0 15px;border-radius:999px;background:rgba(255,255,255,.66);-webkit-backdrop-filter:blur(14px) saturate(160%);backdrop-filter:blur(14px) saturate(160%);box-shadow:0 0 0 .5px var(--bd),0 1px 2px rgba(0,0,0,.04);font-size:13px;font-weight:600;transition:background .2s}.wh-back:hover{background:#fff}'
         + '.wh-id{display:flex;align-items:center;gap:14px}.wh-sig{font-family:"Caveat",cursive;font-size:28px;font-weight:600;line-height:1}'
         + '.wh-cnt{display:flex;align-items:center;gap:10px;font-size:12px;font-weight:700;font-variant-numeric:tabular-nums;color:var(--gray)}.wh-cnt b{color:var(--ink)}.wh-cnt i{width:32px;height:1px;background:currentColor}'
-        + '.wh-title{position:absolute;right:clamp(18px,3vw,44px);top:clamp(12px,2.6vh,30px);z-index:350;margin:0;text-align:right;font-size:clamp(44px,min(7.4vw,11vh),120px);font-weight:800;line-height:.86;letter-spacing:-.055em;pointer-events:none}.wh-title span{display:block}'
-        + '.wh-title small{display:block;margin-top:16px;font-size:13px;font-weight:600;letter-spacing:-.005em;line-height:1.4;color:var(--gray)}'
+        + '.wh-title{position:absolute;right:clamp(18px,3vw,44px);top:clamp(12px,2.6vh,30px);z-index:350;margin:0;text-align:right;font-family:var(--disp);font-size:clamp(40px,min(6.6vw,10.5vh),150px);font-weight:var(--dispw);line-height:.86;letter-spacing:var(--displs);pointer-events:none}.wh-title span{display:block}'
+        // 에디토리얼(세리프) 글꼴: 큰 제목은 한 단계 크게 + 마지막 단어 이탤릭, 번호도 세리프
+        + '.ft-editorial .wh-title{font-size:clamp(48px,min(7.6vw,12vh),176px);line-height:.88}.ft-editorial .wh-title span:last-of-type{font-style:italic}'
+        + '.ft-editorial .wh-cnt{font-family:var(--disp);font-size:21px;font-weight:400;letter-spacing:0}.ft-editorial .wh-cnt b{font-weight:400}.ft-editorial .wh-cnt i{width:40px}'
+        + '.wh-title small{display:block;margin-top:16px;font-family:var(--font);font-size:13px;font-style:normal;font-weight:600;letter-spacing:-.005em;line-height:1.4;color:var(--gray)}'
         // 휠 카드
         + '.wh-ring{position:absolute;left:50%;top:0;width:0;height:0;z-index:2}'
         + '.wh-card{position:absolute;left:calc(var(--cw) / -2);top:calc(var(--ch) / -2);width:var(--cw);height:var(--ch);padding:0;border:0;background:none;cursor:inherit;will-change:transform;-webkit-tap-highlight-color:transparent;font:inherit;color:inherit;outline:none}.wh-card[hidden]{display:none}'
@@ -1491,20 +1529,22 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
         // 애플식 연속 곡률(지원 브라우저) — 같은 인상이 나도록 반경을 키움
         + '@supports (corner-shape:squircle){:root{--rc:34px;--rt:25px;--rs:42px;--rk:22px}.wh-face,.wh-th,.wh-sheet,.wd-kpi,.wd-par,.wd-th{corner-shape:squircle}.wd-th{border-radius:15px}}'
         // 낮은 화면(노트북): 정보 패널 간격을 줄여 아래 분류 버튼과 겹치지 않게
-        + '@media(min-width:760px) and (max-height:780px){.wh-name{font-size:clamp(22px,min(2.9vw,4.4vh),42px)}.wh-kpis{margin-top:12px}.wh-acts{margin-top:14px}.wh-more{height:40px}}'
+        // 큰 모니터(QHD 등): 카드에 맞춰 정보 패널·분류 버튼·머리글도 한 단계 크게
+        + '@media(min-width:1800px){.wh-info{width:min(760px,calc(100vw - 40px))}.wh-meta{font-size:13.5px}.wh-name{font-size:clamp(40px,2.6vw,60px)}.wh-kpis{gap:10px;margin-top:20px}.wh-kpi{padding:10px 18px;font-size:14px}.wh-kpi b{font-size:20px}.wh-acts{margin-top:24px;gap:20px}.wh-more{height:54px;padding:0 26px;font-size:16px}.wh-hint{font-size:14px}'
+        + '.wh-chips{padding:5px}.wh-chip{height:40px;padding:0 17px;font-size:15px}.wh-back{height:42px;padding:0 18px;font-size:14.5px}.wh-sig{font-size:34px}.ft-editorial .wh-cnt{font-size:26px}.wh-title small{font-size:15px}}'
+        // 낮은 화면(노트북): 카드를 크게 쓰는 대신 정보 패널은 제목을 빼고 간단히
+        + '@media(min-width:760px) and (max-height:860px){.wh-name{display:none}.wh-kpis{margin-top:12px}.wh-acts{margin-top:14px}.wh-more{height:40px}}'
         // 모바일: 위에서부터 차례로(돌아가기·번호 → 타이틀 → 카테고리 → 휠 → 정보), 상세는 아래에서 올라오는 시트
         + '@media(max-width:759px){.wh-top{position:relative;left:auto;top:auto;flex-direction:row;align-items:center;justify-content:space-between;padding:14px 16px 0}.wh-sig{display:none}'
-        + '.wh-title{position:relative;right:auto;top:auto;padding:16px 16px 0;text-align:left;font-size:clamp(38px,11.5vw,56px)}.wh-title span{display:inline}.wh-title small{margin-top:10px}'
+        + '.wh-title,.ft-editorial .wh-title{position:relative;right:auto;top:auto;padding:14px 16px 0;text-align:left;font-size:clamp(38px,11.5vw,56px)}.ft-editorial .wh-title{font-size:clamp(44px,13vw,64px)}.wh-title span{display:inline}.wh-title small{margin-top:8px}'
         + '.wh-chips{position:relative;left:auto;bottom:auto;transform:none;margin:14px 16px 0;width:fit-content;max-width:calc(100vw - 32px)}'
-        + '.wh-info{width:calc(100vw - 32px)}.wh-name{font-size:clamp(22px,6.4vw,28px)}.wh-kpi{padding:7px 12px}.wh-kpi b{font-size:15px}.wh-kpi:nth-child(n+3){display:none}.wh-hint .d{display:none}.wh-hint .m{display:inline}.wh-m{display:none}'
+        + '.wh-info{width:calc(100vw - 32px)}.wh-name{font-size:clamp(22px,6.4vw,28px)}@media(max-height:720px){.wh-name{display:none}}.wh-kpi{padding:7px 12px}.wh-kpi b{font-size:15px}.wh-kpi:nth-child(n+3){display:none}.wh-hint .d{display:none}.wh-hint .m{display:inline}.wh-m{display:none}'
         + '.wh-sheet{top:auto;left:8px;right:8px;bottom:8px;width:auto;height:calc(100dvh - 48px);transform:translateY(calc(100% + 20px))}}'
         + '@media(prefers-reduced-motion:reduce){.wh-dyn.swap>*{animation:none}.wh-sheet,.wh-scrim,body{transition:none}}';
       return '<!doctype html><html lang="ko"><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>'
         + '<title>' + esc(P.nameKo || nameEn || "포트폴리오") + ' — ' + esc(txt("ppTitle", "All Projects")) + '</title><link rel="icon" href="data:,"/>'
-        + '<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>'
-        + '<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Caveat:wght@600&family=Figtree:wght@400;500;600;700;800&display=swap">'
-        + '<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css"/>'
-        + '<style>' + WCSS + '</style></head><body' + (d.hostStudio ? ' data-host="studio"' : '') + '>'
+        + fontHead
+        + '<style>' + WCSS + fontVars + '</style></head><body' + (d.hostStudio ? ' data-host="studio"' : '') + ' class="ft-' + FKEY + '">'
         + '<main class="wh" aria-label="프로젝트 휠 — 드래그·휠·←/→로 돌려보기">'
         + '<header class="wh-top"><a class="wh-back" href="' + esc(homeUrl) + '#projects" target="_top" data-ext>← ' + esc(txt("ppBack", "포트폴리오")) + '</a>'
         + '<div class="wh-id">' + (nameEn ? '<span class="wh-sig">' + esc(nameEn) + '</span>' : '') + '<span class="wh-cnt"><b data-cur>01</b><i></i><span data-tot>' + pad2(N) + '</span></span></div></header>'
@@ -1526,10 +1566,8 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
       + '<meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/>'
       + '<title>' + esc(P.nameKo || nameEn || "포트폴리오") + ' — Marketing Portfolio</title>'
       + '<meta name="description" content="' + esc((tagline || "").replace(/"/g, "")) + '"/><meta name="theme-color" content="#ffffff"/><link rel="icon" href="data:,"/>'
-      + '<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>'
-      + '<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&family=Caveat:wght@600&display=swap">'
-      + '<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css"/>'
-      + '<style>' + KCSS + '</style></head><body class="' + ["intro", "aura", "tilt", "progress"].filter(function (k) { return FX[k]; }).map(function (k) { return "fx-" + k; }).join(" ") + '"' + (d.hostStudio ? ' data-host="studio"' : '') + '>'
+      + fontHead
+      + '<style>' + KCSS + fontVars + '</style></head><body class="' + ["intro", "aura", "tilt", "progress"].filter(function (k) { return FX[k]; }).map(function (k) { return "fx-" + k; }).concat("ft-" + FKEY).join(" ") + '"' + (d.hostStudio ? ' data-host="studio"' : '') + '>'
       + (FX.progress ? '<div class="prog" aria-hidden="true"><i></i></div>' : '')
       + '<div class="page">' + home + sectionsHtml
       + '<p class="foot">' + esc(txt("footer", "© " + new Date().getFullYear() + " — " + (nameEn || P.nameKo || "") + ", Marketing Portfolio")) + '</p></div>'
