@@ -788,6 +788,13 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
       return rows;
     };
     // AX 콘솔(/ax) CORE CAPABILITIES 대표 3 — klio에는 이 핵심만, 전체 구조는 콘솔로
+    // 전체 프로젝트 페이지 분류 묶음 기본값(KILO 대시보드 '프로젝트 그룹'에서 편집 · studio.html groupsSeed와 동일)
+    var DEFAULT_GROUPS = [
+      { id: "g-perf", label: "Performance & Growth", cats: ["퍼포먼스", "그로스"], on: true },
+      { id: "g-data", label: "Data & AX", cats: ["성과", "CRM", "AX"], on: true },
+      { id: "g-brand", label: "Brand & Content", cats: ["브랜딩", "콘텐츠", "영상"], on: true },
+      { id: "g-com", label: "Commerce & Partnership", cats: ["커머스", "제휴"], on: true }
+    ];
     var DEFAULT_AXCORE = [
       { num: "01", title: "통합 대시보드", desc: "서비스지표와 마케팅지표를 한 판에서, 같은 정의로 비교·결정." },
       { num: "02", title: "마케팅 자동화", desc: "기획·집행·최적화를 화면 안에서 — 반복은 규칙과 알림으로 자동화." },
@@ -1189,8 +1196,8 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
       // 배치: 카드 크기 · 원 반지름 · 원 중심(화면 아래) · 카드 간 각도
       function layout() {
         W = innerWidth; H = innerHeight; mob = W < 760;
-        var cw = mob ? clamp(W * 0.3, 100, 146) : clamp(Math.min(W * 0.145, H * 0.25), 140, 236), ch = Math.round(cw * 1.34);
-        R = mob ? Math.max(W * 1.05, 370) : Math.max(W * 0.6, 620);
+        var cw = mob ? clamp(Math.min(W * 0.36, H * 0.19), 110, 170) : clamp(Math.min(W * 0.165, H * 0.29), 150, 262), ch = Math.round(cw * (mob ? 1.4 : 1.32));
+        R = mob ? Math.max(W * 1.12, 400) : Math.max(W * 0.62, 640);
         var top;
         if (mob) { var hb = document.querySelector(".wh-chips"); top = (hb ? hb.getBoundingClientRect().bottom : 180) + 40; }
         else top = H * (H < 780 ? 0.37 : 0.4) - ch / 2;
@@ -1198,8 +1205,8 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
         ring.style.top = Math.round(apex + R) + "px";
         stage.style.setProperty("--cw", Math.round(cw) + "px");
         stage.style.setProperty("--ch", ch + "px");
-        stage.style.setProperty("--info", Math.round(apex + ch / 2 + (mob ? 58 : 56)) + "px");
-        S = (cw + (mob ? 14 : 26)) / R * DEG;
+        stage.style.setProperty("--info", Math.round(apex + ch / 2 + (mob ? 56 : H < 780 ? 48 : 66)) + "px");
+        S = (cw + (mob ? 14 : 28)) / R * DEG;
         loop = N * S >= 200;
       }
       function wrapA(a) { if (!loop) return a; var T = N * S; return ((a + T / 2) % T + T) % T - T / 2; }
@@ -1207,14 +1214,14 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
       function snapTarget(r) { var t = -Math.round(-r / S) * S; return loop ? t : clamp(t, -(N - 1) * S, 0); }
 
       function render() {
-        var best = -1, bestA = 1e9, lift = mob ? 12 : 20;
+        var best = -1, bestA = 1e9, lift = mob ? 10 : 18;
         for (var i = 0; i < N; i++) {
           var c = cards[i], a = wrapA(i * S + rot) * spread, aa = Math.abs(a);
           if (aa < bestA) { bestA = aa; best = i; }
           if (aa > 96) { c.style.visibility = "hidden"; continue; }
           var k = Math.max(0, 1 - aa / S); // 꼭대기에 가까울수록 1 → 살짝 떠오르고 커짐
           c.style.visibility = "";
-          c.style.transform = "rotate(" + a.toFixed(3) + "deg) translate3d(0," + (-R - lift * k).toFixed(1) + "px,0) scale(" + (1 + 0.1 * k).toFixed(3) + ")";
+          c.style.transform = "rotate(" + a.toFixed(3) + "deg) translate3d(0," + (-R - lift * k).toFixed(1) + "px,0) scale(" + (1 + 0.07 * k).toFixed(3) + ")";
           c.style.zIndex = String(300 - Math.round(aa * 2));
           c.style.opacity = aa > 66 ? Math.max(0, 1 - (aa - 66) / 30).toFixed(3) : "";
         }
@@ -1227,9 +1234,9 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
         if (totEl) totEl.textContent = pad(N);
         var t = document.getElementById("whi-" + c.getAttribute("data-i"));
         if (dyn && t) { dyn.innerHTML = t.innerHTML; dyn.classList.remove("swap"); void dyn.offsetWidth; dyn.classList.add("swap"); }
-        try { // 배경을 선택 카드 색으로 아주 옅게
-          var bg = getComputedStyle(c.querySelector(".wh-face")).backgroundColor.match(/\d+/g);
-          if (bg) { var base = [239, 238, 234], mx = function (j) { return Math.round(base[j] + (bg[j] - base[j]) * 0.22); }; body.style.backgroundColor = "rgb(" + mx(0) + "," + mx(1) + "," + mx(2) + ")"; }
+        try { // 배경을 선택 카드의 분야 색(--c)으로 아주 옅게
+          var hx = getComputedStyle(c).getPropertyValue("--c").trim().match(/^#([0-9a-f]{6})$/i);
+          if (hx) { var n = parseInt(hx[1], 16), bg = [n >> 16 & 255, n >> 8 & 255, n & 255], base = [239, 238, 234], mx = function (j) { return Math.round(base[j] + (bg[j] - base[j]) * 0.22); }; body.style.backgroundColor = "rgb(" + mx(0) + "," + mx(1) + "," + mx(2) + ")"; }
         } catch (e) {}
         if (sheetOpen) fillSheet();
         if (ready) { try { if (window.parent && window.parent !== window) window.parent.postMessage({ klio: "card", id: c.getAttribute("data-id") }, "*"); } catch (e) {} }
@@ -1278,7 +1285,7 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
       function filter(chip) {
         var f = chip.getAttribute("data-f");
         [].forEach.call(document.querySelectorAll(".wh-chip"), function (c) { c.classList.toggle("on", c === chip); });
-        cards = all.filter(function (c) { var on = f === "*" || c.getAttribute("data-cat") === f; c.hidden = !on; return on; });
+        cards = all.filter(function (c) { var on = f === "*" || c.getAttribute("data-grp") === f; c.hidden = !on; return on; });
         N = cards.length; active = -1; rot = 0; target = null; vel = 0; lastInput = Date.now();
         layout();
         if (!reduce && !still) { spread = 0.15; fan(); } else render();
@@ -1337,6 +1344,7 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
           var yt = b.getAttribute("data-yt");
           main.innerHTML = yt ? '<span class="wd-play" aria-hidden="true"></span>' : "";
           main.style.backgroundImage = "url('" + b.getAttribute("data-src") + "')";
+          main.classList.toggle("img", !yt); // 사진은 잘리지 않게 전체(contain), 영상 썸네일은 꽉 채움
           if (yt) { main.classList.add("yt"); main.setAttribute("data-yt", yt); } else { main.classList.remove("yt"); main.removeAttribute("data-yt"); }
           return;
         }
@@ -1382,26 +1390,37 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
       var N = works.length, pad2 = function (n) { return (n < 10 ? "0" : "") + n; };
       var yrs = works.map(function (x) { return yearOf(x.w); }).filter(Boolean).sort();
       var yrTxt = yrs.length ? (yrs[0] === yrs[yrs.length - 1] ? yrs[0] : yrs[0] + " — " + yrs[yrs.length - 1]) : "";
-      var cats = {}; works.forEach(function (x) { var c = x.w.category || "기타"; cats[c] = (cats[c] || 0) + 1; });
-      var chips = '<button class="wh-chip on" type="button" data-f="*">전체<i>' + N + '</i></button>'
-        + Object.keys(cats).map(function (c) { return '<button class="wh-chip" type="button" data-f="' + esc(c) + '">' + esc(catMeta(c).en) + '<i>' + cats[c] + '</i></button>'; }).join("");
+      // 분류 묶음(KILO 대시보드 '프로젝트 그룹'): 분야(카테고리)를 4~5개로 묶고, 프로젝트별로 따로 옮길 수도(groupOf)
+      // 카드는 묶음 순서대로 휠에 놓임(같은 묶음끼리 이웃) · 어느 묶음에도 없으면 '기타'
+      var GR = (Array.isArray(K.groups) ? K.groups : DEFAULT_GROUPS).filter(function (g) { return g && g.id; });
+      var GO = K.groupOf || {}, catG = {}, gIdx = {};
+      GR.forEach(function (g, gi) { gIdx[g.id] = gi; (g.cats || []).forEach(function (c) { if (!catG[c]) catG[c] = g.id; }); });
+      var gidOf = function (w) { var o = GO[w.id]; if (o && gIdx[o] != null) return o; return catG[w.category || "기타"] || "etc"; };
+      var list = works.map(function (x, o) { return { x: x, g: gidOf(x.w), o: o }; });
+      list.sort(function (a, b) { var ga = gIdx[a.g] != null ? gIdx[a.g] : 99, gb = gIdx[b.g] != null ? gIdx[b.g] : 99; return ga - gb || a.o - b.o; });
+      var gCnt = {}; list.forEach(function (y) { gCnt[y.g] = (gCnt[y.g] || 0) + 1; });
+      var gChips = GR.filter(function (g) { return g.on !== false && gCnt[g.id]; }).map(function (g) { return '<button class="wh-chip" type="button" data-f="' + esc(g.id) + '">' + esc(g.label || "묶음") + '<i>' + gCnt[g.id] + '</i></button>'; }).join("");
+      var chips = '<button class="wh-chip on" type="button" data-f="*">전체<i>' + N + '</i></button>' + gChips
+        + (gChips && gCnt.etc ? '<button class="wh-chip" type="button" data-f="etc">기타<i>' + gCnt.etc + '</i></button>' : '');
       var cardsHtml = "", tpls = "";
-      works.forEach(function (x, i) {
-        var w = x.w, co = x.co, cm = catMeta(w.category), md = mediaOf(w), main = md[0], id = w.id || String(i);
-        var mets = (w.metrics || []).filter(function (m) { return m && m.value; }), m0 = mets[0], per = wPeriod(w);
-        // 휠 카드: 이미지(영상은 ▶ 표시) 또는 색 카드 + 대표 지표, 아래에 카테고리·제목
-        var cap = '<span class="wh-cap"><em>' + esc(cm.en) + '</em><b>' + esc(w.title) + '</b></span>';
-        var face = main
-          ? '<span class="wh-face img" style="background-image:url(\'' + esc(main.src) + '\')">' + (main.yt ? '<i class="wh-play" aria-hidden="true"></i>' : '') + cap + '</span>'
-          : '<span class="wh-face">' + (m0 ? '<span class="wh-ic">' + catIcon(w.category) + '</span><span class="wh-kv"><b>' + esc(m0.value) + '</b>' + (m0.label ? '<span>' + esc(m0.label) + '</span>' : '') + '</span>' : '<span class="wh-big">' + catIcon(w.category) + '</span>') + cap + '</span>';
-        cardsHtml += '<button class="wh-card' + (cm.dark ? ' dk' : '') + '" type="button" data-i="' + i + '" data-id="' + esc(id) + '" data-cat="' + esc(w.category || "기타") + '" style="--c:' + cm.c + '" aria-label="' + esc(w.title) + '">' + face + '</button>';
+      list.forEach(function (y, i) {
+        var x = y.x, w = x.w, co = x.co, cm = catMeta(w.category), md = mediaOf(w), main = md[0], id = w.id || String(i);
+        var mets = (w.metrics || []).filter(function (m) { return m && m.value; }), m0 = mets[0], per = wPeriod(w), yr = yearOf(w);
+        // 휠 카드 = 상품카드: 위 썸네일(이미지·영상 ▶ / 없으면 분야 색 + 아이콘) · 아래 분야·제목·회사·대표 지표
+        var thumb = main
+          ? '<span class="wh-th img" style="background-image:url(\'' + esc(main.src) + '\')">' + (main.yt ? '<i class="wh-play" aria-hidden="true"></i>' : '') + '</span>'
+          : '<span class="wh-th"><span class="wh-big">' + catIcon(w.category) + '</span></span>';
+        var info = '<span class="wh-bd"><em class="wh-cat">' + esc(cm.en) + '</em><b class="wh-t">' + esc(w.title) + '</b>'
+          + '<span class="wh-m">' + esc(dispName(co)) + (yr ? ' · ' + esc(yr) : '') + '</span>'
+          + (m0 ? '<span class="wh-p"><b>' + esc(m0.value) + '</b>' + (m0.label ? ' ' + esc(m0.label) : '') + '</span>' : '') + '</span>';
+        cardsHtml += '<button class="wh-card' + (cm.dark ? ' dk' : '') + '" type="button" data-i="' + i + '" data-id="' + esc(id) + '" data-cat="' + esc(w.category || "기타") + '" data-grp="' + esc(y.g) + '" style="--c:' + cm.c + '" aria-label="' + esc(w.title) + '"><span class="wh-face">' + thumb + info + '</span></button>';
         // 선택 카드 정보(아치 안쪽)
         var kp = mets.slice(0, 3).map(function (m) { return '<span class="wh-kpi"><b>' + esc(m.value) + '</b>' + esc(m.label || "") + '</span>'; }).join("");
         tpls += '<template id="whi-' + i + '"><p class="wh-meta">' + esc(cm.en) + '<span> · ' + esc(dispName(co)) + (per ? ' · ' + esc(per) : '') + '</span></p>'
           + '<h2 class="wh-name">' + esc(w.title) + '</h2>' + (kp ? '<div class="wh-kpis">' + kp + '</div>' : '') + '</template>';
         // 상세 시트
         var media = main
-          ? '<div class="wd-main' + (main.yt ? ' yt' : '') + '" style="background-image:url(\'' + esc(main.src) + '\')"' + (main.yt ? ' data-yt="' + esc(main.yt) + '"' : '') + '>' + (main.yt ? '<span class="wd-play" aria-hidden="true"></span>' : '') + '</div>'
+          ? '<div class="wd-main' + (main.yt ? ' yt' : ' img') + '" style="background-image:url(\'' + esc(main.src) + '\')"' + (main.yt ? ' data-yt="' + esc(main.yt) + '"' : '') + '>' + (main.yt ? '<span class="wd-play" aria-hidden="true"></span>' : '') + '</div>'
             + (md.length > 1 ? '<div class="wd-ths">' + md.slice(0, 8).map(function (m, k) { return '<button class="wd-th' + (k ? '' : ' on') + '" type="button" style="background-image:url(\'' + esc(m.src) + '\')" data-src="' + esc(m.src) + '"' + (m.yt ? ' data-yt="' + esc(m.yt) + '"' : '') + ' aria-label="미디어 ' + (k + 1) + '"></button>'; }).join("") + '</div>' : '')
           : '<div class="wd-main art">' + (m0 ? '<span class="wd-ic">' + catIcon(w.category) + '</span><span class="wd-kv"><b>' + esc(m0.value) + '</b>' + (m0.label ? '<span>' + esc(m0.label) + '</span>' : '') + '</span>' : '<span class="wd-big">' + catIcon(w.category) + '</span>') + '</div>';
         var kpis = mets.slice(0, 4).map(function (m) { return '<div class="wd-kpi"><b>' + esc(m.value) + '</b><span>' + esc(m.label || "") + '</span></div>'; }).join("");
@@ -1419,7 +1438,7 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
           + '</div></template>';
       });
       var words = String(txt("ppTitle", "All Projects")).trim().split(/\s+/).map(function (s) { return '<span>' + esc(s) + '</span>'; }).join(" ");
-      var WCSS = ':root{--ink:#1d1d1f;--ink60:rgba(29,29,31,.6);--gray:#86868b;--bd:rgba(29,29,31,.1);--mint:#abdcd1;--beige:#e6e1d5;--sand:#eae6da;--coral:#dd8e6e;--lav:#c3cde4;--font:"Figtree","Pretendard Variable",Pretendard,-apple-system,system-ui,"Apple SD Gothic Neo",sans-serif;--ez:cubic-bezier(.16,1,.3,1);--rc:18px;--rs:26px;--rk:14px}'
+      var WCSS = ':root{--ink:#1d1d1f;--ink60:rgba(29,29,31,.6);--gray:#86868b;--bd:rgba(29,29,31,.1);--mint:#abdcd1;--beige:#e6e1d5;--sand:#eae6da;--coral:#dd8e6e;--lav:#c3cde4;--font:"Figtree","Pretendard Variable",Pretendard,-apple-system,system-ui,"Apple SD Gothic Neo",sans-serif;--ez:cubic-bezier(.16,1,.3,1);--rc:20px;--rt:14px;--rs:26px;--rk:14px}'
         + '*,*::before,*::after{box-sizing:border-box}html,body{height:100%}body{margin:0;font-family:var(--font);color:var(--ink);background:#efeeea;-webkit-font-smoothing:antialiased;letter-spacing:-.015em;word-break:keep-all;overflow-wrap:break-word;overflow:hidden;transition:background-color 1.2s var(--ez)}a{color:inherit;text-decoration:none}button{font-family:inherit;color:inherit}'
         + '.wh{position:relative;height:100vh;height:100dvh;overflow:hidden;touch-action:none;-webkit-user-select:none;user-select:none;cursor:grab}.wh.grab{cursor:grabbing}'
         // 좌상단: 돌아가기 · 서명 · 번호 / 우상단: 큰 타이틀
@@ -1432,15 +1451,17 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
         // 휠 카드
         + '.wh-ring{position:absolute;left:50%;top:0;width:0;height:0;z-index:2}'
         + '.wh-card{position:absolute;left:calc(var(--cw) / -2);top:calc(var(--ch) / -2);width:var(--cw);height:var(--ch);padding:0;border:0;background:none;cursor:inherit;will-change:transform;-webkit-tap-highlight-color:transparent;font:inherit;color:inherit;outline:none}.wh-card[hidden]{display:none}'
-        + '.wh-face{position:absolute;inset:0;border-radius:var(--rc);overflow:hidden;background:var(--c) center/cover no-repeat;box-shadow:inset 0 0 0 .5px rgba(0,0,0,.06),0 18px 36px -20px rgba(0,0,0,.42),0 2px 6px rgba(0,0,0,.06);transition:box-shadow .5s var(--ez)}'
-        + '.wh-card.on .wh-face{box-shadow:inset 0 0 0 .5px rgba(0,0,0,.06),0 34px 60px -26px rgba(0,0,0,.55),0 6px 16px rgba(0,0,0,.1)}.wh-card:focus-visible .wh-face{box-shadow:0 0 0 3px #fff,0 0 0 5px var(--ink)}'
-        + '.wh-face.img::after{content:"";position:absolute;inset:0;background:linear-gradient(to top,rgba(12,12,14,.74) 0%,rgba(12,12,14,.12) 44%,transparent 62%)}'
-        + '.wh-cap{position:absolute;left:12px;right:12px;bottom:12px;z-index:1;text-align:left}.wh-cap em{display:block;font-style:normal;font-size:9.5px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;opacity:.7}'
-        + '.wh-cap b{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;margin-top:3px;font-size:max(11px,calc(var(--cw) * .062));font-weight:700;line-height:1.28;letter-spacing:-.02em}.wh-face.img .wh-cap,.wh-card.dk .wh-cap{color:#fff}'
-        + '.wh-ic{position:absolute;left:12px;top:12px}.wh-ic svg{width:20px;height:20px}'
-        + '.wh-kv{position:absolute;left:12px;right:12px;top:40%;transform:translateY(-50%);text-align:left}.wh-kv b{display:block;font-size:calc(var(--cw) * .2);font-weight:800;letter-spacing:-.05em;line-height:1}.wh-kv span{display:block;margin-top:6px;font-size:10.5px;font-weight:600;opacity:.6;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.wh-card.dk .wh-kv{color:#fff}'
-        + '.wh-big{position:absolute;left:50%;top:42%;transform:translate(-50%,-50%)}.wh-big svg{display:block;width:calc(var(--cw) * .3);height:calc(var(--cw) * .3);stroke-width:1.3}'
-        + '.wh-play{position:absolute;right:10px;top:10px;z-index:1;width:28px;height:28px;border-radius:50%;background:rgba(0,0,0,.38);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);box-shadow:inset 0 0 0 1px rgba(255,255,255,.5)}.wh-play::after{content:"";position:absolute;left:55%;top:50%;transform:translate(-50%,-50%);border-left:8px solid #fff;border-top:5px solid transparent;border-bottom:5px solid transparent}'
+        // 휠 카드 = 상품카드: 흰 카드 안에 썸네일(동심 곡률) + 분야·제목·회사·대표 지표
+        + '.wh-face{position:absolute;inset:0;display:flex;flex-direction:column;padding:calc(var(--cw) * .03);border-radius:var(--rc);overflow:hidden;background:#fff;text-align:left;box-shadow:0 0 0 .5px rgba(0,0,0,.07),0 18px 36px -22px rgba(0,0,0,.4),0 2px 6px rgba(0,0,0,.05);transition:box-shadow .5s var(--ez)}'
+        + '.wh-card.on .wh-face{box-shadow:0 0 0 .5px rgba(0,0,0,.06),0 34px 60px -28px rgba(0,0,0,.5),0 6px 16px rgba(0,0,0,.08)}.wh-card:focus-visible .wh-face{box-shadow:0 0 0 3px #fff,0 0 0 5px var(--ink)}'
+        + '.wh-th{position:relative;flex:none;aspect-ratio:4/3;border-radius:var(--rt);overflow:hidden;background:var(--c) center/cover no-repeat}.wh-th.img{background-color:#ecebe7}.wh-th.img::after{content:"";position:absolute;inset:0;border-radius:inherit;box-shadow:inset 0 0 0 .5px rgba(0,0,0,.08)}'
+        + '.wh-big{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%)}.wh-big svg{display:block;width:calc(var(--cw) * .24);height:calc(var(--cw) * .24);stroke-width:1.3}'
+        + '.wh-bd{flex:1;min-height:0;display:flex;flex-direction:column;padding:calc(var(--cw) * .05) calc(var(--cw) * .04) calc(var(--cw) * .035)}'
+        + '.wh-cat{font-style:normal;font-size:max(8.5px,calc(var(--cw) * .04));font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--gray);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}'
+        + '.wh-t{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;margin-top:calc(var(--cw) * .018);font-size:max(11px,calc(var(--cw) * .062));font-weight:700;line-height:1.3;letter-spacing:-.025em;color:var(--ink)}'
+        + '.wh-m{margin-top:calc(var(--cw) * .016);font-size:max(9.5px,calc(var(--cw) * .045));font-weight:500;color:var(--gray);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}'
+        + '.wh-p{margin-top:auto;padding-top:calc(var(--cw) * .025);font-size:max(9.5px,calc(var(--cw) * .046));font-weight:600;color:var(--ink60);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.wh-p b{margin-right:2px;font-size:max(12px,calc(var(--cw) * .076));font-weight:800;letter-spacing:-.035em;color:var(--ink)}'
+        + '.wh-play{position:absolute;left:50%;top:50%;z-index:1;width:calc(var(--cw) * .17);height:calc(var(--cw) * .17);transform:translate(-50%,-50%);border-radius:50%;background:rgba(0,0,0,.4);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);box-shadow:inset 0 0 0 1.5px rgba(255,255,255,.75)}.wh-play::after{content:"";position:absolute;left:55%;top:50%;transform:translate(-50%,-50%);border-left:calc(var(--cw) * .045) solid #fff;border-top:calc(var(--cw) * .028) solid transparent;border-bottom:calc(var(--cw) * .028) solid transparent}'
         // 선택 카드 정보 (휠 아치 안쪽)
         + '.wh-info{position:absolute;left:50%;top:var(--info,62vh);transform:translateX(-50%);z-index:360;width:min(560px,calc(100vw - 40px));text-align:center;cursor:auto;-webkit-user-select:text;user-select:text;touch-action:manipulation}'
         + '.wh-meta{margin:0;font-size:11.5px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--ink)}.wh-meta span{font-weight:600;letter-spacing:-.005em;text-transform:none;color:var(--gray)}'
@@ -1458,7 +1479,7 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
         + '.wh-x{position:absolute;top:14px;right:14px;z-index:3;width:36px;height:36px;border:0;border-radius:50%;background:rgba(255,255,255,.82);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);box-shadow:0 0 0 .5px var(--bd),0 4px 12px -6px rgba(0,0,0,.3);font-size:14px;cursor:pointer}'
         + '.wh-sbody{flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain}.wh-snav{flex:none;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px 14px;border-top:1px solid var(--bd)}'
         + '.wh-snav button{height:38px;padding:0 16px;border:0;border-radius:999px;background:#f2f2f4;font-size:13px;font-weight:600;cursor:pointer}.wh-snav button:hover{background:#e8e8ec}.wh-sno{font-size:12px;font-weight:700;color:var(--gray);font-variant-numeric:tabular-nums}'
-        + '.wd-media{background:var(--c)}.wd-main{position:relative;aspect-ratio:16/10;background:var(--c) center/cover no-repeat}.wd-main.yt{cursor:pointer}.wd-main iframe{position:absolute;inset:0;width:100%;height:100%;border:0;background:#000}'
+        + '.wd-media{background:var(--c)}.wd-main{position:relative;aspect-ratio:16/10;background:var(--c) center/cover no-repeat}.wd-main.img{background-color:#f3f3f0;background-size:contain}.wd-main.yt{cursor:pointer}.wd-main iframe{position:absolute;inset:0;width:100%;height:100%;border:0;background:#000}'
         + '.wd-play{position:absolute;left:50%;top:50%;width:72px;height:72px;margin:-36px 0 0 -36px;border-radius:50%;background:rgba(0,0,0,.4);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);box-shadow:inset 0 0 0 1.5px rgba(255,255,255,.8);transition:transform .35s var(--ez)}.wd-play::after{content:"";position:absolute;left:55%;top:50%;transform:translate(-50%,-50%);border-left:20px solid #fff;border-top:12px solid transparent;border-bottom:12px solid transparent}.wd-main.yt:hover .wd-play{transform:scale(1.08)}'
         + '.wd-main.art{display:flex;flex-direction:column;justify-content:flex-end;padding:26px 28px}.wd-ic{position:absolute;left:26px;top:24px}.wd-ic svg{width:32px;height:32px}.wd-kv b{display:block;font-size:clamp(48px,9vw,76px);font-weight:800;letter-spacing:-.055em;line-height:.95}.wd-kv span{display:block;margin-top:10px;font-size:14px;font-weight:600;opacity:.62}.wd-media.dk .wd-kv{color:#fff}.wd-big{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%)}.wd-big svg{display:block;width:104px;height:104px;stroke-width:1.2}'
         + '.wd-ths{display:flex;gap:8px;padding:10px 14px;overflow-x:auto;scrollbar-width:none;background:rgba(0,0,0,.05)}.wd-th{flex:none;width:64px;height:44px;border:2px solid transparent;border-radius:10px;background:center/cover no-repeat;opacity:.6;cursor:pointer;transition:opacity .2s}.wd-th:hover{opacity:.9}.wd-th.on{opacity:1;border-color:#fff;box-shadow:0 0 0 1px rgba(0,0,0,.16)}'
@@ -1468,12 +1489,14 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
         + '.wd-desc{margin:0;font-size:14.5px;line-height:1.75;color:var(--ink60)}.wd-pars{display:grid;gap:8px}.wd-par{padding:12px 14px;border-radius:var(--rk);background:#f7f7f4}.wd-par em{font-style:normal;font-size:10.5px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--gray)}.wd-par p{margin:4px 0 0;font-size:13.5px;line-height:1.65}'
         + '.wd-tags{display:flex;flex-wrap:wrap;gap:6px}.wd-tags span{padding:5px 10px;border-radius:999px;background:#f1f0ec;font-size:11.5px;color:var(--ink60)}.wd-links{display:flex;flex-wrap:wrap;gap:8px}.wd-links a{padding:10px 15px;border-radius:999px;background:var(--ink);color:#fff;font-size:12.5px;font-weight:600;transition:opacity .2s}.wd-links a:hover{opacity:.85}'
         // 애플식 연속 곡률(지원 브라우저) — 같은 인상이 나도록 반경을 키움
-        + '@supports (corner-shape:squircle){:root{--rc:30px;--rs:42px;--rk:22px}.wh-face,.wh-sheet,.wd-kpi,.wd-par,.wd-th{corner-shape:squircle}.wd-th{border-radius:15px}}'
+        + '@supports (corner-shape:squircle){:root{--rc:34px;--rt:25px;--rs:42px;--rk:22px}.wh-face,.wh-th,.wh-sheet,.wd-kpi,.wd-par,.wd-th{corner-shape:squircle}.wd-th{border-radius:15px}}'
+        // 낮은 화면(노트북): 정보 패널 간격을 줄여 아래 분류 버튼과 겹치지 않게
+        + '@media(min-width:760px) and (max-height:780px){.wh-name{font-size:clamp(22px,min(2.9vw,4.4vh),42px)}.wh-kpis{margin-top:12px}.wh-acts{margin-top:14px}.wh-more{height:40px}}'
         // 모바일: 위에서부터 차례로(돌아가기·번호 → 타이틀 → 카테고리 → 휠 → 정보), 상세는 아래에서 올라오는 시트
         + '@media(max-width:759px){.wh-top{position:relative;left:auto;top:auto;flex-direction:row;align-items:center;justify-content:space-between;padding:14px 16px 0}.wh-sig{display:none}'
         + '.wh-title{position:relative;right:auto;top:auto;padding:16px 16px 0;text-align:left;font-size:clamp(38px,11.5vw,56px)}.wh-title span{display:inline}.wh-title small{margin-top:10px}'
         + '.wh-chips{position:relative;left:auto;bottom:auto;transform:none;margin:14px 16px 0;width:fit-content;max-width:calc(100vw - 32px)}'
-        + '.wh-info{width:calc(100vw - 32px)}.wh-name{font-size:clamp(22px,6.4vw,28px)}.wh-kpi{padding:7px 12px}.wh-kpi b{font-size:15px}.wh-hint .d{display:none}.wh-hint .m{display:inline}'
+        + '.wh-info{width:calc(100vw - 32px)}.wh-name{font-size:clamp(22px,6.4vw,28px)}.wh-kpi{padding:7px 12px}.wh-kpi b{font-size:15px}.wh-kpi:nth-child(n+3){display:none}.wh-hint .d{display:none}.wh-hint .m{display:inline}.wh-m{display:none}'
         + '.wh-sheet{top:auto;left:8px;right:8px;bottom:8px;width:auto;height:calc(100dvh - 48px);transform:translateY(calc(100% + 20px))}}'
         + '@media(prefers-reduced-motion:reduce){.wh-dyn.swap>*{animation:none}.wh-sheet,.wh-scrim,body{transition:none}}';
       return '<!doctype html><html lang="ko"><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>'
