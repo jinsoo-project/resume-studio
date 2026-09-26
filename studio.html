@@ -1379,9 +1379,9 @@ function renderAXAdmin(){
   const ppUrl='https://kimjinsoo-mkt-ax.vercel.app/'+encodeURIComponent(axDoc().slug||'portfolio')+'/projects';
   const ppCard=card('전체 프로젝트 페이지',
     `<div class="kd-seg" style="margin-bottom:12px"><button class="kd-btn${axPvPage!=='projects'?' on':''}" data-kpv="main">메인 화면</button><button class="kd-btn${axPvPage==='projects'?' on':''}" data-kpv="projects">전체 프로젝트 페이지</button><a class="kd-btn" href="${ppUrl}" target="_blank" rel="noopener" title="${axAttr(ppUrl)}">새 탭 ↗</a></div>`
-    +G2(F('버튼 제목',kt('pjAllTitle','전체 프로젝트 보기')),F('버튼 보조 문구',kt('pjAllSub','새 페이지에서 큰 카드로 한 장씩 넘겨보기'),`큰 숫자 = 노출 프로젝트 수(${ppN})`))
-    +G2(F('페이지 제목',kt('ppTitle','Projects')),F('돌아가기 버튼',kt('ppBack','포트폴리오')))
-    +`<p class="kd-note">주소 <code>${axText(ppUrl.replace(/^https:\/\//,''))}</code> — 노출된 프로젝트 ${ppN}개가 큰 카드로 넘어가요(← → · 휠 · 아래 썸네일). 모자이크 타일을 누르면 그 카드로 바로 열려요. 미리보기에서도 타일을 누르면 이 페이지로 바뀌어요.</p>`,'새 URL');
+    +G2(F('버튼 제목',kt('pjAllTitle','전체 프로젝트 보기')),F('버튼 보조 문구',kt('pjAllSub','원형 휠로 한눈에 돌려보기'),`큰 숫자 = 노출 프로젝트 수(${ppN})`))
+    +G2(F('페이지 제목',kt('ppTitle','All Projects'),'오른쪽 위 큰 글씨 · 띄어쓰기마다 줄바꿈'),F('돌아가기 버튼',kt('ppBack','포트폴리오')))
+    +`<p class="kd-note">주소 <code>${axText(ppUrl.replace(/^https:\/\//,''))}</code> — 노출된 프로젝트 ${ppN}개가 원형 휠로 펼쳐져요(드래그 · 휠 · ← →, 가만두면 천천히 넘어감). 꼭대기 카드 정보가 가운데에, ‘자세히 보기’로 상세가 열려요. 모자이크 타일을 누르면 그 카드로 바로 열리고, 미리보기에서도 타일을 누르면 이 페이지로 바뀌어요.</p>`,'새 URL');
   const P_projects=()=>intro('회사를 눌러 작업을 편집해요. <b>노출</b> = 포트폴리오·전체 프로젝트 페이지에 표시 · <b>대표</b> = 상단 모자이크(최대 5개). 타일 배지는 첫 번째 지표, 썸네일은 첫 번째 이미지(없으면 유튜브 링크)예요.')
     +ppCard
     +cos.map((c,ci)=>{
