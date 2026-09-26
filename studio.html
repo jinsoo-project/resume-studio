@@ -8,7 +8,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <!-- KILO 대시보드 '글꼴' 견본용 (포트폴리오 글꼴 프리셋과 같은 글꼴) -->
-<link href="https://fonts.googleapis.com/css2?family=Figtree:wght@800&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Figtree:wght@800&family=Newsreader:ital,opsz,wght@0,6..72,400;1,6..72,400&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/sun-typeface/SUIT@2/fonts/variable/woff2/SUIT-Variable.css">
 <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
 <style>
@@ -1404,8 +1404,8 @@ function renderAXAdmin(){
   const P_layout=()=>intro('섹션 순서·노출·이름과 전체 효과를 정해요. 이름을 비우면 기본 이름(About 등)으로 보여요. 하단 바도 같은 순서·이름을 써요.')
     +card('섹션',kd.sections.map((s,i)=>`<div class="kd-item${s.on===false?' off':''}" data-row data-pv="${axAttr(s.key)}"><div class="kd-row">${sw(`data-ax-klio-on="${i}"`,s.on!==false,'','노출')}<input class="kd-in" data-ax-klio-label="${i}" value="${axAttr(s.label||'')}" placeholder="${axAttr(KL[s.key]||s.key)}">${upDown('data-ax-moveklio',i,i===0,i===kd.sections.length-1)}</div></div>`).join(''),'스위치 = 노출 · ↑↓ = 순서')
     +card('글꼴',(()=>{ const cur=(kd.ui||{}).font||'editorial';
-      const OPTS=[['editorial','에디토리얼','큰 제목 세리프 + 본문 프리텐다드','"Instrument Serif",Georgia,serif',400],['modern','모던','프리텐다드 굵게','"Pretendard Variable",Pretendard,sans-serif',800],['soft','소프트','SUIT 둥근 고딕','"SUIT Variable",sans-serif',800],['classic','이전','Figtree + 프리텐다드','Figtree,sans-serif',800]];
-      return `<div class="kd-fonts">${OPTS.map(([k,l,dsc,ff,wt])=>`<button class="kd-font${cur===k?' on':''}" data-kfont="${k}"><b style="font-family:${ff};font-weight:${wt}">All <i style="font-style:${k==='editorial'?'italic':'normal'}">Projects</i></b><span>${l}</span><small>${dsc}</small></button>`).join('')}</div><p class="kd-note">포트폴리오와 전체 프로젝트 페이지에 함께 적용돼요.</p>`; })(),'고르면 바로 미리보기')
+      const OPTS=[['editorial','에디토리얼','제목 세리프(Newsreader) + 본문 프리텐다드','Newsreader,Georgia,serif',400],['modern','모던','프리텐다드 굵게','"Pretendard Variable",Pretendard,sans-serif',800],['soft','소프트','SUIT 둥근 고딕','"SUIT Variable",sans-serif',800],['classic','이전','Figtree + 프리텐다드','Figtree,sans-serif',800]];
+      return `<div class="kd-fonts">${OPTS.map(([k,l,dsc,ff,wt])=>`<button class="kd-font${cur===k?' on':''}" data-kfont="${k}"><b style="font-family:${ff};font-weight:${wt}">Work that <i style="font-style:${k==='editorial'?'italic':'normal'};${k==='editorial'?'':'opacity:.45'}">moved</i></b><span>${l}</span><small>${dsc}</small></button>`).join('')}</div><p class="kd-note">포트폴리오와 전체 프로젝트 페이지에 함께 적용돼요.</p>`; })(),'고르면 바로 미리보기')
     +card('모션 · 효과',`<div class="kd-sws">${showSw('fx','intro',true,'등장 애니메이션')}${showSw('fx','aura',true,'배경 오로라')}${showSw('fx','tilt',true,'3D 기울기·자석 버튼')}${showSw('fx','progress',true,'스크롤 진행바')}</div>`);
 
   // ── Home
@@ -1515,7 +1515,8 @@ function renderAXAdmin(){
     const etcH=etc.length?`<div class="kd-grp etc"><div class="kd-row"><b class="kd-glabel" style="flex:1">기타 <small>어느 묶음에도 없는 카드</small></b><span class="kd-cnt">${etc.length}개</span></div>${cardsOf('etc')}</div>`:'';
     const ppUrl='https://kimjinsoo-mkt-ax.vercel.app/'+encodeURIComponent(axDoc().slug||'portfolio')+'/projects';
     return intro('원형 휠 페이지를 여기서 다 편집해요. <b>묶음</b> = 아래 분류 버튼(분야를 담으면 그 분야 카드가 들어감) · <b>카드</b> = 이름·노출·순서, ▸에서 묶음·대표 지표·썸네일. 오른쪽 미리보기에 바로 반영돼요.')
-      +card('페이지 문구',G2(F('페이지 제목',kt('ppTitle','All Projects'),'오른쪽 위 큰 글씨 · 띄어쓰기마다 줄바꿈'),F('돌아가기 버튼',kt('ppBack','포트폴리오')))
+      +card('페이지 문구',F('머리 문장',kta('ppTitle','Work that *moved*\nthe numbers',2),'위쪽 가운데 큰 문장 · 줄바꿈 = 줄 나눔 · *단어* = 기울임 강조')
+        +G2(F('머리말(작은 글씨)',kt('ppEyebrow','Selected Projects'),'뒤에 연도 범위 자동'),F('돌아가기 버튼',kt('ppBack','포트폴리오')))
         +G2(F('메인 버튼 제목',kt('pjAllTitle','전체 프로젝트 보기')),F('메인 버튼 보조 문구',kt('pjAllSub','원형 휠로 한눈에 돌려보기')))
         +`<div class="kd-acts"><a class="kd-btn" href="${ppUrl}" target="_blank" rel="noopener">새 탭에서 열기 ↗</a></div>`,'새 URL')
       +card('묶음 · 카드',rows+etcH+`<div class="kd-acts"><button class="kd-add" data-kg-add>＋ 묶음 추가</button><button class="kd-btn" data-kg-reset>기본 4개로 다시 채우기</button></div>`,'묶음 ↑↓ = 버튼 순서 · 카드 ↑↓ = 휠 순서');
