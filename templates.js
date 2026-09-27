@@ -1018,12 +1018,14 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
         pjs = svs.map(function (sv, si) {
           var sp = showPj ? (sv.projects || []).filter(function (it) { return it && it.visible !== false && String(it.title || "").trim(); }).map(function (it, k) {
             return '<li style="--k:' + k + '"><span class="t">' + esc(it.title) + '</span>' + (showPjP && it.period ? '<span class="p">' + esc(it.period) + '</span>' : '') + '</li>'; }).join("") : "";
-          return '<div class="xp-sv" style="--s:' + si + '"><div class="xp-sv-hd"><div class="xp-sv-tt"><h4>' + esc(sv.name || "") + '</h4>' + (XS.role && sv.role ? '<p class="xp-sv-role">' + esc(sv.role) + '</p>' : '') + '</div>'
+          var sl = XS.logo ? (sv.logo ? '<span class="xp-sv-logo"><img src="' + esc(sv.logo) + '" alt="" loading="lazy"></span>'
+            : '<span class="xp-sv-logo fb">' + esc(String(sv.name || "").slice(0, 1)) + '</span>') : '';
+          return '<div class="xp-sv' + (sl ? '' : ' nologo') + '" style="--s:' + si + '">' + sl + '<div class="xp-sv-hd"><div class="xp-sv-tt"><h4>' + esc(sv.name || "") + '</h4>' + (XS.role && sv.role ? '<p class="xp-sv-role">' + esc(sv.role) + '</p>' : '') + '</div>'
             + (XS.period && sv.period ? '<p class="xp-sv-when">' + esc(sv.period) + '</p>' : '') + '</div>'
             + (XS.summary && sv.summary ? '<p class="xp-sv-sum">' + esc(sv.summary) + '</p>' : '')
             + (sp ? '<ul class="xp-pj">' + sp + '</ul>' : '') + '</div>';
         }).join("");
-        return '<div class="xp xp-split rv' + (logo ? '' : ' nologo') + '" style="--d:' + (ei * 60) + 'ms"><div class="xp-hd">' + logo
+        return '<div class="xp xp-split nologo rv" style="--d:' + (ei * 60) + 'ms"><div class="xp-hd">'
           + '<div class="xp-tt"><h3>' + esc(nm) + (alt ? '<small>' + esc(alt) + '</small>' : '') + '</h3>' + '' + '</div>'
           + (XS.period && per ? '<p class="xp-when">' + esc(per) + (dur ? '<small>' + esc(dur) + '</small>' : '') + '</p>' : '') + '</div>'
           + '<div class="xp-bd">' + sum + (mets ? '<div class="xp-mets">' + mets + '</div>' : '') + '<div class="xp-svs">' + pjs + '</div></div>'
@@ -1183,14 +1185,16 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
       + '.xp-mets{display:flex;flex-wrap:wrap;gap:4px 16px;margin-top:10px;font-size:12px;color:var(--ink50)}.xp-met b{color:var(--ink);font-weight:700;margin-right:5px}'
       + '.xp-pj{list-style:none;margin:12px 0 0;padding:0}.xp-pj li{position:relative;display:flex;align-items:baseline;gap:12px;padding:4px 0 4px 13px;font-size:13px;line-height:1.55;color:var(--ink)}'
       + '.xp-pj li::before{content:"";position:absolute;left:1px;top:calc(4px + .775em - 2px);width:4px;height:4px;border-radius:50%;background:var(--ink)}.xp-pj .t{flex:1;min-width:0}.xp-pj .p{flex:none;font-size:11px;color:var(--gray);font-variant-numeric:tabular-nums;white-space:nowrap}'
-      + '.xp-svs{margin-top:16px}.xp-sv{position:relative;padding:0 0 20px 22px}.xp-sv:last-child{padding-bottom:0}'
-      + '.xp-sv::before{content:"";position:absolute;left:0;top:7.5px;width:7px;height:7px;border-radius:50%;background:var(--ink)}.xp-sv::after{content:"";position:absolute;left:3px;top:21px;bottom:1px;width:1px;background:var(--bd)}.xp-sv:last-child::after{display:none}'
-      + '.xp-sv-hd{display:flex;align-items:baseline;justify-content:space-between;gap:12px}.xp-sv-tt{min-width:0}'
+      + '.xp-split .xp-tt h3{font-size:17px;font-weight:700;letter-spacing:-.025em}.xp-split .xp-tt h3 small{font-size:12.5px}'
+      + '.xp-svs{margin-top:18px}.xp-sv{position:relative;padding:0 0 22px 44px;min-height:30px}.xp-sv:last-child{padding-bottom:0}.xp-sv.nologo{padding-left:0}'
+      + '.xp-sv-logo{position:absolute;left:0;top:0;width:30px;height:30px;border-radius:9px;overflow:hidden;background:#fff;box-shadow:0 0 0 1px rgba(0,0,0,.07);display:grid;place-items:center;font-size:12.5px;font-weight:700;color:var(--ink)}.xp-sv-logo img{width:100%;height:100%;object-fit:cover;display:block}.xp-sv-logo.fb{background:var(--sand)}'
+      + '.xp-sv::after{content:"";position:absolute;left:15px;top:38px;bottom:8px;width:1px;background:var(--bd)}.xp-sv:last-child::after,.xp-sv.nologo::after{display:none}'
+      + '.xp-sv-hd{display:flex;align-items:baseline;justify-content:space-between;gap:12px;padding-top:5px}.xp-sv-tt{min-width:0}'
       + '.xp-sv h4{font-size:14.5px;font-weight:600;line-height:1.4;letter-spacing:-.02em;color:var(--ink)}'
       + '.xp-sv-role{margin-top:2px;font-size:12.5px;line-height:1.5;color:var(--ink50)}.xp-sv-when{flex:none;font-size:11.5px;color:var(--gray);font-variant-numeric:tabular-nums;white-space:nowrap}'
       + '.xp-sv-sum{margin-top:7px;font-size:13px;line-height:1.7;color:var(--ink50)}.xp-sv .xp-pj{margin-top:6px}'
       + '.js .xp-split .xp-sv{opacity:0;transform:translateY(8px);transition:opacity .6s var(--ez),transform .6s var(--ez);transition-delay:calc(var(--d,0ms) + 160ms + var(--s,0) * 80ms)}.js .xp-split.in .xp-sv{opacity:1;transform:none}'
-      + '@media(max-width:560px){.xp-sv{padding-left:18px}.xp-sv-hd{flex-direction:column;gap:2px}}'
+      + '@media(max-width:560px){.xp-sv{padding-left:40px}.xp-sv-hd{flex-direction:column;gap:2px}.xp-split .xp-when{grid-column:1}}'
       + '@media(prefers-reduced-motion:reduce){.js .xp-split .xp-sv{opacity:1;transform:none;transition:none}}'
       + '@media(max-width:560px){.xp-hd{grid-template-columns:36px minmax(0,1fr)}.xp-logo{width:36px;height:36px;border-radius:10px}.xp-when{grid-column:2;text-align:left;margin-top:6px}.xp-when small{display:inline;margin:0 0 0 6px}.xp.nologo .xp-when{grid-column:1}.xp-bd{margin-left:50px}.xp-pj li{flex-direction:column;gap:0}}'
       + '.js .xp .xp-pj li{opacity:0;transform:translateY(6px);transition:opacity .5s var(--ez),transform .5s var(--ez);transition-delay:calc(var(--d,0ms) + 200ms + var(--k,0) * 45ms)}.js .xp.in .xp-pj li{opacity:1;transform:none}'
@@ -1292,9 +1296,9 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
       + '.vw{border-radius:8px}.dock{border-radius:16px}.dock a,.dock-pill{border-radius:11px}.ax-console{border-radius:12px}'
       // 애플식 곡률: 지원 브라우저(크롬 계열)는 연속 곡률(squircle) + 같은 인상이 나도록 반경을 키움 · 미지원은 위의 둥근 모서리 그대로
       + '@supports (corner-shape:squircle){'
-      + '.photo .card,.tile,.pj-all,.pj-deck i,.dcard,.ax-core,.ax-th,.xp-logo,.socials a,.pc-th,.vw,.dock,.dock a,.dock-pill,.ax-console{corner-shape:squircle}.pc-th{border-radius:33px}.vw{border-radius:12px}.dock{border-radius:26px}.dock a,.dock-pill{border-radius:20px}.ax-console{border-radius:18px}.photo .card::before,.photo .card::after{corner-shape:squircle}'
+      + '.photo .card,.tile,.pj-all,.pj-deck i,.dcard,.ax-core,.ax-th,.xp-logo,.xp-sv-logo,.socials a,.pc-th,.vw,.dock,.dock a,.dock-pill,.ax-console{corner-shape:squircle}.pc-th{border-radius:33px}.vw{border-radius:12px}.dock{border-radius:26px}.dock a,.dock-pill{border-radius:20px}.ax-console{border-radius:18px}.photo .card::before,.photo .card::after{corner-shape:squircle}'
       + '.photo .card{border-radius:42px}.tile{border-radius:40px}.pj-all{border-radius:40px}.pj-deck i{border-radius:14px}.dcard{border-radius:48px}'
-      + '.ax-core{border-radius:30px}.ax-th{border-radius:19px}.xp-logo{border-radius:16px}.socials a{border-radius:13px}'
+      + '.ax-core{border-radius:30px}.ax-th{border-radius:19px}.xp-logo{border-radius:16px}.xp-sv-logo{border-radius:12px}.socials a{border-radius:13px}'
       + '@media(max-width:560px){.xp-logo{border-radius:15px}}}'
       // 글꼴 프리셋의 제목용 글꼴(--disp): 스킬 카드 값 — 세리프(editorial)는 한 단계 크게
       + '.dcard h4{font-family:var(--disp);font-weight:var(--dispw);letter-spacing:var(--displs)}.ft-editorial .dcard h4{font-size:40px;line-height:.95}';
