@@ -1780,8 +1780,6 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
           + '.ps-aura i:nth-child(2){width:30vw;height:30vw;max-width:420px;max-height:420px;right:10%;top:8%;background:var(--lav);animation:au2 26s ease-in-out infinite alternate}.ps-aura i:nth-child(3){width:24vw;height:24vw;max-width:320px;max-height:320px;left:42%;top:46%;background:var(--coral);opacity:.28;animation:au3 30s ease-in-out infinite alternate}'
           + '@keyframes au1{to{transform:translate(8vw,6vh) scale(1.15)}}@keyframes au2{to{transform:translate(-7vw,8vh) scale(.9)}}@keyframes au3{to{transform:translate(-5vw,-5vh) scale(1.2)}}'
           + '.ps-h1 .w{display:inline-block}.js .ps-h1 .w{animation:wIn 1s var(--ez) backwards;animation-delay:calc(.15s + var(--i) * 70ms)}@keyframes wIn{from{opacity:0;transform:translateY(.45em) rotate(2deg);filter:blur(8px)}}.js .ps-hero .ps-h1{animation:none}body[data-still] .ps-h1 .w{animation:none}'
-          + '.ps-cur{position:fixed;left:0;top:0;z-index:70;width:86px;height:86px;margin:-43px 0 0 -43px;border-radius:50%;background:var(--ink);color:#fff;display:grid;place-items:center;font-size:13px;font-weight:600;pointer-events:none;transform:translate3d(var(--cx,-200px),var(--cy,-200px),0) scale(0);transition:transform .35s var(--ez)}'
-          + '.ps-cur.on{transform:translate3d(var(--cx),var(--cy),0) scale(1)}.ps-cur span{opacity:0;transition:opacity .2s}.ps-cur.on span{opacity:1}body.pd-open .ps-cur{display:none}@media(hover:none),(pointer:coarse){.ps-cur{display:none}}'
           + '.ps-p{perspective:1200px}.ps-fan{transform:translate(-50%,-50%) rotateX(calc(var(--ty,0) * -7deg)) rotateY(calc(var(--tx,0) * 9deg));transform-style:preserve-3d;transition:transform .6s var(--ez)}'
           + '.ps-f.f1{transform:translate3d(var(--h1,0px),calc(var(--pk,0) * 46px),0) rotate(var(--r1,-8deg))}.ps-f.f3{transform:translate3d(var(--h3,0px),calc(var(--pk,0) * -46px),0) rotate(var(--r3,8deg))}.ps-f.f2{transform:translate3d(0,calc(var(--pk,0) * -14px + var(--h2,0px)),40px)}'
           + '.ps-p:hover{--h1:-16px;--r1:-11deg;--h3:16px;--r3:11deg;--h2:-6px}.ps-p:hover .f1,.ps-p:hover .f2,.ps-p:hover .f3{transform:none}.ps-p:hover .ps-f.f1{transform:translate3d(var(--h1),calc(var(--pk,0) * 46px),0) rotate(var(--r1))}.ps-p:hover .ps-f.f3{transform:translate3d(var(--h3),calc(var(--pk,0) * -46px),0) rotate(var(--r3))}.ps-p:hover .ps-f.f2{transform:translate3d(0,calc(var(--pk,0) * -14px + var(--h2)),40px)}'
@@ -1792,7 +1790,7 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
           + '.js .pd.on .pd-stick>*{animation:psIn .8s var(--ez) backwards;animation-delay:calc(.25s + var(--k,0) * 60ms)}.js .pd .pr{opacity:0;transform:translateY(34px) scale(.98);transition:opacity .9s var(--ez),transform 1s var(--ez)}.js .pd .pr.in{opacity:1;transform:none}'
           + '.pd-kpis div{transition:transform .4s var(--ez)}.pd-kpis div:hover{transform:translateY(-4px)}'
           + '.mag{transition:transform .35s var(--ez)}'
-          + '@media(prefers-reduced-motion:reduce){.ps-aura i,.js .ps-h1 .w,.js .pd.on .pd-stick>*{animation:none}.ps-cur{display:none}.pd,.pd.on{clip-path:none}.js .pd .pr{opacity:1;transform:none}.ps-fan{transform:translate(-50%,-50%)}}'
+          + '@media(prefers-reduced-motion:reduce){.ps-aura i,.js .ps-h1 .w,.js .pd.on .pd-stick>*{animation:none}.pd,.pd.on{clip-path:none}.js .pd .pr{opacity:1;transform:none}.ps-fan{transform:translate(-50%,-50%)}}'
           + '@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}.js .rv{opacity:1;transform:none;filter:none;transition:none}.js .sw{opacity:1;filter:none}.ps-p{transform:none}.pd,.pd.on{transition:none;transform:none}.js .pd.on .pd-main>*,.js .ps-hero>*{animation:none}}';
         var psRuntime = function () {
           "use strict";
@@ -1819,14 +1817,12 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
             if (on !== lastG) { lastG = on; var sc = on && document.getElementById("g-" + on); body.style.setProperty("--tint", sc ? sc.getAttribute("data-c") : "var(--bg)"); }
           };
           addEventListener("scroll", tick, { passive: true }); addEventListener("resize", tick); tick();
-          // 포인터: 오로라 따라오기 · 커서 '보기' · 패널/카드 기울기 · 빛 · 자석 버튼
-          var curEl = document.querySelector(".ps-cur"), aura = document.querySelector(".ps-aura"), cx = -200, cy = -200, tx = -200, ty = -200, raf = 0;
-          var loop = function () { cx += (tx - cx) * .2; cy += (ty - cy) * .2; if (curEl) { curEl.style.setProperty("--cx", cx.toFixed(1) + "px"); curEl.style.setProperty("--cy", cy.toFixed(1) + "px"); } raf = Math.abs(tx - cx) + Math.abs(ty - cy) > .5 ? requestAnimationFrame(loop) : 0; };
+          // 포인터: 오로라 따라오기 · 패널/카드 기울기 · 빛 · 자석 버튼
+          var aura = document.querySelector(".ps-aura");
           if (fine && !reduce && !still) {
             document.addEventListener("pointermove", function (e) {
-              tx = e.clientX; ty = e.clientY; if (!raf) raf = requestAnimationFrame(loop);
               if (aura) { aura.style.setProperty("--mx", (e.clientX / innerWidth - .5).toFixed(3)); aura.style.setProperty("--my", (e.clientY / innerHeight - .5).toFixed(3)); }
-              var t = e.target, over = t.closest && t.closest(".ps-p,.ps-c"); if (curEl) curEl.classList.toggle("on", !!over && !body.classList.contains("pd-open"));
+              var t = e.target;
               var p = t.closest && t.closest(".ps-p"), c = t.closest && t.closest(".ps-c"), el = p ? p.querySelector(".ps-fan") : c ? c.querySelector(".ps-th") : null, box = p || c;
               if (el) { var r = box.getBoundingClientRect(), x = (e.clientX - r.left) / r.width - .5, y = (e.clientY - r.top) / r.height - .5; el.style.setProperty("--tx", x.toFixed(3)); el.style.setProperty("--ty", y.toFixed(3)); if (p) { p.style.setProperty("--gx", ((x + .5) * 100).toFixed(1) + "%"); p.style.setProperty("--gy", ((y + .5) * 100).toFixed(1) + "%"); } }
               var m = t.closest && t.closest(".ps-go,.pd-x,.ps-back");
@@ -1856,7 +1852,7 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
             if (k < 0) return; cur = k;
             if (!keep && !pd.classList.contains("on")) opener = document.activeElement;
             pin.innerHTML = order[k].innerHTML; pd.scrollTop = 0; if (pno) pno.textContent = pad(k + 1) + " / " + pad(order.length);
-            pd.classList.add("on"); pd.setAttribute("aria-hidden", "false"); body.classList.add("pd-open"); enhance(); if (curEl) curEl.classList.remove("on");
+            pd.classList.add("on"); pd.setAttribute("aria-hidden", "false"); body.classList.add("pd-open"); enhance();
             var x = pd.querySelector(".pd-x"); if (x && !keep) try { x.focus({ preventScroll: true }); } catch (e) {}
             post({ klio: "card", id: order[k].getAttribute("data-id") });
           }
@@ -1888,7 +1884,7 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
           + '<title>' + esc(nameKo || nameEn || "포트폴리오") + ' — Projects</title><link rel="icon" href="data:,"/>' + fontHead
           + '<style>' + PSCSS + fontVars + '</style></head><body' + (d.hostStudio ? ' data-host="studio"' : '') + ' class="ft-' + FKEY + '">'
           + '<header class="ps-top"><a class="ps-back" href="' + esc(homeUrl) + '#projects" target="_top" data-ext>← ' + esc(txt("ppBack", "포트폴리오")) + '</a><span class="ps-nm">' + esc(nameEn || nameKo) + '</span></header>'
-          + '<div class="ps-prog" aria-hidden="true"><i></i></div><div class="ps-cur" aria-hidden="true"><span>' + esc(txt("ppCursor", "보기")) + '</span></div>'
+          + '<div class="ps-prog" aria-hidden="true"><i></i></div>'
           + '<main><section class="ps-hero"><div class="ps-aura" aria-hidden="true"><i></i><i></i><i></i></div><p class="ps-eye">' + eyebrow + '</p><h1 class="ps-h1">' + headHtml + '</h1><p class="ps-sub">' + N + '개 프로젝트 · ' + secs.length + '개 분야</p></section>'
           + body
           + '<div class="ps-end rv"><p>' + esc(txt("ppEnd", "더 궁금한 점이 있다면")) + '</p><a class="ps-go" href="' + esc(homeUrl) + '#contact" target="_top" data-ext>' + esc(txt("ppEndBtn", "연락하기")) + ' <i>→</i></a></div></main>'
