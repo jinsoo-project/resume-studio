@@ -250,6 +250,18 @@ select.kd-catadd{width:auto;max-width:200px;height:28px;padding:0 10px;border-ra
 .kd-tpick.art{display:grid;place-items:center;font-family:inherit;font-size:11.5px}
 .kd-tpick.on{border-color:var(--acc);box-shadow:0 0 0 2px var(--acc-soft)}
 .kd-link{border:0;background:none;padding:0;font:inherit;font-weight:700;color:var(--acc);cursor:pointer;text-decoration:underline;text-underline-offset:2px}
+/* 썸네일 맞춤(드래그·확대·위치) */
+.kd-crop{display:flex;flex-direction:column;gap:10px}
+.kd-cpvs{display:flex;gap:10px;align-items:flex-start}
+.kd-cpv{position:relative;flex:1;min-width:0;border-radius:12px;overflow:hidden;background:#f1f0ec;cursor:grab;touch-action:none;box-shadow:inset 0 0 0 1px rgba(0,0,0,.08);user-select:none}
+.kd-cpv::before{content:"";position:absolute;inset:-14%;background:var(--img) center/cover no-repeat;filter:blur(14px);opacity:.5}
+.kd-cpv img{position:absolute;inset:0;width:100%;height:100%;display:block;pointer-events:none}
+.kd-cpv span{position:absolute;left:6px;bottom:6px;z-index:2;font-size:10.5px;font-weight:700;color:#fff;background:rgba(0,0,0,.45);padding:2px 7px;border-radius:6px}
+.kd-cpv.drag{cursor:grabbing;box-shadow:inset 0 0 0 2px var(--acc)}
+.kd-cctl{display:flex;flex-wrap:wrap;align-items:center;gap:8px 14px}
+.kd-rng{display:flex;align-items:center;gap:8px;font-size:12px;font-weight:600;color:var(--muted);white-space:nowrap}
+.kd-rng input{width:110px;accent-color:var(--acc)}
+.kd-rng b{min-width:34px;font-size:11.5px;color:var(--fg)}
 /* 글꼴 고르기 */
 .kd-fonts{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px}
 .kd-font{display:flex;flex-direction:column;align-items:flex-start;gap:3px;padding:12px 12px 10px;border-radius:12px;border:1px solid var(--border);background:var(--surface);cursor:pointer;text-align:left;font:inherit;color:var(--fg)}
@@ -1291,6 +1303,20 @@ function kcSorted(){
 function kcMove(id,dir){ const k=axDoc().klio, L=kcSorted(), i=L.findIndex(x=>x.w.id===id), j=dir==='up'?i-1:i+1; if(i<0||j<0||j>=L.length||L[j].g!==L[i].g)return; const t=L[i]; L[i]=L[j]; L[j]=t; k.cardOrder=L.map(x=>x.w.id); }
 function kcCard(id){ const k=axDoc().klio; if(!k.cards||typeof k.cards!=='object'||Array.isArray(k.cards))k.cards={}; return k.cards[id]||(k.cards[id]={}); }
 function kcClean(id){ const k=axDoc().klio, c=(k.cards||{})[id]; if(c&&!Object.keys(c).length)delete k.cards[id]; }
+// 썸네일 맞춤(카드별): fit contain(기본·잘림 없음)|cover · zoom 100~300 · px/py 0~100 — templates.js fitOf/thumbImg와 같은 규칙
+function kcFit(CC){ CC=CC||{}; const z=+CC.zoom; return {fit:CC.fit==='cover'?'cover':'contain', z:z>100?Math.min(300,z):100, px:CC.px!=null&&!isNaN(+CC.px)?Math.max(0,Math.min(100,+CC.px)):50, py:CC.py!=null&&!isNaN(+CC.py)?Math.max(0,Math.min(100,+CC.py)):50}; }
+function kcImgStyle(f){ return `object-fit:${f.fit};object-position:${f.px}% ${f.py}%;`+(f.z!==100?`transform:scale(${f.z/100});transform-origin:${f.px}% ${f.py}%;`:''); }
+function kcCropHtml(id,CC,src){
+  const f=kcFit(CC), a=s=>String(s==null?'':s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;'), st=kcImgStyle(f);
+  const box=(ratio,label)=>`<div class="kd-cpv" data-kc-crop="${a(id)}" style="aspect-ratio:${ratio};--img:url('${a(src)}')" title="드래그해서 위치 옮기기"><img src="${a(src)}" alt="" draggable="false" style="${st}"><span>${label}</span></div>`;
+  const rng=(key,label,min,max,step,val)=>`<label class="kd-rng">${label}<input type="range" min="${min}" max="${max}" step="${step}" value="${val}" data-kc-${key}="${a(id)}"><b>${val}%</b></label>`;
+  return `<div class="kd-crop"><div class="kd-cpvs">${box('4/3','전체 프로젝트 카드')}${box('2/1','메인 작은 타일')}</div>`
+    +`<div class="kd-cctl"><div class="kd-seg"><button class="kd-btn${f.fit==='contain'?' on':''}" data-kc-fit="${a(id)}:contain">전체 보이기</button><button class="kd-btn${f.fit==='cover'?' on':''}" data-kc-fit="${a(id)}:cover">꽉 채우기</button></div>`
+    +rng('zoom','확대',100,300,5,f.z)+rng('px','가로 위치',0,100,1,f.px)+rng('py','세로 위치',0,100,1,f.py)
+    +`<button class="kd-btn" data-kc-cropreset="${a(id)}">원래대로</button></div></div>`;
+}
+function kcCropPaint(id){ const f=kcFit((axDoc().klio.cards||{})[id]), st=kcImgStyle(f); document.querySelectorAll(`.kd-cpv[data-kc-crop="${CSS.escape(id)}"] img`).forEach(im=>{ im.setAttribute('style',st); });
+  [['zoom',f.z],['px',f.px],['py',f.py]].forEach(([k,v])=>{ const r=document.querySelector(`[data-kc-${k}="${CSS.escape(id)}"]`); if(r&&document.activeElement!==r){ r.value=v; } if(r){ const b=r.parentNode.querySelector('b'); if(b)b.textContent=v+'%'; } }); }
 function kMediaOf(w){ const out=[]; (w.media||[]).forEach(m=>{ if(m&&m.url&&(m.type==='image'||!m.type))out.push({src:m.url}); }); (w.links||[]).forEach(l=>{ const m=String((l&&l.url)||'').match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|shorts\/|embed\/))([\w-]{6,})/); if(m)out.push({src:'https://img.youtube.com/vi/'+m[1]+'/hqdefault.jpg',yt:1}); }); return out; }
 const KCAT_COL={'퍼포먼스':'#c3cde4','성과':'#abdcd1','브랜딩':'#dd8e6e','커머스':'#eae6da','콘텐츠':'#e6e1d5','그로스':'#abdcd1','영상':'#e6e1d5','CRM':'#c3cde4','제휴':'#eae6da','AX':'#dd8e6e'};
 // klio 표시 설정 헬퍼 (d.klio.show / hidden)
@@ -1502,6 +1528,7 @@ function renderAXAdmin(){
         det=`<div class="kd-cdet">`+G2(F('묶음',grpSel),F('대표 지표',kpiSel,'카드 아래 굵은 숫자'))
           +F('썸네일',`<div class="kd-tpicks">${picks}</div>`,md.length?'고른 게 카드·상세 첫 화면 (메인 타일에도 같이)':'이미지가 없어 자동 일러스트로 보여요 — 아래에서 올리면 바로 썸네일이 돼요')
           +`<div class="kd-row" style="margin:8px 0 2px;gap:8px">${ci>=0&&wi>=0?upl(`work:${ci}:${wi}`,'＋ 이미지 올리기',true):''}<input class="kd-in" data-kc-imgurl="${ci}:${wi}" placeholder="또는 이미지 주소(https://…) 붙여넣고 Enter"></div>`
+          +(th?F('썸네일 맞춤',kcCropHtml(id,CC,th.src),'미리보기를 드래그하면 위치가 옮겨져요 · 기본 = 잘림 없이 전체 보이기'):'')
           +`<p class="kd-note">원래 제목: ${axText(w.title||'')} · ${axText(CAT_EN[w.category]||w.category||'기타')} · ${axText(coName(x.c))} — 설명·지표·이미지 내용은 Projects 탭에서 편집해요.</p></div>`;
       }
       return `<div class="kd-crow${off?' off':''}" data-row><div class="kd-row"><span class="kd-cth" style="${thS}"></span><input class="kd-in" data-kc-title="${axAttr(id)}" value="${axAttr(CC.title||'')}" placeholder="${axAttr(w.title||'카드 이름')}">${sw(`data-kc-on="${axAttr(id)}"`,!off,'','휠에 노출')}${upDown('data-kc-move',id,first,last)}<button class="kd-ib" data-kc-open="${axAttr(id)}" title="세부 설정">${open?'▾':'▸'}</button></div>${det}</div>`;
@@ -1613,6 +1640,10 @@ function renderAXAdmin(){
       if(ds.axKlioLabel!=null){ if(k.sections[+ds.axKlioLabel])k.sections[+ds.axKlioLabel].label=t.value; axSchedule(); return; }
       if(ds.axKlioText){ k.text[ds.axKlioText]=t.value; axSchedule(); return; }
       if(ds.kgLabel!=null){ const g=(k.groups||[])[+ds.kgLabel]; if(g)g.label=t.value; axSchedule(); return; }
+      if(ds.kcZoom!=null||ds.kcPx!=null||ds.kcPy!=null){ // 썸네일 맞춤 슬라이더(확대·가로·세로)
+        const id=ds.kcZoom!=null?ds.kcZoom:ds.kcPx!=null?ds.kcPx:ds.kcPy, c=kcCard(id), v=+t.value;
+        if(ds.kcZoom!=null){ if(v>100)c.zoom=v; else delete c.zoom; } else if(ds.kcPx!=null){ if(v!==50)c.px=v; else delete c.px; } else { if(v!==50)c.py=v; else delete c.py; }
+        kcClean(id); kcCropPaint(id); axSchedule(); return; }
       if(ds.kcTitle!=null){ const c=kcCard(ds.kcTitle); if(t.value.trim())c.title=t.value; else delete c.title; kcClean(ds.kcTitle); axSchedule(); return; } // 카드 이름(비우면 프로젝트 제목)
       if(ds.axTechLabel!=null){ if(k.techstack[+ds.axTechLabel])k.techstack[+ds.axTechLabel].label=t.value; axSchedule(); return; }
       if(ds.axTechItems!=null){ if(k.techstack[+ds.axTechItems])k.techstack[+ds.axTechItems].items=t.value.split('\n').map(s=>s.trim()).filter(Boolean); axSchedule(); return; }
@@ -1653,6 +1684,8 @@ function renderAXAdmin(){
       if((el=q('[data-kc-open]'))){ axOpenCard=axOpenCard===el.dataset.kcOpen?'':el.dataset.kcOpen; renderAXAdmin(); return; }
       if((el=q('[data-kc-thumb]'))){ const s=el.dataset.kcThumb, cut=s.lastIndexOf(':'), id=s.slice(0,cut), v=+s.slice(cut+1), c=kcCard(id), x=kcAll().find(x=>x.w.id===id), noMedia=!x||!kMediaOf(x.w).length; if(v===0||(v<0&&noMedia))delete c.thumb; else c.thumb=v; kcClean(id); rerender(); return; } // 이미지 없는 카드는 색 카드가 기본값
       if((el=q('[data-kfont]'))){ kSet('ui.font',el.dataset.kfont); rerender(); return; }
+      if((el=q('[data-kc-fit]'))){ const s=el.dataset.kcFit, cut=s.lastIndexOf(':'), id=s.slice(0,cut), c=kcCard(id); if(s.slice(cut+1)==='cover')c.fit='cover'; else delete c.fit; kcClean(id); rerender(); return; }
+      if((el=q('[data-kc-cropreset]'))){ const id=el.dataset.kcCropreset, c=kcCard(id); delete c.fit; delete c.zoom; delete c.px; delete c.py; kcClean(id); rerender(); return; }
       if((el=q('[data-kg-reset]'))){ k.groups=groupsSeed(); const ids=k.groups.map(g=>g.id); Object.keys(k.groupOf||{}).forEach(id=>{ if(ids.indexOf(k.groupOf[id])<0)delete k.groupOf[id]; }); rerender(); return; }
       if((el=q('[data-kd-w]'))){ axOpenW=axOpenW===el.dataset.kdW?'':el.dataset.kdW; renderAXAdmin(); return; }
       if((el=q('[data-add]'))){ axAdd(el.dataset.add); rerender(); return; }
@@ -1693,6 +1726,13 @@ function renderAXAdmin(){
       if((el=q('[data-kd-co]'))){ axOpenCo=axOpenCo===el.dataset.kdCo?'':el.dataset.kdCo; renderAXAdmin(); axPvGoto('experience',true); return; }
       if((el=q('[data-kd-pjco]'))){ axOpenPj=axOpenPj===el.dataset.kdPjco?'':el.dataset.kdPjco; axOpenW=''; renderAXAdmin(); axPvGoto('projects',true); return; }
     });
+    // 썸네일 맞춤: 미리보기 드래그 → 위치(px·py) 이동, 놓으면 저장 + 미리보기 갱신
+    let kcDrag=null;
+    left.addEventListener('pointerdown',e=>{ const box=e.target.closest('.kd-cpv'); if(!box)return; e.preventDefault(); const id=box.dataset.kcCrop, f=kcFit((axDoc().klio.cards||{})[id]), r=box.getBoundingClientRect(); kcDrag={id,x0:e.clientX,y0:e.clientY,px0:f.px,py0:f.py,w:r.width,h:r.height}; box.classList.add('drag'); });
+    window.addEventListener('pointermove',e=>{ if(!kcDrag)return; const d=kcDrag, c=kcCard(d.id), k=1.25;
+      const px=Math.round(Math.max(0,Math.min(100,d.px0-(e.clientX-d.x0)/d.w*100*k))), py=Math.round(Math.max(0,Math.min(100,d.py0-(e.clientY-d.y0)/d.h*100*k)));
+      if(px!==50)c.px=px; else delete c.px; if(py!==50)c.py=py; else delete c.py; kcCropPaint(d.id); });
+    window.addEventListener('pointerup',()=>{ if(!kcDrag)return; const id=kcDrag.id; kcDrag=null; document.querySelectorAll('.kd-cpv.drag').forEach(b=>b.classList.remove('drag')); kcClean(id); axSchedule(); });
     left.addEventListener('change',async e=>{
       const t=e.target;
       if(t.dataset&&t.dataset.kgAddcat!=null){ const k=axDoc().klio, g=(k.groups||[])[+t.dataset.kgAddcat], cat=t.value; if(g&&cat){ k.groups.forEach(o=>{ o.cats=(o.cats||[]).filter(c=>c!==cat); }); g.cats.push(cat); } rerender(); return; } // 분야 담기(다른 묶음에서 옮김)
