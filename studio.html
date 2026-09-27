@@ -1526,10 +1526,11 @@ function renderAXAdmin(){
           F('딤 방식',`<select class="kd-in" data-ksel="ui.photoDimMode"><option value="bg"${(kd.ui||{}).photoDimMode!=='all'?' selected':''}>배경만 (얼굴은 밝게)</option><option value="all"${(kd.ui||{}).photoDimMode==='all'?' selected':''}>사진 전체</option></select>`))
       +G2(F('이니셜',kt('initials','JK'),'사진 끌 때'),F('회전 문구',kt('orbit','JINSOO KIM · MARKETER · '))))
     +card('사진 아래 소개 문장',`<div class="kd-sws" style="margin-bottom:10px">${showSw('home','intro',false,'사진 아래 소개 문장 보이기')}</div>`
+      +(kShown('home','intro',false)?'':`<p class="kd-note kd-intro-off" style="margin:0 0 10px;padding:8px 10px;border-radius:8px;background:var(--panel);color:var(--fg)">지금은 <b>꺼져 있어서</b> 아래 ‘첫 문장 직접 쓰기’·‘회색 보조 문장’이 화면에 안 보여요. 두 칸 중 하나에 쓰기 시작하면 자동으로 켜져요.</p>`)
       +`<p class="kd-note" style="margin:0 0 12px">꺼 두면 자기소개는 About이 맡아요 — 대표 문장은 About 첫 줄로 옮겨가고 사진과 About 사이도 가까워져요.</p>`
-      +F('대표 문장',ta('profile.tagline',LIB.profile.tagline,'마케팅의 문제를 AI와 코드로 푸는 그로스 빌더',2),'About 첫 줄 · 켜면 첫 문장 = “{이름} — {대표 문장}.”')
-      +F('첫 문장 직접 쓰기',kta('heroMain',heroAuto,2),'켰을 때 · 비우면 자동(회색 글씨가 그 모습) · 쓰면 이 문장 그대로')
-      +F('회색 보조 문장',kta('heroSub',sum0,2),'켰을 때 · 비우면 소개 첫 문장')
+      +F('대표 문장',ta('profile.tagline',LIB.profile.tagline,'마케팅의 문제를 AI와 코드로 푸는 그로스 빌더',2),'About 첫 줄 · 켜면 첫 문장 = “{이름} — {대표 문장}.”'+((KT.aboutLead||'').trim()?' · ⚠ 지금은 About 탭 ‘한 줄 소개’가 About 첫 줄로 우선 보여요':''))
+      +F('첫 문장 직접 쓰기',kta('heroMain',heroAuto,2),'비우면 자동(회색 글씨가 그 모습) · 쓰면 이 문장 그대로 · 줄바꿈도 그대로')
+      +F('회색 보조 문장',kta('heroSub',sum0,2),'첫 문장 바로 뒤에 회색으로 · 비우면 소개 첫 문장')
       +F('직함',ti('profile.title',LIB.profile.title,'마케팅 × AI 프로덕트 빌더'),'대표 문장이 비었을 때 대신 사용'))
     +viewsCard();
 
@@ -1771,7 +1772,12 @@ function renderAXAdmin(){
       const t=e.target, ds=t.dataset, k=axDoc().klio;
       if(t.type==='checkbox'||t.type==='file'||t.tagName==='SELECT') return; // 체크=click, 파일·선택=change
       if(ds.axKlioLabel!=null){ if(k.sections[+ds.axKlioLabel])k.sections[+ds.axKlioLabel].label=t.value; axSchedule(); return; }
-      if(ds.axKlioText){ k.text[ds.axKlioText]=t.value; axSchedule(); return; }
+      if(ds.axKlioText){ k.text[ds.axKlioText]=t.value;
+        // 첫 문장·회색 보조 문장은 '사진 아래 소개 문장'이 켜져야 보임 → 쓰기 시작하면 자동으로 켜고 미리보기를 맨 위로
+        if((ds.axKlioText==='heroMain'||ds.axKlioText==='heroSub')&&t.value.trim()&&!kShown('home','intro',false)){
+          kSet('show.home.intro',true); const cb=left.querySelector('[data-kchk="show.home.intro"]'); if(cb)cb.checked=true;
+          const w=left.querySelector('.kd-intro-off'); if(w)w.remove(); toast('‘사진 아래 소개 문장’을 켰어요 — 미리보기에 바로 보여요'); axPvGoto('home',true); }
+        axSchedule(); return; }
       if(ds.kgLabel!=null){ const g=(k.groups||[])[+ds.kgLabel]; if(g)g.label=t.value; axSchedule(); return; }
       if(ds.kcZoom!=null||ds.kcPx!=null||ds.kcPy!=null){ // 썸네일 맞춤 슬라이더(확대·가로·세로)
         const id=ds.kcZoom!=null?ds.kcZoom:ds.kcPx!=null?ds.kcPx:ds.kcPy, c=kcCard(id), v=+t.value;
