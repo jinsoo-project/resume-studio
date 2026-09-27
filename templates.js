@@ -925,7 +925,7 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
       return { fit: C.fit === "cover" ? "cover" : "contain", z: z > 100 ? Math.min(300, z) : 100, px: C.px != null && !isNaN(+C.px) ? Math.max(0, Math.min(100, +C.px)) : 50, py: C.py != null && !isNaN(+C.py) ? Math.max(0, Math.min(100, +C.py)) : 50 };
     };
     var thumbImg = function (src, f) {
-      return '<img class="th-img" src="' + esc(src) + '" alt="" loading="lazy" decoding="async" style="object-fit:' + f.fit + ';object-position:' + f.px + '% ' + f.py + '%'
+      return '<img class="th-img" src="' + esc(src) + '" alt="" decoding="async" style="object-fit:' // 흐린 배경(::before)이 같은 이미지를 먼저 받으므로 지연 로딩 안 함 + f.fit + ';object-position:' + f.px + '% ' + f.py + '%'
         + (f.z !== 100 ? ';transform:scale(' + (f.z / 100) + ');transform-origin:' + f.px + '% ' + f.py + '%' : '') + '">';
     };
     // 타일 = 전체 프로젝트 휠과 같은 상품카드: 흰 카드 안 썸네일(작은·세로 타일은 위, 가로 타일은 왼쪽) + 분야 · 제목 · 회사·연도 · 대표 지표
