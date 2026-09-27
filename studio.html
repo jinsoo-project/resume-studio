@@ -198,6 +198,15 @@ select.dbin{min-width:120px;cursor:pointer}
 .kd-card[open]>summary .kd-chev{transform:rotate(-135deg) translateY(-1px)}
 .kd-card[open]>summary{border-bottom:1px solid var(--border)}
 .kd-cbody{padding:14px 14px 12px}
+.kd-chips{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin-top:8px;padding:8px;border:1px solid var(--border);border-radius:10px;background:var(--surface);cursor:text;min-height:44px}
+.kd-chips.over{border-color:var(--ring);background:var(--panel)}
+.kd-chip{display:inline-flex;align-items:center;gap:4px;height:28px;padding:0 4px 0 11px;border-radius:999px;background:var(--card);border:1px solid var(--border);font-size:12.5px;font-weight:600;white-space:nowrap;cursor:grab;user-select:none}
+.kd-chip:hover{border-color:var(--ring)}
+.kd-chip.drag{opacity:.4}
+.kd-chip.before{box-shadow:-3px 0 0 var(--ring)}
+.kd-chip button{width:20px;height:20px;border:0;border-radius:50%;background:transparent;color:var(--muted);font-size:10px;cursor:pointer;display:grid;place-items:center;padding:0}
+.kd-chip button:hover{background:var(--panel);color:var(--fg)}
+.kd-chip-in{flex:1;min-width:120px;height:28px;border:0;outline:0;background:transparent;color:var(--fg);font:inherit;font-size:12.5px;padding:0 4px}
 .kd-help{margin:0 2px 12px;font-size:12.5px;color:var(--muted)}
 .kd-help>summary{display:inline-flex;align-items:center;gap:6px;cursor:pointer;list-style:none;font-weight:600;padding:3px 0}
 .kd-help>summary::-webkit-details-marker{display:none}
@@ -1672,8 +1681,8 @@ function renderAXAdmin(){
     +card('콘솔 버튼',`<div class="kd-sws" style="margin-bottom:12px">${showSw('ax','link',true,'버튼 노출')}</div>`+G2(F('버튼 제목',kt('axLinkText','AX 콘솔에서 전체 구조 보기')),F('보조 문구',kt('axLinkSub','대시보드 · 자동화 · 워크플로우 한눈에')))+F('링크',kt('axLink','https://kimjinsoo-mkt-ax.vercel.app/ax'))+`<p class="kd-note">‘전체 프로젝트 보기’와 같은 다크 카드예요. 오른쪽 미니 화면은 위 대표 기능 카드의 썸네일이 들어가요.</p>`,'전체 프로젝트 버튼과 같은 모양');
 
   // ── Techstack
-  const P_techstack=()=>intro('흐르는 줄(마퀴) 한 개 = 한 줄 목록. 스위치를 켠 줄만 화면에 나오고, 항목은 한 줄에 하나씩 적어요.')
-    +card('줄 목록',(kd.techstack||[]).map((r,i)=>`<div class="kd-item${r.visible===false?' off':''}" data-row><div class="kd-row">${sw(`data-ax-tech-on="${i}"`,r.visible!==false,'','노출')}<input class="kd-in" data-ax-tech-label="${i}" value="${axAttr(r.label||'')}" placeholder="줄 이름 (예: 마케팅·데이터)">${upDown('data-ax-movetech',i,i===0,i===kd.techstack.length-1)}${delB('data-ax-tech-del',i)}</div><textarea class="kd-in" data-ax-tech-items="${i}" rows="3" placeholder="한 줄에 하나씩" style="margin-top:6px">${axText((r.items||[]).join('\n'))}</textarea>${r.visible===false?'<p class="kd-note">화면에 안 나오는 후보 목록이에요 — 쓸 항목만 위 줄로 옮기세요.</p>':''}</div>`).join('')
+  const P_techstack=()=>intro('흐르는 줄(마퀴) 한 개 = 한 줄 목록. 스위치를 켠 줄만 화면에 나와요. 항목은 칩으로 가로로 보여요 — 입력칸에 쓰고 Enter(쉼표로 여러 개 · 여러 줄 붙여넣기도 돼요), ✕로 빼고, 칩을 끌어서 순서를 바꾸거나 다른 줄로 옮겨요.')
+    +card('줄 목록',(kd.techstack||[]).map((r,i)=>`<div class="kd-item${r.visible===false?' off':''}" data-row><div class="kd-row">${sw(`data-ax-tech-on="${i}"`,r.visible!==false,'','노출')}<input class="kd-in" data-ax-tech-label="${i}" value="${axAttr(r.label||'')}" placeholder="줄 이름 (예: 마케팅·데이터)">${upDown('data-ax-movetech',i,i===0,i===kd.techstack.length-1)}${delB('data-ax-tech-del',i)}</div><div class="kd-chips" data-tech-row="${i}">${(r.items||[]).map((t,j)=>`<span class="kd-chip" draggable="true" data-tech-chip="${i}:${j}">${axText(t)}<button type="button" data-tech-x="${i}:${j}" title="빼기" aria-label="${axAttr(t)} 빼기">✕</button></span>`).join('')}<input class="kd-chip-in" data-tech-new="${i}" placeholder="${(r.items||[]).length?'＋ 항목 추가':'＋ 항목 입력 후 Enter'}" aria-label="항목 추가"></div>${r.visible===false?'<p class="kd-note">화면에 안 나오는 후보 목록이에요 — 쓸 칩을 위 줄로 끌어다 놓으세요.</p>':''}</div>`).join('')
       +`<div class="kd-acts"><button class="kd-add" data-ax-tech-add>＋ 줄 추가</button><button class="kd-btn" data-ax-tech-reset>기본값 다시 채우기</button></div>`);
 
   // ── Skills
@@ -1705,6 +1714,21 @@ function renderAXAdmin(){
     const KL_NEW={skills:()=>({value:'',label:'',sub:'',visible:true})}, KL_SEED={skills:()=>skillsSeed(axDoc())};
     const rerender=()=>{ renderAXAdmin(); save(); updateAXPreview(); };
     const dim=(el,on)=>{ const row=el.closest('[data-row]'); if(row) row.classList.toggle('off',!on); };
+    // Techstack 칩: 입력 후 Enter/쉼표 = 추가 · 여러 줄 붙여넣기 = 한꺼번에 · 빈 칸에서 Backspace = 마지막 칩 빼기 · 칩 끌기 = 순서/다른 줄로
+    const techAdd=(i,txt)=>{ const r=(axDoc().klio.techstack||[])[i]; if(!r)return; if(!Array.isArray(r.items))r.items=[]; const add=String(txt).split(/[\n,]+/).map(x=>x.trim()).filter(Boolean).filter(x=>r.items.indexOf(x)<0); if(!add.length)return false; r.items.push(...add); renderAXAdmin(); save(); updateAXPreview(); const f=left.querySelector(`[data-tech-new="${i}"]`); if(f)f.focus(); return true; };
+    left.addEventListener('keydown',e=>{ const t=e.target; if(!t.dataset||t.dataset.techNew==null)return; const i=+t.dataset.techNew;
+      if(e.key==='Enter'||e.key===','){ e.preventDefault(); if(t.value.trim()){ const v=t.value; t.value=''; techAdd(i,v); } }
+      else if(e.key==='Backspace'&&!t.value){ const r=(axDoc().klio.techstack||[])[i]; if(r&&r.items&&r.items.length){ e.preventDefault(); r.items.pop(); renderAXAdmin(); save(); updateAXPreview(); const f=left.querySelector(`[data-tech-new="${i}"]`); if(f)f.focus(); } } });
+    left.addEventListener('paste',e=>{ const t=e.target; if(!t.dataset||t.dataset.techNew==null)return; const txt=(e.clipboardData||window.clipboardData).getData('text'); if(!/[\n,]/.test(txt))return; e.preventDefault(); techAdd(+t.dataset.techNew,txt); });
+    left.addEventListener('focusout',e=>{ const t=e.target; if(!t.dataset||t.dataset.techNew==null||!t.value.trim())return; const v=t.value; t.value=''; setTimeout(()=>techAdd(+t.dataset.techNew,v),0); });
+    let chipDrag=null;
+    left.addEventListener('dragstart',e=>{ const c=e.target.closest&&e.target.closest('.kd-chip'); if(!c)return; chipDrag=c.dataset.techChip.split(':').map(Number); c.classList.add('drag'); try{ e.dataTransfer.effectAllowed='move'; e.dataTransfer.setData('text/plain',c.textContent); }catch(_){} });
+    left.addEventListener('dragend',()=>{ chipDrag=null; left.querySelectorAll('.kd-chip.drag,.kd-chip.before,.kd-chips.over').forEach(x=>x.classList.remove('drag','before','over')); });
+    left.addEventListener('dragover',e=>{ if(!chipDrag)return; const box=e.target.closest&&e.target.closest('.kd-chips'); if(!box)return; e.preventDefault(); left.querySelectorAll('.kd-chip.before,.kd-chips.over').forEach(x=>x.classList.remove('before','over')); box.classList.add('over'); const c=e.target.closest('.kd-chip'); if(c&&!c.classList.contains('drag'))c.classList.add('before'); });
+    left.addEventListener('drop',e=>{ if(!chipDrag)return; const box=e.target.closest&&e.target.closest('.kd-chips'); if(!box)return; e.preventDefault();
+      const T=axDoc().klio.techstack, [a,b]=chipDrag, to=+box.dataset.techRow, c=e.target.closest('.kd-chip'); let at=c?+c.dataset.techChip.split(':')[1]:(T[to].items||[]).length;
+      const item=T[a].items[b]; if(item==null)return; T[a].items.splice(b,1); if(!Array.isArray(T[to].items))T[to].items=[]; if(a===to&&b<at)at--; if(a!==to&&T[to].items.indexOf(item)>=0){ /* 이미 있으면 옮기기만 */ } else T[to].items.splice(Math.max(0,Math.min(at,T[to].items.length)),0,item);
+      chipDrag=null; renderAXAdmin(); save(); updateAXPreview(); });
     // 카드 접기/펼치기 상태 기억 · 모두 펼치기/접기
     left.addEventListener('toggle',e=>{ const d=e.target; if(d&&d.classList&&d.classList.contains('kd-card')&&d.dataset.ck) kdCardSave(d.dataset.ck,d.open); },true);
     left.addEventListener('click',e=>{ const b=e.target.closest('[data-kd-all]'); if(!b)return; const open=b.dataset.kdAll==='open'; left.querySelectorAll('details.kd-card').forEach(d=>{ d.open=open; kdCardSave(d.dataset.ck,open); }); });
@@ -1818,6 +1842,8 @@ function renderAXAdmin(){
       if((el=q('[data-xsvp-move]'))){ const [ci,si,pi,dir]=el.dataset.xsvpMove.split(':'), v=(xsvList(+ci,true)||[])[+si]; if(v&&v.projects)axMove(v.projects,+pi,dir); rerender(); return; }
       if((el=q('[data-pchk]'))){ axSet(el.dataset.pchk,el.checked); rerender(); return; }
       if((el=q('[data-ax-tech-on]'))){ const r=k.techstack[+el.dataset.axTechOn]; if(r)r.visible=el.checked; rerender(); return; }
+      if((el=q('[data-tech-x]'))){ const [a,b]=el.dataset.techX.split(':').map(Number), r=k.techstack[a]; if(r&&Array.isArray(r.items)){ r.items.splice(b,1); rerender(); const f=left.querySelector(`[data-tech-new="${a}"]`); if(f)f.focus(); } return; }
+      if((el=q('.kd-chips'))&&!e.target.closest('.kd-chip')){ const f=el.querySelector('.kd-chip-in'); if(f)f.focus(); }
       if((el=q('[data-ax-tech-add]'))){ k.techstack.push({label:'',items:[],visible:true}); rerender(); return; }
       if((el=q('[data-ax-tech-del]'))){ k.techstack.splice(+el.dataset.axTechDel,1); rerender(); return; }
       if((el=q('[data-ax-tech-reset]'))){ k.techstack=techSeedRows(); rerender(); return; }
