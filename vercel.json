@@ -3,74 +3,24 @@
   "cleanUrls": true,
   "trailingSlash": false,
   "redirects": [
-    {
-      "source": "/",
-      "destination": "/studio.html",
-      "permanent": false
-    }
+    { "source": "/", "destination": "/studio.html", "permanent": false }
   ],
   "rewrites": [
-    {
-      "source": "/r/:slug",
-      "destination": "/view?slug=:slug"
-    },
-    {
-      "source": "/p/:slug",
-      "destination": "/view?slug=:slug"
-    },
-    {
-      "source": "/portfolio",
-      "destination": "/view"
-    },
-    {
-      "source": "/mkt/portfolio",
-      "destination": "/view"
-    },
-    {
-      "source": "/mkt/portfolio/projects",
-      "destination": "/view"
-    },
-    {
-      "source": "/p/:slug/projects",
-      "destination": "/view"
-    },
-    {
-      "source": "/r/:slug/projects",
-      "destination": "/view"
-    },
-    {
-      "source": "/mkt/portfolio/w/:id",
-      "destination": "/view"
-    },
-    {
-      "source": "/p/:slug/w/:id",
-      "destination": "/view"
-    },
-    {
-      "source": "/r/:slug/w/:id",
-      "destination": "/view"
-    },
-    {
-      "source": "/:slug/w/:id",
-      "destination": "/view"
-    },
-    {
-      "source": "/:slug/projects",
-      "destination": "/view"
-    }
+    { "source": "/r/:slug", "destination": "/view?slug=:slug" },
+    { "source": "/p/:slug", "destination": "/view?slug=:slug" },
+    { "source": "/portfolio", "destination": "/view" },
+    { "source": "/mkt/portfolio", "destination": "/view" },
+    { "source": "/mkt/portfolio/projects", "destination": "/view" },
+    { "source": "/p/:slug/projects", "destination": "/view" },
+    { "source": "/r/:slug/projects", "destination": "/view" },
+    { "source": "/:slug/projects", "destination": "/view" }
   ],
   "headers": [
     {
       "source": "/(.*)",
       "headers": [
-        {
-          "key": "X-Content-Type-Options",
-          "value": "nosniff"
-        },
-        {
-          "key": "Referrer-Policy",
-          "value": "strict-origin-when-cross-origin"
-        }
+        { "key": "X-Content-Type-Options", "value": "nosniff" },
+        { "key": "Referrer-Policy", "value": "strict-origin-when-cross-origin" }
       ]
     }
   ]

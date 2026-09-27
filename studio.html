@@ -1347,11 +1347,11 @@ function axDoc(){ let d=DOCS.find(x=>x.template==='klio')||DOCS.find(x=>x.templa
 let axPvTimer,axSaveTimer;
 let axPvRendered=false, axPvSec='';
 // 미리보기 화면: 'main' = 포트폴리오 / 'projects' = 전체 프로젝트 페이지(/portfolio/projects) · 보던 카드·돌아갈 섹션 기억
-let axPvPage='main', axPvShown='', axPvCard='', axPvBack='', axPvWork='';
+let axPvPage='main', axPvShown='', axPvCard='', axPvBack='';
 function updateAXPreview(){ clearTimeout(axPvTimer); axPvTimer=setTimeout(()=>{
   const f=$('#axPreview'); if(!f) return;
-  const pp=axPvPage==='projects', wk=axPvPage==='work', same=axPvRendered&&axPvShown===axPvPage+(wk?':'+axPvWork:''), back=axPvBack; axPvBack='';
-  let html=TEMPLATES.render(Object.assign({template:'klio',klio:(axDoc().klio||null)},LIB,{slug:axDoc().slug||'portfolio',hostStudio:true,page:pp?'projects':wk?'work':'',workId:axPvWork})), y=0;
+  const pp=axPvPage==='projects', same=axPvRendered&&axPvShown===axPvPage, back=axPvBack; axPvBack='';
+  let html=TEMPLATES.render(Object.assign({template:'klio',klio:(axDoc().klio||null)},LIB,{slug:axDoc().slug||'portfolio',hostStudio:true,page:pp?'projects':''})), y=0;
   if(same){
     // 편집 중 재렌더: 보던 위치 유지 + 등장 애니메이션 생략(깜빡임 방지)
     if(pp) html=html.replace('<body data-host="studio"','<body data-host="studio" data-still');
@@ -1364,16 +1364,14 @@ function updateAXPreview(){ clearTimeout(axPvTimer); axPvTimer=setTimeout(()=>{
     postPreviewViews();
     const w=f.contentWindow; if(!w)return;
     if(pp){ if(axPvCard) try{ w.postMessage({klio:'goto-card',id:axPvCard},'*'); }catch(e){} return; }
-    if(wk&&!same) return;
     if(back){ axPvSec=back; try{ w.postMessage({klio:'goto',id:back,instant:true},'*'); }catch(e){} return; }
     if(!y)return; try{ w.scrollTo({top:y,behavior:'instant'}); }catch(e){ try{ w.scrollTo(0,y); }catch(_){} }
   };
-  f.setAttribute('srcdoc',html); axPvRendered=true; axPvShown=axPvPage+(wk?':'+axPvWork:'');
+  f.setAttribute('srcdoc',html); axPvRendered=true; axPvShown=axPvPage;
 },220); }
 // 미리보기 화면 전환 (Projects 탭 버튼 · 미리보기 안 타일/전체보기/돌아가기 클릭)
 function axPvSetPage(page,opt){
-  opt=opt||{}; axPvPage=page==='projects'?'projects':page==='work'?'work':'main';
-  if(axPvPage==='work') axPvWork=opt.id||'';
+  opt=opt||{}; axPvPage=page==='projects'?'projects':'main';
   if(axPvPage==='projects'&&opt.card!=null) axPvCard=opt.card;
   if(axPvPage==='main') axPvBack=opt.back||'';
   const onAx=!!document.querySelector('#v-ax:not(.hidden)');
@@ -1437,11 +1435,6 @@ function renderAXAdmin(){
   // ── 구성: 섹션 순서·노출·이름 + 모션·효과
   const P_layout=()=>intro('섹션 순서·노출·이름과 전체 효과를 정해요. 이름을 비우면 기본 이름(About 등)으로 보여요. 하단 바도 같은 순서·이름을 써요.')
     +card('섹션',kd.sections.map((s,i)=>`<div class="kd-item${s.on===false?' off':''}" data-row data-pv="${axAttr(s.key)}"><div class="kd-row">${sw(`data-ax-klio-on="${i}"`,s.on!==false,'','노출')}<input class="kd-in" data-ax-klio-label="${i}" value="${axAttr(s.label||'')}" placeholder="${axAttr(KL[s.key]||s.key)}">${upDown('data-ax-moveklio',i,i===0,i===kd.sections.length-1)}</div></div>`).join(''),'스위치 = 노출 · ↑↓ = 순서')
-    +card('레이아웃',(()=>{ const cur=(kd.ui||{}).layout==='classic'?'classic':'showcase';
-      const OPTS=[['showcase','쇼케이스','가운데 인트로 문장 → 큰 대표작 패널 → 3열 프로젝트 카드 → 상세 페이지'],['classic','클래식','이전 모양(서명·사진 카드 · 모자이크 타일)']];
-      return `<div class="kd-fonts" style="grid-template-columns:1fr 1fr;margin-bottom:14px">${OPTS.map(([k,l,dsc])=>`<button class="kd-font${cur===k?' on':''}" data-klayout="${k}"><span>${l}</span><small>${dsc}</small></button>`).join('')}</div>`
-        +(cur==='showcase'?F('인트로 큰 문장',kt('scHero',LIB.profile.tagline||'마케팅의 문제를 AI와 코드로 푸는 그로스 빌더'),'가운데 세리프 문장 · 비우면 한 줄 소개')+F('인트로 작은 문장',kt('scHeroSub','지금은 ○○에서 일하고 있어요.'),'비우면 재직 중인 회사로 자동'):'')
-        +`<p class="kd-note">쇼케이스: 대표작(프로젝트 탭의 ‘대표’) 최대 6개가 큰 패널·3열 카드로 나오고, 카드를 누르면 프로젝트 상세 페이지가 열려요.</p>`; })(),'고르면 바로 미리보기')
     +card('글꼴',(()=>{ const cur=(kd.ui||{}).font||'editorial';
       const OPTS=[['editorial','에디토리얼','제목 세리프(Newsreader) + 본문 프리텐다드','Newsreader,Georgia,serif',400],['modern','모던','프리텐다드 굵게','"Pretendard Variable",Pretendard,sans-serif',800],['soft','소프트','SUIT 둥근 고딕','"SUIT Variable",sans-serif',800],['classic','이전','Figtree + 프리텐다드','Figtree,sans-serif',800]];
       return `<div class="kd-fonts">${OPTS.map(([k,l,dsc,ff,wt])=>`<button class="kd-font${cur===k?' on':''}" data-kfont="${k}"><b style="font-family:${axAttr(ff)};font-weight:${wt}">Work that <i style="font-style:${k==='editorial'?'italic':'normal'};${k==='editorial'?'':'opacity:.45'}">moved</i></b><span>${l}</span><small>${dsc}</small></button>`).join('')}</div><p class="kd-note">포트폴리오와 전체 프로젝트 페이지에 함께 적용돼요.</p>`; })(),'고르면 바로 미리보기')
@@ -1731,7 +1724,6 @@ function renderAXAdmin(){
       if((el=q('[data-kc-open]'))){ axOpenCard=axOpenCard===el.dataset.kcOpen?'':el.dataset.kcOpen; renderAXAdmin(); return; }
       if((el=q('[data-kc-thumb]'))){ const s=el.dataset.kcThumb, cut=s.lastIndexOf(':'), id=s.slice(0,cut), v=+s.slice(cut+1), c=kcCard(id), x=kcAll().find(x=>x.w.id===id), noMedia=!x||!kMediaOf(x.w).length; if(v===0||(v<0&&noMedia))delete c.thumb; else c.thumb=v; kcClean(id); rerender(); return; } // 이미지 없는 카드는 색 카드가 기본값
       if((el=q('[data-kfont]'))){ kSet('ui.font',el.dataset.kfont); rerender(); return; }
-      if((el=q('[data-klayout]'))){ kSet('ui.layout',el.dataset.klayout); axPvRendered=false; rerender(); return; }
       if((el=q('[data-ksigfont]'))){ kSet('ui.sigFont',el.dataset.ksigfont); axPvRendered=false; rerender(); return; } // 서명 글씨체: 바꾸면 써지는 모션부터 다시 보여줌
       if((el=q('[data-ksig-replay]'))){ axPvRendered=false; updateAXPreview(); return; }
       if((el=q('[data-kc-fit]'))){ const s=el.dataset.kcFit, cut=s.lastIndexOf(':'), id=s.slice(0,cut), c=kcCard(id); if(s.slice(cut+1)==='cover')c.fit='cover'; else delete c.fit; kcClean(id); rerender(); return; }
@@ -1828,8 +1820,6 @@ function renderAXAdmin(){
       if(m.klio==='pp') axPvSetPage('projects',{card:typeof m.id==='string'?m.id:''});
       else if(m.klio==='pp-back') axPvSetPage('main',{back:'projects'});
       else if(m.klio==='card'&&typeof m.id==='string') axPvCard=m.id;
-      else if(m.klio==='work'&&typeof m.id==='string') axPvSetPage('work',{id:m.id});
-      else if(m.klio==='home') axPvSetPage('main',{back:typeof m.sec==='string'?m.sec:''});
     });
   }
   updateAXPreview();

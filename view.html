@@ -32,15 +32,14 @@ function printDoc(){var f=document.getElementById('frame');if(f&&f.contentWindow
 var SEC_RE=/^[a-z][a-z0-9-]{0,30}$/;
 // 전체 프로젝트 페이지(/portfolio/projects) 카드 딥링크 #p-<작업 id>
 var CARD_RE=/^p-[A-Za-z0-9._~%-]{1,120}$/;
-var PAGE='', WORK_ID='';
+var PAGE='';
 function cardOf(h){try{return CARD_RE.test(h)?decodeURIComponent(h.slice(2)):'';}catch(e){return '';}}
 function gotoSec(id,instant){var f=document.getElementById('frame');try{if(f&&f.contentWindow)f.contentWindow.postMessage({klio:'goto',id:id,instant:!!instant},'*');}catch(e){}}
 function gotoCard(id){var f=document.getElementById('frame');try{if(f&&f.contentWindow)f.contentWindow.postMessage({klio:'goto-card',id:id},'*');}catch(e){}}
 function render(doc,sec,card){
   var f=document.getElementById('frame');
   if(PAGE==='projects') doc.page='projects';
-  if(PAGE==='work'){ doc.page='work'; doc.workId=WORK_ID; }
-  document.title=(doc.profile&&doc.profile.nameKo?doc.profile.nameKo+' — ':'')+(PAGE==='projects'?'Projects':PAGE==='work'?'Project':(doc.title||'이력서'));
+  document.title=(doc.profile&&doc.profile.nameKo?doc.profile.nameKo+' — ':'')+(PAGE==='projects'?'Projects':(doc.title||'이력서'));
   if(sec||card){ f.addEventListener('load',function once(){ f.removeEventListener('load',once); if(card) gotoCard(card); else gotoSec(sec,true); }); }
   f.setAttribute('srcdoc', window.TEMPLATES.render(doc));
   document.getElementById('bar').style.display = (doc.template==='ax'||doc.template==='klio'||doc.template==='web') ? 'none' : 'flex';
@@ -80,9 +79,6 @@ window.addEventListener('hashchange',function(){var h=location.hash.slice(1),c=P
   var segs=location.pathname.split('/').filter(Boolean);
   if(params.get('page')==='projects') PAGE='projects';
   if(segs.length>1&&segs[segs.length-1]==='projects'&&!(segs.length===2&&/^[rp]$/.test(segs[0]))){ PAGE='projects'; segs.pop(); }
-  // /{slug}/w/{작업 id} = 프로젝트 상세 페이지
-  var WID='';
-  if(segs.length>2&&segs[segs.length-2]==='w'){ PAGE='work'; try{ WID=decodeURIComponent(segs.pop()); }catch(e){ WID=''; } segs.pop(); WORK_ID=WID; }
   var slug=params.get('slug');
   if(!slug){var m=location.pathname.match(/\/[rp]\/([^/?#]+)/);if(m)slug=decodeURIComponent(m[1]);}
   if(!slug&&segs.length)slug=decodeURIComponent(segs[segs.length-1]);
@@ -105,10 +101,10 @@ window.addEventListener('hashchange',function(){var h=location.hash.slice(1),c=P
       var tplOverride=params.get('tpl')||FORCE_TPL[slug];
       if(row&&row.snapshot){
         if(tplOverride) row.snapshot.template=tplOverride;
-        if((PAGE==='projects'||PAGE==='work')&&row.snapshot.template!=='klio') PAGE=''; // 전체 프로젝트·상세 페이지는 klio 전용
+        if(PAGE==='projects'&&row.snapshot.template!=='klio') PAGE=''; // 전체 프로젝트 페이지는 klio 전용
         // 타일(→ …/projects)·돌아가기 링크는 지금 연 주소 기준 (/portfolio · /p/x · /mkt/portfolio). /view?slug= 경유면 슬러그 기준
         row.snapshot.slug=slug;
-        var base=location.pathname.replace(/\/+$/,''); if(PAGE==='projects') base=base.replace(/\/projects$/,''); if(PAGE==='work') base=base.replace(/\/w\/[^/]+$/,'');
+        var base=location.pathname.replace(/\/+$/,''); if(PAGE==='projects') base=base.replace(/\/projects$/,'');
         if(!base||/^\/view(\.html)?$/.test(base)) base='/'+encodeURIComponent(slug);
         row.snapshot.homePath=base; row.snapshot.pjPath=base+'/projects';
         render(row.snapshot,secHash,cardHash); if(row.snapshot.template==='klio') trackViews(slug); return;
