@@ -1011,6 +1011,24 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
       var pjs = showPj ? xpj.map(function (it, k) {
         return '<li style="--k:' + k + '"><span class="t">' + esc(it.title) + '</span>' + (showPjP && it.period ? '<span class="p">' + esc(it.period) + '</span>' : '') + '</li>'; }).join("") : "";
       var sum = XS.summary && co.summary ? '<p class="xp-sum">' + esc(co.summary) + '</p>' : '';
+      // 서비스 분리(회사별 토글 klio.expCo[id].split): 회사명 아래로 서비스(이름·역할·기간·요약·프로젝트)를 한 단계 더 묶어 표시
+      var svs = CO.split && K.expSvc && Array.isArray(K.expSvc[co.id]) ? K.expSvc[co.id].filter(function (sv) { return sv && sv.visible !== false && String(sv.name || sv.role || "").trim(); }) : null;
+      if (svs && svs.length) {
+        nm = co.nameKo || co.nameEn || nm; alt = co.nameKo && co.nameEn && co.nameEn !== nm ? co.nameEn : "";
+        pjs = svs.map(function (sv) {
+          var sp = showPj ? (sv.projects || []).filter(function (it) { return it && it.visible !== false && String(it.title || "").trim(); }).map(function (it, k) {
+            return '<li style="--k:' + k + '"><span class="t">' + esc(it.title) + '</span>' + (showPjP && it.period ? '<span class="p">' + esc(it.period) + '</span>' : '') + '</li>'; }).join("") : "";
+          return '<div class="xp-sv"><div class="xp-sv-hd"><div class="xp-sv-tt"><h4>' + esc(sv.name || "") + '</h4>' + (XS.role && sv.role ? '<p class="xp-sv-role">' + esc(sv.role) + '</p>' : '') + '</div>'
+            + (XS.period && sv.period ? '<p class="xp-sv-when">' + esc(sv.period) + '</p>' : '') + '</div>'
+            + (XS.summary && sv.summary ? '<p class="xp-sv-sum">' + esc(sv.summary) + '</p>' : '')
+            + (sp ? '<ul class="xp-pj">' + sp + '</ul>' : '') + '</div>';
+        }).join("");
+        return '<div class="xp xp-split rv' + (logo ? '' : ' nologo') + '" style="--d:' + (ei * 60) + 'ms"><div class="xp-hd">' + logo
+          + '<div class="xp-tt"><h3>' + esc(nm) + (alt ? '<small>' + esc(alt) + '</small>' : '') + '</h3>' + (XS.role ? '<p class="xp-role">' + svs.length + '개 서비스</p>' : '') + '</div>'
+          + (XS.period && per ? '<p class="xp-when">' + esc(per) + (dur ? '<small>' + esc(dur) + '</small>' : '') + '</p>' : '') + '</div>'
+          + '<div class="xp-bd">' + sum + (mets ? '<div class="xp-mets">' + mets + '</div>' : '') + '<div class="xp-svs">' + pjs + '</div></div>'
+          + '</div>';
+      }
       return '<div class="xp rv' + (logo ? '' : ' nologo') + '" style="--d:' + (ei * 60) + 'ms"><div class="xp-hd">' + logo
         + '<div class="xp-tt"><h3>' + esc(nm) + (alt ? '<small>' + esc(alt) + '</small>' : '') + '</h3>' + (XS.role && co.role ? '<p class="xp-role">' + esc(co.role) + '</p>' : '') + '</div>'
         + (XS.period && per ? '<p class="xp-when">' + esc(per) + (dur ? '<small>' + esc(dur) + '</small>' : '') + '</p>' : '') + '</div>'
@@ -1165,6 +1183,11 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
       + '.xp-mets{display:flex;flex-wrap:wrap;gap:4px 16px;margin-top:10px;font-size:12px;color:var(--ink50)}.xp-met b{color:var(--ink);font-weight:700;margin-right:5px}'
       + '.xp-pj{list-style:none;margin:12px 0 0;padding:0}.xp-pj li{position:relative;display:flex;align-items:baseline;gap:12px;padding:4px 0 4px 13px;font-size:13px;line-height:1.55;color:var(--ink)}'
       + '.xp-pj li::before{content:"";position:absolute;left:1px;top:calc(4px + .775em - 2px);width:4px;height:4px;border-radius:50%;background:var(--ink)}.xp-pj .t{flex:1;min-width:0}.xp-pj .p{flex:none;font-size:11px;color:var(--gray);font-variant-numeric:tabular-nums;white-space:nowrap}'
+      + '.xp-svs{margin-top:14px;display:flex;flex-direction:column;gap:10px}.xp-sv{position:relative;padding:14px 16px;border-radius:14px;background:rgba(234,230,218,.42);box-shadow:inset 0 0 0 1px var(--bd)}'
+      + '.xp-sv-hd{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}.xp-sv-tt{min-width:0}.xp-sv h4{font-size:14.5px;font-weight:600;line-height:1.4;letter-spacing:-.015em;color:var(--ink)}'
+      + '.xp-sv-role{margin-top:2px;font-size:12px;line-height:1.5;color:var(--ink50)}.xp-sv-when{flex:none;padding-top:2px;font-size:11.5px;color:var(--gray);font-variant-numeric:tabular-nums;white-space:nowrap}'
+      + '.xp-sv-sum{margin-top:8px;font-size:13px;line-height:1.7;color:var(--ink50)}.xp-sv .xp-pj{margin-top:8px}'
+      + '@media(max-width:560px){.xp-sv{padding:12px 14px}.xp-sv-hd{flex-direction:column;gap:2px}.xp-sv-when{padding-top:0}}'
       + '@media(max-width:560px){.xp-hd{grid-template-columns:36px minmax(0,1fr)}.xp-logo{width:36px;height:36px;border-radius:10px}.xp-when{grid-column:2;text-align:left;margin-top:6px}.xp-when small{display:inline;margin:0 0 0 6px}.xp.nologo .xp-when{grid-column:1}.xp-bd{margin-left:50px}.xp-pj li{flex-direction:column;gap:0}}'
       + '.js .xp .xp-pj li{opacity:0;transform:translateY(6px);transition:opacity .5s var(--ez),transform .5s var(--ez);transition-delay:calc(var(--d,0ms) + 200ms + var(--k,0) * 45ms)}.js .xp.in .xp-pj li{opacity:1;transform:none}'
       // 조회수 알약 (Home)
@@ -1265,9 +1288,9 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
       + '.vw{border-radius:8px}.dock{border-radius:16px}.dock a,.dock-pill{border-radius:11px}.ax-console{border-radius:12px}'
       // 애플식 곡률: 지원 브라우저(크롬 계열)는 연속 곡률(squircle) + 같은 인상이 나도록 반경을 키움 · 미지원은 위의 둥근 모서리 그대로
       + '@supports (corner-shape:squircle){'
-      + '.photo .card,.tile,.pj-all,.pj-deck i,.dcard,.ax-core,.ax-th,.xp-logo,.socials a,.pc-th,.vw,.dock,.dock a,.dock-pill,.ax-console{corner-shape:squircle}.pc-th{border-radius:33px}.vw{border-radius:12px}.dock{border-radius:26px}.dock a,.dock-pill{border-radius:20px}.ax-console{border-radius:18px}.photo .card::before,.photo .card::after{corner-shape:squircle}'
+      + '.photo .card,.tile,.pj-all,.pj-deck i,.dcard,.ax-core,.ax-th,.xp-logo,.xp-sv,.socials a,.pc-th,.vw,.dock,.dock a,.dock-pill,.ax-console{corner-shape:squircle}.pc-th{border-radius:33px}.vw{border-radius:12px}.dock{border-radius:26px}.dock a,.dock-pill{border-radius:20px}.ax-console{border-radius:18px}.photo .card::before,.photo .card::after{corner-shape:squircle}'
       + '.photo .card{border-radius:42px}.tile{border-radius:40px}.pj-all{border-radius:40px}.pj-deck i{border-radius:14px}.dcard{border-radius:48px}'
-      + '.ax-core{border-radius:30px}.ax-th{border-radius:19px}.xp-logo{border-radius:16px}.socials a{border-radius:13px}'
+      + '.ax-core{border-radius:30px}.ax-th{border-radius:19px}.xp-logo{border-radius:16px}.xp-sv{border-radius:20px}.socials a{border-radius:13px}'
       + '@media(max-width:560px){.xp-logo{border-radius:15px}}}'
       // 글꼴 프리셋의 제목용 글꼴(--disp): 스킬 카드 값 — 세리프(editorial)는 한 단계 크게
       + '.dcard h4{font-family:var(--disp);font-weight:var(--dispw);letter-spacing:var(--displs)}.ft-editorial .dcard h4{font-size:40px;line-height:.95}';
