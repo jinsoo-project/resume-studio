@@ -198,6 +198,7 @@ select.dbin{min-width:120px;cursor:pointer}
 .kd-card[open]>summary .kd-chev{transform:rotate(-135deg) translateY(-1px)}
 .kd-card[open]>summary{border-bottom:1px solid var(--border)}
 .kd-cbody{padding:14px 14px 12px}
+.kd-phlist{display:flex;flex-direction:column;gap:6px}.kd-phrow{padding:6px 8px}.kd-badge{flex:none;min-width:34px;height:22px;padding:0 7px;border-radius:999px;background:var(--panel);color:var(--muted);font-size:11px;font-weight:700;display:inline-grid;place-items:center}.kd-phrow:first-child .kd-badge{background:var(--fg);color:var(--bg)}
 .kd-chips{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin-top:8px;padding:8px;border:1px solid var(--border);border-radius:10px;background:var(--surface);cursor:text;min-height:44px}
 .kd-chips.over{border-color:var(--ring);background:var(--panel)}
 .kd-chip{display:inline-flex;align-items:center;gap:4px;height:28px;padding:0 4px 0 11px;border-radius:999px;background:var(--card);border:1px solid var(--border);font-size:12.5px;font-weight:600;white-space:nowrap;cursor:grab;user-select:none}
@@ -1359,6 +1360,9 @@ function kcCropPaint(id){ const f=kcFit((axDoc().klio.cards||{})[id]), st=kcImgS
 function kMediaOf(w){ const out=[]; (w.media||[]).forEach(m=>{ if(m&&m.url&&(m.type==='image'||!m.type))out.push({src:m.url}); }); (w.links||[]).forEach(l=>{ const m=String((l&&l.url)||'').match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|shorts\/|embed\/))([\w-]{6,})/); if(m)out.push({src:'https://img.youtube.com/vi/'+m[1]+'/hqdefault.jpg',yt:1}); }); return out; }
 const KCAT_COL={'퍼포먼스':'#c3cde4','성과':'#abdcd1','브랜딩':'#dd8e6e','커머스':'#eae6da','콘텐츠':'#e6e1d5','그로스':'#abdcd1','영상':'#e6e1d5','CRM':'#c3cde4','제휴':'#eae6da','AX':'#dd8e6e'};
 // klio 표시 설정 헬퍼 (d.klio.show / hidden)
+// 프로필 사진 여러 장: klio.photos (없으면 profile.avatar 한 장에서 시작) · 첫 장 = profile.avatar 로 맞춤
+function phList(create){ const k=axDoc().klio; if(Array.isArray(k.photos))return k.photos; const base=[LIB.profile.avatar].filter(Boolean); if(!create)return base; k.photos=base.slice(); return k.photos; }
+function phSync(){ const L=phList(false)||[]; LIB.profile.avatar=L[0]||''; }
 function kdCardState(){ try{ return JSON.parse(localStorage.getItem('kd-cards')||'{}')||{}; }catch(e){ return {}; } }
 function kdCardSave(key,open){ try{ const m=kdCardState(); m[key]=!!open; localStorage.setItem('kd-cards',JSON.stringify(m)); }catch(e){} }
 function kSet(path,val){ const s=String(path).split('.'); let o=axDoc().klio; for(let i=0;i<s.length-1;i++){ if(o[s[i]]==null||typeof o[s[i]]!=='object')o[s[i]]={}; o=o[s[i]]; } o[s[s.length-1]]=val; }
@@ -1512,8 +1516,12 @@ function renderAXAdmin(){
       +G2(F('국문 이름',kt('nameKo',LIB.profile.nameKo||'예: 김진수')),F('영문 이름',kt('nameEn',LIB.profile.nameEn||'예: Kim Jinsoo'),'서명도 이 이름'))
       +G2(F('위치',ti('profile.location',LIB.profile.location,'Seoul, KR')),F('이메일',ti('profile.email',LIB.profile.email,'you@mail.com')))
       +F('사이트 링크',kt('siteUrl','https://kimjinsoo-mkt-ax.vercel.app'),'Contact와 공유 · 비우면 기본 도메인'))
-    +card('사진 카드',`<div class="kd-row" style="margin-bottom:12px">${thumb(LIB.profile.avatar,48)}<div style="flex:1;min-width:0">${ti('profile.avatar',LIB.profile.avatar,'사진 URL (또는 업로드)')}</div>${upl('avatar','업로드')}</div>`
-      +`<div class="kd-sws" style="margin-bottom:12px">${showSw('home','photo',false,'사진 사용 (끄면 이니셜)')}</div>`
+    +card('사진 카드',(()=>{ const L=phList(false)||[];
+        const rows=L.map((u,i)=>`<div class="kd-item kd-phrow" data-row><div class="kd-row">${thumb(u,44)}<input class="kd-in" data-ph="${i}" value="${axAttr(u)}" placeholder="사진 URL"><span class="kd-badge">${i===0?'대표':String(i+1)}</span>${upDown('data-ph-move',i)}${delB('data-ph-del',i)}</div></div>`).join('')
+          ||`<p class="kd-note" style="margin:0 0 8px">사진이 없어요 — 올리거나 URL을 넣으세요. (없으면 이니셜 카드)</p>`;
+        return `<div class="kd-phlist">${rows}</div><div class="kd-row" style="margin:8px 0 12px"><input class="kd-in" data-ph-new placeholder="사진 URL 붙여넣고 Enter">${upl('photos','＋ 사진 올리기 (여러 장)',true)}</div>`
+          +`<div class="kd-sws" style="margin-bottom:6px">${showSw('home','photo',false,'사진 사용 (끄면 이니셜)')}${showSw('home','photoAuto',true,'여러 장 자동 넘김')}</div>`
+          +`<p class="kd-note" style="margin:0 0 12px">2장 이상이면 뒤에 다음 사진이 겹쳐 보이고, 천천히 넘어가요(마우스를 올리면 멈춤 · 누르면 다음). ⠿ 끌어서 순서 · 첫 장이 대표예요.</p>`; })()
       +G2(F('사진 딤',`<div class="kd-row" style="height:36px"><input type="range" min="0" max="60" step="5" value="${dimV}" data-knum="ui.photoDim" style="flex:1;accent-color:var(--acc)"><b data-knum-out="ui.photoDim" style="font-size:12px;min-width:34px;text-align:right">${dimV}%</b></div>`),
           F('딤 방식',`<select class="kd-in" data-ksel="ui.photoDimMode"><option value="bg"${(kd.ui||{}).photoDimMode!=='all'?' selected':''}>배경만 (얼굴은 밝게)</option><option value="all"${(kd.ui||{}).photoDimMode==='all'?' selected':''}>사진 전체</option></select>`))
       +G2(F('이니셜',kt('initials','JK'),'사진 끌 때'),F('회전 문구',kt('orbit','JINSOO KIM · MARKETER · '))))
@@ -1716,6 +1724,7 @@ function renderAXAdmin(){
     const dim=(el,on)=>{ const row=el.closest('[data-row]'); if(row) row.classList.toggle('off',!on); };
     // Techstack 칩: 입력 후 Enter/쉼표 = 추가 · 여러 줄 붙여넣기 = 한꺼번에 · 빈 칸에서 Backspace = 마지막 칩 빼기 · 칩 끌기 = 순서/다른 줄로
     const techAdd=(i,txt)=>{ const r=(axDoc().klio.techstack||[])[i]; if(!r)return; if(!Array.isArray(r.items))r.items=[]; const add=String(txt).split(/[\n,]+/).map(x=>x.trim()).filter(Boolean).filter(x=>r.items.indexOf(x)<0); if(!add.length)return false; r.items.push(...add); renderAXAdmin(); save(); updateAXPreview(); const f=left.querySelector(`[data-tech-new="${i}"]`); if(f)f.focus(); return true; };
+    left.addEventListener('keydown',e=>{ const t=e.target; if(e.key!=='Enter'||!t.dataset||t.dataset.phNew==null)return; e.preventDefault(); const u=t.value.trim(); if(!/^(https?:|data:image\/)/i.test(u)){ if(u)toast('https:// 로 시작하는 이미지 주소를 넣어 주세요'); return; } phList(true).push(u); phSync(); kSet('show.home.photo',true); renderAXAdmin(); save(); updateAXPreview(); const f=left.querySelector('[data-ph-new]'); if(f)f.focus(); });
     left.addEventListener('keydown',e=>{ const t=e.target; if(!t.dataset||t.dataset.techNew==null)return; const i=+t.dataset.techNew;
       if(e.key==='Enter'||e.key===','){ e.preventDefault(); if(t.value.trim()){ const v=t.value; t.value=''; techAdd(i,v); } }
       else if(e.key==='Backspace'&&!t.value){ const r=(axDoc().klio.techstack||[])[i]; if(r&&r.items&&r.items.length){ e.preventDefault(); r.items.pop(); renderAXAdmin(); save(); updateAXPreview(); const f=left.querySelector(`[data-tech-new="${i}"]`); if(f)f.focus(); } } });
@@ -1778,6 +1787,7 @@ function renderAXAdmin(){
       if(ds.kview){ const v=Math.max(0,parseInt(t.value,10)||0), real=axViews.data||{total:0,today:0}; if(!k.views||typeof k.views!=='object')k.views={}; if(ds.kview==='total')k.views.totalAdj=v-real.total; else { k.views.todayAdj=v-real.today; k.views.todayDay=kstToday(); } axSchedule(); return; }
       if(ds.kl){ const [n,i,f]=ds.kl.split(':'), L=klList(n); if(L[+i])L[+i][f]=t.value; axSchedule(); return; }
       if(ds.knum){ const v=+t.value; kSet(ds.knum,v); const o=left.querySelector(`[data-knum-out="${ds.knum}"]`); if(o)o.textContent=v+'%'; axSchedule(); return; }
+      if(ds.ph!=null){ const L=phList(true); L[+ds.ph]=t.value.trim(); phSync(); axSchedule(); return; }
       if(ds.kgDesc!=null){ const g=(k.groups||[])[+ds.kgDesc]; if(g)g.desc=t.value; axSchedule(); return; }
       if(ds.xpj){ const [ci,i,f]=ds.xpj.split(':'), L=xpjList(+ci,true); if(L&&L[+i])L[+i][f]=t.value; axSchedule(); return; }
       if(ds.xsv){ const [ci,si,f]=ds.xsv.split(':'), L=xsvList(+ci,true); if(L&&L[+si])L[+si][f]=t.value; axSchedule(); return; }
@@ -1842,6 +1852,8 @@ function renderAXAdmin(){
       if((el=q('[data-xsvp-move]'))){ const [ci,si,pi,dir]=el.dataset.xsvpMove.split(':'), v=(xsvList(+ci,true)||[])[+si]; if(v&&v.projects)axMove(v.projects,+pi,dir); rerender(); return; }
       if((el=q('[data-pchk]'))){ axSet(el.dataset.pchk,el.checked); rerender(); return; }
       if((el=q('[data-ax-tech-on]'))){ const r=k.techstack[+el.dataset.axTechOn]; if(r)r.visible=el.checked; rerender(); return; }
+      if((el=q('[data-ph-move]'))){ const [i,dir]=el.dataset.phMove.split(':'); axMove(phList(true),+i,dir); phSync(); rerender(); return; }
+      if((el=q('[data-ph-del]'))){ const L=phList(true); L.splice(+el.dataset.phDel,1); phSync(); rerender(); return; }
       if((el=q('[data-tech-x]'))){ const [a,b]=el.dataset.techX.split(':').map(Number), r=k.techstack[a]; if(r&&Array.isArray(r.items)){ r.items.splice(b,1); rerender(); const f=left.querySelector(`[data-tech-new="${a}"]`); if(f)f.focus(); } return; }
       if((el=q('.kd-chips'))&&!e.target.closest('.kd-chip')){ const f=el.querySelector('.kd-chip-in'); if(f)f.focus(); }
       if((el=q('[data-ax-tech-add]'))){ k.techstack.push({label:'',items:[],visible:true}); rerender(); return; }
@@ -1896,6 +1908,7 @@ function renderAXAdmin(){
         if(kind==='logo'){ LIB.companies[+a].logo=await CLOUD.uploadFile(t.files[0]); }
         else if(kind==='svlogo'){ const [,x,y]=up.split(':'), v=(xsvList(+x,true)||[])[+y]; if(v)v.logo=await CLOUD.uploadFile(t.files[0]); }
         else if(kind==='avatar'){ LIB.profile.avatar=await CLOUD.uploadFile(t.files[0]); kSet('show.home.photo',true); }
+        else if(kind==='photos'){ const L=phList(true); for(const f of t.files){ L.push(await CLOUD.uploadFile(f)); } phSync(); kSet('show.home.photo',true); }
         else if(kind==='axcore'){ const c=axDoc().klio.axCore[+a]; if(c)c.img=await CLOUD.uploadFile(t.files[0]); }
         else if(kind==='work'){ const w=LIB.companies[+a].works[+b]; if(!Array.isArray(w.media))w.media=[]; for(const f of t.files){ w.media.push({id:uid(),type:'image',url:await CLOUD.uploadFile(f)}); } }
         if(typeof normalizeIds==='function')normalizeIds();

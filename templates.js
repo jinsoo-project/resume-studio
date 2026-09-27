@@ -844,7 +844,10 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
     var mainH1 = txt("heroMain", "") ? esc(txt("heroMain", ""))
       : (hName ? esc(hName) + (tagline ? hJoin : "") : "") + esc(tagline) + (tagline && !/[.!?。]$/.test(tagline) ? "." : "");
     var dimH1 = esc(txt("heroSub", sents[0] || ""));
-    var photoOn = shown("home", "photo", false) && !!P.avatar;
+    // 프로필 사진 여러 장(KILO 대시보드 Home → 사진 카드 = klio.photos, 첫 장 = 대표 = profile.avatar)
+    var PHOTOS = (Array.isArray(K.photos) ? K.photos : [P.avatar]).map(function (u) { return String(u || "").trim(); }).filter(Boolean);
+    if (!PHOTOS.length && P.avatar) PHOTOS = [P.avatar];
+    var photoOn = shown("home", "photo", false) && PHOTOS.length > 0, multiPh = photoOn && PHOTOS.length > 1;
     var dimRaw = parseFloat((K.ui || {}).photoDim), photoDim = isNaN(dimRaw) ? 0.35 : Math.max(0, Math.min(80, dimRaw)) / 100; // 사진 딤(어둡게) — KILO 대시보드에서 조절
     // 조회수(누적·오늘): 라이브 view.html이 트래커 값을 보내면 표시 = 실제 + KILO 대시보드 보정값(klio.views)
     var KV = K.views || {}, kstToday = new Date(Date.now() + 9 * 3600e3).toISOString().slice(0, 10);
@@ -877,7 +880,12 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
       + '<div class="meta">' + (nmHtml ? '<p class="nm">' + nmHtml + '</p>' : '') + (shown("home", "location", true) ? '<span>' + esc(P.location || "Seoul, Korea") + '</span>' : '')
       + (shown("home", "email", true) && P.email ? '<a href="mailto:' + esc(P.email) + '">' + esc(P.email) + '</a>' : '')
       + (shown("home", "site", true) ? '<a href="' + esc(siteHref) + '" target="_blank" rel="noopener">' + esc(siteLabel) + '</a>' : '') + '</div>' + viewsHtml + '</div>'
-      + '<div class="cnt"><div class="photo rv" style="--d:80ms"><div class="card' + (photoOn ? ' img dim-' + dimMode + '" style="background-image:url(\'' + esc(P.avatar) + '\');--dim:' + photoDim + '">' : '"><b>' + esc(initials) + '</b>') + '</div>'
+      + '<div class="cnt"><div class="photo rv' + (multiPh ? ' multi' : '') + '" style="--d:80ms"' + (multiPh ? ' data-ph="' + PHOTOS.length + '" data-auto="' + (shown("home", "photoAuto", true) ? 1 : 0) + '"' : '') + '>'
+      // 여러 장: 뒤에 다음 사진들이 살짝 기울어 겹쳐 보이고(덱) · 앞 카드는 천천히 교차 전환 + 은은한 줌 · 아래 이야기형 진행 막대
+      + (multiPh ? '<div class="ph-deck" aria-hidden="true">' + PHOTOS.slice(1, 3).map(function (u, i) { return '<i class="pd' + (i + 1) + '" style="background-image:url(\'' + esc(u) + '\')"></i>'; }).join("") + '</div>' : '')
+      + '<div class="card' + (photoOn ? ' img dim-' + dimMode + '" style="' + (multiPh ? '' : 'background-image:url(\'' + esc(PHOTOS[0]) + '\');') + '--dim:' + photoDim + '"' + (multiPh ? ' role="button" tabindex="0" aria-label="다음 사진"' : '') + '>'
+        + (multiPh ? PHOTOS.map(function (u, i) { return '<i class="ph' + (i ? '' : ' on') + '" style="background-image:url(\'' + esc(u) + '\')"></i>'; }).join("") : '') : '"><b>' + esc(initials) + '</b>') + '</div>'
+      + (multiPh ? '<div class="ph-bars" aria-hidden="true">' + PHOTOS.map(function (u, i) { return '<i' + (i ? '' : ' class="on"') + '><b></b></i>'; }).join("") + '</div>' : '')
       + '<svg class="orbit" viewBox="0 0 150 150" aria-hidden="true"><defs><path id="orb" d="M75,75 m-63,0 a63,63 0 1,1 126,0 a63,63 0 1,1 -126,0"/></defs><text><textPath href="#orb">' + orbit + '</textPath></text></svg></div>'
       + (introOn ? '<h1 class="hero-h">' + wrapW(mainH1) + ' <span class="dim">' + wrapW(dimH1) + '</span></h1>' : '') + '</div></header>';
 
@@ -1327,8 +1335,43 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
       + '.row>h2{font-size:15px}.row>h2 .sn{font-size:12px}.about p.g{font-size:15px;line-height:1.8}.meta span,.meta a{font-size:13.5px}.meta .nm b{font-size:14.5px}'
       + '.xp-tt h3{font-size:16.5px}.xp-role,.xp-sv-role{font-size:13px}.xp-when{font-size:12.5px}.xp-sum{font-size:14px;line-height:1.75}.xp-pj li{font-size:13.5px}.xp-pj .p,.xp-sv-when,.xp-sv-no{font-size:12px}.xp-sv h4{font-size:15px}.xp-sv-sum{font-size:13.5px}'
       + '.pc-cat{font-size:10.5px}.pc-m,.pc-p{font-size:12px}.ax-ctx .ax-cno{color:var(--gray)}.ax-ctx h4{font-size:16px}.ax-ctx p{font-size:13.5px;line-height:1.65}.foot{font-size:12.5px}'
-      + '.dcard{background:#f4f3ef;box-shadow:inset 0 0 0 1px rgba(29,29,31,.05)}.dcard h4{color:var(--ink)}.dcard p{font-size:12.5px;color:var(--ink50)}.dcard:hover{box-shadow:inset 0 0 0 1px rgba(29,29,31,.05),0 18px 36px -26px rgba(0,0,0,.3)}';
+      + '.dcard{background:#f4f3ef;box-shadow:inset 0 0 0 1px rgba(29,29,31,.05)}.dcard h4{color:var(--ink)}.dcard p{font-size:12.5px;color:var(--ink50)}.dcard:hover{box-shadow:inset 0 0 0 1px rgba(29,29,31,.05),0 18px 36px -26px rgba(0,0,0,.3)}'
+      // 프로필 사진 여러 장: 덱(뒤 카드) · 교차 전환 + 줌 · 진행 막대
+      + '.photo.multi .card{cursor:pointer;z-index:1}.ph-deck{position:absolute;inset:0;pointer-events:none}.ph-deck i{position:absolute;inset:0;border-radius:24px;background:var(--sand) center/cover;box-shadow:0 18px 36px -22px rgba(0,0,0,.45);transition:transform .9s var(--ez2),opacity .6s}'
+      + '.ph-deck .pd1{transform:rotate(-7deg) translate(-14px,10px) scale(.96);opacity:.9}.ph-deck .pd2{transform:rotate(6deg) translate(12px,4px) scale(.93);opacity:.75}'
+      + '.photo.multi:hover .ph-deck .pd1{transform:rotate(-11deg) translate(-26px,12px) scale(.96)}.photo.multi:hover .ph-deck .pd2{transform:rotate(10deg) translate(24px,2px) scale(.93)}.ph-deck.flip i{animation:phFlip .7s var(--ez2)}@keyframes phFlip{40%{opacity:.4}}'
+      + '.photo .card .ph{position:absolute;inset:0;background:center/cover;opacity:0;transform:scale(1.08);transition:opacity 1.1s var(--ez),transform 6s cubic-bezier(.2,.6,.2,1)}.photo .card .ph.on{opacity:1;transform:scale(1)}'
+      + '.ph-bars{position:absolute;left:14px;right:14px;bottom:12px;z-index:3;display:flex;gap:4px;pointer-events:none}.ph-bars i{flex:1;height:2.5px;border-radius:2px;background:rgba(255,255,255,.4);overflow:hidden}.ph-bars b{display:block;height:100%;width:100%;background:#fff;transform-origin:0 50%;transform:scaleX(0)}'
+      + '.ph-bars i.done b{transform:scaleX(1)}.ph-bars i.on b{animation:phBar var(--phT,4.8s) linear forwards}.photo.paused .ph-bars i.on b{animation-play-state:paused}@keyframes phBar{to{transform:scaleX(1)}}'
+      + '@supports (corner-shape:squircle){.ph-deck i{corner-shape:squircle;border-radius:42px}}'
+      + '@media(prefers-reduced-motion:reduce){.photo .card .ph{transform:none;transition:opacity .4s}.ph-deck i,.ph-deck.flip i{transition:none;animation:none}.ph-bars i.on b{animation:none;transform:scaleX(1)}}';
 
+    // 프로필 사진 넘김(여러 장일 때): 자동(가만두면 약 5초) · 카드 클릭/Enter = 다음 · 마우스 올리면 멈춤 · 화면 밖·탭 숨김이면 멈춤
+    var phRuntime = function () {
+      var box = document.querySelector(".photo.multi"); if (!box) return;
+      var card = box.querySelector(".card"), ph = [].slice.call(card.querySelectorAll(".ph")), bars = [].slice.call(box.querySelectorAll(".ph-bars i")), deck = box.querySelector(".ph-deck"), dk = deck ? [].slice.call(deck.querySelectorAll("i")) : [];
+      var n = ph.length, cur = 0, T = 4800, auto = box.getAttribute("data-auto") !== "0", reduce = matchMedia("(prefers-reduced-motion: reduce)").matches, hov = false, vis = true, t = 0, left = T, t0 = 0;
+      box.style.setProperty("--phT", T / 1000 + "s");
+      var urls = ph.map(function (p) { return p.style.backgroundImage; });
+      var show = function (i) {
+        cur = (i + n) % n;
+        ph.forEach(function (p, k) { p.classList.toggle("on", k === cur); });
+        var run = auto && !reduce;
+        bars.forEach(function (b, k) { b.classList.remove("on"); b.classList.toggle("done", k < cur || (!run && k === cur)); if (k === cur && run) { void b.offsetWidth; b.classList.add("on"); } });
+        dk.forEach(function (d, k) { d.style.backgroundImage = urls[(cur + 1 + k) % n]; });
+        if (deck) { deck.classList.remove("flip"); void deck.offsetWidth; deck.classList.add("flip"); }
+        left = T; schedule();
+      };
+      var schedule = function () { clearTimeout(t); if (!auto || reduce || hov || !vis || document.hidden) return; t0 = Date.now(); t = setTimeout(function () { show(cur + 1); }, left); };
+      var pause = function () { if (t) { clearTimeout(t); t = 0; left = Math.max(300, left - (Date.now() - t0)); } box.classList.add("paused"); };
+      var resume = function () { box.classList.remove("paused"); schedule(); };
+      card.addEventListener("click", function () { show(cur + 1); });
+      card.addEventListener("keydown", function (e) { if (e.key === "Enter" || e.key === " " || e.key === "ArrowRight") { e.preventDefault(); show(cur + 1); } else if (e.key === "ArrowLeft") { e.preventDefault(); show(cur - 1); } });
+      box.addEventListener("mouseenter", function () { hov = true; pause(); }); box.addEventListener("mouseleave", function () { hov = false; resume(); });
+      if ("IntersectionObserver" in window) new IntersectionObserver(function (es) { vis = es[0].isIntersecting; if (vis) resume(); else pause(); }).observe(box);
+      document.addEventListener("visibilitychange", function () { if (document.hidden) pause(); else if (!hov) resume(); });
+      show(0);
+    };
     var KJS = '(function(){"use strict";var reduce=matchMedia("(prefers-reduced-motion: reduce)").matches,still=!document.documentElement.classList.contains("js");'
       + 'var rvs=document.querySelectorAll(".rv");if("IntersectionObserver" in window&&!reduce){var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){e.target.classList.add("in");io.unobserve(e.target);}});},{threshold:.12,rootMargin:"0px 0px -8% 0px"});rvs.forEach(function(el){io.observe(el);});}else{rvs.forEach(function(el){el.classList.add("in");});}'
       // 하단 독: srcdoc iframe(라이브 view.html·스튜디오 미리보기)에선 #앵커가 부모 URL로 해석돼 iframe이 통째로 재로드됨 → JS로 스크롤 처리
@@ -2010,7 +2053,7 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
       + (FX.progress ? '<div class="prog" aria-hidden="true"><i></i></div>' : '')
       + '<div class="page">' + home + sectionsHtml
       + '<p class="foot">' + esc(txt("footer", "© " + new Date().getFullYear() + " — " + (nameEn || nameKo || "") + ", Marketing Portfolio")) + '</p></div>'
-      + dock + '<script>' + KJS + '<\/script></body></html>';
+      + dock + '<script>' + KJS + '<\/script>' + (multiPh ? '<script>(' + phRuntime.toString() + ')();<\/script>' : '') + '</body></html>';
   }
 
   /* ---------- doc wrapper ---------- */
