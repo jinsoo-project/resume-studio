@@ -872,23 +872,26 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
     var pSlug = d.slug || "portfolio", homeUrl = d.homePath || "/" + encodeURIComponent(pSlug), pjUrl = d.pjPath || homeUrl + "/projects";
     var feat = works.filter(function (x) { return x.w.featured; });
     var featM = feat.filter(function (x) { return (x.w.metrics || []).length; });
-    var pick = (featM.length >= 5 ? featM : feat.length ? feat : works).slice(0, 5);
-    // 타일 = 위: 카테고리 · 가운데: 대표 지표 크게(이미지 타일은 알약) · 아래: 제목(2줄) + 회사·연도 — 겹침 없이 세로 흐름
+    var pick = (featM.length >= 4 ? featM : feat.length ? feat : works).slice(0, 4); // 대표작 4 (작게·세로 길게·작게·가로 길게)
+    // 카드 표시값 — KILO 대시보드 카드별 설정(klio.cards: 이름 · 썸네일 번호(-1=색 카드) · 대표 지표 번호(-1=없음))을 메인 타일에도 똑같이
+    var KCARD = K.cards || {};
+    var cardView = function (w) {
+      var CC = KCARD[w.id] || {}, md = mediaOf(w), ti = CC.thumb != null ? +CC.thumb : 0, ki = CC.kpi != null ? +CC.kpi : 0;
+      var mets = (w.metrics || []).filter(function (m) { return m && m.value; });
+      return { title: (CC.title && String(CC.title).trim()) || w.title || "", main: ti >= 0 ? (md[ti] || md[0] || null) : null, m0: ki >= 0 ? (mets[ki] || mets[0] || null) : null };
+    };
+    // 타일 = 전체 프로젝트 휠과 같은 상품카드: 흰 카드 안 썸네일(작은·세로 타일은 위, 가로 타일은 왼쪽) + 분야 · 제목 · 회사·연도 · 대표 지표
     var tileHtml = function (x, span, j) {
-      var w = x.w, co = x.co, cm = catMeta(w.category), md = mediaOf(w)[0];
-      var dark = (cm.dark || md) ? " dark" : "";
-      var m0 = (w.metrics || []).filter(function (m) { return m && m.value; })[0], yr = yearOf(w);
-      var mid = m0 ? (md
-          ? '<span class="kp"><b>' + esc(m0.value) + '</b>' + (m0.label ? ' ' + esc(m0.label) : '') + '</span>'
-          : '<span class="t-kpi"><b>' + esc(m0.value) + '</b>' + (m0.label ? '<small>' + esc(m0.label) + '</small>' : '') + '</span>')
-        : (md ? '' : '<span class="t-kpi t-ic">' + catIcon(w.category) + '</span>');
-      return '<a class="tile' + span + dark + (md ? ' has-img' : '') + '" href="' + pjUrl + '#p-' + esc(w.id || "") + '" target="_top" data-ext style="' + (j != null ? '--j:' + j + ';' : '') + 'background-color:' + cm.c + (md ? ';background-image:url(\'' + esc(md.src) + '\')' : '') + '">'
-        + '<span class="t-top"><span class="t-cat">' + catIcon(w.category) + esc(cm.en) + '</span></span>'
-        + (md && md.yt ? '<span class="t-play" aria-hidden="true"></span>' : '') + mid
-        + '<span class="lb"><b>' + esc(w.title) + '</b><span>' + esc(dispName(co)) + (yr ? ' · ' + esc(yr) : '') + '</span></span><span class="t-go" aria-hidden="true">→</span></a>';
+      var w = x.w, co = x.co, cm = catMeta(w.category), v = cardView(w), md = v.main, m0 = v.m0, yr = yearOf(w);
+      var th = md
+        ? '<span class="pc-th img" style="background-image:url(\'' + esc(md.src) + '\')">' + (md.yt ? '<i class="t-play" aria-hidden="true"></i>' : '') + '</span>'
+        : '<span class="pc-th">' + catIcon(w.category) + '</span>';
+      return '<a class="tile pc' + span + (cm.dark ? ' dk' : '') + '" href="' + pjUrl + '#p-' + esc(w.id || "") + '" target="_top" data-ext style="' + (j != null ? '--j:' + j + ';' : '') + '--c:' + cm.c + '">' + th
+        + '<span class="pc-bd"><em class="pc-cat">' + esc(cm.en) + '</em><b class="pc-t">' + esc(v.title) + '</b><span class="pc-m">' + esc(dispName(co)) + (yr ? ' · ' + esc(yr) : '') + '</span>'
+        + (m0 ? '<span class="pc-p"><b>' + esc(m0.value) + '</b>' + (m0.label ? ' ' + esc(m0.label) : '') + '</span>' : '') + '</span><span class="t-go" aria-hidden="true">→</span></a>';
     };
     var mosaic = pick.map(function (x, i) {
-      var span = i === 1 ? " tall" : (i === 3 || i === 4) ? " wide" : "";
+      var span = i === 1 ? " tall" : i === 3 ? " wide" : "";
       return tileHtml(x, span, i);
     }).join("");
     // 전체 보기 버튼: 썸네일 4개 겹침 + 제목/부제 + 화살표 (문구는 KILO 대시보드에서)
@@ -1149,14 +1152,29 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
       + '.dcard{transition:transform .4s var(--ez),box-shadow .4s var(--ez)}.dcard:hover{transform:translateY(-4px);box-shadow:0 20px 40px -24px rgba(0,0,0,.55)}'
       + '.avail i{position:relative}.avail i::after{content:"";position:absolute;inset:0;border-radius:50%;background:var(--mint);animation:ping 1.9s var(--ez) infinite}@keyframes ping{from{transform:scale(1);opacity:.85}to{transform:scale(2.8);opacity:0}}'
       + '@media(prefers-reduced-motion:reduce){.js .rv{filter:none}.aura i,.avail i::after,.js .fx-intro .sig,.js .fx-intro .hero-h .w,.js .fx-intro .photo .card{animation:none}.js .xp .xp-pj li{opacity:1;transform:none;transition:none}.js .xp .xp-pj li::before{transform:none;transition:none}.dock-pill,.tile::after{transition:none}}'
+      // 03 Projects 타일 = 상품카드(전체 프로젝트 휠과 같은 구성): 흰 카드 · 썸네일 · 분야 · 제목 · 회사·연도 · 대표 지표 — 크기별 배치
+      + '.mosaic{grid-auto-rows:234px}.tile.pc{justify-content:flex-start;padding:7px;background:#fff;box-shadow:0 0 0 1px rgba(0,0,0,.06),0 14px 30px -22px rgba(0,0,0,.42)}.tile.pc::after{background:linear-gradient(110deg,transparent 35%,rgba(255,255,255,.35) 50%,transparent 65%)}'
+      + '.pc-th{position:relative;flex:none;height:41%;border-radius:17px;overflow:hidden;background:var(--c) center/cover no-repeat;display:grid;place-items:center}.pc-th.img{background-color:#ecebe7}.tile .pc-th svg{width:30px;height:30px}.tile.tall .pc-th{height:60%}.tile.tall .pc-th svg{width:46px;height:46px}'
+      + '.tile.wide{flex-direction:row}.tile.wide .pc-th{height:auto;width:46%;align-self:stretch}.tile.wide .pc-th svg{width:40px;height:40px}.tile.pc .t-play{top:50%}'
+      + '.pc-bd{flex:1;min-width:0;min-height:0;display:flex;flex-direction:column;padding:11px 9px 5px}.tile.wide .pc-bd{padding:10px 12px 6px 16px}.tile.tall .pc-bd{padding:14px 11px 7px}'
+      + '.pc-cat{font-style:normal;font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--gray);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}'
+      + '.pc-t{flex:none;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;margin-top:4px;font-size:14px;font-weight:700;line-height:1.32;letter-spacing:-.025em;color:var(--ink)}.tile.tall .pc-t,.tile.wide .pc-t{font-size:16.5px}'
+      + '.pc-m{margin-top:3px;font-size:11.5px;font-weight:500;color:var(--gray);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}'
+      + '.pc-p{margin-top:auto;padding:4px 36px 0 0;font-size:11.5px;font-weight:600;color:var(--ink50);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.pc-p b{margin-right:2px;font-size:17px;font-weight:800;letter-spacing:-.035em;color:var(--ink)}.tile.tall .pc-p b,.tile.wide .pc-p b{font-size:22px}'
+      + '.tile.pc .t-go{right:10px;bottom:10px;width:30px;height:30px;font-size:13px;background:var(--ink);color:#fff}'
+      + '@media(max-width:520px){.mosaic{grid-auto-rows:226px}.pc-t{font-size:13px}.tile.tall .pc-t,.tile.wide .pc-t{font-size:14.5px}.pc-m{font-size:11px}.tile.wide .pc-th{width:42%}.pc-p{padding-right:30px}.pc-p b{font-size:15px}.tile.tall .pc-p b,.tile.wide .pc-p b{font-size:18px}}'
+      // 전체 프로젝트 보기의 큰 개수: 애플풍 가는 숫자 + 위→아래 은은한 그라데이션
+      + '.pj-num{font-family:var(--font);font-weight:250;font-size:clamp(48px,4.4vw,60px);line-height:.9;letter-spacing:-.06em;font-variant-numeric:tabular-nums;background:linear-gradient(180deg,#fff 35%,rgba(255,255,255,.55));-webkit-background-clip:text;background-clip:text;color:transparent}'
+      // 곡률: 알약 대신 애플식 둥근 사각형(누적·오늘 라벨 · 하단 바 · 콘솔 버튼) — 지원 브라우저는 아래에서 연속 곡률로
+      + '.vw{border-radius:8px}.dock{border-radius:16px}.dock a,.dock-pill{border-radius:11px}.ax-console{border-radius:12px}'
       // 애플식 곡률: 지원 브라우저(크롬 계열)는 연속 곡률(squircle) + 같은 인상이 나도록 반경을 키움 · 미지원은 위의 둥근 모서리 그대로
       + '@supports (corner-shape:squircle){'
-      + '.photo .card,.tile,.pj-all,.pj-deck i,.dcard,.ax-core,.ax-th,.xp-logo,.socials a{corner-shape:squircle}'
+      + '.photo .card,.tile,.pj-all,.pj-deck i,.dcard,.ax-core,.ax-th,.xp-logo,.socials a,.pc-th,.vw,.dock,.dock a,.dock-pill,.ax-console{corner-shape:squircle}.pc-th{border-radius:33px}.vw{border-radius:12px}.dock{border-radius:26px}.dock a,.dock-pill{border-radius:20px}.ax-console{border-radius:18px}'
       + '.photo .card{border-radius:42px}.tile{border-radius:40px}.pj-all{border-radius:40px}.pj-deck i{border-radius:14px}.dcard{border-radius:48px}'
       + '.ax-core{border-radius:30px}.ax-th{border-radius:19px}.xp-logo{border-radius:16px}.socials a{border-radius:13px}'
       + '@media(max-width:560px){.xp-logo{border-radius:15px}}}'
-      // 글꼴 프리셋의 제목용 글꼴(--disp): 큰 숫자·스킬 카드 값 — 세리프(editorial)는 한 단계 크게
-      + '.pj-num,.dcard h4{font-family:var(--disp);font-weight:var(--dispw);letter-spacing:var(--displs)}.ft-editorial .pj-num{font-size:clamp(48px,4.6vw,62px);line-height:.82}.ft-editorial .dcard h4{font-size:40px;line-height:.95}';
+      // 글꼴 프리셋의 제목용 글꼴(--disp): 스킬 카드 값 — 세리프(editorial)는 한 단계 크게
+      + '.dcard h4{font-family:var(--disp);font-weight:var(--dispw);letter-spacing:var(--displs)}.ft-editorial .dcard h4{font-size:40px;line-height:.95}';
 
     var KJS = '(function(){"use strict";var reduce=matchMedia("(prefers-reduced-motion: reduce)").matches,still=!document.documentElement.classList.contains("js");'
       + 'var rvs=document.querySelectorAll(".rv");if("IntersectionObserver" in window&&!reduce){var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){e.target.classList.add("in");io.unobserve(e.target);}});},{threshold:.12,rootMargin:"0px 0px -8% 0px"});rvs.forEach(function(el){io.observe(el);});}else{rvs.forEach(function(el){el.classList.add("in");});}'
@@ -1533,7 +1551,10 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
         + '.wd-desc{margin:0;font-size:14.5px;line-height:1.75;color:var(--ink60)}.wd-pars{display:grid;gap:8px}.wd-par{padding:12px 14px;border-radius:var(--rk);background:#f7f7f4}.wd-par em{font-style:normal;font-size:10.5px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--gray)}.wd-par p{margin:4px 0 0;font-size:13.5px;line-height:1.65}'
         + '.wd-tags{display:flex;flex-wrap:wrap;gap:6px}.wd-tags span{padding:5px 10px;border-radius:999px;background:#f1f0ec;font-size:11.5px;color:var(--ink60)}.wd-links{display:flex;flex-wrap:wrap;gap:8px}.wd-links a{padding:10px 15px;border-radius:999px;background:var(--ink);color:#fff;font-size:12.5px;font-weight:600;transition:opacity .2s}.wd-links a:hover{opacity:.85}'
         // 애플식 연속 곡률(지원 브라우저) — 같은 인상이 나도록 반경을 키움
-        + '@supports (corner-shape:squircle){:root{--rc:34px;--rt:25px;--rs:42px;--rk:22px}.wh-face,.wh-th,.wh-sheet,.wd-kpi,.wd-par,.wd-th{corner-shape:squircle}.wd-th{border-radius:15px}}'
+        // 알약 대신 애플식 둥근 사각형(돌아가기·지표·자세히 보기·분류 바·상세 태그/링크/이전·다음)
+        + '.wh-back{border-radius:11px}.wh-kpi{border-radius:10px}.wh-more{border-radius:13px}.wh-chips{border-radius:16px}.wh-chip{border-radius:11px}.wd-cat,.wd-tags span{border-radius:8px}.wd-links a,.wh-snav button{border-radius:11px}'
+        + '@supports (corner-shape:squircle){:root{--rc:34px;--rt:25px;--rs:42px;--rk:22px}.wh-face,.wh-th,.wh-sheet,.wd-kpi,.wd-par,.wd-th,.wh-back,.wh-kpi,.wh-more,.wh-chips,.wh-chip,.wd-cat,.wd-tags span,.wd-links a,.wh-snav button{corner-shape:squircle}.wd-th{border-radius:15px}'
+        + '.wh-back{border-radius:17px}.wh-kpi{border-radius:15px}.wh-more{border-radius:20px}.wh-chips{border-radius:25px}.wh-chip{border-radius:19px}.wd-cat,.wd-tags span{border-radius:12px}.wd-links a,.wh-snav button{border-radius:17px}}'
         // 낮은 화면(노트북): 정보 패널 간격을 줄여 아래 분류 버튼과 겹치지 않게
         // 큰 모니터(QHD 등): 카드에 맞춰 정보 패널·분류 버튼·머리글도 한 단계 크게
         + '@media(min-width:1800px){.wh-info{width:min(680px,calc(100vw - 40px))}.wh-meta{font-size:12.5px}.wh-name{font-size:clamp(34px,2.1vw,48px)}.wh-kpis{gap:9px;margin-top:18px}.wh-kpi{padding:9px 16px;font-size:13px}.wh-kpi b{font-size:18px}.wh-acts{margin-top:20px;gap:18px}.wh-more{height:50px;padding:0 24px;font-size:15px}.wh-hint{font-size:13px}.wh-h1{font-size:clamp(48px,2.9vw,72px)}'
