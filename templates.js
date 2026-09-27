@@ -1015,14 +1015,16 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
       var svs = CO.split && K.expSvc && Array.isArray(K.expSvc[co.id]) ? K.expSvc[co.id].filter(function (sv) { return sv && sv.visible !== false && String(sv.name || sv.role || "").trim(); }) : null;
       if (svs && svs.length) {
         nm = co.nameKo || co.nameEn || nm; alt = co.nameKo && co.nameEn && co.nameEn !== nm ? co.nameEn : "";
-        var byRole = CO.splitKind === "role"; // 분리 단위: 서비스(앱 로고) · 직책(로고 없이 점·세로선)
+        var byRole = CO.splitKind === "role"; // 분리 단위: 서비스(앱 로고) · 직책(로고 없이 — 스타일 roleStyle: num 번호 · date 기간 왼쪽 · bar 세로 막대)
+        var rs = byRole ? ({ date: "date", bar: "bar" })[CO.roleStyle] || "num" : "";
         pjs = svs.map(function (sv, si) {
           var sp = showPj ? (sv.projects || []).filter(function (it) { return it && it.visible !== false && String(it.title || "").trim(); }).map(function (it, k) {
             return '<li style="--k:' + k + '"><span class="t">' + esc(it.title) + '</span>' + (showPjP && it.period ? '<span class="p">' + esc(it.period) + '</span>' : '') + '</li>'; }).join("") : "";
           var sl = XS.logo && !byRole ? (sv.logo ? '<span class="xp-sv-logo"><img src="' + esc(sv.logo) + '" alt="" loading="lazy"></span>'
             : '<span class="xp-sv-logo fb">' + esc(String(sv.name || "").slice(0, 1)) + '</span>') : '';
-          return '<div class="xp-sv' + (byRole ? ' dot' : sl ? '' : ' nologo') + '" style="--s:' + si + '">' + sl + '<div class="xp-sv-hd"><div class="xp-sv-tt"><h4>' + esc(sv.name || "") + '</h4>' + (XS.role && sv.role ? '<p class="xp-sv-role">' + esc(sv.role) + '</p>' : '') + '</div>'
-            + (XS.period && sv.period ? '<p class="xp-sv-when">' + esc(sv.period) + '</p>' : '') + '</div>'
+          var no = rs === "num" ? '<span class="xp-sv-no">' + (si < 9 ? '0' : '') + (si + 1) + '</span>' : rs === "date" && XS.period && sv.period ? '<span class="xp-sv-no">' + esc(sv.period) + '</span>' : '';
+          return '<div class="xp-sv' + (rs ? ' r r-' + rs : sl ? '' : ' nologo') + '" style="--s:' + si + '">' + sl + no + '<div class="xp-sv-hd"><div class="xp-sv-tt"><h4>' + esc(sv.name || "") + '</h4>' + (XS.role && sv.role ? '<p class="xp-sv-role">' + esc(sv.role) + '</p>' : '') + '</div>'
+            + (XS.period && sv.period && rs !== "date" ? '<p class="xp-sv-when">' + esc(sv.period) + '</p>' : '') + '</div>'
             + (XS.summary && sv.summary ? '<p class="xp-sv-sum">' + esc(sv.summary) + '</p>' : '')
             + (sp ? '<ul class="xp-pj">' + sp + '</ul>' : '') + '</div>';
         }).join("");
@@ -1190,13 +1192,17 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
       + '.xp-svs{margin-top:18px}.xp-sv{position:relative;padding:0 0 22px 44px;min-height:30px}.xp-sv:last-child{padding-bottom:0}.xp-sv.nologo{padding-left:0}'
       + '.xp-sv-logo{position:absolute;left:0;top:0;width:30px;height:30px;border-radius:9px;overflow:hidden;background:#fff;box-shadow:0 0 0 1px rgba(0,0,0,.07);display:grid;place-items:center;font-size:12.5px;font-weight:700;color:var(--ink)}.xp-sv-logo img{width:100%;height:100%;object-fit:cover;display:block}.xp-sv-logo.fb{background:var(--sand)}'
       + '.xp-sv::after{content:"";position:absolute;left:15px;top:38px;bottom:8px;width:1px;background:var(--bd)}.xp-sv:last-child::after,.xp-sv.nologo::after{display:none}'
-      + '.xp-sv.dot{padding-left:22px;min-height:0}.xp-sv.dot::before{content:"";position:absolute;left:0;top:7.5px;width:7px;height:7px;border-radius:50%;background:var(--ink)}.xp-sv.dot::after{display:block;left:3px;top:21px;bottom:1px}.xp-sv.dot:last-child::after{display:none}.xp-sv.dot .xp-sv-hd{padding-top:0}'
+      + '.xp-sv.r{min-height:0;padding:18px 0}.xp-sv.r:first-child{padding-top:0}.xp-sv.r:last-child{padding-bottom:0}.xp-sv.r+.xp-sv.r{border-top:1px solid var(--bd)}.xp-sv.r::after{display:none}.xp-sv.r .xp-sv-hd{padding-top:0}'
+      + '.xp-sv-no{position:absolute;left:0;top:20px;font-size:12px;line-height:1.5;font-variant-numeric:tabular-nums;white-space:nowrap}.xp-sv.r:first-child .xp-sv-no{top:2px}'
+      + '.xp-sv.r-num{padding-left:36px}.r-num .xp-sv-no{font-weight:600;letter-spacing:.02em;color:var(--gray)}'
+      + '.xp-sv.r-date{padding-left:124px}.r-date .xp-sv-no{width:112px;font-weight:500;color:var(--ink);white-space:normal}'
+      + '.xp-sv.r-bar{padding:0 0 0 16px;border-left:2px solid var(--ink)}.xp-sv.r-bar+.xp-sv.r-bar{border-top:0;margin-top:22px}'
       + '.xp-sv-hd{display:flex;align-items:baseline;justify-content:space-between;gap:12px;padding-top:5px}.xp-sv-tt{min-width:0}'
       + '.xp-sv h4{font-size:14.5px;font-weight:600;line-height:1.4;letter-spacing:-.02em;color:var(--ink)}'
       + '.xp-sv-role{margin-top:2px;font-size:12.5px;line-height:1.5;color:var(--ink50)}.xp-sv-when{flex:none;font-size:11.5px;color:var(--gray);font-variant-numeric:tabular-nums;white-space:nowrap}'
       + '.xp-sv-sum{margin-top:7px;font-size:13px;line-height:1.7;color:var(--ink50)}.xp-sv .xp-pj{margin-top:6px}'
       + '.js .xp-split .xp-sv{opacity:0;transform:translateY(8px);transition:opacity .6s var(--ez),transform .6s var(--ez);transition-delay:calc(var(--d,0ms) + 160ms + var(--s,0) * 80ms)}.js .xp-split.in .xp-sv{opacity:1;transform:none}'
-      + '@media(max-width:560px){.xp-sv{padding-left:40px}.xp-sv.dot{padding-left:18px}.xp-sv-hd{flex-direction:column;gap:2px}.xp-split .xp-when{grid-column:1}}'
+      + '@media(max-width:560px){.xp-sv{padding-left:40px}.xp-sv.r-num{padding-left:30px}.xp-sv.r-date{padding-left:0}.r-date .xp-sv-no{position:static;display:block;width:auto;margin-bottom:3px;color:var(--gray)}.xp-sv-hd{flex-direction:column;gap:2px}.xp-split .xp-when{grid-column:1}}'
       + '@media(prefers-reduced-motion:reduce){.js .xp-split .xp-sv{opacity:1;transform:none;transition:none}}'
       + '@media(max-width:560px){.xp-hd{grid-template-columns:36px minmax(0,1fr)}.xp-logo{width:36px;height:36px;border-radius:10px}.xp-when{grid-column:2;text-align:left;margin-top:6px}.xp-when small{display:inline;margin:0 0 0 6px}.xp.nologo .xp-when{grid-column:1}.xp-bd{margin-left:50px}.xp-pj li{flex-direction:column;gap:0}}'
       + '.js .xp .xp-pj li{opacity:0;transform:translateY(6px);transition:opacity .5s var(--ez),transform .5s var(--ez);transition-delay:calc(var(--d,0ms) + 200ms + var(--k,0) * 45ms)}.js .xp.in .xp-pj li{opacity:1;transform:none}'
