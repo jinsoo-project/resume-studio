@@ -1001,7 +1001,8 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
       // 회사별 설정(KILO 대시보드): 프로젝트 목록 · 프로젝트 기간 표시 — 없으면 전체 기본값
       var CO = (K.expCo || {})[co.id] || {};
       var showPj = CO.pj != null ? CO.pj !== false : XS.projects, showPjP = CO.pjPeriod != null ? CO.pjPeriod !== false : XS.pjPeriod;
-      var logo = XS.logo ? (co.logo ? '<span class="xp-logo"><img src="' + esc(co.logo) + '" alt="" loading="lazy"></span>'
+      var coLogo = XS.logo && CO.logo !== false; // 회사별 로고 켜기/끄기(klio.expCo[id].logo) — 표시 항목 '로고'가 켜져 있을 때
+      var logo = coLogo ? (co.logo ? '<span class="xp-logo"><img src="' + esc(co.logo) + '" alt="" loading="lazy"></span>'
         : '<span class="xp-logo fb">' + esc(String(nm).slice(0, 1)) + '</span>') : '';
       var per = coPeriod(co), dur = /년|개월/.test(per) ? "" : durOf(co);
       var mets = XS.metrics ? (co.metrics || []).map(function (m) { return { v: m.v != null ? m.v : m.value, k: m.k != null ? m.k : m.label }; })
@@ -1033,7 +1034,7 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
             + (sp ? '<ul class="xp-pj">' + sp + '</ul>' : '') + '</div>';
         }).join("");
         // 회사 로고(위) + 서비스 로고(아래 · 들여쓴 본문 열) — 크기·위치를 달리해 겹치지 않게 구분
-        var clogo = XS.logo ? (co.logo ? '<span class="xp-logo"><img src="' + esc(co.logo) + '" alt="" loading="lazy"></span>'
+        var clogo = coLogo ? (co.logo ? '<span class="xp-logo"><img src="' + esc(co.logo) + '" alt="" loading="lazy"></span>'
           : '<span class="xp-logo fb">' + esc(String(nm).slice(0, 1)) + '</span>') : '';
         return '<div class="xp xp-split rv' + (clogo ? '' : ' nologo') + '" style="--d:' + (ei * 60) + 'ms"><div class="xp-hd">' + clogo
           + '<div class="xp-tt"><h3>' + esc(nm) + (alt ? '<small>' + esc(alt) + '</small>' : '') + '</h3>' + '' + '</div>'
