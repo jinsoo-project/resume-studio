@@ -1584,9 +1584,9 @@ function renderAXAdmin(){
       const CO=(kd.expCo||{})[c.id]||{};
       const pjOn=CO.pj!=null?CO.pj!==false:kShown('exp','projects',false);
       const pjpOn=CO.pjPeriod!=null?CO.pjPeriod!==false:kShown('exp','pjPeriod',true);
-      const splitOn=CO.split===true, svL=splitOn?(xsvList(ci,false)||[]):[];
-      const hd=`<div class="kd-acc-hd" data-kd-co="${axAttr(key)}"><span class="kd-car">▶</span>${thumb(c.logo,30)}<div class="kd-acc-tt"><b>${axText(coName(c))}</b><small>${axText(splitOn?`서비스 ${svL.length}개 · `+(svL.map(v=>v.name).filter(Boolean).join(', ')||'이름 미입력'):(c.role||'역할 미입력'))}</small></div>${upDown('data-ax-moveco',ci,ci===0,ci===cos.length-1)}${hideSw('companies',c.id,'노출')}</div>`;
-      const sub=c.id?`<div class="kd-acc-sub">${sw(`data-kco="${axAttr(c.id)}:pj"`,pjOn,'프로젝트 목록')}${sw(`data-kco="${axAttr(c.id)}:pjPeriod"`,pjpOn,'프로젝트 기간')}${sw(`data-kco="${axAttr(c.id)}:split"`,splitOn,'서비스 분리','한 회사에서 맡은 서비스를 회사 아래로 묶어 표시')}</div>`:'';
+      const splitOn=CO.split===true, svL=splitOn?(xsvList(ci,false)||[]):[], byRole=CO.splitKind==='role', unitL=byRole?'직책':'서비스';
+      const hd=`<div class="kd-acc-hd" data-kd-co="${axAttr(key)}"><span class="kd-car">▶</span>${thumb(c.logo,30)}<div class="kd-acc-tt"><b>${axText(coName(c))}</b><small>${axText(splitOn?`${unitL} ${svL.length}개 · `+(svL.map(v=>v.name).filter(Boolean).join(', ')||'이름 미입력'):(c.role||'역할 미입력'))}</small></div>${upDown('data-ax-moveco',ci,ci===0,ci===cos.length-1)}${hideSw('companies',c.id,'노출')}</div>`;
+      const sub=c.id?`<div class="kd-acc-sub">${sw(`data-kco="${axAttr(c.id)}:pj"`,pjOn,'프로젝트 목록')}${sw(`data-kco="${axAttr(c.id)}:pjPeriod"`,pjpOn,'프로젝트 기간')}${sw(`data-kco="${axAttr(c.id)}:split"`,splitOn,'하위 분리','회사 아래로 서비스 또는 직책 단위로 묶어 표시')}</div>`:'';
       let body='';
       if(open){
         const cmets=(c.metrics||[]).map((m,mi)=>`<div class="kd-row" style="margin-bottom:6px">${ti(`${P}.metrics.${mi}.v`,m.v,'값 (예: 2배)')}${ti(`${P}.metrics.${mi}.k`,m.k,'라벨 (예: ROAS 개선)')}${delB('data-del',`${P}.metrics.${mi}`)}</div>`).join('');
@@ -1594,16 +1594,18 @@ function renderAXAdmin(){
         const xrows=xl.map((it,i)=>`<div class="kd-item${it.visible===false?' off':''}" data-row><div class="kd-row">${sw(`data-xpj-on="${ci}:${i}"`,it.visible!==false,'','노출')}<input class="kd-in" data-xpj="${ci}:${i}:title" value="${axAttr(it.title)}" placeholder="프로젝트명">${upDown('data-xpj-move',`${ci}:${i}`,i===0,i===xl.length-1)}${delB('data-xpj-del',`${ci}:${i}`)}</div><div class="kd-row${pjpOn?'':' kd-dim'}" style="margin-top:6px;padding-left:38px"><span class="kd-l" style="margin:0;white-space:nowrap">기간</span><input class="kd-in" data-xpj="${ci}:${i}:period" value="${axAttr(it.period)}" placeholder="2021.04 – 2021.12" style="max-width:220px"></div></div>`).join('')
           ||`<p class="kd-note" style="margin:0 0 6px">항목이 없어요 — 추가하거나 프로젝트에서 채우세요.</p>`;
         // 서비스 분리 편집: 서비스마다 이름·역할·기간·요약 + 프로젝트 목록(노출·순서)
-        const svEd=`<div class="kd-sec-t">서비스 <span>회사명 아래로 묶여 보여요 · 로고·역할은 서비스마다 표시 (회사 로고는 숨김)${pjOn?'':' · 프로젝트 목록 숨김'}</span></div>`
+        const svEd=`<div class="kd-sec-t">나누는 단위 <span>회사명 아래로 묶여 보여요 (회사 로고는 숨김)</span></div>`
+          +`<div class="kd-fonts" style="grid-template-columns:1fr 1fr;margin-bottom:12px">${[['service','서비스 단위','서비스마다 앱 로고 · 이름 · 역할'],['role','직책 단위','로고 없이 점 · 직책/팀 · 담당']].map(([kk,l,dsc])=>`<button class="kd-font${(byRole?'role':'service')===kk?' on':''}" data-ksplitkind="${axAttr(c.id)}:${kk}"><span>${l}</span><small>${dsc}</small></button>`).join('')}</div>`
+          +`<div class="kd-sec-t">${unitL} <span>${byRole?'직책·팀마다 담당 업무 표시':'로고·역할은 서비스마다 표시'}${pjOn?'':' · 프로젝트 목록 숨김'}</span></div>`
           +(svL.map((v,si)=>{ const pl=v.projects||[];
             const prow=pl.map((it,pi)=>`<div class="kd-row" style="margin-top:6px">${sw(`data-xsvp-on="${ci}:${si}:${pi}"`,it.visible!==false,'','노출')}<input class="kd-in" data-xsvp="${ci}:${si}:${pi}:title" value="${axAttr(it.title)}" placeholder="프로젝트명"><input class="kd-in${pjpOn?'':' kd-dim'}" data-xsvp="${ci}:${si}:${pi}:period" value="${axAttr(it.period)}" placeholder="2021.04 – 2021.12" style="flex:none;width:150px">${upDown('data-xsvp-move',`${ci}:${si}:${pi}`,pi===0,pi===pl.length-1)}${delB('data-xsvp-del',`${ci}:${si}:${pi}`)}</div>`).join('');
-            return `<div class="kd-item${v.visible===false?' off':''}" data-row><div class="kd-row">${sw(`data-xsv-on="${ci}:${si}"`,v.visible!==false,'','노출')}<input class="kd-in" data-xsv="${ci}:${si}:name" value="${axAttr(v.name)}" placeholder="서비스명 (예: 매일새옷)">${upDown('data-xsv-move',`${ci}:${si}`,si===0,si===svL.length-1)}${delB('data-xsv-del',`${ci}:${si}`)}</div>`
-              +`<div class="kd-row" style="margin-top:6px">${thumb(v.logo,36)}<input class="kd-in" data-xsv="${ci}:${si}:logo" value="${axAttr(v.logo||'')}" placeholder="앱 로고 이미지 URL (비우면 첫 글자)">${upl(`svlogo:${ci}:${si}`,'로고 업로드')}</div>`
-              +`<div class="kd-g2" style="margin-top:6px">${F('역할',`<input class="kd-in" data-xsv="${ci}:${si}:role" value="${axAttr(v.role)}" placeholder="퍼포먼스 마케팅 매니저 · 마케팅 엔지니어링">`)}${F('기간',`<input class="kd-in" data-xsv="${ci}:${si}:period" value="${axAttr(v.period)}" placeholder="2023.03 — 2024.06">`)}</div>`
-              +F('요약',`<textarea class="kd-in" data-xsv="${ci}:${si}:summary" rows="2" placeholder="이 서비스에서 한 일 (선택)">${axText(v.summary||'')}</textarea>`,'표시 항목의 ‘요약’을 켜야 보여요')
+            return `<div class="kd-item${v.visible===false?' off':''}" data-row><div class="kd-row">${sw(`data-xsv-on="${ci}:${si}"`,v.visible!==false,'','노출')}<input class="kd-in" data-xsv="${ci}:${si}:name" value="${axAttr(v.name)}" placeholder="${byRole?'직책·팀 (예: 퍼포먼스 마케팅 매니저)':'서비스명 (예: 매일새옷)'}">${upDown('data-xsv-move',`${ci}:${si}`,si===0,si===svL.length-1)}${delB('data-xsv-del',`${ci}:${si}`)}</div>`
+              +(byRole?'':`<div class="kd-row" style="margin-top:6px">${thumb(v.logo,36)}<input class="kd-in" data-xsv="${ci}:${si}:logo" value="${axAttr(v.logo||'')}" placeholder="앱 로고 이미지 URL (비우면 첫 글자)">${upl(`svlogo:${ci}:${si}`,'로고 업로드')}</div>`)
+              +`<div class="kd-g2" style="margin-top:6px">${F(byRole?'담당':'역할',`<input class="kd-in" data-xsv="${ci}:${si}:role" value="${axAttr(v.role)}" placeholder="${byRole?'예: 매일새옷 · 퍼포먼스 광고 운영':'퍼포먼스 마케팅 매니저 · 마케팅 엔지니어링'}">`)}${F('기간',`<input class="kd-in" data-xsv="${ci}:${si}:period" value="${axAttr(v.period)}" placeholder="2023.03 — 2024.06">`)}</div>`
+              +F('요약',`<textarea class="kd-in" data-xsv="${ci}:${si}:summary" rows="2" placeholder="${byRole?'이 직책에서 한 일 (선택)':'이 서비스에서 한 일 (선택)'}">${axText(v.summary||'')}</textarea>`,'표시 항목의 ‘요약’을 켜야 보여요')
               +`<span class="kd-l" style="margin-top:8px">프로젝트</span>${prow||'<p class="kd-note" style="margin:4px 0 0">프로젝트가 없어요.</p>'}<div class="kd-acts"><button class="kd-add" data-xsvp-add="${ci}:${si}">＋ 프로젝트</button></div></div>`; }).join('')
             ||`<p class="kd-note" style="margin:0 0 6px">서비스가 없어요 — 추가하세요.</p>`)
-          +`<div class="kd-acts"><button class="kd-add" data-xsv-add="${ci}">＋ 서비스 추가</button></div>`;
+          +`<div class="kd-acts"><button class="kd-add" data-xsv-add="${ci}">＋ ${unitL} 추가</button></div>`;
         body=`<div class="kd-acc-bd">`
           +`<div class="kd-sec-t">기본 정보</div>`
           +`<div class="kd-row" style="margin-bottom:10px">${thumb(c.logo,44)}<div style="flex:1;min-width:0">${ti(`${P}.logo`,c.logo,'로고 이미지 URL')}</div>${upl(`logo:${ci}`,'로고 업로드')}</div>`
@@ -1622,7 +1624,7 @@ function renderAXAdmin(){
     }).join('');
     const hl=LIB.highlights||[];
     const stats=hl.map((h,i)=>`<div class="kd-item${kHidden('stats',h.id)?' off':''}" data-row><div class="kd-row">${hideSw('stats',h.id,'')}${ti(`highlights.${i}.value`,h.value,'9년+')}${ti(`highlights.${i}.label`,h.label,'마케팅 경력')}${delB('data-del',`highlights.${i}`)}</div></div>`).join('')+addB('highlights','스탯 추가');
-    return intro('회사 행에서 <b>노출 · 프로젝트 목록 · 프로젝트 기간 · 서비스 분리</b>를 바로 켜고 꺼요. 서비스 분리를 켜면 한 회사에서 맡은 서비스들이 회사명 아래로 묶이고, 서비스마다 역할을 적을 수 있어요. 회사를 누르면 로고·이름·기간·요약·목록을 편집해요. ↑↓ = 화면 순서.')
+    return intro('회사 행에서 <b>노출 · 프로젝트 목록 · 프로젝트 기간 · 하위 분리</b>를 바로 켜고 꺼요. 하위 분리를 켜면 회사명 아래로 <b>서비스 단위</b>(앱 로고) 또는 <b>직책 단위</b>(로고 없이)로 묶어 보여줘요. 회사를 누르면 로고·이름·기간·요약·목록을 편집해요. ↑↓ = 화면 순서.')
       +card('표시 항목',`<div class="kd-sws">${showSw('exp','logo',true,'로고')}${showSw('exp','role',true,'역할')}${showSw('exp','period',true,'재직 기간')}${showSw('exp','summary',true,'요약')}${showSw('exp','metrics',true,'회사 지표')}${showSw('exp','stats',true,'하단 스탯')}</div>`,'모든 회사 공통')
       +rows
       +card('하단 스탯 카드',stats,'스위치 = 노출 · 3개씩 한 줄');
@@ -1737,6 +1739,7 @@ function renderAXAdmin(){
       if((el=q('[data-khide]'))){ kSetHidden(el.dataset.khide,el.dataset.id,!el.checked); rerender(); return; }
       if((el=q('[data-kco]'))){ const [id,key]=el.dataset.kco.split(':'); if(!k.expCo||typeof k.expCo!=='object')k.expCo={}; k.expCo[id]=Object.assign({},k.expCo[id]||{}); k.expCo[id][key]=el.checked;
         if(key==='split'&&el.checked){ const ci=(LIB.companies||[]).findIndex(c=>c.id===id); if(ci>=0){ xsvList(ci,true); axOpenCo=id; } } rerender(); return; } // 서비스 분리 켜면 첫 서비스 채우고 펼침
+      if((el=q('[data-ksplitkind]'))){ const [id,kk]=el.dataset.ksplitkind.split(':'); if(!k.expCo||typeof k.expCo!=='object')k.expCo={}; k.expCo[id]=Object.assign({},k.expCo[id]||{}); if(kk==='role')k.expCo[id].splitKind='role'; else delete k.expCo[id].splitKind; rerender(); return; }
       // 서비스 분리 편집
       if((el=q('[data-xsv-on]'))){ const [ci,si]=el.dataset.xsvOn.split(':'), L=xsvList(+ci,true); if(L&&L[+si])L[+si].visible=el.checked; rerender(); return; }
       if((el=q('[data-xsv-add]'))){ const L=xsvList(+el.dataset.xsvAdd,true); if(L)L.push({name:'',role:'',period:'',summary:'',projects:[],visible:true}); rerender(); return; }
