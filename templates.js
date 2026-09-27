@@ -1230,7 +1230,7 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
       + '.vw{border-radius:8px}.dock{border-radius:16px}.dock a,.dock-pill{border-radius:11px}.ax-console{border-radius:12px}'
       // 애플식 곡률: 지원 브라우저(크롬 계열)는 연속 곡률(squircle) + 같은 인상이 나도록 반경을 키움 · 미지원은 위의 둥근 모서리 그대로
       + '@supports (corner-shape:squircle){'
-      + '.photo .card,.tile,.pj-all,.pj-deck i,.dcard,.ax-core,.ax-th,.xp-logo,.socials a,.pc-th,.vw,.dock,.dock a,.dock-pill,.ax-console{corner-shape:squircle}.pc-th{border-radius:33px}.vw{border-radius:12px}.dock{border-radius:26px}.dock a,.dock-pill{border-radius:20px}.ax-console{border-radius:18px}'
+      + '.photo .card,.tile,.pj-all,.pj-deck i,.dcard,.ax-core,.ax-th,.xp-logo,.socials a,.pc-th,.vw,.dock,.dock a,.dock-pill,.ax-console{corner-shape:squircle}.pc-th{border-radius:33px}.vw{border-radius:12px}.dock{border-radius:26px}.dock a,.dock-pill{border-radius:20px}.ax-console{border-radius:18px}.photo .card::before,.photo .card::after{corner-shape:squircle}'
       + '.photo .card{border-radius:42px}.tile{border-radius:40px}.pj-all{border-radius:40px}.pj-deck i{border-radius:14px}.dcard{border-radius:48px}'
       + '.ax-core{border-radius:30px}.ax-th{border-radius:19px}.xp-logo{border-radius:16px}.socials a{border-radius:13px}'
       + '@media(max-width:560px){.xp-logo{border-radius:15px}}}'
@@ -1614,7 +1614,7 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
         // 애플식 연속 곡률(지원 브라우저) — 같은 인상이 나도록 반경을 키움
         // 알약 대신 애플식 둥근 사각형(돌아가기·지표·자세히 보기·분류 바·상세 태그/링크/이전·다음)
         + '.wh-back{border-radius:11px}.wh-kpi{border-radius:10px}.wh-more{border-radius:13px}.wh-chips{border-radius:16px}.wh-chip{border-radius:11px}.wd-cat,.wd-tags span{border-radius:8px}.wd-links a,.wh-snav button{border-radius:11px}'
-        + '@supports (corner-shape:squircle){:root{--rc:34px;--rt:25px;--rs:42px;--rk:22px}.wh-face,.wh-th,.wh-sheet,.wd-kpi,.wd-par,.wd-th,.wh-back,.wh-kpi,.wh-more,.wh-chips,.wh-chip,.wd-cat,.wd-tags span,.wd-links a,.wh-snav button{corner-shape:squircle}.wd-th{border-radius:15px}'
+        + '@supports (corner-shape:squircle){:root{--rc:34px;--rt:25px;--rs:42px;--rk:22px}.wh-face,.wh-th,.wh-sheet,.wd-kpi,.wd-par,.wd-th,.wh-back,.wh-kpi,.wh-more,.wh-chips,.wh-chip,.wd-cat,.wd-tags span,.wd-links a,.wh-snav button,.wh-th.img::after{corner-shape:squircle}.wd-th{border-radius:15px}'
         + '.wh-back{border-radius:17px}.wh-kpi{border-radius:15px}.wh-more{border-radius:20px}.wh-chips{border-radius:25px}.wh-chip{border-radius:19px}.wd-cat,.wd-tags span{border-radius:12px}.wd-links a,.wh-snav button{border-radius:17px}}'
         // 낮은 화면(노트북): 정보 패널 간격을 줄여 아래 분류 버튼과 겹치지 않게
         // 큰 모니터(QHD 등): 카드에 맞춰 정보 패널·분류 버튼·머리글도 한 단계 크게
