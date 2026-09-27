@@ -994,7 +994,9 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
     var expCos = companies.filter(function (co) { return (co.nameKo || co.nameEn || co.serviceKo || co.serviceEn) && !isHidden("companies", co.id); });
     var exp = expCos.map(function (co, ei) {
       var nm = dispName(co) || co.nameKo || co.nameEn || "";
-      var alt = co.useService ? (co.nameKo || co.nameEn || "") : "";
+      // 이름 옆 작은 글씨: 서비스명으로 표시 중이면 회사명, 아니면 영문명 (이름에 이미 들어 있으면 생략 · 예: '와그 (WAUG)')
+      var hasIn = function (a, b) { return String(a).toLowerCase().indexOf(String(b).toLowerCase()) >= 0; };
+      var alt = co.useService ? (co.nameKo || co.nameEn || "") : (co.nameEn && co.nameEn !== nm && !hasIn(nm, co.nameEn) ? co.nameEn : "");
       if (alt === nm) alt = "";
       // 회사별 설정(KILO 대시보드): 프로젝트 목록 · 프로젝트 기간 표시 — 없으면 전체 기본값
       var CO = (K.expCo || {})[co.id] || {};
@@ -1014,7 +1016,7 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
       // 서비스 분리(회사별 토글 klio.expCo[id].split): 회사명 아래로 서비스(이름·역할·기간·요약·프로젝트)를 한 단계 더 묶어 표시
       var svs = CO.split && K.expSvc && Array.isArray(K.expSvc[co.id]) ? K.expSvc[co.id].filter(function (sv) { return sv && sv.visible !== false && String(sv.name || sv.role || "").trim(); }) : null;
       if (svs && svs.length) {
-        nm = co.nameKo || co.nameEn || nm; alt = co.nameKo && co.nameEn && co.nameEn !== nm ? co.nameEn : "";
+        nm = co.nameKo || co.nameEn || nm; alt = co.nameKo && co.nameEn && co.nameEn !== nm && !hasIn(nm, co.nameEn) ? co.nameEn : "";
         var byRole = CO.splitKind === "role"; // 분리 단위: 서비스(앱 로고) · 직책(로고 없이 — 스타일 roleStyle: num 번호 · date 기간 왼쪽 · bar 세로 막대)
         var rs = byRole ? ({ date: "date", bar: "bar" })[CO.roleStyle] || "num" : "";
         pjs = svs.map(function (sv, si) {
