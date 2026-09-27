@@ -1377,21 +1377,21 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
         var cw, top, lift = mob ? 10 : 18;
         if (mob) { cw = clamp(Math.min(W * 0.38, H * 0.18), 112, 160); R = Math.max(W * 1.6, 560); var hb = document.querySelector(".wh-chips"); top = (hb ? hb.getBoundingClientRect().bottom : 180) + 34; }
         else { // 카드 크기 = 화면 폭·높이에 비례(큰 모니터 최대 300px) · 휠 꼭대기는 가운데 머리 문장 바로 아래
-          cw = clamp(Math.min(W * 0.133, (H * 0.42 - 17) / 1.32), 150, 300); R = Math.max(W * 0.9, 900);
+          cw = clamp(Math.min(W * 0.15, (H * 0.44 - 17) / 1.32), 160, 320); R = Math.max(W * 0.9, 900);
           var hd = document.querySelector(".wh-head"); top = (hd ? hd.getBoundingClientRect().bottom : H * 0.16) + 26;
         }
         var ch = Math.round(cw * (mob ? 1.4 : 1.32)), hw = cw / 2, hh = ch / 2;
-        var apex = top + hh * 1.07 + lift; // 꼭대기 카드는 떠오르고(lift) 커지므로(1.07) 그만큼 아래로
+        var apex = top + hh * 1.12 + lift; // 꼭대기 카드는 떠오르고(lift) 커지므로(1.07) 그만큼 아래로
         ring.style.top = Math.round(apex + R) + "px";
         stage.style.setProperty("--cw", Math.round(cw) + "px");
         stage.style.setProperty("--ch", ch + "px");
         S = (cw + (mob ? 14 : 28)) / R * DEG;
         // 정보 패널: 꼭대기 카드 아래 끝과, 패널 폭 안으로 들어오는 옆 카드(±1)의 아래 모서리 중 더 낮은 곳 바로 아래
         var s = S / DEG, cs = Math.cos(s), sn = Math.sin(s), cx = W / 2 + R * sn, cy = apex + R * (1 - cs);
-        var n1 = 0.975, blx = cx - hw * n1, bly = cy + hh * n1, brx = cx + hw * n1, bry = bly; // 옆 카드도 똑바로 서 있음(아래 모서리 수평)
+        var n1 = 0.96, blx = cx - hw * n1, bly = cy + hh * n1, brx = cx + hw * n1, bry = bly; // 옆 카드도 똑바로 서 있음(아래 모서리 수평)
         var infoEl = document.querySelector(".wh-info"), xr = W / 2 + ((infoEl && infoEl.offsetWidth) || Math.min(mob ? W - 32 : 560, W - 40)) / 2, edge = 0;
         if (xr > blx) edge = xr >= brx ? bry : bly + (xr - blx) / (brx - blx) * (bry - bly);
-        stage.style.setProperty("--info", Math.round(Math.max(apex - lift + hh * 1.07, edge) + (mob ? 22 : 18)) + "px");
+        stage.style.setProperty("--info", Math.round(Math.max(apex - lift + hh * 1.12, edge) + (mob ? 22 : 18)) + "px");
         loop = N * S >= 200;
       }
       function wrapA(a) { if (!loop) return a; var T = N * S; return ((a + T / 2) % T + T) % T - T / 2; }
@@ -1407,10 +1407,10 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
           var k = Math.max(0, 1 - aa / S); // 꼭대기에 가까울수록 1 → 살짝 떠오르고 커짐
           c.style.visibility = "";
           // 카드는 원 둘레를 따라가되 똑바로 선 채(역회전) — 글씨가 기울지 않아 잘 읽힘 · 가운데에서 멀수록 작고 옅게
-          var dn = aa / S, sc = 1 + 0.07 * k - Math.min(dn, 4) * 0.045;
+          var dn = aa / S, sc = 1 + 0.12 * k - Math.min(dn, 4) * 0.06;
           c.style.transform = "rotate(" + a.toFixed(3) + "deg) translate3d(0," + (-R - lift * k).toFixed(1) + "px,0) rotate(" + (-a).toFixed(3) + "deg) scale(" + sc.toFixed(3) + ")";
           c.style.zIndex = String(300 - Math.round(aa * 2));
-          var op = Math.max(0.3, 1 - Math.max(0, dn - 0.5) * 0.2);
+          var op = Math.max(0.22, 1 - Math.max(0, dn - 0.5) * 0.26);
           if (aa > 66) op = Math.min(op, Math.max(0, 1 - (aa - 66) / 30));
           c.style.opacity = op < 0.999 ? op.toFixed(3) : "";
         }
@@ -1516,6 +1516,7 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
 
       document.addEventListener("click", function (e) {
         var t = e.target, b;
+        if ((b = t.closest("[data-step]"))) { lastInput = Date.now(); step(+b.getAttribute("data-step")); return; }
         if ((b = t.closest(".wh-card"))) {
           if (moved) { moved = false; return; }
           var i = cards.indexOf(b); if (i < 0) return;
@@ -1621,7 +1622,7 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
         // 선택 카드 정보(휠 아래): 분야·회사·기간 · 제목(큰 화면에서만) · 지표 알약
         var kp = (m0 ? mets : []).slice(0, 3).map(function (m) { return '<span class="wh-kpi"><b>' + esc(m.value) + '</b>' + esc(m.label || "") + '</span>'; }).join("");
         tpls += '<template id="whi-' + i + '"><p class="wh-meta">' + esc(cm.en) + '<span> · ' + esc(dispName(co)) + (per ? ' · ' + esc(per) : '') + '</span></p>'
-          + '<h2 class="wh-name">' + esc(title) + '</h2>' + (kp ? '<div class="wh-kpis">' + kp + '</div>' : '') + '</template>';
+          + '<h2 class="wh-name">' + esc(title) + '</h2>' + ((w.summary || w.detail) ? '<p class="wh-sum">' + esc(w.summary || w.detail) + '</p>' : '') + (kp ? '<div class="wh-kpis">' + kp + '</div>' : '') + '</template>';
         // 상세 시트
         var media = main
           ? '<div class="wd-main' + (main.yt ? ' yt' : ' img') + '" style="background-image:url(\'' + esc(main.src) + '\')"' + (main.yt ? ' data-yt="' + esc(main.yt) + '"' : '') + '>' + (main.yt ? '<span class="wd-play" aria-hidden="true"></span>' : '') + '</div>'
@@ -1679,6 +1680,10 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
         + '.wh-kpis{display:flex;justify-content:center;flex-wrap:wrap;gap:8px;margin-top:16px}.wh-kpi{display:inline-flex;align-items:baseline;gap:7px;max-width:100%;padding:8px 14px;border-radius:999px;background:rgba(255,255,255,.7);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);box-shadow:0 0 0 .5px var(--bd);font-size:12px;font-weight:600;color:var(--ink60);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.wh-kpi b{font-size:16px;font-weight:800;letter-spacing:-.03em;color:var(--ink)}'
         + '.wh-dyn.swap>*{animation:whIn .7s var(--ez) backwards}.wh-dyn.swap>:nth-child(2){animation-delay:.05s}.wh-dyn.swap>:nth-child(3){animation-delay:.1s}@keyframes whIn{from{opacity:0;transform:translateY(12px);filter:blur(5px)}}'
         + '.wh-acts{display:flex;justify-content:center;align-items:center;gap:16px;margin-top:18px}.wh-more{display:inline-flex;align-items:center;gap:8px;height:44px;padding:0 20px;border:0;border-radius:999px;background:var(--ink);color:#fff;font-size:14px;font-weight:700;cursor:pointer;box-shadow:0 10px 24px -12px rgba(0,0,0,.5);transition:transform .3s var(--ez)}.wh-more:hover{transform:scale(1.04)}.wh-more span{transition:transform .3s var(--ez)}.wh-more:hover span{transform:translateX(3px)}'
+        // 선택 카드 설명 한 줄 · 이전/다음 버튼(무엇을 누르면 넘어가는지 분명하게) · 힌트는 한 줄 아래로
+        + '.wh-sum{max-width:460px;margin:10px auto 0;font-size:14px;line-height:1.65;color:var(--ink60);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}'
+        + '.wh-acts{flex-wrap:wrap;gap:10px}.wh-hint{flex-basis:100%;margin-top:2px}.wh-nav{width:44px;height:44px;border:0;border-radius:50%;background:rgba(255,255,255,.72);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);box-shadow:0 0 0 .5px var(--bd),0 6px 16px -10px rgba(0,0,0,.35);font-size:16px;color:var(--ink);cursor:pointer;transition:background .2s,transform .2s}.wh-nav:hover{background:#fff;transform:translateY(-1px)}.wh-nav:focus-visible{outline:2px solid var(--ink);outline-offset:2px}'
+        + '@media(min-width:760px) and (max-height:860px){.wh-sum{display:none}}@media(max-width:759px){.wh-sum{font-size:13px}.wh-nav{width:40px;height:40px}}@media(min-width:1800px){.wh-sum{font-size:15px;max-width:560px}.wh-nav{width:50px;height:50px}}'
         + '.wh-hint{font-size:12px;font-weight:600;color:var(--gray)}.wh-hint .m{display:none}'
         // 카테고리: 하단 가운데 유리 캡슐
         + '.wh-chips{position:absolute;left:50%;bottom:clamp(14px,2.6vh,28px);transform:translateX(-50%);z-index:370;display:flex;gap:2px;max-width:calc(100vw - 32px);padding:4px;border-radius:999px;overflow-x:auto;scrollbar-width:none;background:rgba(255,255,255,.58);-webkit-backdrop-filter:blur(18px) saturate(170%);backdrop-filter:blur(18px) saturate(170%);box-shadow:inset 0 1px 0 rgba(255,255,255,.7),0 0 0 .5px var(--bd),0 14px 34px -20px rgba(0,0,0,.3);cursor:auto;touch-action:pan-x}.wh-chips::-webkit-scrollbar{display:none}'
@@ -1726,7 +1731,7 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
         + '<header class="wh-head"><p class="wh-eye"><i></i>' + eyebrow + '<i></i></p><h1 class="wh-h1">' + headHtml + '</h1></header>'
         + '<nav class="wh-chips" aria-label="카테고리">' + chips + '</nav>'
         + '<div class="wh-ring">' + cardsHtml + '</div>'
-        + '<section class="wh-info" aria-live="polite"><div class="wh-dyn"></div><div class="wh-acts"><button class="wh-more" type="button" data-open>' + esc(txt("ppMore", "자세히 보기")) + ' <span aria-hidden="true">→</span></button>'
+        + '<section class="wh-info" aria-live="polite"><div class="wh-dyn"></div><div class="wh-acts"><button class="wh-nav" type="button" data-step="-1" aria-label="이전 프로젝트">←</button><button class="wh-more" type="button" data-open>' + esc(txt("ppMore", "자세히 보기")) + ' <span aria-hidden="true">→</span></button><button class="wh-nav" type="button" data-step="1" aria-label="다음 프로젝트">→</button>'
         + '<span class="wh-hint"><span class="d">' + esc(txt("ppHint", "드래그 · 휠 · ← →")) + '</span><span class="m">' + esc(txt("ppHintM", "좌우로 밀어서 돌리기")) + '</span></span></div></section>'
         + '</main>'
         + '<div class="wh-scrim" data-close></div>'
