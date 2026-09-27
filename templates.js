@@ -870,6 +870,44 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
     };
     // 메인 ↔ 전체 프로젝트 페이지 경로: 라이브(view.html)가 지금 연 주소 기준으로 넘겨줌(/portfolio, /p/x, /mkt/portfolio…), 없으면 슬러그 기준
     var pSlug = d.slug || "portfolio", homeUrl = d.homePath || "/" + encodeURIComponent(pSlug), pjUrl = d.pjPath || homeUrl + "/projects";
+    // 이미지 없는 프로젝트의 썸네일 일러스트(SVG): 분야별 미니 화면(상승 차트 · 막대+쿠폰 · 앱 자동화 흐름 · 미디어) + 대표 지표
+    // 프로젝트 id로 곡선·막대 모양이 조금씩 달라짐. preserveAspectRatio=meet → 어떤 썸네일 비율에서도 잘리지 않고 분야 색 바탕 가운데
+    var hashOf = function (s) { var h = 2166136261; s = String(s || ""); for (var i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return h >>> 0; };
+    var coverArt = function (w, m0) {
+      var cm = catMeta(w.category), en = String(cm.en), h = hashOf(w.id || w.title);
+      var rnd = function () { h = (Math.imul(h ^ (h >>> 15), 2246822507) + 0x9e3779b9) >>> 0; return (h % 1000) / 1000; };
+      var ink = "#222", soft = "rgba(34,34,34,.12)", val = m0 ? String(m0.value) : "", fs = val.length <= 4 ? 30 : val.length <= 6 ? 25 : 20;
+      var head = val
+        ? '<text x="34" y="62" font-size="' + fs + '" font-weight="800" letter-spacing="-1" fill="' + ink + '">' + esc(val) + '</text>' + (m0.label ? '<text x="34" y="82" font-size="10.5" font-weight="600" fill="rgba(34,34,34,.5)">' + esc(String(m0.label).slice(0, 24)) + '</text>' : '')
+        : '<rect x="34" y="40" width="110" height="12" rx="6" fill="' + ink + '" opacity=".85"/><rect x="34" y="60" width="70" height="8" rx="4" fill="' + ink + '" opacity=".25"/>';
+      var body;
+      if (/Performance|Growth|Data|CRM/.test(en)) { // 상승 곡선 + 영역 + 끝점
+        var pts = [], n = 8;
+        for (var i = 0; i < n; i++) { var t = i / (n - 1); pts.push([34 + 252 * t, 184 - 80 * (0.15 + 0.85 * Math.pow(t, 1.3)) + (rnd() - 0.5) * 18 * (1 - t)]); }
+        var dd = pts.map(function (p, k) { return (k ? "L" : "M") + p[0].toFixed(1) + " " + p[1].toFixed(1); }).join(" "), last = pts[n - 1];
+        body = '<path d="M34 190H286" stroke="' + soft + '"/><path d="M34 160H286M34 130H286" stroke="' + soft + '" stroke-dasharray="3 5"/>'
+          + '<path d="' + dd + ' L286 190 L34 190Z" fill="' + cm.c + '" opacity=".6"/><path class="ln" d="' + dd + '" fill="none" stroke="' + ink + '" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>'
+          + '<circle cx="' + last[0].toFixed(1) + '" cy="' + last[1].toFixed(1) + '" r="11" fill="' + ink + '" opacity=".12"/><circle cx="' + last[0].toFixed(1) + '" cy="' + last[1].toFixed(1) + '" r="5.5" fill="' + ink + '"/>'
+          + '<rect x="220" y="34" width="66" height="20" rx="6" fill="' + cm.c + '"/><rect x="232" y="42" width="42" height="4" rx="2" fill="' + ink + '" opacity=".35"/>';
+      } else if (/Commerce|Partnership/.test(en)) { // 오르는 막대 + 쿠폰(티켓)
+        var bars = "";
+        for (var j = 0; j < 4; j++) { var bh = 34 + j * 24 + rnd() * 14; bars += '<rect x="' + (150 + j * 34) + '" y="' + (188 - bh).toFixed(1) + '" width="22" height="' + bh.toFixed(1) + '" rx="5" fill="' + (j === 3 ? ink : cm.c) + '"/>'; }
+        body = '<path d="M34 190H286" stroke="' + soft + '"/>' + bars
+          + '<g transform="translate(34 104)"><rect width="96" height="54" rx="9" fill="' + cm.c + '"/><circle cy="27" r="7" fill="#fff"/><circle cx="96" cy="27" r="7" fill="#fff"/><path d="M68 10V44" stroke="#fff" stroke-width="2" stroke-dasharray="3 4"/><rect x="14" y="14" width="40" height="6" rx="3" fill="' + ink + '" opacity=".5"/><rect x="14" y="28" width="28" height="6" rx="3" fill="' + ink + '" opacity=".25"/></g>';
+      } else if (/AX/.test(en)) { // 앱 창 + 자동화 흐름(노드 → 노드 → 완료) + 진행 막대
+        body = '<circle cx="238" cy="36" r="4" fill="#e5e5e5"/><circle cx="252" cy="36" r="4" fill="#e5e5e5"/><circle cx="266" cy="36" r="4" fill="#e5e5e5"/>'
+          + '<rect x="34" y="100" width="62" height="40" rx="9" fill="#c3cde4"/><rect x="129" y="100" width="62" height="40" rx="9" fill="#abdcd1"/><rect x="224" y="100" width="62" height="40" rx="9" fill="' + ink + '"/>'
+          + '<path class="ln" d="M96 120h33M191 120h33" stroke="' + ink + '" stroke-width="2.4" stroke-linecap="round"/><path d="M123 114.5l6 5.5-6 5.5M218 114.5l6 5.5-6 5.5" fill="none" stroke="' + ink + '" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>'
+          + '<path d="M246 120l6 6 12-13" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>'
+          + '<rect x="34" y="158" width="252" height="10" rx="5" fill="#f1f0ec"/><rect x="34" y="158" width="' + (120 + rnd() * 110).toFixed(0) + '" height="10" rx="5" fill="' + ink + '"/><rect x="34" y="178" width="180" height="8" rx="4" fill="#f1f0ec"/>';
+      } else { // 미디어(브랜딩·콘텐츠·영상): 겹친 프레임 + 재생 + 재생 막대
+        var pl = 90 + rnd() * 120;
+        body = '<rect x="150" y="54" width="118" height="80" rx="10" fill="' + cm.c + '" transform="rotate(' + (6 + rnd() * 4).toFixed(1) + ' 209 94)"/>'
+          + '<rect x="132" y="70" width="128" height="88" rx="10" fill="' + ink + '"/><path d="M186 100l22 14-22 14z" fill="#fff"/>'
+          + '<rect x="34" y="176" width="252" height="8" rx="4" fill="#f1f0ec"/><rect x="34" y="176" width="' + pl.toFixed(0) + '" height="8" rx="4" fill="' + ink + '" opacity=".75"/><circle cx="' + (34 + pl).toFixed(0) + '" cy="180" r="6" fill="' + ink + '"/>';
+      }
+      return '<svg class="cv" viewBox="0 0 320 220" preserveAspectRatio="xMidYMid meet" aria-hidden="true"><rect x="18" y="18" width="284" height="184" rx="16" fill="#fff"/>' + body + head + '</svg>';
+    };
     var feat = works.filter(function (x) { return x.w.featured; });
     var featM = feat.filter(function (x) { return (x.w.metrics || []).length; });
     var pick = (featM.length >= 4 ? featM : feat.length ? feat : works).slice(0, 4); // 대표작 4 (작게·세로 길게·작게·가로 길게)
@@ -885,7 +923,7 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
       var w = x.w, co = x.co, cm = catMeta(w.category), v = cardView(w), md = v.main, m0 = v.m0, yr = yearOf(w);
       var th = md
         ? '<span class="pc-th img" style="background-image:url(\'' + esc(md.src) + '\')">' + (md.yt ? '<i class="t-play" aria-hidden="true"></i>' : '') + '</span>'
-        : '<span class="pc-th">' + catIcon(w.category) + '</span>';
+        : '<span class="pc-th art">' + coverArt(w, m0) + '</span>'; // 이미지 없으면 자동 일러스트
       return '<a class="tile pc' + span + (cm.dark ? ' dk' : '') + '" href="' + pjUrl + '#p-' + esc(w.id || "") + '" target="_top" data-ext style="' + (j != null ? '--j:' + j + ';' : '') + '--c:' + cm.c + '">' + th
         + '<span class="pc-bd"><em class="pc-cat">' + esc(cm.en) + '</em><b class="pc-t">' + esc(v.title) + '</b><span class="pc-m">' + esc(dispName(co)) + (yr ? ' · ' + esc(yr) : '') + '</span>'
         + (m0 ? '<span class="pc-p"><b>' + esc(m0.value) + '</b>' + (m0.label ? ' ' + esc(m0.label) : '') + '</span>' : '') + '</span><span class="t-go" aria-hidden="true">→</span></a>';
@@ -1162,6 +1200,9 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
       + '.pc-m{margin-top:3px;font-size:11.5px;font-weight:500;color:var(--gray);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}'
       + '.pc-p{margin-top:auto;padding:4px 36px 0 0;font-size:11.5px;font-weight:600;color:var(--ink50);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.pc-p b{margin-right:2px;font-size:17px;font-weight:800;letter-spacing:-.035em;color:var(--ink)}.tile.tall .pc-p b,.tile.wide .pc-p b{font-size:22px}'
       + '.tile.pc .t-go{right:10px;bottom:10px;width:30px;height:30px;font-size:13px;background:var(--ink);color:#fff}'
+      // 자동 일러스트 썸네일: 칸을 꽉 채우는 SVG(분야 색 바탕 가운데) · 호버 시 살짝 확대 · 등장 시 선 그리기
+      + '.tile .pc-th svg.cv{width:100%;height:100%;transform:none;transition:transform .6s var(--ez)}.tile:hover .pc-th svg.cv{transform:scale(1.04)}.pc-th.art{padding:4px}'
+      + '.js .mosaic.in .pc-th .cv .ln{stroke-dasharray:420;animation:cvDraw 1.6s var(--ez) backwards;animation-delay:calc(var(--j,0) * 110ms + 380ms)}@keyframes cvDraw{from{stroke-dashoffset:420}to{stroke-dashoffset:0}}@media(prefers-reduced-motion:reduce){.js .mosaic.in .pc-th .cv .ln{animation:none}}'
       + '@media(max-width:520px){.mosaic{grid-auto-rows:226px}.pc-t{font-size:13px}.tile.tall .pc-t,.tile.wide .pc-t{font-size:14.5px}.pc-m{font-size:11px}.tile.wide .pc-th{width:42%}.pc-p{padding-right:30px}.pc-p b{font-size:15px}.tile.tall .pc-p b,.tile.wide .pc-p b{font-size:18px}}'
       // 전체 프로젝트 보기의 큰 개수: 애플풍 가는 숫자 + 위→아래 은은한 그라데이션
       + '.pj-num{font-family:var(--font);font-weight:250;font-size:clamp(48px,4.4vw,60px);line-height:.9;letter-spacing:-.06em;font-variant-numeric:tabular-nums;background:linear-gradient(180deg,#fff 35%,rgba(255,255,255,.55));-webkit-background-clip:text;background-clip:text;color:transparent}'
@@ -1418,7 +1459,7 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
         lastInput = Date.now(); go(cards.indexOf(c), true);
       });
       addEventListener("resize", function () { layout(); render(); });
-      if (!reduce && !still) setInterval(function () { // 가만두면 한 장씩 흘러감
+      if (!reduce && !still && stage.getAttribute("data-auto") !== "0") setInterval(function () { // 가만두면 한 장씩 흘러감(KILO 대시보드에서 끌 수 있음)
         if (hover || sheetOpen || dragging || document.hidden || spread < 1 || Date.now() - lastInput < 9000) return;
         if (!loop && active >= N - 1) go(0); else step(1);
       }, 3800);
@@ -1465,7 +1506,7 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
         // 휠 카드 = 상품카드: 위 썸네일(이미지·영상 ▶ / 없으면 분야 색 + 아이콘) · 아래 분야·제목·회사·대표 지표
         var thumb = main
           ? '<span class="wh-th img" style="background-image:url(\'' + esc(main.src) + '\')">' + (main.yt ? '<i class="wh-play" aria-hidden="true"></i>' : '') + '</span>'
-          : '<span class="wh-th"><span class="wh-big">' + catIcon(w.category) + '</span></span>';
+          : '<span class="wh-th art">' + coverArt(w, m0) + '</span>'; // 이미지 없으면 자동 일러스트
         var info = '<span class="wh-bd"><em class="wh-cat">' + esc(cm.en) + '</em><b class="wh-t">' + esc(title) + '</b>'
           + '<span class="wh-m">' + esc(dispName(co)) + (yr ? ' · ' + esc(yr) : '') + '</span>'
           + (m0 ? '<span class="wh-p"><b>' + esc(m0.value) + '</b>' + (m0.label ? ' ' + esc(m0.label) : '') + '</span>' : '') + '</span>';
@@ -1516,7 +1557,7 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
         // 휠 카드 = 상품카드: 흰 카드 안에 썸네일(동심 곡률) + 분야·제목·회사·대표 지표
         + '.wh-face{position:absolute;inset:0;display:flex;flex-direction:column;padding:calc(var(--cw) * .03);border-radius:var(--rc);overflow:hidden;background:#fff;text-align:left;box-shadow:0 0 0 .5px rgba(0,0,0,.07),0 18px 36px -22px rgba(0,0,0,.4),0 2px 6px rgba(0,0,0,.05);transition:box-shadow .5s var(--ez)}'
         + '.wh-card.on .wh-face{box-shadow:0 0 0 .5px rgba(0,0,0,.06),0 34px 60px -28px rgba(0,0,0,.5),0 6px 16px rgba(0,0,0,.08)}.wh-card:focus-visible .wh-face{box-shadow:0 0 0 3px #fff,0 0 0 5px var(--ink)}'
-        + '.wh-th{position:relative;flex:none;aspect-ratio:4/3;border-radius:var(--rt);overflow:hidden;background:var(--c) center/cover no-repeat}.wh-th.img{background-color:#ecebe7}.wh-th.img::after{content:"";position:absolute;inset:0;border-radius:inherit;box-shadow:inset 0 0 0 .5px rgba(0,0,0,.08)}'
+        + '.wh-th{position:relative;flex:none;aspect-ratio:4/3;border-radius:var(--rt);overflow:hidden;background:var(--c) center/cover no-repeat}.wh-th.img{background-color:#ecebe7}.wh-th.img::after{content:"";position:absolute;inset:0;border-radius:inherit;box-shadow:inset 0 0 0 .5px rgba(0,0,0,.08)}.wh-th .cv{position:absolute;inset:4px;width:calc(100% - 8px);height:calc(100% - 8px)}'
         + '.wh-big{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%)}.wh-big svg{display:block;width:calc(var(--cw) * .24);height:calc(var(--cw) * .24);stroke-width:1.3}'
         + '.wh-bd{flex:1;min-height:0;display:flex;flex-direction:column;padding:calc(var(--cw) * .05) calc(var(--cw) * .04) calc(var(--cw) * .035)}'
         + '.wh-cat{font-style:normal;font-size:max(8.5px,calc(var(--cw) * .04));font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--gray);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}'
@@ -1572,14 +1613,14 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
         + '<title>' + esc(P.nameKo || nameEn || "포트폴리오") + ' — Projects</title><link rel="icon" href="data:,"/>'
         + fontHead
         + '<style>' + WCSS + fontVars + '</style></head><body' + (d.hostStudio ? ' data-host="studio"' : '') + ' class="ft-' + FKEY + '">'
-        + '<main class="wh" aria-label="프로젝트 휠 — 드래그·휠·←/→로 돌려보기">'
+        + '<main class="wh"' + (shown("pp", "autoplay", true) ? '' : ' data-auto="0"') + ' aria-label="프로젝트 휠 — 드래그·휠·←/→로 돌려보기">'
         + '<header class="wh-top"><a class="wh-back" href="' + esc(homeUrl) + '#projects" target="_top" data-ext>← ' + esc(txt("ppBack", "포트폴리오")) + '</a>'
         + '<div class="wh-id">' + (nameEn ? '<span class="wh-sig">' + esc(nameEn) + '</span>' : '') + '<span class="wh-cnt"><b data-cur>01</b><i></i><span data-tot>' + pad2(N) + '</span></span></div></header>'
         + '<header class="wh-head"><p class="wh-eye"><i></i>' + eyebrow + '<i></i></p><h1 class="wh-h1">' + headHtml + '</h1></header>'
         + '<nav class="wh-chips" aria-label="카테고리">' + chips + '</nav>'
         + '<div class="wh-ring">' + cardsHtml + '</div>'
-        + '<section class="wh-info" aria-live="polite"><div class="wh-dyn"></div><div class="wh-acts"><button class="wh-more" type="button" data-open>자세히 보기 <span aria-hidden="true">→</span></button>'
-        + '<span class="wh-hint"><span class="d">드래그 · 휠 · ← →</span><span class="m">좌우로 밀어서 돌리기</span></span></div></section>'
+        + '<section class="wh-info" aria-live="polite"><div class="wh-dyn"></div><div class="wh-acts"><button class="wh-more" type="button" data-open>' + esc(txt("ppMore", "자세히 보기")) + ' <span aria-hidden="true">→</span></button>'
+        + '<span class="wh-hint"><span class="d">' + esc(txt("ppHint", "드래그 · 휠 · ← →")) + '</span><span class="m">' + esc(txt("ppHintM", "좌우로 밀어서 돌리기")) + '</span></span></div></section>'
         + '</main>'
         + '<div class="wh-scrim" data-close></div>'
         + '<aside class="wh-sheet" role="dialog" aria-modal="true" aria-label="프로젝트 상세" aria-hidden="true" tabindex="-1"><button class="wh-x" type="button" data-close aria-label="닫기">✕</button><div class="wh-sbody"></div>'
