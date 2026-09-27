@@ -1309,7 +1309,13 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
       + '.ax-core{border-radius:30px}.ax-th{border-radius:19px}.xp-logo{border-radius:16px}.xp-sv-logo{border-radius:12px}.socials a{border-radius:13px}'
       + '@media(max-width:560px){.xp-logo{border-radius:15px}}}'
       // 글꼴 프리셋의 제목용 글꼴(--disp): 스킬 카드 값 — 세리프(editorial)는 한 단계 크게
-      + '.dcard h4{font-family:var(--disp);font-weight:var(--dispw);letter-spacing:var(--displs)}.ft-editorial .dcard h4{font-size:40px;line-height:.95}';
+      + '.dcard h4{font-family:var(--disp);font-weight:var(--dispw);letter-spacing:var(--displs)}.ft-editorial .dcard h4{font-size:40px;line-height:.95}'
+      // 차분한 톤 레이어(전체 프로젝트 페이지와 같은 잉크·회색): 본문 굵기 낮추고 작은 글씨 키워 가독성↑ · 검은 스탯 카드 → 옅은 웜그레이 · 포인트 색 절제
+      + ':root{--ink:#1d1d1f;--ink50:rgba(29,29,31,.64);--gray:#86868b;--bd:rgba(29,29,31,.09)}body{font-weight:400;letter-spacing:-.015em}'
+      + '.row>h2{font-size:15px}.row>h2 .sn{font-size:12px}.about p.g{font-size:15px;line-height:1.8}.meta span,.meta a{font-size:13.5px}.meta .nm b{font-size:14.5px}'
+      + '.xp-tt h3{font-size:16.5px}.xp-role,.xp-sv-role{font-size:13px}.xp-when{font-size:12.5px}.xp-sum{font-size:14px;line-height:1.75}.xp-pj li{font-size:13.5px}.xp-pj .p,.xp-sv-when,.xp-sv-no{font-size:12px}.xp-sv h4{font-size:15px}.xp-sv-sum{font-size:13.5px}'
+      + '.pc-cat{font-size:10.5px}.pc-m,.pc-p{font-size:12px}.ax-ctx .ax-cno{color:var(--gray)}.ax-ctx h4{font-size:16px}.ax-ctx p{font-size:13.5px;line-height:1.65}.foot{font-size:12.5px}'
+      + '.dcard{background:#f4f3ef;box-shadow:inset 0 0 0 1px rgba(29,29,31,.05)}.dcard h4{color:var(--ink)}.dcard p{font-size:12.5px;color:var(--ink50)}.dcard:hover{box-shadow:inset 0 0 0 1px rgba(29,29,31,.05),0 18px 36px -26px rgba(0,0,0,.3)}';
 
     var KJS = '(function(){"use strict";var reduce=matchMedia("(prefers-reduced-motion: reduce)").matches,still=!document.documentElement.classList.contains("js");'
       + 'var rvs=document.querySelectorAll(".rv");if("IntersectionObserver" in window&&!reduce){var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){e.target.classList.add("in");io.unobserve(e.target);}});},{threshold:.12,rootMargin:"0px 0px -8% 0px"});rvs.forEach(function(el){io.observe(el);});}else{rvs.forEach(function(el){el.classList.add("in");});}'
@@ -1369,9 +1375,9 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
       function layout() {
         W = innerWidth; H = innerHeight; mob = W < 760;
         var cw, top, lift = mob ? 10 : 18;
-        if (mob) { cw = clamp(Math.min(W * 0.38, H * 0.18), 112, 160); R = Math.max(W * 1.2, 420); var hb = document.querySelector(".wh-chips"); top = (hb ? hb.getBoundingClientRect().bottom : 180) + 34; }
+        if (mob) { cw = clamp(Math.min(W * 0.38, H * 0.18), 112, 160); R = Math.max(W * 1.6, 560); var hb = document.querySelector(".wh-chips"); top = (hb ? hb.getBoundingClientRect().bottom : 180) + 34; }
         else { // 카드 크기 = 화면 폭·높이에 비례(큰 모니터 최대 300px) · 휠 꼭대기는 가운데 머리 문장 바로 아래
-          cw = clamp(Math.min(W * 0.133, (H * 0.42 - 17) / 1.32), 150, 300); R = Math.max(W * 0.62, 700);
+          cw = clamp(Math.min(W * 0.133, (H * 0.42 - 17) / 1.32), 150, 300); R = Math.max(W * 0.9, 900);
           var hd = document.querySelector(".wh-head"); top = (hd ? hd.getBoundingClientRect().bottom : H * 0.16) + 26;
         }
         var ch = Math.round(cw * (mob ? 1.4 : 1.32)), hw = cw / 2, hh = ch / 2;
@@ -1382,7 +1388,7 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
         S = (cw + (mob ? 14 : 28)) / R * DEG;
         // 정보 패널: 꼭대기 카드 아래 끝과, 패널 폭 안으로 들어오는 옆 카드(±1)의 아래 모서리 중 더 낮은 곳 바로 아래
         var s = S / DEG, cs = Math.cos(s), sn = Math.sin(s), cx = W / 2 + R * sn, cy = apex + R * (1 - cs);
-        var blx = cx - hw * cs - hh * sn, bly = cy - hw * sn + hh * cs, brx = cx + hw * cs - hh * sn, bry = cy + hw * sn + hh * cs;
+        var n1 = 0.975, blx = cx - hw * n1, bly = cy + hh * n1, brx = cx + hw * n1, bry = bly; // 옆 카드도 똑바로 서 있음(아래 모서리 수평)
         var infoEl = document.querySelector(".wh-info"), xr = W / 2 + ((infoEl && infoEl.offsetWidth) || Math.min(mob ? W - 32 : 560, W - 40)) / 2, edge = 0;
         if (xr > blx) edge = xr >= brx ? bry : bly + (xr - blx) / (brx - blx) * (bry - bly);
         stage.style.setProperty("--info", Math.round(Math.max(apex - lift + hh * 1.07, edge) + (mob ? 22 : 18)) + "px");
@@ -1400,9 +1406,13 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
           if (aa > 96) { c.style.visibility = "hidden"; continue; }
           var k = Math.max(0, 1 - aa / S); // 꼭대기에 가까울수록 1 → 살짝 떠오르고 커짐
           c.style.visibility = "";
-          c.style.transform = "rotate(" + a.toFixed(3) + "deg) translate3d(0," + (-R - lift * k).toFixed(1) + "px,0) scale(" + (1 + 0.07 * k).toFixed(3) + ")";
+          // 카드는 원 둘레를 따라가되 똑바로 선 채(역회전) — 글씨가 기울지 않아 잘 읽힘 · 가운데에서 멀수록 작고 옅게
+          var dn = aa / S, sc = 1 + 0.07 * k - Math.min(dn, 4) * 0.045;
+          c.style.transform = "rotate(" + a.toFixed(3) + "deg) translate3d(0," + (-R - lift * k).toFixed(1) + "px,0) rotate(" + (-a).toFixed(3) + "deg) scale(" + sc.toFixed(3) + ")";
           c.style.zIndex = String(300 - Math.round(aa * 2));
-          c.style.opacity = aa > 66 ? Math.max(0, 1 - (aa - 66) / 30).toFixed(3) : "";
+          var op = Math.max(0.3, 1 - Math.max(0, dn - 0.5) * 0.2);
+          if (aa > 66) op = Math.min(op, Math.max(0, 1 - (aa - 66) / 30));
+          c.style.opacity = op < 0.999 ? op.toFixed(3) : "";
         }
         if (best >= 0 && best !== active) setActive(best);
       }
@@ -1415,7 +1425,7 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
         if (dyn && t) { dyn.innerHTML = t.innerHTML; dyn.classList.remove("swap"); void dyn.offsetWidth; dyn.classList.add("swap"); }
         try { // 배경을 선택 카드의 분야 색(--c)으로 아주 옅게
           var hx = getComputedStyle(c).getPropertyValue("--c").trim().match(/^#([0-9a-f]{6})$/i);
-          if (hx) { var n = parseInt(hx[1], 16), bg = [n >> 16 & 255, n >> 8 & 255, n & 255], base = [239, 238, 234], mx = function (j) { return Math.round(base[j] + (bg[j] - base[j]) * 0.22); }; body.style.backgroundColor = "rgb(" + mx(0) + "," + mx(1) + "," + mx(2) + ")"; }
+          if (hx) { var n = parseInt(hx[1], 16), bg = [n >> 16 & 255, n >> 8 & 255, n & 255], base = [239, 238, 234], mx = function (j) { return Math.round(base[j] + (bg[j] - base[j]) * 0.12); }; body.style.backgroundColor = "rgb(" + mx(0) + "," + mx(1) + "," + mx(2) + ")"; }
         } catch (e) {}
         if (sheetOpen) fillSheet();
         if (ready) { try { if (window.parent && window.parent !== window) window.parent.postMessage({ klio: "card", id: c.getAttribute("data-id") }, "*"); } catch (e) {} }
@@ -1657,10 +1667,10 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
         + '.wh-th{position:relative;flex:none;aspect-ratio:4/3;border-radius:var(--rt);overflow:hidden;background:var(--c) center/cover no-repeat}.wh-th.img{background-color:#f1f0ec}.wh-th.img::before{content:"";position:absolute;inset:-14%;background:var(--img) center/cover no-repeat;filter:blur(18px) saturate(1.15);opacity:.5}.wh-th .th-img{position:absolute;inset:0;width:100%;height:100%;display:block;z-index:1}.wh-th .wh-play{z-index:3}.wh-th.img::after{content:"";position:absolute;inset:0;z-index:2;border-radius:inherit;box-shadow:inset 0 0 0 .5px rgba(0,0,0,.08)}.wh-th .cv{position:absolute;inset:4px;width:calc(100% - 8px);height:calc(100% - 8px)}'
         + '.wh-big{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%)}.wh-big svg{display:block;width:calc(var(--cw) * .24);height:calc(var(--cw) * .24);stroke-width:1.3}'
         + '.wh-bd{flex:1;min-height:0;display:flex;flex-direction:column;padding:calc(var(--cw) * .05) calc(var(--cw) * .04) calc(var(--cw) * .035)}'
-        + '.wh-cat{font-style:normal;font-size:max(8.5px,calc(var(--cw) * .04));font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--gray);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}'
-        + '.wh-t{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;margin-top:calc(var(--cw) * .018);font-size:max(11px,calc(var(--cw) * .062));font-weight:700;line-height:1.3;letter-spacing:-.025em;color:var(--ink)}'
-        + '.wh-m{margin-top:calc(var(--cw) * .016);font-size:max(9.5px,calc(var(--cw) * .045));font-weight:500;color:var(--gray);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}'
-        + '.wh-p{margin-top:auto;padding-top:calc(var(--cw) * .025);font-size:max(9.5px,calc(var(--cw) * .046));font-weight:600;color:var(--ink60);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.wh-p b{margin-right:2px;font-size:max(12px,calc(var(--cw) * .076));font-weight:800;letter-spacing:-.035em;color:var(--ink)}'
+        + '.wh-cat{font-style:normal;font-size:max(9.5px,calc(var(--cw) * .044));font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--gray);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}'
+        + '.wh-t{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;margin-top:calc(var(--cw) * .018);font-size:max(12.5px,calc(var(--cw) * .07));font-weight:700;line-height:1.3;letter-spacing:-.025em;color:var(--ink)}'
+        + '.wh-m{margin-top:calc(var(--cw) * .016);font-size:max(10.5px,calc(var(--cw) * .05));font-weight:500;color:var(--gray);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}'
+        + '.wh-p{margin-top:auto;padding-top:calc(var(--cw) * .025);font-size:max(10.5px,calc(var(--cw) * .05));font-weight:600;color:var(--ink60);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.wh-p b{margin-right:2px;font-size:max(12px,calc(var(--cw) * .076));font-weight:800;letter-spacing:-.035em;color:var(--ink)}'
         + '.wh-play{position:absolute;left:50%;top:50%;z-index:1;width:calc(var(--cw) * .17);height:calc(var(--cw) * .17);transform:translate(-50%,-50%);border-radius:50%;background:rgba(0,0,0,.4);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);box-shadow:inset 0 0 0 1.5px rgba(255,255,255,.75)}.wh-play::after{content:"";position:absolute;left:55%;top:50%;transform:translate(-50%,-50%);border-left:calc(var(--cw) * .045) solid #fff;border-top:calc(var(--cw) * .028) solid transparent;border-bottom:calc(var(--cw) * .028) solid transparent}'
         // 선택 카드 정보 (휠 아치 안쪽)
         + '.wh-info{position:absolute;left:50%;top:var(--info,62vh);transform:translateX(-50%);z-index:360;width:min(560px,calc(100vw - 40px));text-align:center;cursor:auto;-webkit-user-select:text;user-select:text;touch-action:manipulation}'
