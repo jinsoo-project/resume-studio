@@ -856,7 +856,11 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
     // 모션·효과 (KILO 대시보드 토글) + 사진 딤 방식(bg=배경만·가장자리 / all=사진 전체)
     var FX = { intro: shown("fx", "intro", true), aura: shown("fx", "aura", true), tilt: shown("fx", "tilt", true), progress: shown("fx", "progress", true) };
     var dimMode = (K.ui || {}).photoDimMode === "all" ? "all" : "bg";
-    var wIdx = 0, wrapW = function (s) { return String(s).split(/\s+/).filter(Boolean).map(function (w) { return '<span class="w" style="--i:' + (wIdx++) + '">' + w + '</span>'; }).join(" "); };
+    // 단어별 등장 애니메이션용 분리 — 입력한 줄바꿈(= 줄 나눔)과 여러 칸 띄어쓰기는 그대로 살림
+    var spaces = function (t) { var n = t.split("\n").length - 1; return n ? new Array(n + 1).join("<br>") : " " + new Array(t.length).join("&#160;"); };
+    var wIdx = 0, wrapW = function (s) { return String(s).replace(/\r\n?/g, "\n").split(/(\s+)/).map(function (w) { if (!w) return ""; if (/^\s+$/.test(w)) return spaces(w); return '<span class="w" style="--i:' + (wIdx++) + '">' + w + '</span>'; }).join(""); };
+    // 직접 쓴 문구: 줄바꿈·여러 칸 띄어쓰기를 화면에도 그대로
+    var tx = function (s) { return esc(String(s).replace(/\r\n?/g, "\n")).replace(/\n/g, "<br>").replace(/ {2,}/g, function (m) { return " " + new Array(m.length).join("&#160;"); }); };
     // 사진 아래 소개 문장(대표 문장 + 회색 보조 문장): 기본 숨김 — 자기소개는 About이 맡음(대표 문장은 About 첫 줄로). KILO 대시보드 Home에서 다시 켤 수 있음
     var introOn = shown("home", "intro", false);
     // 좌상단 서명(붓글씨 SVG): 글자(tspan)마다 굵은 붓 획이 윤곽을 따라 그려지고 글자 모양으로 잘려(clip) 먹이 채워지듯 써짐 — 순서·속도는 런타임이 글자 위치로 맞춤
@@ -884,7 +888,7 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
     else { var half = Math.ceil(sents.length / 2); aboutParas = [sents.slice(0, half).join(" "), sents.slice(half).join(" ")].filter(Boolean); }
     // About 첫 줄(한 줄 소개): 사진 아래 소개 문장을 숨기면 대표 문장이 여기로 — klio.text.aboutLead(비우면 대표 문장) · 끄기 show.about.lead
     var aboutLead = !introOn && shown("about", "lead", true) ? txt("aboutLead", tagline).trim() : "";
-    var aboutInner = '<div class="cnt about rv rv-g">' + (aboutLead ? '<p class="lead" style="--j:0">' + esc(aboutLead) + '</p>' : '') + aboutParas.map(function (p, i) { return '<p' + (i ? ' class="g"' : '') + ' style="--j:' + (i * 2 + (aboutLead ? 1 : 0)) + '">' + esc(p).replace(/\n/g, "<br>") + '</p>'; }).join("") + '</div>';
+    var aboutInner = '<div class="cnt about rv rv-g">' + (aboutLead ? '<p class="lead" style="--j:0">' + tx(aboutLead) + '</p>' : '') + aboutParas.map(function (p, i) { return '<p' + (i ? ' class="g"' : '') + ' style="--j:' + (i * 2 + (aboutLead ? 1 : 0)) + '">' + tx(p) + '</p>'; }).join("") + '</div>';
 
     // ── PROJECTS — 대표작 5 모자이크(썸네일 카드) + '전체 프로젝트 보기' → 새 URL /{slug}/projects (큰 상품카드 슬라이드)
     var ytW = function (u) { var m = String(u || "").match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|shorts\/|embed\/))([\w-]{6,})/); return m ? m[1] : null; };
@@ -1125,7 +1129,7 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
     var availLabel = txt("available", "Available for work");
     var cEmail = shown("contact", "email", true) && P.email, cPhone = shown("contact", "phone", true) && P.phone, cSite = shown("contact", "site", true);
     var contactInner = '<div class="cnt rv rv-g">'
-      + '<h3 style="--j:0">' + esc(contactIntro) + '</h3>'
+      + '<h3 style="--j:0">' + tx(contactIntro) + '</h3>'
       + '<div class="meta" style="--j:2">' + (shown("contact", "location", true) ? '<span>' + esc(P.location || "Seoul, Korea") + '</span>' : '')
       + (cEmail ? '<a href="mailto:' + esc(P.email) + '">' + esc(P.email) + '</a>' : '')
       + (cPhone ? '<a href="tel:' + esc(String(P.phone).replace(/[^0-9]/g, "")) + '">' + esc(P.phone) + '</a>' : '') + '</div>'
