@@ -67,6 +67,7 @@ async function trackViews(slug){
 // 전체 프로젝트 페이지에서 카드 넘김 → 주소창 #p-<id> (그 카드로 바로 공유 가능)
 window.addEventListener('message',function(e){var f=document.getElementById('frame');if(!f||e.source!==f.contentWindow)return;var m=e.data;
   if(m&&m.klio==='sec'&&typeof m.id==='string'&&SEC_RE.test(m.id)){try{history.replaceState(null,'',location.pathname+location.search+(m.id==='home'?'':'#'+m.id));}catch(_){}}
+  else if(m&&m.klio==='card-close'&&PAGE==='projects'){try{history.replaceState(null,'',location.pathname+location.search);}catch(_){}}
   else if(m&&m.klio==='card'&&PAGE==='projects'&&typeof m.id==='string'&&m.id&&m.id.length<=120){try{history.replaceState(null,'',location.pathname+location.search+'#p-'+encodeURIComponent(m.id));}catch(_){}}
 });
 window.addEventListener('hashchange',function(){var h=location.hash.slice(1),c=PAGE==='projects'?cardOf(h):'';if(c)gotoCard(c);else if(SEC_RE.test(h))gotoSec(h,false);});
