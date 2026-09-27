@@ -1280,6 +1280,7 @@ function klioNormalize(d){
   if(!d.klio.expPj||typeof d.klio.expPj!=='object'||Array.isArray(d.klio.expPj))d.klio.expPj={};
   if(!d.klio.expColor||typeof d.klio.expColor!=='object'||Array.isArray(d.klio.expColor))d.klio.expColor={};
   if(!d.klio.expCo||typeof d.klio.expCo!=='object'||Array.isArray(d.klio.expCo))d.klio.expCo={}; // 회사별 설정(프로젝트 목록·기간 표시)
+  if(!d.klio.expSvc||typeof d.klio.expSvc!=='object'||Array.isArray(d.klio.expSvc))d.klio.expSvc={}; // 회사별 서비스 분리 목록(회사 id → [{name,role,period,summary,projects,visible}])
   // 프로젝트 묶음: 없을 때만 기본 4개(사용자 편집값 유지) · 한 분야는 한 묶음에만 · groupOf = 프로젝트별 예외(작업 id → 묶음 id)
   if(!Array.isArray(d.klio.groups)) d.klio.groups=groupsSeed();
   var usedCat={};
@@ -1294,6 +1295,9 @@ function klioNormalize(d){
 function wPeriodS(w){ const f=s=>s?String(s).slice(0,7).replace('-','.'):''; const a=f(w.startDate), b=w.endDate?f(w.endDate):'현재'; return a?(a+' – '+b):(w.endDate?b:''); }
 function xpjDerived(ci){ const c=(LIB.companies||[])[ci]; if(!c)return []; return (c.works||[]).filter(w=>!kHidden('works',w.id)).map(w=>({title:w.title||'',period:wPeriodS(w),visible:true})); }
 function xpjList(ci,create){ const k=axDoc().klio, c=(LIB.companies||[])[ci]; if(!c||!c.id)return null; if(!k.expPj||typeof k.expPj!=='object')k.expPj={}; if(Array.isArray(k.expPj[c.id]))return k.expPj[c.id]; if(!create)return null; k.expPj[c.id]=xpjDerived(ci); return k.expPj[c.id]; }
+// 서비스 분리: 처음 켜면 회사의 서비스명·역할·기간·요약·프로젝트 목록으로 첫 서비스를 채움
+function xsvList(ci,create){ const k=axDoc().klio, c=(LIB.companies||[])[ci]; if(!c||!c.id)return null; if(!k.expSvc||typeof k.expSvc!=='object')k.expSvc={}; if(Array.isArray(k.expSvc[c.id]))return k.expSvc[c.id]; if(!create)return null;
+  k.expSvc[c.id]=[{name:c.serviceKo||c.serviceEn||((String(c.nameKo||'').match(/\(([^)]+)\)\s*$/)||[])[1])||'',role:c.role||'',period:c.periodText||wPeriodS(c),summary:'',projects:(xpjList(ci,false)||xpjDerived(ci)).map(x=>Object.assign({},x)),visible:true}]; return k.expSvc[c.id]; }
 function klioEnsure(){ return klioNormalize(axDoc()); }
 // 전체 프로젝트(원형 휠) 카드 — templates.js projectsPage와 같은 규칙: 묶음 판정 · 표시 순서(묶음 순서 → cardOrder → 원래 순서)
 function kcAll(){ const out=[]; (LIB.companies||[]).forEach(c=>(c.works||[]).forEach(w=>{ if(w&&w.id&&!kHidden('works',w.id)) out.push({c,w}); })); return out; }
@@ -1580,33 +1584,44 @@ function renderAXAdmin(){
       const CO=(kd.expCo||{})[c.id]||{};
       const pjOn=CO.pj!=null?CO.pj!==false:kShown('exp','projects',false);
       const pjpOn=CO.pjPeriod!=null?CO.pjPeriod!==false:kShown('exp','pjPeriod',true);
-      const hd=`<div class="kd-acc-hd" data-kd-co="${axAttr(key)}"><span class="kd-car">▶</span>${thumb(c.logo,30)}<div class="kd-acc-tt"><b>${axText(coName(c))}</b><small>${axText(c.role||'역할 미입력')}</small></div>${upDown('data-ax-moveco',ci,ci===0,ci===cos.length-1)}${hideSw('companies',c.id,'노출')}</div>`;
-      const sub=c.id?`<div class="kd-acc-sub">${sw(`data-kco="${axAttr(c.id)}:pj"`,pjOn,'프로젝트 목록')}${sw(`data-kco="${axAttr(c.id)}:pjPeriod"`,pjpOn,'프로젝트 기간')}</div>`:'';
+      const splitOn=CO.split===true, svL=splitOn?(xsvList(ci,false)||[]):[];
+      const hd=`<div class="kd-acc-hd" data-kd-co="${axAttr(key)}"><span class="kd-car">▶</span>${thumb(c.logo,30)}<div class="kd-acc-tt"><b>${axText(coName(c))}</b><small>${axText(splitOn?`서비스 ${svL.length}개 · `+(svL.map(v=>v.name).filter(Boolean).join(', ')||'이름 미입력'):(c.role||'역할 미입력'))}</small></div>${upDown('data-ax-moveco',ci,ci===0,ci===cos.length-1)}${hideSw('companies',c.id,'노출')}</div>`;
+      const sub=c.id?`<div class="kd-acc-sub">${sw(`data-kco="${axAttr(c.id)}:pj"`,pjOn,'프로젝트 목록')}${sw(`data-kco="${axAttr(c.id)}:pjPeriod"`,pjpOn,'프로젝트 기간')}${sw(`data-kco="${axAttr(c.id)}:split"`,splitOn,'서비스 분리','한 회사에서 맡은 서비스를 회사 아래로 묶어 표시')}</div>`:'';
       let body='';
       if(open){
         const cmets=(c.metrics||[]).map((m,mi)=>`<div class="kd-row" style="margin-bottom:6px">${ti(`${P}.metrics.${mi}.v`,m.v,'값 (예: 2배)')}${ti(`${P}.metrics.${mi}.k`,m.k,'라벨 (예: ROAS 개선)')}${delB('data-del',`${P}.metrics.${mi}`)}</div>`).join('');
         const xCustom=xpjList(ci,false), xl=xCustom||xpjDerived(ci);
         const xrows=xl.map((it,i)=>`<div class="kd-item${it.visible===false?' off':''}" data-row><div class="kd-row">${sw(`data-xpj-on="${ci}:${i}"`,it.visible!==false,'','노출')}<input class="kd-in" data-xpj="${ci}:${i}:title" value="${axAttr(it.title)}" placeholder="프로젝트명">${upDown('data-xpj-move',`${ci}:${i}`,i===0,i===xl.length-1)}${delB('data-xpj-del',`${ci}:${i}`)}</div><div class="kd-row${pjpOn?'':' kd-dim'}" style="margin-top:6px;padding-left:38px"><span class="kd-l" style="margin:0;white-space:nowrap">기간</span><input class="kd-in" data-xpj="${ci}:${i}:period" value="${axAttr(it.period)}" placeholder="2021.04 – 2021.12" style="max-width:220px"></div></div>`).join('')
           ||`<p class="kd-note" style="margin:0 0 6px">항목이 없어요 — 추가하거나 프로젝트에서 채우세요.</p>`;
+        // 서비스 분리 편집: 서비스마다 이름·역할·기간·요약 + 프로젝트 목록(노출·순서)
+        const svEd=`<div class="kd-sec-t">서비스 <span>회사명 아래로 묶여 보여요 · 역할은 서비스마다 표시${pjOn?'':' · 프로젝트 목록 숨김'}</span></div>`
+          +(svL.map((v,si)=>{ const pl=v.projects||[];
+            const prow=pl.map((it,pi)=>`<div class="kd-row" style="margin-top:6px">${sw(`data-xsvp-on="${ci}:${si}:${pi}"`,it.visible!==false,'','노출')}<input class="kd-in" data-xsvp="${ci}:${si}:${pi}:title" value="${axAttr(it.title)}" placeholder="프로젝트명"><input class="kd-in${pjpOn?'':' kd-dim'}" data-xsvp="${ci}:${si}:${pi}:period" value="${axAttr(it.period)}" placeholder="2021.04 – 2021.12" style="flex:none;width:150px">${upDown('data-xsvp-move',`${ci}:${si}:${pi}`,pi===0,pi===pl.length-1)}${delB('data-xsvp-del',`${ci}:${si}:${pi}`)}</div>`).join('');
+            return `<div class="kd-item${v.visible===false?' off':''}" data-row><div class="kd-row">${sw(`data-xsv-on="${ci}:${si}"`,v.visible!==false,'','노출')}<input class="kd-in" data-xsv="${ci}:${si}:name" value="${axAttr(v.name)}" placeholder="서비스명 (예: 매일새옷)">${upDown('data-xsv-move',`${ci}:${si}`,si===0,si===svL.length-1)}${delB('data-xsv-del',`${ci}:${si}`)}</div>`
+              +`<div class="kd-g2" style="margin-top:6px">${F('역할',`<input class="kd-in" data-xsv="${ci}:${si}:role" value="${axAttr(v.role)}" placeholder="퍼포먼스 마케팅 매니저 · 마케팅 엔지니어링">`)}${F('기간',`<input class="kd-in" data-xsv="${ci}:${si}:period" value="${axAttr(v.period)}" placeholder="2023.03 — 2024.06">`)}</div>`
+              +F('요약',`<textarea class="kd-in" data-xsv="${ci}:${si}:summary" rows="2" placeholder="이 서비스에서 한 일 (선택)">${axText(v.summary||'')}</textarea>`,'표시 항목의 ‘요약’을 켜야 보여요')
+              +`<span class="kd-l" style="margin-top:8px">프로젝트</span>${prow||'<p class="kd-note" style="margin:4px 0 0">프로젝트가 없어요.</p>'}<div class="kd-acts"><button class="kd-add" data-xsvp-add="${ci}:${si}">＋ 프로젝트</button></div></div>`; }).join('')
+            ||`<p class="kd-note" style="margin:0 0 6px">서비스가 없어요 — 추가하세요.</p>`)
+          +`<div class="kd-acts"><button class="kd-add" data-xsv-add="${ci}">＋ 서비스 추가</button></div>`;
         body=`<div class="kd-acc-bd">`
           +`<div class="kd-sec-t">기본 정보</div>`
           +`<div class="kd-row" style="margin-bottom:10px">${thumb(c.logo,44)}<div style="flex:1;min-width:0">${ti(`${P}.logo`,c.logo,'로고 이미지 URL')}</div>${upl(`logo:${ci}`,'로고 업로드')}</div>`
           +G2(F('회사명',ti(`${P}.nameKo`,c.nameKo,'회사명 (국문)')),F('영문명',ti(`${P}.nameEn`,c.nameEn,'Company')))
           +G2(F('서비스명',ti(`${P}.serviceKo`,c.serviceKo,'예: 매일새옷')),F('표시 이름',`<div class="kd-row" style="height:36px">${sw(`data-pchk="${P}.useService"`,!!c.useService,'서비스명으로 표시')}</div>`))
-          +F('역할',ti(`${P}.role`,c.role,'예: 퍼포먼스 마케팅 매니저'))
+          +(splitOn?'':F('역할',ti(`${P}.role`,c.role,'예: 퍼포먼스 마케팅 매니저')))
           +G2(F('시작',tm(`${P}.startDate`,c.startDate)),F('종료',tm(`${P}.endDate`,c.endDate),'비우면 재직중'))
           +F('기간 표시 문구',ti(`${P}.periodText`,c.periodText,'예: 2025.06 — 현재'),'선택 · 쓰면 날짜 대신 그대로 표시')
           +F('요약',ta(`${P}.summary`,c.summary,'회사에서 한 일',3),'표시 항목에서 ‘요약’을 켜야 보여요')
           +`<div class="kd-sec-t">회사 지표 <span>표시 항목에서 ‘회사 지표’를 켜야 보여요</span></div>`+cmets+addB(`${P}.metrics`,'지표 추가')
-          +`<div class="kd-sec-t">프로젝트 목록 <span>${xCustom?'직접 편집 중':'자동 — 이 회사 프로젝트에서 가져옴 · 수정하면 고정'}${pjOn?'':' · 지금 목록 숨김'}${pjpOn?'':' · 기간 숨김'}</span></div>`
-          +xrows+`<div class="kd-acts"><button class="kd-add" data-xpj-add="${ci}">＋ 항목 추가</button>${xCustom?`<button class="kd-btn" data-xpj-reset="${ci}">프로젝트에서 다시 채우기</button>`:''}</div>`
+          +(splitOn?svEd:`<div class="kd-sec-t">프로젝트 목록 <span>${xCustom?'직접 편집 중':'자동 — 이 회사 프로젝트에서 가져옴 · 수정하면 고정'}${pjOn?'':' · 지금 목록 숨김'}${pjpOn?'':' · 기간 숨김'}</span></div>`
+          +xrows+`<div class="kd-acts"><button class="kd-add" data-xpj-add="${ci}">＋ 항목 추가</button>${xCustom?`<button class="kd-btn" data-xpj-reset="${ci}">프로젝트에서 다시 채우기</button>`:''}</div>`)
           +`</div>`;
       }
       return `<div class="kd-acc${open?' open':''}${off?' off':''}" data-row data-pv="experience">${hd}${sub}${body}</div>`;
     }).join('');
     const hl=LIB.highlights||[];
     const stats=hl.map((h,i)=>`<div class="kd-item${kHidden('stats',h.id)?' off':''}" data-row><div class="kd-row">${hideSw('stats',h.id,'')}${ti(`highlights.${i}.value`,h.value,'9년+')}${ti(`highlights.${i}.label`,h.label,'마케팅 경력')}${delB('data-del',`highlights.${i}`)}</div></div>`).join('')+addB('highlights','스탯 추가');
-    return intro('회사 행에서 <b>노출 · 프로젝트 목록 · 프로젝트 기간</b>을 바로 켜고 꺼요. 회사를 누르면 로고·이름·기간·요약·목록을 편집해요. ↑↓ = 화면 순서.')
+    return intro('회사 행에서 <b>노출 · 프로젝트 목록 · 프로젝트 기간 · 서비스 분리</b>를 바로 켜고 꺼요. 서비스 분리를 켜면 한 회사에서 맡은 서비스들이 회사명 아래로 묶이고, 서비스마다 역할을 적을 수 있어요. 회사를 누르면 로고·이름·기간·요약·목록을 편집해요. ↑↓ = 화면 순서.')
       +card('표시 항목',`<div class="kd-sws">${showSw('exp','logo',true,'로고')}${showSw('exp','role',true,'역할')}${showSw('exp','period',true,'재직 기간')}${showSw('exp','summary',true,'요약')}${showSw('exp','metrics',true,'회사 지표')}${showSw('exp','stats',true,'하단 스탯')}</div>`,'모든 회사 공통')
       +rows
       +card('하단 스탯 카드',stats,'스위치 = 노출 · 3개씩 한 줄');
@@ -1674,6 +1689,8 @@ function renderAXAdmin(){
       if(ds.kl){ const [n,i,f]=ds.kl.split(':'), L=klList(n); if(L[+i])L[+i][f]=t.value; axSchedule(); return; }
       if(ds.knum){ const v=+t.value; kSet(ds.knum,v); const o=left.querySelector(`[data-knum-out="${ds.knum}"]`); if(o)o.textContent=v+'%'; axSchedule(); return; }
       if(ds.xpj){ const [ci,i,f]=ds.xpj.split(':'), L=xpjList(+ci,true); if(L&&L[+i])L[+i][f]=t.value; axSchedule(); return; }
+      if(ds.xsv){ const [ci,si,f]=ds.xsv.split(':'), L=xsvList(+ci,true); if(L&&L[+si])L[+si][f]=t.value; axSchedule(); return; }
+      if(ds.xsvp){ const [ci,si,pi,f]=ds.xsvp.split(':'), v=(xsvList(+ci,true)||[])[+si]; if(v&&v.projects&&v.projects[+pi])v.projects[+pi][f]=t.value; axSchedule(); return; }
       const p=ds.p; if(!p)return;
       let v=t.value; if(ds.arr==='lines')v=v.split('\n').map(s=>s.trim()).filter(Boolean); else if(ds.arr==='comma')v=v.split(',').map(s=>s.trim()).filter(Boolean);
       axSet(p,v); axSchedule();
@@ -1717,7 +1734,17 @@ function renderAXAdmin(){
       if((el=q('[data-ax-featured]'))){ const [ci,wi]=el.dataset.axFeatured.split(':').map(Number); const w=((LIB.companies[ci]||{}).works||[])[wi]; if(w)w.featured=el.checked; rerender(); return; }
       if((el=q('[data-kchk]'))){ kSet(el.dataset.kchk,el.checked); rerender(); return; }
       if((el=q('[data-khide]'))){ kSetHidden(el.dataset.khide,el.dataset.id,!el.checked); rerender(); return; }
-      if((el=q('[data-kco]'))){ const [id,key]=el.dataset.kco.split(':'); if(!k.expCo||typeof k.expCo!=='object')k.expCo={}; k.expCo[id]=Object.assign({},k.expCo[id]||{}); k.expCo[id][key]=el.checked; rerender(); return; }
+      if((el=q('[data-kco]'))){ const [id,key]=el.dataset.kco.split(':'); if(!k.expCo||typeof k.expCo!=='object')k.expCo={}; k.expCo[id]=Object.assign({},k.expCo[id]||{}); k.expCo[id][key]=el.checked;
+        if(key==='split'&&el.checked){ const ci=(LIB.companies||[]).findIndex(c=>c.id===id); if(ci>=0){ xsvList(ci,true); axOpenCo=id; } } rerender(); return; } // 서비스 분리 켜면 첫 서비스 채우고 펼침
+      // 서비스 분리 편집
+      if((el=q('[data-xsv-on]'))){ const [ci,si]=el.dataset.xsvOn.split(':'), L=xsvList(+ci,true); if(L&&L[+si])L[+si].visible=el.checked; rerender(); return; }
+      if((el=q('[data-xsv-add]'))){ const L=xsvList(+el.dataset.xsvAdd,true); if(L)L.push({name:'',role:'',period:'',summary:'',projects:[],visible:true}); rerender(); return; }
+      if((el=q('[data-xsv-del]'))){ const [ci,si]=el.dataset.xsvDel.split(':'), L=xsvList(+ci,true); if(L)L.splice(+si,1); rerender(); return; }
+      if((el=q('[data-xsv-move]'))){ const [ci,si,dir]=el.dataset.xsvMove.split(':'), L=xsvList(+ci,true); if(L)axMove(L,+si,dir); rerender(); return; }
+      if((el=q('[data-xsvp-on]'))){ const [ci,si,pi]=el.dataset.xsvpOn.split(':'), v=(xsvList(+ci,true)||[])[+si]; if(v&&v.projects&&v.projects[+pi])v.projects[+pi].visible=el.checked; rerender(); return; }
+      if((el=q('[data-xsvp-add]'))){ const [ci,si]=el.dataset.xsvpAdd.split(':'), v=(xsvList(+ci,true)||[])[+si]; if(v){ if(!Array.isArray(v.projects))v.projects=[]; v.projects.push({title:'',period:'',visible:true}); } rerender(); return; }
+      if((el=q('[data-xsvp-del]'))){ const [ci,si,pi]=el.dataset.xsvpDel.split(':'), v=(xsvList(+ci,true)||[])[+si]; if(v&&v.projects)v.projects.splice(+pi,1); rerender(); return; }
+      if((el=q('[data-xsvp-move]'))){ const [ci,si,pi,dir]=el.dataset.xsvpMove.split(':'), v=(xsvList(+ci,true)||[])[+si]; if(v&&v.projects)axMove(v.projects,+pi,dir); rerender(); return; }
       if((el=q('[data-pchk]'))){ axSet(el.dataset.pchk,el.checked); rerender(); return; }
       if((el=q('[data-ax-tech-on]'))){ const r=k.techstack[+el.dataset.axTechOn]; if(r)r.visible=el.checked; rerender(); return; }
       if((el=q('[data-ax-tech-add]'))){ k.techstack.push({label:'',items:[],visible:true}); rerender(); return; }
