@@ -1104,10 +1104,21 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
     var axCta = '<a class="pj-all ax-all rv" href="' + esc(txt("axLink", "https://kimjinsoo-mkt-ax.vercel.app/ax")) + '" target="_blank" rel="noopener"><span class="pj-num">AX</span>'
       + '<span class="pj-all-t"><b>' + esc(txt("axLinkText", "AX 콘솔에서 전체 구조 보기")) + '</b><small>' + esc(txt("axLinkSub", "대시보드 · 자동화 · 워크플로우 한눈에")) + '</small></span>'
       + '<span class="pj-deck" aria-hidden="true">' + axDeck + '</span><span class="pj-all-a" aria-hidden="true">→</span></a>';
+    // 마케팅 콘솔 데모 버튼 = 같은 다크 카드 · 미니 화면은 콘솔 화면(막대·선·표) 모양
+    var MCART = [
+      '<svg viewBox="0 0 40 40" fill="none"><rect x="7" y="22" width="5" height="11" rx="1.5" fill="#1a1a1a" opacity=".55"/><rect x="15" y="15" width="5" height="18" rx="1.5" fill="#1a1a1a" opacity=".75"/><rect x="23" y="18" width="5" height="15" rx="1.5" fill="#1a1a1a" opacity=".6"/><rect x="31" y="9" width="3" height="24" rx="1.5" fill="#1a1a1a"/></svg>',
+      '<svg viewBox="0 0 40 40" fill="none"><path d="M6 29l8-8 6 5 8-11 6 5" stroke="#1a1a1a" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/><circle cx="28" cy="15" r="2.6" fill="#1a1a1a"/></svg>',
+      '<svg viewBox="0 0 40 40" fill="none"><rect x="7" y="9" width="26" height="4" rx="2" fill="#1a1a1a"/><rect x="7" y="17" width="20" height="3" rx="1.5" fill="#1a1a1a" opacity=".5"/><rect x="7" y="23" width="24" height="3" rx="1.5" fill="#1a1a1a" opacity=".5"/><rect x="7" y="29" width="16" height="3" rx="1.5" fill="#1a1a1a" opacity=".5"/></svg>'
+    ];
+    var mcDeck = ["var(--mint)", "var(--lav)", "var(--beige)"].map(function (bg, i) { return '<i class="ax-di" style="--r:' + FAN3[i][0] + 'deg;--y:' + FAN3[i][1] + 'px;background:' + bg + '">' + MCART[i] + '</i>'; }).join("");
+    var mcCta = '<a class="pj-all ax-all ax-mc rv" href="' + esc(txt("axConsoleLink", "https://kimjinsoo-mkt-ax.vercel.app/mkt-console-demo")) + '" target="_blank" rel="noopener"><span class="pj-num">MKT</span>'
+      + '<span class="pj-all-t"><b>' + esc(txt("axConsoleText", "마케팅 콘솔 보기")) + '</b><small>' + esc(txt("axConsoleSub", "직접 만든 마케팅 운영 콘솔 데모 · 가상 데이터")) + '</small></span>'
+      + '<span class="pj-deck" aria-hidden="true">' + mcDeck + '</span><span class="pj-all-a" aria-hidden="true">→</span></a>';
     var axInner = '<div class="cnt ax-cnt">'
       + '<p class="rv" style="font-size:16px;line-height:1.75;color:var(--ink50);margin-bottom:4px">' + esc(axIntro) + '</p>'
       + (axCoreHtml ? '<div class="ax-cores rv rv-g">' + axCoreHtml + '</div>' : '')
       + (shown("ax", "link", true) ? axCta : '')
+      + (shown("ax", "console", true) ? mcCta : '')
       + '</div>';
 
     // ── TECHSTACK (편집 가능한 행 데이터: klio.techstack, 없으면 큐레이션 3행 + 현재 DB 데이터 전부 덤프)
@@ -1324,7 +1335,7 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
       + '.js .mosaic.in .pc-th .cv .ln{stroke-dasharray:420;animation:cvDraw 1.6s var(--ez) backwards;animation-delay:calc(var(--j,0) * 110ms + 380ms)}@keyframes cvDraw{from{stroke-dashoffset:420}to{stroke-dashoffset:0}}@media(prefers-reduced-motion:reduce){.js .mosaic.in .pc-th .cv .ln{animation:none}}'
       + '@media(max-width:520px){.mosaic{grid-auto-rows:226px}.pc-t{font-size:13px}.tile.tall .pc-t,.tile.wide .pc-t{font-size:14.5px}.pc-m{font-size:11px}.tile.wide .pc-th{width:42%}.pc-p{padding-right:30px}.pc-p b{font-size:15px}.tile.tall .pc-p b,.tile.wide .pc-p b{font-size:18px}}'
       // 전체 프로젝트 보기의 큰 개수: 애플풍 가는 숫자 + 위→아래 은은한 그라데이션
-      + '.ax-all{margin-top:0}.pj-deck .ax-di svg{width:40px;height:40px;display:block}.ax-all .pj-num{letter-spacing:-.04em}'
+      + '.ax-all{margin-top:0}.ax-all+.ax-mc{margin-top:12px}.pj-deck .ax-di svg{width:40px;height:40px;display:block}.ax-all .pj-num{letter-spacing:-.04em}'
       + '.pj-num{font-family:var(--font);font-weight:250;font-size:clamp(48px,4.4vw,60px);line-height:.9;letter-spacing:-.06em;font-variant-numeric:tabular-nums;background:linear-gradient(180deg,#fff 35%,rgba(255,255,255,.55));-webkit-background-clip:text;background-clip:text;color:transparent}'
       // 곡률: 알약 대신 애플식 둥근 사각형(누적·오늘 라벨 · 하단 바 · 콘솔 버튼) — 지원 브라우저는 아래에서 연속 곡률로
       + '.vw{border-radius:8px}.dock{border-radius:16px}.dock a,.dock-pill{border-radius:11px}.ax-console{border-radius:12px}'
