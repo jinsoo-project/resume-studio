@@ -1019,13 +1019,15 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
         nm = co.nameKo || co.nameEn || nm; alt = co.nameKo && co.nameEn && co.nameEn !== nm && !hasIn(nm, co.nameEn) ? co.nameEn : "";
         var byRole = CO.splitKind === "role"; // 분리 단위: 서비스(앱 로고) · 직책(로고 없이 — 스타일 roleStyle: num 번호 · date 기간 왼쪽 · bar 세로 막대)
         var rs = byRole ? ({ date: "date", bar: "bar" })[CO.roleStyle] || "num" : "";
+        // 서비스별 로고 켜기/끄기(sv.logoOff) — 일부만 끄면 글자 줄은 맞춰 둠(빈 자리), 모두 끄면 들여쓰기 없음
+        var anyLogo = XS.logo && !byRole && svs.some(function (sv) { return !sv.logoOff; });
         pjs = svs.map(function (sv, si) {
           var sp = showPj ? (sv.projects || []).filter(function (it) { return it && it.visible !== false && String(it.title || "").trim(); }).map(function (it, k) {
             return '<li style="--k:' + k + '"><span class="t">' + esc(it.title) + '</span>' + (showPjP && it.period ? '<span class="p">' + esc(it.period) + '</span>' : '') + '</li>'; }).join("") : "";
-          var sl = XS.logo && !byRole ? (sv.logo ? '<span class="xp-sv-logo"><img src="' + esc(sv.logo) + '" alt="" loading="lazy"></span>'
+          var sl = anyLogo && !sv.logoOff ? (sv.logo ? '<span class="xp-sv-logo"><img src="' + esc(sv.logo) + '" alt="" loading="lazy"></span>'
             : '<span class="xp-sv-logo fb">' + esc(String(sv.name || "").slice(0, 1)) + '</span>') : '';
           var no = rs === "num" ? '<span class="xp-sv-no">' + (si < 9 ? '0' : '') + (si + 1) + '</span>' : rs === "date" && XS.period && sv.period ? '<span class="xp-sv-no">' + esc(sv.period) + '</span>' : '';
-          return '<div class="xp-sv' + (rs ? ' r r-' + rs : sl ? '' : ' nologo') + '" style="--s:' + si + '">' + sl + no + '<div class="xp-sv-hd"><div class="xp-sv-tt"><h4>' + esc(sv.name || "") + '</h4>' + (XS.role && sv.role ? '<p class="xp-sv-role">' + esc(sv.role) + '</p>' : '') + '</div>'
+          return '<div class="xp-sv' + (rs ? ' r r-' + rs : sl ? '' : anyLogo ? ' blank' : ' nologo') + '" style="--s:' + si + '">' + sl + no + '<div class="xp-sv-hd"><div class="xp-sv-tt"><h4>' + esc(sv.name || "") + '</h4>' + (XS.role && sv.role ? '<p class="xp-sv-role">' + esc(sv.role) + '</p>' : '') + '</div>'
             + (XS.period && sv.period && rs !== "date" ? '<p class="xp-sv-when">' + esc(sv.period) + '</p>' : '') + '</div>'
             + (XS.summary && sv.summary ? '<p class="xp-sv-sum">' + esc(sv.summary) + '</p>' : '')
             + (sp ? '<ul class="xp-pj">' + sp + '</ul>' : '') + '</div>';
@@ -1196,7 +1198,7 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
       + '.xp-split .xp-tt h3{font-size:17px;font-weight:700;letter-spacing:-.025em}.xp-split .xp-tt h3 small{font-size:12.5px}'
       + '.xp-split:not(.nologo) .xp-svs{margin-top:20px;padding-top:18px;border-top:1px solid var(--bd)}.xp-svs{margin-top:18px}.xp-sv{position:relative;padding:0 0 22px 44px;min-height:30px}.xp-sv:last-child{padding-bottom:0}.xp-sv.nologo{padding-left:0}'
       + '.xp-sv-logo{position:absolute;left:0;top:0;width:30px;height:30px;border-radius:9px;overflow:hidden;background:#fff;box-shadow:0 0 0 1px rgba(0,0,0,.07);display:grid;place-items:center;font-size:12.5px;font-weight:700;color:var(--ink)}.xp-sv-logo img{width:100%;height:100%;object-fit:cover;display:block}.xp-sv-logo.fb{background:var(--sand)}'
-      + '.xp-sv::after{content:"";position:absolute;left:15px;top:38px;bottom:8px;width:1px;background:var(--bd)}.xp-sv:last-child::after,.xp-sv.nologo::after{display:none}'
+      + '.xp-sv::after{content:"";position:absolute;left:15px;top:38px;bottom:8px;width:1px;background:var(--bd)}.xp-sv:last-child::after,.xp-sv.nologo::after,.xp-sv.blank::after{display:none}'
       + '.xp-sv.r{min-height:0;padding:18px 0}.xp-sv.r:first-child{padding-top:0}.xp-sv.r:last-child{padding-bottom:0}.xp-sv.r+.xp-sv.r{border-top:1px solid var(--bd)}.xp-sv.r::after{display:none}.xp-sv.r .xp-sv-hd{padding-top:0}'
       + '.xp-sv-no{position:absolute;left:0;top:20px;font-size:12px;line-height:1.5;font-variant-numeric:tabular-nums;white-space:nowrap}.xp-sv.r:first-child .xp-sv-no{top:2px}'
       + '.xp-sv.r-num{padding-left:36px}.r-num .xp-sv-no{font-weight:600;letter-spacing:.02em;color:var(--gray)}'
