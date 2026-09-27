@@ -918,11 +918,21 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
       var mets = (w.metrics || []).filter(function (m) { return m && m.value; });
       return { title: (CC.title && String(CC.title).trim()) || w.title || "", main: ti >= 0 ? (md[ti] || md[0] || null) : null, m0: ki >= 0 ? (mets[ki] || mets[0] || null) : null };
     };
+    // 썸네일 맞춤(KILO 대시보드 카드 세부 → klio.cards[id]: fit 'contain'(기본·잘림 없음)|'cover', zoom 100~300(%), px·py 0~100(위치 %))
+    // <img>로 그림: contain이면 이미지 전체가 칸 안에 들어가고 남는 곳은 같은 이미지를 흐리게 깐 배경(::before, --img)으로 채움
+    var fitOf = function (w) {
+      var C = KCARD[w.id] || {}, z = +C.zoom;
+      return { fit: C.fit === "cover" ? "cover" : "contain", z: z > 100 ? Math.min(300, z) : 100, px: C.px != null && !isNaN(+C.px) ? Math.max(0, Math.min(100, +C.px)) : 50, py: C.py != null && !isNaN(+C.py) ? Math.max(0, Math.min(100, +C.py)) : 50 };
+    };
+    var thumbImg = function (src, f) {
+      return '<img class="th-img" src="' + esc(src) + '" alt="" loading="lazy" decoding="async" style="object-fit:' + f.fit + ';object-position:' + f.px + '% ' + f.py + '%'
+        + (f.z !== 100 ? ';transform:scale(' + (f.z / 100) + ');transform-origin:' + f.px + '% ' + f.py + '%' : '') + '">';
+    };
     // 타일 = 전체 프로젝트 휠과 같은 상품카드: 흰 카드 안 썸네일(작은·세로 타일은 위, 가로 타일은 왼쪽) + 분야 · 제목 · 회사·연도 · 대표 지표
     var tileHtml = function (x, span, j) {
       var w = x.w, co = x.co, cm = catMeta(w.category), v = cardView(w), md = v.main, m0 = v.m0, yr = yearOf(w);
       var th = md
-        ? '<span class="pc-th img" style="background-image:url(\'' + esc(md.src) + '\')">' + (md.yt ? '<i class="t-play" aria-hidden="true"></i>' : '') + '</span>'
+        ? '<span class="pc-th img" style="--img:url(\'' + esc(md.src) + '\')">' + thumbImg(md.src, fitOf(w)) + (md.yt ? '<i class="t-play" aria-hidden="true"></i>' : '') + '</span>'
         : '<span class="pc-th art">' + coverArt(w, m0) + '</span>'; // 이미지 없으면 자동 일러스트
       return '<a class="tile pc' + span + (cm.dark ? ' dk' : '') + '" href="' + pjUrl + '#p-' + esc(w.id || "") + '" target="_top" data-ext style="' + (j != null ? '--j:' + j + ';' : '') + '--c:' + cm.c + '">' + th
         + '<span class="pc-bd"><em class="pc-cat">' + esc(cm.en) + '</em><b class="pc-t">' + esc(v.title) + '</b><span class="pc-m">' + esc(dispName(co)) + (yr ? ' · ' + esc(yr) : '') + '</span>'
@@ -1201,7 +1211,7 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
       + '@media(prefers-reduced-motion:reduce){.js .rv{filter:none}.aura i,.avail i::after,.js .fx-intro .sig,.js .fx-intro .hero-h .w,.js .fx-intro .photo .card{animation:none}.js .xp .xp-pj li{opacity:1;transform:none;transition:none}.js .xp .xp-pj li::before{transform:none;transition:none}.dock-pill,.tile::after{transition:none}}'
       // 03 Projects 타일 = 상품카드(전체 프로젝트 휠과 같은 구성): 흰 카드 · 썸네일 · 분야 · 제목 · 회사·연도 · 대표 지표 — 크기별 배치
       + '.mosaic{grid-auto-rows:234px}.tile.pc{justify-content:flex-start;padding:7px;background:#fff;box-shadow:0 0 0 1px rgba(0,0,0,.06),0 14px 30px -22px rgba(0,0,0,.42)}.tile.pc::after{background:linear-gradient(110deg,transparent 35%,rgba(255,255,255,.35) 50%,transparent 65%)}'
-      + '.pc-th{position:relative;flex:none;height:41%;border-radius:17px;overflow:hidden;background:var(--c) center/cover no-repeat;display:grid;place-items:center}.pc-th.img{background-color:#ecebe7}.tile .pc-th svg{width:30px;height:30px}.tile.tall .pc-th{height:60%}.tile.tall .pc-th svg{width:46px;height:46px}'
+      + '.pc-th{position:relative;flex:none;height:41%;border-radius:17px;overflow:hidden;background:var(--c) center/cover no-repeat;display:grid;place-items:center}.pc-th.img{background-color:#f1f0ec}.pc-th.img::before{content:"";position:absolute;inset:-14%;background:var(--img) center/cover no-repeat;filter:blur(18px) saturate(1.15);opacity:.5}.pc-th .th-img{position:absolute;inset:0;width:100%;height:100%;display:block;z-index:1}.pc-th .t-play{z-index:2}.tile .pc-th svg{width:30px;height:30px}.tile.tall .pc-th{height:60%}.tile.tall .pc-th svg{width:46px;height:46px}'
       + '.tile.wide{flex-direction:row}.tile.wide .pc-th{height:auto;width:46%;align-self:stretch}.tile.wide .pc-th svg{width:40px;height:40px}.tile.pc .t-play{top:50%}'
       + '.pc-bd{flex:1;min-width:0;min-height:0;display:flex;flex-direction:column;padding:11px 9px 5px}.tile.wide .pc-bd{padding:10px 12px 6px 16px}.tile.tall .pc-bd{padding:14px 11px 7px}'
       + '.pc-cat{font-style:normal;font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--gray);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}'
@@ -1515,7 +1525,7 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
         var per = wPeriod(w), yr = yearOf(w);
         // 휠 카드 = 상품카드: 위 썸네일(이미지·영상 ▶ / 없으면 분야 색 + 아이콘) · 아래 분야·제목·회사·대표 지표
         var thumb = main
-          ? '<span class="wh-th img" style="background-image:url(\'' + esc(main.src) + '\')">' + (main.yt ? '<i class="wh-play" aria-hidden="true"></i>' : '') + '</span>'
+          ? '<span class="wh-th img" style="--img:url(\'' + esc(main.src) + '\')">' + thumbImg(main.src, fitOf(w)) + (main.yt ? '<i class="wh-play" aria-hidden="true"></i>' : '') + '</span>'
           : '<span class="wh-th art">' + coverArt(w, m0) + '</span>'; // 이미지 없으면 자동 일러스트
         var info = '<span class="wh-bd"><em class="wh-cat">' + esc(cm.en) + '</em><b class="wh-t">' + esc(title) + '</b>'
           + '<span class="wh-m">' + esc(dispName(co)) + (yr ? ' · ' + esc(yr) : '') + '</span>'
@@ -1567,7 +1577,7 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
         // 휠 카드 = 상품카드: 흰 카드 안에 썸네일(동심 곡률) + 분야·제목·회사·대표 지표
         + '.wh-face{position:absolute;inset:0;display:flex;flex-direction:column;padding:calc(var(--cw) * .03);border-radius:var(--rc);overflow:hidden;background:#fff;text-align:left;box-shadow:0 0 0 .5px rgba(0,0,0,.07),0 18px 36px -22px rgba(0,0,0,.4),0 2px 6px rgba(0,0,0,.05);transition:box-shadow .5s var(--ez)}'
         + '.wh-card.on .wh-face{box-shadow:0 0 0 .5px rgba(0,0,0,.06),0 34px 60px -28px rgba(0,0,0,.5),0 6px 16px rgba(0,0,0,.08)}.wh-card:focus-visible .wh-face{box-shadow:0 0 0 3px #fff,0 0 0 5px var(--ink)}'
-        + '.wh-th{position:relative;flex:none;aspect-ratio:4/3;border-radius:var(--rt);overflow:hidden;background:var(--c) center/cover no-repeat}.wh-th.img{background-color:#ecebe7}.wh-th.img::after{content:"";position:absolute;inset:0;border-radius:inherit;box-shadow:inset 0 0 0 .5px rgba(0,0,0,.08)}.wh-th .cv{position:absolute;inset:4px;width:calc(100% - 8px);height:calc(100% - 8px)}'
+        + '.wh-th{position:relative;flex:none;aspect-ratio:4/3;border-radius:var(--rt);overflow:hidden;background:var(--c) center/cover no-repeat}.wh-th.img{background-color:#f1f0ec}.wh-th.img::before{content:"";position:absolute;inset:-14%;background:var(--img) center/cover no-repeat;filter:blur(18px) saturate(1.15);opacity:.5}.wh-th .th-img{position:absolute;inset:0;width:100%;height:100%;display:block;z-index:1}.wh-th .wh-play{z-index:3}.wh-th.img::after{content:"";position:absolute;inset:0;z-index:2;border-radius:inherit;box-shadow:inset 0 0 0 .5px rgba(0,0,0,.08)}.wh-th .cv{position:absolute;inset:4px;width:calc(100% - 8px);height:calc(100% - 8px)}'
         + '.wh-big{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%)}.wh-big svg{display:block;width:calc(var(--cw) * .24);height:calc(var(--cw) * .24);stroke-width:1.3}'
         + '.wh-bd{flex:1;min-height:0;display:flex;flex-direction:column;padding:calc(var(--cw) * .05) calc(var(--cw) * .04) calc(var(--cw) * .035)}'
         + '.wh-cat{font-style:normal;font-size:max(8.5px,calc(var(--cw) * .04));font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--gray);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}'
