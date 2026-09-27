@@ -1595,7 +1595,8 @@ function renderAXAdmin(){
           ||`<p class="kd-note" style="margin:0 0 6px">항목이 없어요 — 추가하거나 프로젝트에서 채우세요.</p>`;
         // 서비스 분리 편집: 서비스마다 이름·역할·기간·요약 + 프로젝트 목록(노출·순서)
         const svEd=`<div class="kd-sec-t">나누는 단위 <span>회사명 아래로 묶여 보여요 (회사 로고는 숨김)</span></div>`
-          +`<div class="kd-fonts" style="grid-template-columns:1fr 1fr;margin-bottom:12px">${[['service','서비스 단위','서비스마다 앱 로고 · 이름 · 역할'],['role','직책 단위','로고 없이 점 · 직책/팀 · 담당']].map(([kk,l,dsc])=>`<button class="kd-font${(byRole?'role':'service')===kk?' on':''}" data-ksplitkind="${axAttr(c.id)}:${kk}"><span>${l}</span><small>${dsc}</small></button>`).join('')}</div>`
+          +`<div class="kd-fonts" style="grid-template-columns:1fr 1fr;margin-bottom:12px">${[['service','서비스 단위','서비스마다 앱 로고 · 이름 · 역할'],['role','직책 단위','로고 없이 · 직책/팀 · 담당']].map(([kk,l,dsc])=>`<button class="kd-font${(byRole?'role':'service')===kk?' on':''}" data-ksplitkind="${axAttr(c.id)}:${kk}"><span>${l}</span><small>${dsc}</small></button>`).join('')}</div>`
+          +(byRole?`<div class="kd-sec-t">직책 표시 스타일</div><div class="kd-fonts" style="grid-template-columns:1fr 1fr 1fr;margin-bottom:12px">${[['num','번호','01 · 02 · 구분선'],['date','기간 왼쪽','왼쪽 열에 기간'],['bar','세로 막대','왼쪽 굵은 선']].map(([kk,l,dsc])=>`<button class="kd-font${(CO.roleStyle||'num')===kk?' on':''}" data-krolestyle="${axAttr(c.id)}:${kk}"><span>${l}</span><small>${dsc}</small></button>`).join('')}</div>`:'')
           +`<div class="kd-sec-t">${unitL} <span>${byRole?'직책·팀마다 담당 업무 표시':'로고·역할은 서비스마다 표시'}${pjOn?'':' · 프로젝트 목록 숨김'}</span></div>`
           +(svL.map((v,si)=>{ const pl=v.projects||[];
             const prow=pl.map((it,pi)=>`<div class="kd-row" style="margin-top:6px">${sw(`data-xsvp-on="${ci}:${si}:${pi}"`,it.visible!==false,'','노출')}<input class="kd-in" data-xsvp="${ci}:${si}:${pi}:title" value="${axAttr(it.title)}" placeholder="프로젝트명"><input class="kd-in${pjpOn?'':' kd-dim'}" data-xsvp="${ci}:${si}:${pi}:period" value="${axAttr(it.period)}" placeholder="2021.04 – 2021.12" style="flex:none;width:150px">${upDown('data-xsvp-move',`${ci}:${si}:${pi}`,pi===0,pi===pl.length-1)}${delB('data-xsvp-del',`${ci}:${si}:${pi}`)}</div>`).join('');
@@ -1739,6 +1740,7 @@ function renderAXAdmin(){
       if((el=q('[data-khide]'))){ kSetHidden(el.dataset.khide,el.dataset.id,!el.checked); rerender(); return; }
       if((el=q('[data-kco]'))){ const [id,key]=el.dataset.kco.split(':'); if(!k.expCo||typeof k.expCo!=='object')k.expCo={}; k.expCo[id]=Object.assign({},k.expCo[id]||{}); k.expCo[id][key]=el.checked;
         if(key==='split'&&el.checked){ const ci=(LIB.companies||[]).findIndex(c=>c.id===id); if(ci>=0){ xsvList(ci,true); axOpenCo=id; } } rerender(); return; } // 서비스 분리 켜면 첫 서비스 채우고 펼침
+      if((el=q('[data-krolestyle]'))){ const [id,kk]=el.dataset.krolestyle.split(':'); if(!k.expCo||typeof k.expCo!=='object')k.expCo={}; k.expCo[id]=Object.assign({},k.expCo[id]||{}); if(kk==='num')delete k.expCo[id].roleStyle; else k.expCo[id].roleStyle=kk; rerender(); return; }
       if((el=q('[data-ksplitkind]'))){ const [id,kk]=el.dataset.ksplitkind.split(':'); if(!k.expCo||typeof k.expCo!=='object')k.expCo={}; k.expCo[id]=Object.assign({},k.expCo[id]||{}); if(kk==='role')k.expCo[id].splitKind='role'; else delete k.expCo[id].splitKind; rerender(); return; }
       // 서비스 분리 편집
       if((el=q('[data-xsv-on]'))){ const [ci,si]=el.dataset.xsvOn.split(':'), L=xsvList(+ci,true); if(L&&L[+si])L[+si].visible=el.checked; rerender(); return; }
