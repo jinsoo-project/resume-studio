@@ -180,7 +180,7 @@ select.dbin{min-width:120px;cursor:pointer}
 /* ===== KILO 대시보드: 탭 · 카드 · 스위치 · 아코디언 ===== */
 #v-ax .libsplit{grid-template-columns:minmax(440px,50%) 1fr}
 #axLeft{padding:0!important;background:var(--bg)}
-.kd-tabs{position:sticky;top:0;z-index:5;display:flex;gap:4px;padding:10px 14px;background:var(--surface);border-bottom:1px solid var(--border);overflow-x:auto;scrollbar-width:none}
+.kd-tabs{position:sticky;top:0;z-index:5;display:flex;flex-wrap:wrap;gap:4px;padding:10px 14px;background:var(--surface);border-bottom:1px solid var(--border)}
 .kd-tabs::-webkit-scrollbar{display:none}
 .kd-tab{flex:none;height:32px;padding:0 13px;border-radius:8px;border:1px solid transparent;background:transparent;color:var(--muted);font:600 13px/1 inherit;font-family:inherit;cursor:pointer;white-space:nowrap}
 .kd-tab:hover{color:var(--fg);background:var(--panel)}
@@ -188,9 +188,33 @@ select.dbin{min-width:120px;cursor:pointer}
 .kd-tab i{font-style:normal;font-size:10px;font-weight:700;color:#c0392b;margin-left:5px}
 .kd-pane{padding:16px 16px 120px}
 .kd-intro{font-size:12.5px;color:var(--muted);line-height:1.6;margin:0 2px 12px}
-.kd-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px 14px 12px;margin-bottom:12px}
-.kd-card>h4{margin:0 0 12px;font-size:13px;font-weight:700;display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
-.kd-card>h4 span{font-size:11.5px;font-weight:500;color:var(--muted)}
+.kd-card{background:var(--card);border:1px solid var(--border);border-radius:12px;margin-bottom:10px;overflow:hidden}
+.kd-card>summary{list-style:none;display:flex;align-items:center;gap:10px;padding:13px 14px;cursor:pointer;user-select:none}
+.kd-card>summary::-webkit-details-marker{display:none}
+.kd-card>summary:hover{background:var(--panel)}
+.kd-card>summary h4{flex:1;min-width:0;margin:0;font-size:13.5px;font-weight:700;display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
+.kd-card>summary h4 span{font-size:11.5px;font-weight:500;color:var(--muted)}
+.kd-chev{flex:none;width:8px;height:8px;border-right:1.6px solid var(--muted);border-bottom:1.6px solid var(--muted);transform:rotate(45deg) translateY(-2px);transition:transform .2s}
+.kd-card[open]>summary .kd-chev{transform:rotate(-135deg) translateY(-1px)}
+.kd-card[open]>summary{border-bottom:1px solid var(--border)}
+.kd-cbody{padding:14px 14px 12px}
+.kd-help{margin:0 2px 12px;font-size:12.5px;color:var(--muted)}
+.kd-help>summary{display:inline-flex;align-items:center;gap:6px;cursor:pointer;list-style:none;font-weight:600;padding:3px 0}
+.kd-help>summary::-webkit-details-marker{display:none}
+.kd-help>summary::before{content:"?";display:inline-grid;place-items:center;width:16px;height:16px;border-radius:50%;border:1px solid var(--border);font-size:10.5px;font-weight:700}
+.kd-help>p{margin:6px 0 0;line-height:1.65}
+.kd-tools{display:flex;justify-content:flex-end;gap:6px;margin:-2px 0 8px}
+.kd-tool{height:26px;padding:0 10px;border-radius:7px;border:1px solid var(--border);background:var(--surface);color:var(--muted);font:600 12px/1 inherit;font-family:inherit;cursor:pointer}
+.kd-tool:hover{color:var(--fg);border-color:var(--ring)}
+.kd-drag{flex:none;width:24px;height:30px;border:0;border-radius:6px;background:transparent;color:var(--muted);cursor:grab;display:inline-grid;place-items:center;padding:0;touch-action:none}
+.kd-drag svg{width:10px;height:16px;fill:currentColor}
+.kd-drag:hover,.kd-drag:focus-visible{background:var(--panel);color:var(--fg)}
+.kd-drag:focus-visible{outline:2px solid var(--ring);outline-offset:1px}
+.kd-dnd-on,.kd-dnd-on *{cursor:grabbing!important;user-select:none!important}
+[data-row].kd-shift{transition:transform .18s ease}
+[data-row].kd-dragging{position:relative;z-index:20;box-shadow:0 12px 28px -10px rgba(0,0,0,.35);background:var(--card);border-radius:10px;transition:none}
+[data-row].kd-moved{animation:kdMoved .9s ease}
+@keyframes kdMoved{0%{box-shadow:0 0 0 2px var(--ring)}100%{box-shadow:0 0 0 2px transparent}}
 .kd-f{margin-bottom:10px}.kd-f:last-child{margin-bottom:0}
 .kd-l{display:block;font-size:11.5px;font-weight:600;color:var(--muted);margin-bottom:4px}
 .kd-l em{font-style:normal;font-weight:400;margin-left:6px;opacity:.85}
@@ -1326,6 +1350,8 @@ function kcCropPaint(id){ const f=kcFit((axDoc().klio.cards||{})[id]), st=kcImgS
 function kMediaOf(w){ const out=[]; (w.media||[]).forEach(m=>{ if(m&&m.url&&(m.type==='image'||!m.type))out.push({src:m.url}); }); (w.links||[]).forEach(l=>{ const m=String((l&&l.url)||'').match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|shorts\/|embed\/))([\w-]{6,})/); if(m)out.push({src:'https://img.youtube.com/vi/'+m[1]+'/hqdefault.jpg',yt:1}); }); return out; }
 const KCAT_COL={'퍼포먼스':'#c3cde4','성과':'#abdcd1','브랜딩':'#dd8e6e','커머스':'#eae6da','콘텐츠':'#e6e1d5','그로스':'#abdcd1','영상':'#e6e1d5','CRM':'#c3cde4','제휴':'#eae6da','AX':'#dd8e6e'};
 // klio 표시 설정 헬퍼 (d.klio.show / hidden)
+function kdCardState(){ try{ return JSON.parse(localStorage.getItem('kd-cards')||'{}')||{}; }catch(e){ return {}; } }
+function kdCardSave(key,open){ try{ const m=kdCardState(); m[key]=!!open; localStorage.setItem('kd-cards',JSON.stringify(m)); }catch(e){} }
 function kSet(path,val){ const s=String(path).split('.'); let o=axDoc().klio; for(let i=0;i<s.length-1;i++){ if(o[s[i]]==null||typeof o[s[i]]!=='object')o[s[i]]={}; o=o[s[i]]; } o[s[s.length-1]]=val; }
 function kShown(g,k,def){ const o=((axDoc().klio.show)||{})[g]||{}; return o[k]==null?def:o[k]!==false; }
 function kHidden(b,id){ return (((axDoc().klio.hidden)||{})[b]||[]).indexOf(id)>=0; }
@@ -1418,13 +1444,17 @@ function renderAXAdmin(){
   const kta=(k,ph,r)=>`<textarea class="kd-in" data-ax-klio-text="${k}" rows="${r||3}" placeholder="${axAttr(ph||'')}">${axText(KT[k]||'')}</textarea>`;
   const F=(label,control,hint)=>`<div class="kd-f"><span class="kd-l">${label}${hint?`<em>${hint}</em>`:''}</span>${control}</div>`;
   const G2=(a,b)=>`<div class="kd-g2">${a}${b}</div>`;
-  const card=(title,inner,hint)=>`<section class="kd-card"><h4>${title}${hint?`<span>${hint}</span>`:''}</h4>${inner}</section>`;
-  const intro=t=>`<p class="kd-intro">${t}</p>`;
+  // 설정 묶음 = 접고 펼치는 카드(열림 상태는 기억 · 처음엔 탭의 첫 카드만 열림)
+  let cardN=0; const CO_OPEN=kdCardState();
+  const card=(title,inner,hint)=>{ const key=axTab+'|'+String(title).replace(/<[^>]*>/g,''), open=CO_OPEN[key]!=null?CO_OPEN[key]:cardN===0; cardN++;
+    return `<details class="kd-card" data-ck="${axAttr(key)}"${open?' open':''}><summary><h4>${title}${hint?`<span>${hint}</span>`:''}</h4><i class="kd-chev" aria-hidden="true"></i></summary><div class="kd-cbody">${inner}</div></details>`; };
+  const intro=t=>`<details class="kd-help"><summary>이 탭 도움말</summary><p>${t}</p></details>`;
   const sw=(attr,on,label,title)=>`<label class="kd-sw"${title?` title="${axAttr(title)}"`:''}><input type="checkbox" ${attr} ${on?'checked':''}><span></span>${label||''}</label>`;
   const showSw=(g,k,def,label)=>sw(`data-kchk="show.${g}.${k}"`,kShown(g,k,def),label);
   const hideSw=(b,id,label)=>id?sw(`data-khide="${b}" data-id="${axAttr(id)}"`,!kHidden(b,id),label,'포트폴리오에 노출'):'';
   const ib=(attr,val,icon,title,dis)=>`<button class="kd-ib" ${attr}="${val}" title="${title}"${dis?' disabled':''}>${icon}</button>`;
-  const upDown=(attr,key,first,last)=>ib(attr,`${key}:up`,'↑','위로',first)+ib(attr,`${key}:down`,'↓','아래로',last);
+  // 순서 바꾸기 = 손잡이(⠿)를 끌어서 위아래로 · 키보드는 손잡이에서 ↑↓
+  const upDown=(attr,key)=>`<button type="button" class="kd-drag" data-dnd="${attr}" data-dnd-key="${axAttr(key)}" title="끌어서 순서 바꾸기 (↑↓ 키도 가능)" aria-label="끌어서 순서 바꾸기"><svg viewBox="0 0 10 16" aria-hidden="true"><circle cx="2.5" cy="3" r="1.3"/><circle cx="7.5" cy="3" r="1.3"/><circle cx="2.5" cy="8" r="1.3"/><circle cx="7.5" cy="8" r="1.3"/><circle cx="2.5" cy="13" r="1.3"/><circle cx="7.5" cy="13" r="1.3"/></svg></button>`;
   const delB=(attr,val)=>`<button class="kd-ib kd-del" ${attr}="${val}" title="삭제">✕</button>`;
   const addB=(p,t)=>`<button class="kd-add" data-add="${p}">＋ ${t}</button>`;
   const thumb=(src,sz)=>src?`<img class="kd-thumb" src="${axAttr(src)}" alt="" style="width:${sz}px;height:${sz}px;border-radius:${Math.round(sz/4)}px">`:`<span class="kd-thumb" style="display:inline-block;width:${sz}px;height:${sz}px;border-radius:${Math.round(sz/4)}px;border-style:dashed"></span>`;
@@ -1434,7 +1464,7 @@ function renderAXAdmin(){
 
   // ── 구성: 섹션 순서·노출·이름 + 모션·효과
   const P_layout=()=>intro('섹션 순서·노출·이름과 전체 효과를 정해요. 이름을 비우면 기본 이름(About 등)으로 보여요. 하단 바도 같은 순서·이름을 써요.')
-    +card('섹션',kd.sections.map((s,i)=>`<div class="kd-item${s.on===false?' off':''}" data-row data-pv="${axAttr(s.key)}"><div class="kd-row">${sw(`data-ax-klio-on="${i}"`,s.on!==false,'','노출')}<input class="kd-in" data-ax-klio-label="${i}" value="${axAttr(s.label||'')}" placeholder="${axAttr(KL[s.key]||s.key)}">${upDown('data-ax-moveklio',i,i===0,i===kd.sections.length-1)}</div></div>`).join(''),'스위치 = 노출 · ↑↓ = 순서')
+    +card('섹션',kd.sections.map((s,i)=>`<div class="kd-item${s.on===false?' off':''}" data-row data-pv="${axAttr(s.key)}"><div class="kd-row">${sw(`data-ax-klio-on="${i}"`,s.on!==false,'','노출')}<input class="kd-in" data-ax-klio-label="${i}" value="${axAttr(s.label||'')}" placeholder="${axAttr(KL[s.key]||s.key)}">${upDown('data-ax-moveklio',i,i===0,i===kd.sections.length-1)}</div></div>`).join(''),'스위치 = 노출 · ⠿ 끌어서 순서')
     +card('글꼴',(()=>{ const cur=(kd.ui||{}).font||'editorial';
       const OPTS=[['editorial','에디토리얼','제목 세리프(Newsreader) + 본문 프리텐다드','Newsreader,Georgia,serif',400],['modern','모던','프리텐다드 굵게','"Pretendard Variable",Pretendard,sans-serif',800],['soft','소프트','SUIT 둥근 고딕','"SUIT Variable",sans-serif',800],['classic','이전','Figtree + 프리텐다드','Figtree,sans-serif',800]];
       return `<div class="kd-fonts">${OPTS.map(([k,l,dsc,ff,wt])=>`<button class="kd-font${cur===k?' on':''}" data-kfont="${k}"><b style="font-family:${axAttr(ff)};font-weight:${wt}">Work that <i style="font-style:${k==='editorial'?'italic':'normal'};${k==='editorial'?'':'opacity:.45'}">moved</i></b><span>${l}</span><small>${dsc}</small></button>`).join('')}</div><p class="kd-note">포트폴리오와 전체 프로젝트 페이지에 함께 적용돼요.</p>`; })(),'고르면 바로 미리보기')
@@ -1457,7 +1487,7 @@ function renderAXAdmin(){
   const KV=kd.views||{}, kToday=kstToday(), vReal=axViews.data||{total:0,today:0};
   const vTa=+KV.totalAdj||0, vTda=KV.todayDay===kToday?(+KV.todayAdj||0):0;
   const vState=axViews.loading?'실제 집계 불러오는 중…':axViews.err?`<b style="color:#c0392b">트래커 미연결</b> — Supabase에서 <code>supabase/schema_v5_views.sql</code>을 한 번 실행해야 방문이 집계돼요. (지금은 아래 숫자만 표시)`:`<b style="color:var(--ok)">트래커 연결됨</b> · 실제 집계 누적 ${vReal.total.toLocaleString('ko-KR')} · 오늘 ${vReal.today.toLocaleString('ko-KR')}`;
-  const viewsCard=card('조회수',`<div class="kd-sws" style="margin-bottom:12px">${showSw('home','views',true,'조회수 표시')}</div>`
+  const viewsCard=()=>card('조회수',`<div class="kd-sws" style="margin-bottom:12px">${showSw('home','views',true,'조회수 표시')}</div>`
     +G2(F('누적 (화면에 보일 숫자)',`<input class="kd-in" type="number" min="0" data-kview="total" value="${vReal.total+vTa}">`),F('오늘 (화면에 보일 숫자)',`<input class="kd-in" type="number" min="0" data-kview="today" value="${vReal.today+vTda}">`))
     +`<p class="kd-note">${vState}</p><p class="kd-note">숫자를 고치면 “실제 집계 + 보정값”으로 저장돼요 — 이후 방문도 이어서 더해져요. 오늘 보정은 오늘 하루만 적용돼요.</p>`
     +`<div class="kd-acts"><a class="kd-btn" href="https://kimjinsoo-mkt-ax.vercel.app/portfolio?kilo-owner=1" target="_blank" rel="noopener" title="이 브라우저에서 여는 포트폴리오 방문은 집계하지 않아요">이 브라우저 방문 제외</a><button class="kd-btn" data-kview-reset>보정 지우기</button><button class="kd-btn" data-kview-refresh>새로 고침</button></div>`
@@ -1484,7 +1514,7 @@ function renderAXAdmin(){
       +F('첫 문장 직접 쓰기',kta('heroMain',heroAuto,2),'켰을 때 · 비우면 자동(회색 글씨가 그 모습) · 쓰면 이 문장 그대로')
       +F('회색 보조 문장',kta('heroSub',sum0,2),'켰을 때 · 비우면 소개 첫 문장')
       +F('직함',ti('profile.title',LIB.profile.title,'마케팅 × AI 프로덕트 빌더'),'대표 문장이 비었을 때 대신 사용'))
-    +viewsCard;
+    +viewsCard();
 
   // ── About
   const P_about=()=>intro('About 섹션 문단이에요.')
@@ -1497,11 +1527,11 @@ function renderAXAdmin(){
   const CATOPTS=['퍼포먼스','성과','브랜딩','커머스','콘텐츠','그로스','영상','CRM','제휴','AX'];
   const ppN=cos.reduce((n,c)=>n+(c.works||[]).filter(w=>!kHidden('works',w.id)).length,0);
   const ppUrl='https://kimjinsoo-mkt-ax.vercel.app/'+encodeURIComponent(axDoc().slug||'portfolio')+'/projects';
-  const ppCard=card('전체 프로젝트 페이지',
+  const ppCard=()=>card('전체 프로젝트 페이지',
     `<div class="kd-seg" style="margin-bottom:12px"><button class="kd-btn${axPvPage!=='projects'?' on':''}" data-kpv="main">메인 화면</button><button class="kd-btn${axPvPage==='projects'?' on':''}" data-kpv="projects">전체 프로젝트 페이지</button><a class="kd-btn" href="${ppUrl}" target="_blank" rel="noopener" title="${axAttr(ppUrl)}">새 탭 ↗</a></div>`
     +`<p class="kd-note">주소 <code>${axText(ppUrl.replace(/^https:\/\//,''))}</code> — 프로젝트 ${ppN}개가 원형 휠로 펼쳐져요. <b>카드 이름·순서·묶음·썸네일과 페이지 문구</b>는 <button class="kd-link" data-kd-tab="groups">‘전체 프로젝트’ 탭</button>에서 편집해요.</p>`,'새 URL');
   const P_projects=()=>intro('회사를 눌러 작업을 편집해요. <b>노출</b> = 포트폴리오·전체 프로젝트 페이지에 표시 · <b>대표</b> = 상단 모자이크(최대 5개). 타일 배지는 첫 번째 지표, 썸네일은 첫 번째 이미지(없으면 유튜브 링크)예요.')
-    +ppCard
+    +ppCard()
     +cos.map((c,ci)=>{
       const ws=c.works||[]; if(!ws.length)return '';
       const key=c.id||String(ci), open=axOpenPj===key;
@@ -1561,7 +1591,7 @@ function renderAXAdmin(){
       const n=sorted.filter(x=>x.g===g.id&&!(KC[x.w.id]||{}).off).length;
       const chipsH=(g.cats||[]).map(k=>`<button class="kd-cat on" data-kg-cat="${i}|${axAttr(k)}" title="누르면 이 묶음에서 빼요">${axText(CAT_EN[k]||k)}<i>${nCat(k)}</i><b aria-hidden="true">×</b></button>`).join('')
         +`<select class="kd-in kd-catadd" data-kg-addcat="${i}"><option value="">＋ 분야 담기</option>${cats.filter(k=>(g.cats||[]).indexOf(k)<0).map(k=>{ const o=catG(k); return `<option value="${axAttr(k)}">${axText(CAT_EN[k]||k)} (${nCat(k)})${o?' · 지금 '+axText(o.label||'다른 묶음'):' · 묶음 없음'}</option>`; }).join('')}</select>`;
-      return `<div class="kd-grp${g.on===false?' off':''}"><div class="kd-row">${sw(`data-kg-on="${i}"`,g.on!==false,'','분류 버튼 노출')}<input class="kd-in kd-glabel" data-kg-label="${i}" value="${axAttr(g.label||'')}" placeholder="묶음 이름 (예: Performance & Growth)"><span class="kd-cnt">${n}개</span>${upDown('data-kg-move',i,i===0,i===G.length-1)}${delB('data-kg-del',i)}</div><div class="kd-cats">${chipsH}</div><textarea class="kd-in" data-kg-desc="${i}" rows="2" placeholder="묶음 소개 문장 (스크롤 모양에서 묶음 위에 크게 · 비우면 분야·대표 성과로 자동)" style="margin:8px 0 4px">${axText(g.desc||'')}</textarea>${cardsOf(g.id)}</div>`;
+      return `<div class="kd-grp${g.on===false?' off':''}" data-row><div class="kd-row">${sw(`data-kg-on="${i}"`,g.on!==false,'','분류 버튼 노출')}<input class="kd-in kd-glabel" data-kg-label="${i}" value="${axAttr(g.label||'')}" placeholder="묶음 이름 (예: Performance & Growth)"><span class="kd-cnt">${n}개</span>${upDown('data-kg-move',i,i===0,i===G.length-1)}${delB('data-kg-del',i)}</div><div class="kd-cats">${chipsH}</div><textarea class="kd-in" data-kg-desc="${i}" rows="2" placeholder="묶음 소개 문장 (스크롤 모양에서 묶음 위에 크게 · 비우면 분야·대표 성과로 자동)" style="margin:8px 0 4px">${axText(g.desc||'')}</textarea>${cardsOf(g.id)}</div>`;
     }).join('')||`<p class="kd-note" style="margin:0 0 6px">묶음이 없어요 — 추가하거나 기본값으로 채우세요. (없으면 화면엔 ‘전체’만 보여요)</p>`;
     const etc=sorted.filter(x=>x.g==='etc');
     const etcH=etc.length?`<div class="kd-grp etc"><div class="kd-row"><b class="kd-glabel" style="flex:1">기타 <small>어느 묶음에도 없는 카드</small></b><span class="kd-cnt">${etc.length}개</span></div>${cardsOf('etc')}</div>`:'';
@@ -1576,7 +1606,7 @@ function renderAXAdmin(){
         +G2(F('자세히 보기 버튼',kt('ppMore','자세히 보기')),F('안내 문구 (PC)',kt('ppHint','드래그 · 휠 · ← →')))
         +G2(F('안내 문구 (모바일)',kt('ppHintM','좌우로 밀어서 돌리기')),F('자동 넘김',`<div class="kd-row" style="height:36px">${showSw('pp','autoplay',true,'가만두면 한 장씩 넘기기')}</div>`))
         +`<div class="kd-acts"><a class="kd-btn" href="${ppUrl}" target="_blank" rel="noopener">새 탭에서 열기 ↗</a></div>`,'새 URL')
-      +card('묶음 · 카드',rows+etcH+`<div class="kd-acts"><button class="kd-add" data-kg-add>＋ 묶음 추가</button><button class="kd-btn" data-kg-reset>기본 4개로 다시 채우기</button></div>`,'묶음 ↑↓ = 버튼 순서 · 카드 ↑↓ = 휠 순서');
+      +card('묶음 · 카드',rows+etcH+`<div class="kd-acts"><button class="kd-add" data-kg-add>＋ 묶음 추가</button><button class="kd-btn" data-kg-reset>기본 4개로 다시 채우기</button></div>`,'⠿ 끌어서 묶음·카드 순서 변경');
   };
 
   // ── Experience: 표시 항목(공통) · 회사(행에서 노출·목록·기간 바로 설정, 펼쳐서 내용) · 스탯
@@ -1602,7 +1632,7 @@ function renderAXAdmin(){
           +(byRole?`<div class="kd-sec-t">직책 표시 스타일</div><div class="kd-fonts" style="grid-template-columns:1fr 1fr 1fr;margin-bottom:12px">${[['num','번호','01 · 02 · 구분선'],['date','기간 왼쪽','왼쪽 열에 기간'],['bar','세로 막대','왼쪽 굵은 선']].map(([kk,l,dsc])=>`<button class="kd-font${(CO.roleStyle||'num')===kk?' on':''}" data-krolestyle="${axAttr(c.id)}:${kk}"><span>${l}</span><small>${dsc}</small></button>`).join('')}</div>`:'')
           +`<div class="kd-sec-t">${unitL} <span>${byRole?'직책·팀마다 담당 업무 표시':'로고·역할은 서비스마다 표시'}${pjOn?'':' · 프로젝트 목록 숨김'}</span></div>`
           +(svL.map((v,si)=>{ const pl=v.projects||[];
-            const prow=pl.map((it,pi)=>`<div class="kd-row" style="margin-top:6px">${sw(`data-xsvp-on="${ci}:${si}:${pi}"`,it.visible!==false,'','노출')}<input class="kd-in" data-xsvp="${ci}:${si}:${pi}:title" value="${axAttr(it.title)}" placeholder="프로젝트명"><input class="kd-in${pjpOn?'':' kd-dim'}" data-xsvp="${ci}:${si}:${pi}:period" value="${axAttr(it.period)}" placeholder="2021.04 – 2021.12" style="flex:none;width:150px">${upDown('data-xsvp-move',`${ci}:${si}:${pi}`,pi===0,pi===pl.length-1)}${delB('data-xsvp-del',`${ci}:${si}:${pi}`)}</div>`).join('');
+            const prow=pl.map((it,pi)=>`<div class="kd-row" data-row style="margin-top:6px">${sw(`data-xsvp-on="${ci}:${si}:${pi}"`,it.visible!==false,'','노출')}<input class="kd-in" data-xsvp="${ci}:${si}:${pi}:title" value="${axAttr(it.title)}" placeholder="프로젝트명"><input class="kd-in${pjpOn?'':' kd-dim'}" data-xsvp="${ci}:${si}:${pi}:period" value="${axAttr(it.period)}" placeholder="2021.04 – 2021.12" style="flex:none;width:150px">${upDown('data-xsvp-move',`${ci}:${si}:${pi}`,pi===0,pi===pl.length-1)}${delB('data-xsvp-del',`${ci}:${si}:${pi}`)}</div>`).join('');
             return `<div class="kd-item${v.visible===false?' off':''}" data-row><div class="kd-row">${sw(`data-xsv-on="${ci}:${si}"`,v.visible!==false,'','노출')}<input class="kd-in" data-xsv="${ci}:${si}:name" value="${axAttr(v.name)}" placeholder="${byRole?'직책·팀 (예: 퍼포먼스 마케팅 매니저)':'서비스명 (예: 매일새옷)'}">${upDown('data-xsv-move',`${ci}:${si}`,si===0,si===svL.length-1)}${delB('data-xsv-del',`${ci}:${si}`)}</div>`
               +(byRole?'':`<div class="kd-row" style="margin-top:6px">${sw(`data-xsv-logo="${ci}:${si}"`,!v.logoOff,'','앱 로고 표시')}${thumb(v.logo,36)}<input class="kd-in${v.logoOff?' kd-dim':''}" data-xsv="${ci}:${si}:logo" value="${axAttr(v.logo||'')}" placeholder="앱 로고 이미지 URL (비우면 첫 글자)">${upl(`svlogo:${ci}:${si}`,'로고 업로드')}</div>`)
               +`<div class="kd-g2" style="margin-top:6px">${F(byRole?'담당':'역할',`<input class="kd-in" data-xsv="${ci}:${si}:role" value="${axAttr(v.role)}" placeholder="${byRole?'예: 매일새옷 · 퍼포먼스 광고 운영':'퍼포먼스 마케팅 매니저 · 마케팅 엔지니어링'}">`)}${F('기간',`<input class="kd-in" data-xsv="${ci}:${si}:period" value="${axAttr(v.period)}" placeholder="2023.03 — 2024.06">`)}</div>`
@@ -1628,7 +1658,7 @@ function renderAXAdmin(){
     }).join('');
     const hl=LIB.highlights||[];
     const stats=hl.map((h,i)=>`<div class="kd-item${kHidden('stats',h.id)?' off':''}" data-row><div class="kd-row">${hideSw('stats',h.id,'')}${ti(`highlights.${i}.value`,h.value,'9년+')}${ti(`highlights.${i}.label`,h.label,'마케팅 경력')}${delB('data-del',`highlights.${i}`)}</div></div>`).join('')+addB('highlights','스탯 추가');
-    return intro('회사 행에서 <b>노출 · 프로젝트 목록 · 프로젝트 기간 · 하위 분리</b>를 바로 켜고 꺼요. 하위 분리를 켜면 회사명 아래로 <b>서비스 단위</b>(앱 로고) 또는 <b>직책 단위</b>(로고 없이)로 묶어 보여줘요. 회사를 누르면 로고·이름·기간·요약·목록을 편집해요. ↑↓ = 화면 순서.')
+    return intro('회사 행에서 <b>노출 · 프로젝트 목록 · 프로젝트 기간 · 하위 분리</b>를 바로 켜고 꺼요. 하위 분리를 켜면 회사명 아래로 <b>서비스 단위</b>(앱 로고) 또는 <b>직책 단위</b>(로고 없이)로 묶어 보여줘요. 회사를 누르면 로고·이름·기간·요약·목록을 편집해요. ⠿ 손잡이를 끌면 화면 순서가 바뀌어요.')
       +card('표시 항목',`<div class="kd-sws">${showSw('exp','logo',true,'로고')}${showSw('exp','role',true,'역할')}${showSw('exp','period',true,'재직 기간')}${showSw('exp','summary',true,'요약')}${showSw('exp','metrics',true,'회사 지표')}${showSw('exp','stats',true,'하단 스탯')}</div>`,'모든 회사 공통')
       +rows
       +card('하단 스탯 카드',stats,'스위치 = 노출 · 3개씩 한 줄');
@@ -1661,7 +1691,9 @@ function renderAXAdmin(){
   const TABS=[['layout','구성'],['home','Home']].concat(kd.sections.map(s=>[s.key,s.label||KL[s.key]||s.key]));
   { const pi=TABS.findIndex(t=>t[0]==='projects'); TABS.splice(pi>=0?pi+1:TABS.length,0,['groups','전체 프로젝트']); } // Projects 바로 뒤 — 원형 휠 페이지(묶음·카드·문구)
   const tabs=`<nav class="kd-tabs">`+TABS.map(([k,l])=>`<button class="kd-tab${axTab===k?' on':''}" data-kd-tab="${k}">${axText(l)}${k!=='layout'&&k!=='home'&&!secOn(k)?'<i>숨김</i>':''}</button>`).join('')+`</nav>`;
-  leftEl.innerHTML=tabs+`<div class="kd-pane"${axTab!=='layout'&&axTab!=='groups'?` data-pv="${axTab}"`:''}>${(PANES[axTab]||P_layout)()}</div>`;
+  cardN=0; const paneHtml=(PANES[axTab]||P_layout)();
+  const tools=cardN>1?`<div class="kd-tools"><button type="button" class="kd-tool" data-kd-all="open">모두 펼치기</button><button type="button" class="kd-tool" data-kd-all="close">모두 접기</button></div>`:'';
+  leftEl.innerHTML=tabs+`<div class="kd-pane"${axTab!=='layout'&&axTab!=='groups'?` data-pv="${axTab}"`:''}>${tools}${paneHtml}</div>`;
   leftEl.dataset.tab=axTab;
   leftEl.scrollTop=sameTab?keepTop:0;
   if(!axViews.at&&!axViews.loading) axFetchViews(); // 첫 진입: 조회수 실제 집계 불러와 Home 탭·미리보기에 반영
@@ -1673,6 +1705,33 @@ function renderAXAdmin(){
     const KL_NEW={skills:()=>({value:'',label:'',sub:'',visible:true})}, KL_SEED={skills:()=>skillsSeed(axDoc())};
     const rerender=()=>{ renderAXAdmin(); save(); updateAXPreview(); };
     const dim=(el,on)=>{ const row=el.closest('[data-row]'); if(row) row.classList.toggle('off',!on); };
+    // 카드 접기/펼치기 상태 기억 · 모두 펼치기/접기
+    left.addEventListener('toggle',e=>{ const d=e.target; if(d&&d.classList&&d.classList.contains('kd-card')&&d.dataset.ck) kdCardSave(d.dataset.ck,d.open); },true);
+    left.addEventListener('click',e=>{ const b=e.target.closest('[data-kd-all]'); if(!b)return; const open=b.dataset.kdAll==='open'; left.querySelectorAll('details.kd-card').forEach(d=>{ d.open=open; kdCardSave(d.dataset.ck,open); }); });
+    // 순서 바꾸기: 기존 ↑↓ 동작을 한 칸씩 반복 실행(키의 마지막 숫자 = 위치)
+    const stepKey=(key,dir)=>{ const seg=String(key).split(':'), last=seg[seg.length-1]; if(/^\d+$/.test(last)){ seg[seg.length-1]=String(+last+(dir==='down'?1:-1)); } return seg.join(':'); };
+    const runMove=(attr,key,from,to)=>{ if(from===to)return key; const dir=to>from?'down':'up'; let k=key;
+      for(let n=0;n<Math.abs(to-from);n++){ const b=document.createElement('button'); b.setAttribute(attr,k+':'+dir); b.style.display='none'; left.appendChild(b); b.click(); if(b.parentNode)b.remove(); k=stepKey(k,dir); }
+      return k; };
+    const siblingsOf=h=>{ const row=h.closest('[data-row]'); if(!row)return null; const attr=h.dataset.dnd;
+      const rows=[...row.parentElement.children].filter(c=>c.matches('[data-row]')&&[...c.querySelectorAll('.kd-drag')].some(x=>x.dataset.dnd===attr&&x.closest('[data-row]')===c));
+      return {row,rows,attr,from:rows.indexOf(row)}; };
+    let dnd=null;
+    left.addEventListener('pointerdown',e=>{ const h=e.target.closest('.kd-drag'); if(!h||e.button!==0)return; const sb=siblingsOf(h); if(!sb||sb.rows.length<2)return;
+      e.preventDefault(); h.setPointerCapture&&h.setPointerCapture(e.pointerId);
+      const rects=sb.rows.map(r=>r.getBoundingClientRect()), me=rects[sb.from], gap=sb.rows.length>1?Math.max(4,(rects[1].top-rects[0].bottom)):6;
+      dnd={h,key:h.dataset.dndKey,...sb,rects,y0:e.clientY,to:sb.from,hgt:me.height+gap};
+      sb.row.classList.add('kd-dragging'); document.body.classList.add('kd-dnd-on'); sb.rows.forEach(r=>{ if(r!==sb.row) r.classList.add('kd-shift'); }); });
+    window.addEventListener('pointermove',e=>{ if(!dnd)return; const dy=e.clientY-dnd.y0, me=dnd.rects[dnd.from], c=me.top+me.height/2+dy; let to=dnd.from;
+      dnd.rects.forEach((r,i)=>{ const m=r.top+r.height/2; if(i>dnd.from&&c>m)to=Math.max(to,i); if(i<dnd.from&&c<m)to=Math.min(to,i); });
+      dnd.to=to; dnd.row.style.transform=`translateY(${dy}px)`;
+      dnd.rows.forEach((r,i)=>{ if(r===dnd.row)return; const sh=(i>dnd.from&&i<=to)?-dnd.hgt:(i<dnd.from&&i>=to)?dnd.hgt:0; r.style.transform=sh?`translateY(${sh}px)`:''; }); });
+    const endDnd=()=>{ if(!dnd)return; const d=dnd; dnd=null; document.body.classList.remove('kd-dnd-on'); d.rows.forEach(r=>{ r.style.transform=''; r.classList.remove('kd-shift','kd-dragging'); });
+      if(d.to!==d.from){ const nk=runMove(d.attr,d.key,d.from,d.to); requestAnimationFrame(()=>{ const nh=[...left.querySelectorAll('.kd-drag')].find(x=>x.dataset.dnd===d.attr&&x.dataset.dndKey===nk); if(nh){ const r=nh.closest('[data-row]'); if(r){ r.classList.add('kd-moved'); setTimeout(()=>r.classList.remove('kd-moved'),900); } } }); } };
+    window.addEventListener('pointerup',endDnd); window.addEventListener('pointercancel',endDnd);
+    left.addEventListener('keydown',e=>{ const h=e.target.closest&&e.target.closest('.kd-drag'); if(!h||(e.key!=='ArrowUp'&&e.key!=='ArrowDown'))return; e.preventDefault();
+      const sb=siblingsOf(h); if(!sb)return; const to=sb.from+(e.key==='ArrowDown'?1:-1); if(to<0||to>=sb.rows.length)return;
+      const nk=runMove(sb.attr,h.dataset.dndKey,sb.from,to); const nh=[...left.querySelectorAll('.kd-drag')].find(x=>x.dataset.dnd===sb.attr&&x.dataset.dndKey===nk); if(nh)nh.focus(); });
     // 편집 중인 섹션으로 미리보기 이동(같은 섹션 안에서는 한 번만)
     left.addEventListener('focusin',e=>{ const el=e.target.closest('[data-pv]'); if(el) axPvGoto(el.dataset.pv,false); });
     left.addEventListener('input',e=>{
