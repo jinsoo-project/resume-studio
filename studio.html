@@ -1286,6 +1286,13 @@ function klioNormalize(d){
   var KEYS=KLIO_SEC.map(function(p){return p[0];});
   if(!d.klio||typeof d.klio!=='object')d.klio={};
   if(!d.klio.text||typeof d.klio.text!=='object')d.klio.text={};
+  // 첫 문장·회색 보조 문장이 비어 있고 '사진 아래 소개'가 꺼져 있으면 지금 보이는 About 두 문단을 칸에 채워 둠(바로 고칠 수 있게)
+  try{ var T0=d.klio.text, introOn0=((d.klio.show||{}).home||{}).intro===true;
+    if(!introOn0&&!String(T0.heroMain||'').trim()&&!String(T0.heroSub||'').trim()&&typeof LIB!=='undefined'&&LIB&&LIB.profile){
+      var ov0=String(T0.about||'').trim(), ps0;
+      if(ov0) ps0=ov0.split(/\n\s*\n/).map(function(x){return x.trim();}).filter(Boolean);
+      else { var se0=String(LIB.profile.summary||'').split(/(?<=다\.)\s+/).filter(Boolean), h0=Math.ceil(se0.length/2); ps0=[se0.slice(0,h0).join(' '),se0.slice(h0).join(' ')].filter(Boolean); }
+      if(ps0[0])T0.heroMain=ps0[0]; if(ps0[1])T0.heroSub=ps0[1]; } }catch(e){}
   var cur=Array.isArray(d.klio.sections)?d.klio.sections:[];
   var seen={},out=[];
   cur.forEach(function(s){ if(!s)return; var k=s.key==='archive'?'ax':s.key; if(KEYS.indexOf(k)>=0&&!seen[k]){ seen[k]=1; out.push({key:k,label:(s.label!=null?s.label:''),on:s.on!==false}); } });
@@ -1363,6 +1370,9 @@ const KCAT_COL={'퍼포먼스':'#c3cde4','성과':'#abdcd1','브랜딩':'#dd8e6e
 // 프로필 사진 여러 장: klio.photos (없으면 profile.avatar 한 장에서 시작) · 첫 장 = profile.avatar 로 맞춤
 function phList(create){ const k=axDoc().klio; if(Array.isArray(k.photos))return k.photos; const base=[LIB.profile.avatar].filter(Boolean); if(!create)return base; k.photos=base.slice(); return k.photos; }
 function phSync(){ const L=phList(false)||[]; LIB.profile.avatar=L[0]||''; }
+// About 자동 두 문단(포트폴리오 전용 소개 → 없으면 소개 요약을 문장 기준 반씩) — 화면과 같은 규칙
+function aboutAuto(){ const KT=((axDoc()||{}).klio||{}).text||{}, ov=String(KT.about||'').trim(); if(ov) return ov.split(/\n\s*\n/).map(x=>x.trim()).filter(Boolean);
+  const se=String(LIB.profile.summary||'').split(/(?<=다\.)\s+/).filter(Boolean), h=Math.ceil(se.length/2); return [se.slice(0,h).join(' '),se.slice(h).join(' ')].filter(Boolean); }
 function kdCardState(){ try{ return JSON.parse(localStorage.getItem('kd-cards')||'{}')||{}; }catch(e){ return {}; } }
 function kdCardSave(key,open){ try{ const m=kdCardState(); m[key]=!!open; localStorage.setItem('kd-cards',JSON.stringify(m)); }catch(e){} }
 function kSet(path,val){ const s=String(path).split('.'); let o=axDoc().klio; for(let i=0;i<s.length-1;i++){ if(o[s[i]]==null||typeof o[s[i]]!=='object')o[s[i]]={}; o=o[s[i]]; } o[s[s.length-1]]=val; }
@@ -1526,11 +1536,10 @@ function renderAXAdmin(){
           F('딤 방식',`<select class="kd-in" data-ksel="ui.photoDimMode"><option value="bg"${(kd.ui||{}).photoDimMode!=='all'?' selected':''}>배경만 (얼굴은 밝게)</option><option value="all"${(kd.ui||{}).photoDimMode==='all'?' selected':''}>사진 전체</option></select>`))
       +G2(F('이니셜',kt('initials','JK'),'사진 끌 때'),F('회전 문구',kt('orbit','JINSOO KIM · MARKETER · '))))
     +card('사진 아래 소개 문장',`<div class="kd-sws" style="margin-bottom:10px">${showSw('home','intro',false,'사진 아래 소개 문장 보이기')}</div>`
-      +(kShown('home','intro',false)?'':`<p class="kd-note kd-intro-off" style="margin:0 0 10px;padding:8px 10px;border-radius:8px;background:var(--panel);color:var(--fg)">지금은 <b>꺼져 있어서</b> 아래 ‘첫 문장 직접 쓰기’·‘회색 보조 문장’이 화면에 안 보여요. 두 칸 중 하나에 쓰기 시작하면 자동으로 켜져요.</p>`)
       +`<p class="kd-note" style="margin:0 0 12px">꺼 두면 자기소개는 About이 맡아요 — 대표 문장은 About 첫 줄로 옮겨가고 사진과 About 사이도 가까워져요.</p>`
       +F('대표 문장',ta('profile.tagline',LIB.profile.tagline,'마케팅의 문제를 AI와 코드로 푸는 그로스 빌더',2),'About 첫 줄 · 켜면 첫 문장 = “{이름} — {대표 문장}.”'+((KT.aboutLead||'').trim()?' · ⚠ 지금은 About 탭 ‘한 줄 소개’가 About 첫 줄로 우선 보여요':''))
-      +F('첫 문장 직접 쓰기',kta('heroMain',heroAuto,2),'비우면 자동(회색 글씨가 그 모습) · 쓰면 이 문장 그대로 · 줄바꿈도 그대로')
-      +F('회색 보조 문장',kta('heroSub',sum0,2),'첫 문장 바로 뒤에 회색으로 · 비우면 소개 첫 문장')
+      +F('첫 문장 (검은 글씨)',kta('heroMain',kShown('home','intro',false)?heroAuto:(aboutAuto()[0]||''),5),kShown('home','intro',false)?'사진 아래 큰 문장 · 쓰면 그대로 · 줄바꿈 그대로':'About 첫 문단(검은 글씨) · 고치면 바로 반영 · 줄바꿈 그대로')
+      +F('회색 보조 문장',kta('heroSub',kShown('home','intro',false)?sum0:(aboutAuto()[1]||''),5),kShown('home','intro',false)?'첫 문장 바로 뒤에 회색으로':'About 두 번째 문단(회색 글씨) · 고치면 바로 반영 · 줄바꿈 그대로')
       +F('직함',ti('profile.title',LIB.profile.title,'마케팅 × AI 프로덕트 빌더'),'대표 문장이 비었을 때 대신 사용'))
     +viewsCard();
 
@@ -1539,7 +1548,8 @@ function renderAXAdmin(){
     +card('첫 줄 (한 줄 소개)',`<div class="kd-sws" style="margin-bottom:12px">${showSw('about','lead',true,'첫 줄 보이기')}</div>`
       +F('한 줄 소개',kt('aboutLead',LIB.profile.tagline||LIB.profile.title||''),'비우면 대표 문장(Home) · Home의 ‘사진 아래 소개 문장’을 켜면 겹치지 않게 자동으로 숨겨져요'))
     +card('소개',F('소개 요약',ta('profile.summary',LIB.profile.summary,'',7),'이력서와 공유 · 화면엔 문장 기준 2문단 자동')
-      +F('포트폴리오 전용 소개',kta('about','비우면 위 요약을 사용',6),'선택 · 빈 줄 = 문단 구분 · 2번째 문단부터 회색'));
+      +F('포트폴리오 전용 소개',kta('about','비우면 위 요약을 사용',6),'선택 · 빈 줄 = 문단 구분 · 2번째 문단부터 회색')
+      +(kShown('home','intro',false)?'':F('첫 문단 (검은 글씨)',kta('heroMain',aboutAuto()[0]||'',5),'Home ‘첫 문장’과 같은 칸 · 이 칸이 위 소개보다 우선')+F('두 번째 문단 (회색 글씨)',kta('heroSub',aboutAuto()[1]||'',5),'Home ‘회색 보조 문장’과 같은 칸')));
 
   // ── Projects: 회사 → 작업 (작업은 제목 줄에서 노출·대표, ▸로 세부)
   const CATOPTS=['퍼포먼스','성과','브랜딩','커머스','콘텐츠','그로스','영상','CRM','제휴','AX'];
@@ -1773,10 +1783,7 @@ function renderAXAdmin(){
       if(t.type==='checkbox'||t.type==='file'||t.tagName==='SELECT') return; // 체크=click, 파일·선택=change
       if(ds.axKlioLabel!=null){ if(k.sections[+ds.axKlioLabel])k.sections[+ds.axKlioLabel].label=t.value; axSchedule(); return; }
       if(ds.axKlioText){ k.text[ds.axKlioText]=t.value;
-        // 첫 문장·회색 보조 문장은 '사진 아래 소개 문장'이 켜져야 보임 → 쓰기 시작하면 자동으로 켜고 미리보기를 맨 위로
-        if((ds.axKlioText==='heroMain'||ds.axKlioText==='heroSub')&&t.value.trim()&&!kShown('home','intro',false)){
-          kSet('show.home.intro',true); const cb=left.querySelector('[data-kchk="show.home.intro"]'); if(cb)cb.checked=true;
-          const w=left.querySelector('.kd-intro-off'); if(w)w.remove(); toast('‘사진 아래 소개 문장’을 켰어요 — 미리보기에 바로 보여요'); axPvGoto('home',true); }
+        if((ds.axKlioText==='heroMain'||ds.axKlioText==='heroSub')&&!kShown('home','intro',false)) axPvGoto('about',true); // 꺼져 있으면 About 두 문단 = 이 두 칸
         axSchedule(); return; }
       if(ds.kgLabel!=null){ const g=(k.groups||[])[+ds.kgLabel]; if(g)g.label=t.value; axSchedule(); return; }
       if(ds.kcZoom!=null||ds.kcPx!=null||ds.kcPy!=null){ // 썸네일 맞춤 슬라이더(확대·가로·세로)
