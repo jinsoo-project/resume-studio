@@ -1297,7 +1297,7 @@ function xpjDerived(ci){ const c=(LIB.companies||[])[ci]; if(!c)return []; retur
 function xpjList(ci,create){ const k=axDoc().klio, c=(LIB.companies||[])[ci]; if(!c||!c.id)return null; if(!k.expPj||typeof k.expPj!=='object')k.expPj={}; if(Array.isArray(k.expPj[c.id]))return k.expPj[c.id]; if(!create)return null; k.expPj[c.id]=xpjDerived(ci); return k.expPj[c.id]; }
 // 서비스 분리: 처음 켜면 회사의 서비스명·역할·기간·요약·프로젝트 목록으로 첫 서비스를 채움
 function xsvList(ci,create){ const k=axDoc().klio, c=(LIB.companies||[])[ci]; if(!c||!c.id)return null; if(!k.expSvc||typeof k.expSvc!=='object')k.expSvc={}; if(Array.isArray(k.expSvc[c.id]))return k.expSvc[c.id]; if(!create)return null;
-  k.expSvc[c.id]=[{name:c.serviceKo||c.serviceEn||((String(c.nameKo||'').match(/\(([^)]+)\)\s*$/)||[])[1])||'',role:c.role||'',period:c.periodText||wPeriodS(c),summary:'',projects:(xpjList(ci,false)||xpjDerived(ci)).map(x=>Object.assign({},x)),visible:true}]; return k.expSvc[c.id]; }
+  k.expSvc[c.id]=[{logo:c.logo||'',name:c.serviceKo||c.serviceEn||((String(c.nameKo||'').match(/\(([^)]+)\)\s*$/)||[])[1])||'',role:c.role||'',period:c.periodText||wPeriodS(c),summary:'',projects:(xpjList(ci,false)||xpjDerived(ci)).map(x=>Object.assign({},x)),visible:true}]; return k.expSvc[c.id]; }
 function klioEnsure(){ return klioNormalize(axDoc()); }
 // 전체 프로젝트(원형 휠) 카드 — templates.js projectsPage와 같은 규칙: 묶음 판정 · 표시 순서(묶음 순서 → cardOrder → 원래 순서)
 function kcAll(){ const out=[]; (LIB.companies||[]).forEach(c=>(c.works||[]).forEach(w=>{ if(w&&w.id&&!kHidden('works',w.id)) out.push({c,w}); })); return out; }
@@ -1594,10 +1594,11 @@ function renderAXAdmin(){
         const xrows=xl.map((it,i)=>`<div class="kd-item${it.visible===false?' off':''}" data-row><div class="kd-row">${sw(`data-xpj-on="${ci}:${i}"`,it.visible!==false,'','노출')}<input class="kd-in" data-xpj="${ci}:${i}:title" value="${axAttr(it.title)}" placeholder="프로젝트명">${upDown('data-xpj-move',`${ci}:${i}`,i===0,i===xl.length-1)}${delB('data-xpj-del',`${ci}:${i}`)}</div><div class="kd-row${pjpOn?'':' kd-dim'}" style="margin-top:6px;padding-left:38px"><span class="kd-l" style="margin:0;white-space:nowrap">기간</span><input class="kd-in" data-xpj="${ci}:${i}:period" value="${axAttr(it.period)}" placeholder="2021.04 – 2021.12" style="max-width:220px"></div></div>`).join('')
           ||`<p class="kd-note" style="margin:0 0 6px">항목이 없어요 — 추가하거나 프로젝트에서 채우세요.</p>`;
         // 서비스 분리 편집: 서비스마다 이름·역할·기간·요약 + 프로젝트 목록(노출·순서)
-        const svEd=`<div class="kd-sec-t">서비스 <span>회사명 아래로 묶여 보여요 · 역할은 서비스마다 표시${pjOn?'':' · 프로젝트 목록 숨김'}</span></div>`
+        const svEd=`<div class="kd-sec-t">서비스 <span>회사명 아래로 묶여 보여요 · 로고·역할은 서비스마다 표시 (회사 로고는 숨김)${pjOn?'':' · 프로젝트 목록 숨김'}</span></div>`
           +(svL.map((v,si)=>{ const pl=v.projects||[];
             const prow=pl.map((it,pi)=>`<div class="kd-row" style="margin-top:6px">${sw(`data-xsvp-on="${ci}:${si}:${pi}"`,it.visible!==false,'','노출')}<input class="kd-in" data-xsvp="${ci}:${si}:${pi}:title" value="${axAttr(it.title)}" placeholder="프로젝트명"><input class="kd-in${pjpOn?'':' kd-dim'}" data-xsvp="${ci}:${si}:${pi}:period" value="${axAttr(it.period)}" placeholder="2021.04 – 2021.12" style="flex:none;width:150px">${upDown('data-xsvp-move',`${ci}:${si}:${pi}`,pi===0,pi===pl.length-1)}${delB('data-xsvp-del',`${ci}:${si}:${pi}`)}</div>`).join('');
             return `<div class="kd-item${v.visible===false?' off':''}" data-row><div class="kd-row">${sw(`data-xsv-on="${ci}:${si}"`,v.visible!==false,'','노출')}<input class="kd-in" data-xsv="${ci}:${si}:name" value="${axAttr(v.name)}" placeholder="서비스명 (예: 매일새옷)">${upDown('data-xsv-move',`${ci}:${si}`,si===0,si===svL.length-1)}${delB('data-xsv-del',`${ci}:${si}`)}</div>`
+              +`<div class="kd-row" style="margin-top:6px">${thumb(v.logo,36)}<input class="kd-in" data-xsv="${ci}:${si}:logo" value="${axAttr(v.logo||'')}" placeholder="앱 로고 이미지 URL (비우면 첫 글자)">${upl(`svlogo:${ci}:${si}`,'로고 업로드')}</div>`
               +`<div class="kd-g2" style="margin-top:6px">${F('역할',`<input class="kd-in" data-xsv="${ci}:${si}:role" value="${axAttr(v.role)}" placeholder="퍼포먼스 마케팅 매니저 · 마케팅 엔지니어링">`)}${F('기간',`<input class="kd-in" data-xsv="${ci}:${si}:period" value="${axAttr(v.period)}" placeholder="2023.03 — 2024.06">`)}</div>`
               +F('요약',`<textarea class="kd-in" data-xsv="${ci}:${si}:summary" rows="2" placeholder="이 서비스에서 한 일 (선택)">${axText(v.summary||'')}</textarea>`,'표시 항목의 ‘요약’을 켜야 보여요')
               +`<span class="kd-l" style="margin-top:8px">프로젝트</span>${prow||'<p class="kd-note" style="margin:4px 0 0">프로젝트가 없어요.</p>'}<div class="kd-acts"><button class="kd-add" data-xsvp-add="${ci}:${si}">＋ 프로젝트</button></div></div>`; }).join('')
@@ -1797,6 +1798,7 @@ function renderAXAdmin(){
       try{
         const [kind,a,b]=up.split(':');
         if(kind==='logo'){ LIB.companies[+a].logo=await CLOUD.uploadFile(t.files[0]); }
+        else if(kind==='svlogo'){ const [,x,y]=up.split(':'), v=(xsvList(+x,true)||[])[+y]; if(v)v.logo=await CLOUD.uploadFile(t.files[0]); }
         else if(kind==='avatar'){ LIB.profile.avatar=await CLOUD.uploadFile(t.files[0]); kSet('show.home.photo',true); }
         else if(kind==='axcore'){ const c=axDoc().klio.axCore[+a]; if(c)c.img=await CLOUD.uploadFile(t.files[0]); }
         else if(kind==='work'){ const w=LIB.companies[+a].works[+b]; if(!Array.isArray(w.media))w.media=[]; for(const f of t.files){ w.media.push({id:uid(),type:'image',url:await CLOUD.uploadFile(f)}); } }
