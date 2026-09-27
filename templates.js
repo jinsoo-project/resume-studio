@@ -748,7 +748,19 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
     // 글꼴 프리셋(KILO 대시보드 '구성 → 글꼴' = klio.ui.font): editorial(기본 · 큰 제목 세리프 + 본문 Pretendard) · modern · soft(SUIT) · classic(이전 Figtree)
     var PRET = "https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css";
     var SANS_KR = '"Pretendard Variable",Pretendard,-apple-system,BlinkMacSystemFont,system-ui,"Apple SD Gothic Neo","Noto Sans KR",sans-serif';
-    var GF = "https://fonts.googleapis.com/css2?family=Caveat:wght@600";
+    // 좌상단 서명 글씨체(KILO 대시보드 Home → '서명' = klio.ui.sigFont · 크기 klio.ui.sigSize %) — 붓글씨로 써지는 모션은 show.fx.sigDraw
+    // fs = 기본 크기(px, 글씨체마다 눈에 보이는 크기를 맞춤) · sw = 붓 굵기(em, 획 폭을 한 번에 덮을 만큼) · y = 기준선(em)
+    var SIGFONTS = {
+      dafoe: { n: "Mr Dafoe", q: "Mr+Dafoe", fs: 40, w: 400, sw: .3, y: 1.02 },
+      qwitcher: { n: "Qwitcher Grypen", q: "Qwitcher+Grypen:wght@700", fs: 54, w: 700, sw: .24, y: 1 },
+      kaushan: { n: "Kaushan Script", q: "Kaushan+Script", fs: 36, w: 400, sw: .36, y: 1.08 },
+      mashan: { n: "Ma Shan Zheng", q: "Ma+Shan+Zheng", fs: 46, w: 400, sw: .4, y: 1.02 },
+      caveat: { n: "Caveat", q: "Caveat:wght@600", fs: 44, w: 600, sw: .26, y: .98 }
+    };
+    var SKEY = SIGFONTS[(K.ui || {}).sigFont] ? (K.ui || {}).sigFont : "dafoe", SIG = SIGFONTS[SKEY];
+    var sigPct = parseFloat((K.ui || {}).sigSize); sigPct = isNaN(sigPct) ? 100 : Math.max(70, Math.min(160, sigPct));
+    var sigFs = Math.round(SIG.fs * sigPct / 100);
+    var GF = "https://fonts.googleapis.com/css2?family=" + SIG.q;
     var FONTS = {
       editorial: { body: SANS_KR, disp: '"Newsreader","Noto Serif KR",Georgia,serif', w: 400, ls: "-.02em", css: [GF + "&family=Newsreader:ital,opsz,wght@0,6..72,300..600;1,6..72,300..600&family=Noto+Serif+KR:wght@400;500&display=swap", PRET] },
       modern: { body: SANS_KR, disp: SANS_KR, w: 800, ls: "-.05em", css: [GF + "&display=swap", PRET] },
@@ -758,7 +770,7 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
     var FKEY = FONTS[(K.ui || {}).font] ? (K.ui || {}).font : "editorial", FNT = FONTS[FKEY];
     var fontHead = '<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>'
       + FNT.css.map(function (h) { return '<link rel="stylesheet" href="' + h + '"/>'; }).join("");
-    var fontVars = ':root{--font:' + FNT.body + ';--disp:' + FNT.disp + ';--dispw:' + FNT.w + ';--displs:' + FNT.ls + '}';
+    var fontVars = ':root{--font:' + FNT.body + ';--disp:' + FNT.disp + ';--dispw:' + FNT.w + ';--displs:' + FNT.ls + ';--sgf:"' + SIG.n + '",cursive;--sgw:' + SIG.w + ';--sgfs:' + sigFs + 'px;--ssw:' + SIG.sw + 'em}';
     var works = [];
     companies.forEach(function (co) { (co.works || []).forEach(function (w) { if (!isHidden("works", w.id)) works.push({ co: co, w: w }); }); });
 
@@ -816,7 +828,9 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
     ];
 
     // ── HOME
-    var nameEn = P.nameEn || P.nameKo || "";
+    // 이름: KILO 대시보드 Home '상단 연락처'의 국문·영문 이름(klio.text.nameKo/nameEn) 우선, 비우면 프로필 값
+    var nameKo = txt("nameKo", P.nameKo || "").trim();
+    var nameEn = txt("nameEn", P.nameEn || "").trim() || nameKo;
     var initials = txt("initials", (nameEn.split(/\s+/).map(function (x) { return x[0] || ""; }).join("") || "JK").slice(0, 2).toUpperCase());
     var siteUrl = txt("siteUrl", "https://kimjinsoo-mkt-ax.vercel.app");
     var siteHref = /^https?:\/\//i.test(siteUrl) ? siteUrl : "https://" + siteUrl;
@@ -826,7 +840,7 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
     var tagline = P.tagline || P.title || "";
     // 첫 문장: KILO 대시보드에서 직접 쓴 문장(klio.text.heroMain)이 있으면 그대로, 없으면 편집칸 값만으로 "{이름} — {대표 문장}."
     // (숨은 고정 문구 없음 · 이름 칸이 문장으로 끝나면 대시 없이 이어 붙임)
-    var hName = String(P.nameKo || nameEn || "").trim(), hJoin = /[.!?。]$/.test(hName) ? " " : " — ";
+    var hName = String(nameKo || nameEn || "").trim(), hJoin = /[.!?。]$/.test(hName) ? " " : " — ";
     var mainH1 = txt("heroMain", "") ? esc(txt("heroMain", ""))
       : (hName ? esc(hName) + (tagline ? hJoin : "") : "") + esc(tagline) + (tagline && !/[.!?。]$/.test(tagline) ? "." : "");
     var dimH1 = esc(txt("heroSub", sents[0] || ""));
@@ -843,22 +857,34 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
     var FX = { intro: shown("fx", "intro", true), aura: shown("fx", "aura", true), tilt: shown("fx", "tilt", true), progress: shown("fx", "progress", true) };
     var dimMode = (K.ui || {}).photoDimMode === "all" ? "all" : "bg";
     var wIdx = 0, wrapW = function (s) { return String(s).split(/\s+/).filter(Boolean).map(function (w) { return '<span class="w" style="--i:' + (wIdx++) + '">' + w + '</span>'; }).join(" "); };
-    var home = '<header class="home" id="home">'
+    // 사진 아래 소개 문장(대표 문장 + 회색 보조 문장): 기본 숨김 — 자기소개는 About이 맡음(대표 문장은 About 첫 줄로). KILO 대시보드 Home에서 다시 켤 수 있음
+    var introOn = shown("home", "intro", false);
+    // 좌상단 서명(붓글씨 SVG): 글자(tspan)마다 굵은 붓 획이 윤곽을 따라 그려지고 글자 모양으로 잘려(clip) 먹이 채워지듯 써짐 — 순서·속도는 런타임이 글자 위치로 맞춤
+    var sigTxt = txt("sig", nameEn), sigDraw = FX.intro && shown("fx", "sigDraw", true), sigTag = introOn ? "div" : "h1";
+    var sgSpans = sigTxt.split("").map(function (ch, i) { return '<tspan style="--k:' + i + '">' + esc(ch) + '</tspan>'; }).join("");
+    var sigHtml = sigTxt ? '<' + sigTag + ' class="sig"' + (sigDraw ? ' data-draw data-sf="' + esc(SIG.n) + '"' : '') + '><span class="sr">' + esc(sigTxt) + '</span>'
+      + '<svg class="sg" aria-hidden="true" focusable="false"><defs><clipPath id="sgc"><text class="sg-t" x="2" y="' + SIG.y + 'em">' + sgSpans + '</text></clipPath></defs>'
+      + '<text class="sg-t sg-ink" x="2" y="' + SIG.y + 'em" clip-path="url(#sgc)">' + sgSpans + '</text></svg></' + sigTag + '>' : '';
+    // 상단 연락처 맨 위: 국문 · 영문 이름 (영문이 국문과 같으면 한 번만)
+    var nmHtml = (shown("home", "nameKo", true) && nameKo ? '<b>' + esc(nameKo) + '</b>' : '') + (shown("home", "nameEn", true) && nameEn && nameEn !== nameKo ? '<span>' + esc(nameEn) + '</span>' : '');
+    var home = '<header class="home' + (introOn ? '' : ' noh') + '" id="home">'
       + (FX.aura ? '<div class="aura" aria-hidden="true"><i class="a1"></i><i class="a2"></i><i class="a3"></i></div>' : '')
-      + '<div class="rv"><div class="sig">' + esc(nameEn) + '</div>'
-      + '<div class="meta">' + (shown("home", "location", true) ? '<span>' + esc(P.location || "Seoul, Korea") + '</span>' : '')
+      + '<div class="rv">' + sigHtml
+      + '<div class="meta">' + (nmHtml ? '<p class="nm">' + nmHtml + '</p>' : '') + (shown("home", "location", true) ? '<span>' + esc(P.location || "Seoul, Korea") + '</span>' : '')
       + (shown("home", "email", true) && P.email ? '<a href="mailto:' + esc(P.email) + '">' + esc(P.email) + '</a>' : '')
       + (shown("home", "site", true) ? '<a href="' + esc(siteHref) + '" target="_blank" rel="noopener">' + esc(siteLabel) + '</a>' : '') + '</div>' + viewsHtml + '</div>'
       + '<div class="cnt"><div class="photo rv" style="--d:80ms"><div class="card' + (photoOn ? ' img dim-' + dimMode + '" style="background-image:url(\'' + esc(P.avatar) + '\');--dim:' + photoDim + '">' : '"><b>' + esc(initials) + '</b>') + '</div>'
       + '<svg class="orbit" viewBox="0 0 150 150" aria-hidden="true"><defs><path id="orb" d="M75,75 m-63,0 a63,63 0 1,1 126,0 a63,63 0 1,1 -126,0"/></defs><text><textPath href="#orb">' + orbit + '</textPath></text></svg></div>'
-      + '<h1 class="hero-h">' + wrapW(mainH1) + ' <span class="dim">' + wrapW(dimH1) + '</span></h1></div></header>';
+      + (introOn ? '<h1 class="hero-h">' + wrapW(mainH1) + ' <span class="dim">' + wrapW(dimH1) + '</span></h1>' : '') + '</div></header>';
 
     // ── ABOUT (포트폴리오 전용 문구가 있으면 그걸로 — 빈 줄=문단 구분, 없으면 요약을 문장 기준 2문단)
     var aboutOv = txt("about", "");
     var aboutParas;
     if (aboutOv) aboutParas = aboutOv.split(/\n\s*\n/).map(function (s) { return s.trim(); }).filter(Boolean);
     else { var half = Math.ceil(sents.length / 2); aboutParas = [sents.slice(0, half).join(" "), sents.slice(half).join(" ")].filter(Boolean); }
-    var aboutInner = '<div class="cnt about rv rv-g">' + aboutParas.map(function (p, i) { return '<p' + (i ? ' class="g"' : '') + ' style="--j:' + (i * 2) + '">' + esc(p).replace(/\n/g, "<br>") + '</p>'; }).join("") + '</div>';
+    // About 첫 줄(한 줄 소개): 사진 아래 소개 문장을 숨기면 대표 문장이 여기로 — klio.text.aboutLead(비우면 대표 문장) · 끄기 show.about.lead
+    var aboutLead = !introOn && shown("about", "lead", true) ? txt("aboutLead", tagline).trim() : "";
+    var aboutInner = '<div class="cnt about rv rv-g">' + (aboutLead ? '<p class="lead" style="--j:0">' + esc(aboutLead) + '</p>' : '') + aboutParas.map(function (p, i) { return '<p' + (i ? ' class="g"' : '') + ' style="--j:' + (i * 2 + (aboutLead ? 1 : 0)) + '">' + esc(p).replace(/\n/g, "<br>") + '</p>'; }).join("") + '</div>';
 
     // ── PROJECTS — 대표작 5 모자이크(썸네일 카드) + '전체 프로젝트 보기' → 새 URL /{slug}/projects (큰 상품카드 슬라이드)
     var ytW = function (u) { var m = String(u || "").match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|shorts\/|embed\/))([\w-]{6,})/); return m ? m[1] : null; };
@@ -1107,13 +1133,22 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
       + '@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}.js .rv{opacity:1;transform:none;transition:none}}'
       + '.page{max-width:880px;margin:0 auto;padding:0 24px 180px}.row{display:grid;grid-template-columns:1fr 1fr;margin-top:150px}.row>h2{font-size:14px;font-weight:600;line-height:130%}.cnt{max-width:440px}'
       + '@media(max-width:920px){.row{grid-template-columns:1fr;margin-top:104px}.row>h2{margin-bottom:22px}}'
-      + '.home{display:grid;grid-template-columns:1fr 1fr;padding-top:88px}.sig{font-family:"Caveat",cursive;font-size:34px;font-weight:600;line-height:1;color:var(--ink)}'
-      + '.meta{margin-top:34px;display:flex;flex-direction:column;gap:4px}.meta span,.meta a{font-size:13px;font-weight:500;line-height:160%}.meta a{text-decoration:underline;text-underline-offset:2px;text-decoration-thickness:1px}.meta a:hover{color:var(--gray)}'
+      + '.home{display:grid;grid-template-columns:1fr 1fr;padding-top:88px}.sig{margin:0;font-family:var(--sgf);font-size:var(--sgfs);font-weight:var(--sgw);line-height:1;letter-spacing:0;color:var(--ink)}'
+      // 붓글씨 서명: 굵은 붓 획(stroke)을 글자 모양으로 잘라 그림 → 다 쓰면 채움(fill)으로 빈틈 없이. 모션 전엔 숨겼다가 글씨체가 준비되면 .go
+      + '.sig .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}.sig .sg{display:block;width:100%;height:1.46em;overflow:visible}'
+      + '.sg-t{white-space:pre}.sg-ink{fill:currentColor;stroke:currentColor;stroke-width:var(--ssw);stroke-linecap:round;stroke-linejoin:round}'
+      + '.js .sig[data-draw]:not(.go) .sg{opacity:0;animation:sgFail 0s 3.4s forwards}@keyframes sgFail{to{opacity:1}}'
+      + '.js .sig[data-draw].go .sg-ink tspan{animation:sgDraw .72s cubic-bezier(.45,.05,.3,1) backwards;animation-delay:calc(.2s + var(--k) * .12s)}'
+      + '@keyframes sgDraw{from{fill:transparent;stroke-dasharray:9em 90em;stroke-dashoffset:9.6em}to{fill:transparent;stroke-dasharray:9em 90em;stroke-dashoffset:0}}'
+      + '.meta .nm{display:flex;flex-wrap:wrap;align-items:baseline;gap:0 9px;margin:0 0 2px}.meta .nm b{font-size:14px;font-weight:700;letter-spacing:.02em}.meta .nm span{font-size:13px;color:var(--ink50)}'
+      + '.meta{margin-top:14px;display:flex;flex-direction:column;gap:4px}.meta span,.meta a{font-size:13px;font-weight:500;line-height:160%}.meta a{text-decoration:underline;text-underline-offset:2px;text-decoration-thickness:1px}.meta a:hover{color:var(--gray)}'
       + '.photo{position:relative;width:196px;height:260px}.photo .card{width:196px;height:260px;border-radius:24px;background:var(--mint);display:grid;place-items:center;overflow:hidden}.photo .card b{font-size:56px;font-weight:700;letter-spacing:-.04em;color:var(--ink);transform:translateX(-14px)}'
       + '.photo .orbit{position:absolute;top:50%;right:-98px;width:150px;height:150px;margin-top:-75px;animation:spin 26s linear infinite;pointer-events:none}.photo .orbit text{font-family:var(--font);font-size:12px;font-weight:600;letter-spacing:.42em;fill:var(--ink);text-transform:uppercase}'
       + '@keyframes spin{to{transform:rotate(360deg)}}@media(prefers-reduced-motion:reduce){.photo .orbit{animation:none}}'
-      + '.home h1{margin-top:40px;font-size:20px;line-height:150%;max-width:360px}.home h1 .dim{color:var(--gray)}@media(max-width:920px){.home{grid-template-columns:1fr;padding-top:64px}.home .cnt{margin-top:52px}}'
-      + '.about p{font-size:16px;line-height:175%}.about p+p{margin-top:22px}.about p.g{color:var(--ink50);font-size:14px}'
+      + '.home .hero-h{margin-top:40px;font-size:20px;line-height:150%;max-width:360px}.home .hero-h .dim{color:var(--gray)}@media(max-width:920px){.home{grid-template-columns:1fr;padding-top:64px}.home .cnt{margin-top:52px}}'
+      // 사진 아래 소개 문장을 숨기면(.noh) 바로 다음 섹션(About)을 사진 쪽으로 당겨 자기소개가 한 덩어리로 이어지게
+      + '.home.noh+.row{margin-top:88px}@media(max-width:920px){.home.noh+.row{margin-top:64px}}'
+      + '.about p{font-size:16px;line-height:175%}.about p+p{margin-top:22px}.about p.g{color:var(--ink50);font-size:14px}.about p.lead{font-size:20px;font-weight:600;line-height:150%;letter-spacing:-.025em;text-wrap:balance}'
       + '.mosaic{display:grid;grid-template-columns:1fr 1fr;grid-auto-rows:201px;gap:12px}.tile{position:relative;border-radius:24px;overflow:hidden;display:grid;place-items:center;transition:transform .35s var(--ez)}.tile:hover{transform:translateY(-3px)}.tile.tall{grid-row:span 2}.tile.wide{grid-column:span 2}.tile svg{width:46px;height:46px}.tile.wide svg{width:42px;height:42px}'
       + '.tile .lb{position:absolute;left:18px;bottom:14px;right:18px;line-height:140%}.tile .lb b{display:block;font-size:13px;font-weight:600;letter-spacing:-.01em}.tile .lb span{display:block;font-size:11px;font-weight:500;color:var(--ink50)}.tile.dark .lb b{color:#fff}.tile.dark .lb span{color:rgba(255,255,255,.72)}'
       + '.tile .kp{position:absolute;right:16px;top:14px;font-size:11px;font-weight:600;background:rgba(255,255,255,.72);border-radius:999px;padding:5px 10px;line-height:1}@media(max-width:520px){.mosaic{grid-auto-rows:168px}}'
@@ -1192,7 +1227,7 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
       + '.aura .a2{width:300px;height:300px;background:var(--lav);right:0;top:10px;animation:au2 28s ease-in-out infinite alternate}.aura .a3{width:240px;height:240px;background:var(--coral);left:44%;top:270px;opacity:.26;animation:au3 32s ease-in-out infinite alternate}'
       + '@keyframes au1{to{transform:translate(90px,60px) scale(1.18)}}@keyframes au2{to{transform:translate(-80px,90px) scale(.9)}}@keyframes au3{to{transform:translate(-60px,-50px) scale(1.25)}}'
       // 서명 쓰기 · 제목 단어 순서 등장 · 사진 카드 등장
-      + '.hero-h .w{display:inline-block}.js .fx-intro .sig{animation:sigIn 1.4s .15s var(--ez) backwards}@keyframes sigIn{from{clip-path:inset(-25% 100% -25% -5%)}to{clip-path:inset(-25% -5% -25% -5%)}}'
+      + '.hero-h .w{display:inline-block}.js .fx-intro .sig:not([data-draw]){animation:sigIn 1.4s .15s var(--ez) backwards}@keyframes sigIn{from{clip-path:inset(-25% 100% -25% -5%)}to{clip-path:inset(-25% -5% -25% -5%)}}'
       + '.js .fx-intro .hero-h .w{animation:wIn .8s var(--ez) backwards;animation-delay:calc(.4s + var(--i) * 45ms)}@keyframes wIn{from{opacity:0;transform:translateY(.55em);filter:blur(6px)}}'
       + '.js .fx-intro .photo .card{animation:cardIn 1.1s .12s var(--ez) backwards}@keyframes cardIn{from{opacity:0;transform:translateY(26px) rotate(-5deg) scale(.94)}}'
       // 사진·타일 3D 기울기 + 빛 반사 (JS가 --gx/--gy, transform 지정)
@@ -1208,7 +1243,7 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
       // 카드 호버 · Available 신호
       + '.dcard{transition:transform .4s var(--ez),box-shadow .4s var(--ez)}.dcard:hover{transform:translateY(-4px);box-shadow:0 20px 40px -24px rgba(0,0,0,.55)}'
       + '.avail i{position:relative}.avail i::after{content:"";position:absolute;inset:0;border-radius:50%;background:var(--mint);animation:ping 1.9s var(--ez) infinite}@keyframes ping{from{transform:scale(1);opacity:.85}to{transform:scale(2.8);opacity:0}}'
-      + '@media(prefers-reduced-motion:reduce){.js .rv{filter:none}.aura i,.avail i::after,.js .fx-intro .sig,.js .fx-intro .hero-h .w,.js .fx-intro .photo .card{animation:none}.js .xp .xp-pj li{opacity:1;transform:none;transition:none}.js .xp .xp-pj li::before{transform:none;transition:none}.dock-pill,.tile::after{transition:none}}'
+      + '@media(prefers-reduced-motion:reduce){.js .rv{filter:none}.aura i,.avail i::after,.js .fx-intro .sig,.js .sig[data-draw]:not(.go) .sg,.js .fx-intro .hero-h .w,.js .fx-intro .photo .card{animation:none}.js .sig[data-draw]:not(.go) .sg{opacity:1}.js .xp .xp-pj li{opacity:1;transform:none;transition:none}.js .xp .xp-pj li::before{transform:none;transition:none}.dock-pill,.tile::after{transition:none}}'
       // 03 Projects 타일 = 상품카드(전체 프로젝트 휠과 같은 구성): 흰 카드 · 썸네일 · 분야 · 제목 · 회사·연도 · 대표 지표 — 크기별 배치
       + '.mosaic{grid-auto-rows:234px}.tile.pc{justify-content:flex-start;padding:7px;background:#fff;box-shadow:0 0 0 1px rgba(0,0,0,.06),0 14px 30px -22px rgba(0,0,0,.42)}.tile.pc::after{background:linear-gradient(110deg,transparent 35%,rgba(255,255,255,.35) 50%,transparent 65%)}'
       + '.pc-th{position:relative;flex:none;height:41%;border-radius:17px;overflow:hidden;background:var(--c) center/cover no-repeat;display:grid;place-items:center}.pc-th.img{background-color:#f1f0ec}.pc-th.img::before{content:"";position:absolute;inset:-14%;background:var(--img) center/cover no-repeat;filter:blur(18px) saturate(1.15);opacity:.5}.pc-th .th-img{position:absolute;inset:0;width:100%;height:100%;display:block;z-index:1}.pc-th .t-play{z-index:2}.tile .pc-th svg{width:30px;height:30px}.tile.tall .pc-th{height:60%}.tile.tall .pc-th svg{width:46px;height:46px}'
@@ -1252,6 +1287,9 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
       // 스크롤 진행바
       + 'var prog=document.querySelector(".prog");if(prog){var pT=0,pUp=function(){pT=0;var h=document.documentElement.scrollHeight-innerHeight;prog.style.setProperty("--p",h>0?Math.min(1,Math.max(0,(window.pageYOffset||0)/h)).toFixed(4):0);};addEventListener("scroll",function(){if(!pT)pT=requestAnimationFrame(pUp);},{passive:true});addEventListener("resize",pUp);pUp();}'
       // 히어로: 스크롤하면 살짝 떠오르며 옅어짐 → 다음 섹션으로 이어지는 느낌
+      // 붓글씨 서명: 글씨체가 준비되면(.go) 글자 위치(x)에 맞춰 붓이 지나가는 순서대로 써 내려감 · 줄인 모션·편집 중 재렌더면 완성된 모습 그대로
+      + 'var sig=document.querySelector(".sig[data-draw]");if(sig){var sgGo=function(){if(sig.classList.contains("go"))return;var fs=parseFloat(getComputedStyle(sig).fontSize)||40,x0=null;[].forEach.call(sig.querySelectorAll(".sg-ink tspan"),function(t,i){var x=i*fs*.42;try{x=t.getStartPositionOfChar(0).x;}catch(_){}if(x0==null)x0=x;t.style.animationDelay=(.25+Math.max(0,x-x0)/fs*.28).toFixed(3)+"s";});sig.classList.add("go");};'
+      + 'if(reduce||still)sig.removeAttribute("data-draw");else{var sgT=setTimeout(sgGo,2600),sgF=sig.getAttribute("data-sf");if(document.fonts&&document.fonts.load&&sgF)document.fonts.load(Math.round(parseFloat(getComputedStyle(sig).fontSize)||40)+"px \'"+sgF+"\'").then(function(){clearTimeout(sgT);sgGo();},function(){clearTimeout(sgT);sgGo();});else{clearTimeout(sgT);sgGo();}}}'
       + 'var hcnt=document.querySelector(".home .cnt");if(hcnt&&!reduce&&!still&&document.body.classList.contains("fx-intro")){var hT=0,hUp=function(){hT=0;var y=window.pageYOffset||0;if(y>1600)return;var k=Math.min(1,y/700);hcnt.style.transform="translate3d(0,"+(-y*.12).toFixed(1)+"px,0)";hcnt.style.opacity=String(1-k*.55);};addEventListener("scroll",function(){if(!hT)hT=requestAnimationFrame(hUp);},{passive:true});}'
       // 조회수: 부모(라이브 view.html·스튜디오)가 보낸 실제 값 + 보정값(data-ta/tda/tdd) → 카운트업
       + 'var vw=document.querySelector(".vw");function kstD(){return new Date(Date.now()+9*3600e3).toISOString().slice(0,10);}function nf(n){try{return Number(n).toLocaleString("ko-KR");}catch(_){return String(n);}}'
@@ -1564,7 +1602,7 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
         // 좌상단: 돌아가기 · 서명 · 번호 / 우상단: 큰 타이틀
         + '.wh-top{position:absolute;left:clamp(18px,3vw,44px);top:clamp(16px,3vh,32px);z-index:400;display:flex;flex-direction:column;align-items:flex-start;gap:16px;cursor:auto}'
         + '.wh-back{display:inline-flex;align-items:center;height:36px;padding:0 15px;border-radius:999px;background:rgba(255,255,255,.66);-webkit-backdrop-filter:blur(14px) saturate(160%);backdrop-filter:blur(14px) saturate(160%);box-shadow:0 0 0 .5px var(--bd),0 1px 2px rgba(0,0,0,.04);font-size:13px;font-weight:600;transition:background .2s}.wh-back:hover{background:#fff}'
-        + '.wh-id{display:flex;align-items:center;gap:14px}.wh-sig{font-family:"Caveat",cursive;font-size:28px;font-weight:600;line-height:1}'
+        + '.wh-id{display:flex;align-items:center;gap:14px}.wh-sig{font-family:var(--sgf);font-size:calc(var(--sgfs) * .74);font-weight:var(--sgw);line-height:1;white-space:nowrap}'
         + '.wh-cnt{display:flex;align-items:center;gap:10px;font-size:12px;font-weight:700;font-variant-numeric:tabular-nums;color:var(--gray)}.wh-cnt b{color:var(--ink)}.wh-cnt i{width:32px;height:1px;background:currentColor}'
         + '.wh-head{position:absolute;left:50%;top:clamp(18px,3.2vh,40px);transform:translateX(-50%);z-index:350;width:min(760px,calc(100vw - 480px));text-align:center;pointer-events:none}'
         + '.wh-eye{display:flex;align-items:center;justify-content:center;gap:14px;margin:0;font-size:11px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--gray)}.wh-eye i{width:36px;height:1px;background:currentColor;opacity:.55}'
@@ -1619,7 +1657,7 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
         // 낮은 화면(노트북): 정보 패널 간격을 줄여 아래 분류 버튼과 겹치지 않게
         // 큰 모니터(QHD 등): 카드에 맞춰 정보 패널·분류 버튼·머리글도 한 단계 크게
         + '@media(min-width:1800px){.wh-info{width:min(680px,calc(100vw - 40px))}.wh-meta{font-size:12.5px}.wh-name{font-size:clamp(34px,2.1vw,48px)}.wh-kpis{gap:9px;margin-top:18px}.wh-kpi{padding:9px 16px;font-size:13px}.wh-kpi b{font-size:18px}.wh-acts{margin-top:20px;gap:18px}.wh-more{height:50px;padding:0 24px;font-size:15px}.wh-hint{font-size:13px}.wh-h1{font-size:clamp(48px,2.9vw,72px)}'
-        + '.wh-chips{padding:5px}.wh-chip{height:40px;padding:0 17px;font-size:15px}.wh-back{height:42px;padding:0 18px;font-size:14.5px}.wh-sig{font-size:34px}.ft-editorial .wh-cnt{font-size:26px}.wh-eye{font-size:12.5px}}'
+        + '.wh-chips{padding:5px}.wh-chip{height:40px;padding:0 17px;font-size:15px}.wh-back{height:42px;padding:0 18px;font-size:14.5px}.wh-sig{font-size:calc(var(--sgfs) * .9)}.ft-editorial .wh-cnt{font-size:26px}.wh-eye{font-size:12.5px}}'
         // 낮은 화면(노트북): 카드를 크게 쓰는 대신 정보 패널은 제목을 빼고 간단히
         + '@media(min-width:760px) and (max-height:860px){.wh-name{display:none}.wh-kpis{margin-top:12px}.wh-acts{margin-top:14px}.wh-more{height:40px}}'
         // 모바일: 위에서부터 차례로(돌아가기·번호 → 타이틀 → 카테고리 → 휠 → 정보), 상세는 아래에서 올라오는 시트
@@ -1630,12 +1668,12 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
         + '.wh-sheet{top:auto;left:8px;right:8px;bottom:8px;width:auto;height:calc(100dvh - 48px);transform:translateY(calc(100% + 20px))}}'
         + '@media(prefers-reduced-motion:reduce){.wh-dyn.swap>*{animation:none}.wh-sheet,.wh-scrim,body{transition:none}}';
       return '<!doctype html><html lang="ko"><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>'
-        + '<title>' + esc(P.nameKo || nameEn || "포트폴리오") + ' — Projects</title><link rel="icon" href="data:,"/>'
+        + '<title>' + esc(nameKo || nameEn || "포트폴리오") + ' — Projects</title><link rel="icon" href="data:,"/>'
         + fontHead
         + '<style>' + WCSS + fontVars + '</style></head><body' + (d.hostStudio ? ' data-host="studio"' : '') + ' class="ft-' + FKEY + '">'
         + '<main class="wh"' + (shown("pp", "autoplay", true) ? '' : ' data-auto="0"') + ' aria-label="프로젝트 휠 — 드래그·휠·←/→로 돌려보기">'
         + '<header class="wh-top"><a class="wh-back" href="' + esc(homeUrl) + '#projects" target="_top" data-ext>← ' + esc(txt("ppBack", "포트폴리오")) + '</a>'
-        + '<div class="wh-id">' + (nameEn ? '<span class="wh-sig">' + esc(nameEn) + '</span>' : '') + '<span class="wh-cnt"><b data-cur>01</b><i></i><span data-tot>' + pad2(N) + '</span></span></div></header>'
+        + '<div class="wh-id">' + (sigTxt ? '<span class="wh-sig">' + esc(sigTxt) + '</span>' : '') + '<span class="wh-cnt"><b data-cur>01</b><i></i><span data-tot>' + pad2(N) + '</span></span></div></header>'
         + '<header class="wh-head"><p class="wh-eye"><i></i>' + eyebrow + '<i></i></p><h1 class="wh-h1">' + headHtml + '</h1></header>'
         + '<nav class="wh-chips" aria-label="카테고리">' + chips + '</nav>'
         + '<div class="wh-ring">' + cardsHtml + '</div>'
@@ -1652,13 +1690,13 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
 
     return '<!doctype html><html lang="ko"><head><script>document.documentElement.classList.add("js")<\/script>'
       + '<meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/>'
-      + '<title>' + esc(P.nameKo || nameEn || "포트폴리오") + ' — Marketing Portfolio</title>'
+      + '<title>' + esc(nameKo || nameEn || "포트폴리오") + ' — Marketing Portfolio</title>'
       + '<meta name="description" content="' + esc((tagline || "").replace(/"/g, "")) + '"/><meta name="theme-color" content="#ffffff"/><link rel="icon" href="data:,"/>'
       + fontHead
       + '<style>' + KCSS + fontVars + '</style></head><body class="' + ["intro", "aura", "tilt", "progress"].filter(function (k) { return FX[k]; }).map(function (k) { return "fx-" + k; }).concat("ft-" + FKEY).join(" ") + '"' + (d.hostStudio ? ' data-host="studio"' : '') + '>'
       + (FX.progress ? '<div class="prog" aria-hidden="true"><i></i></div>' : '')
       + '<div class="page">' + home + sectionsHtml
-      + '<p class="foot">' + esc(txt("footer", "© " + new Date().getFullYear() + " — " + (nameEn || P.nameKo || "") + ", Marketing Portfolio")) + '</p></div>'
+      + '<p class="foot">' + esc(txt("footer", "© " + new Date().getFullYear() + " — " + (nameEn || nameKo || "") + ", Marketing Portfolio")) + '</p></div>'
       + dock + '<script>' + KJS + '<\/script></body></html>';
   }
 
