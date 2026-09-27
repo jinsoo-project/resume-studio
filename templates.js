@@ -894,6 +894,12 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
     var aboutParas;
     if (aboutOv) aboutParas = aboutOv.split(/\n\s*\n/).map(function (s) { return s.trim(); }).filter(Boolean);
     else { var half = Math.ceil(sents.length / 2); aboutParas = [sents.slice(0, half).join(" "), sents.slice(half).join(" ")].filter(Boolean); }
+    // About 두 문단 = KILO 대시보드 '첫 문장'(검은 글씨) · '회색 보조 문장'(회색 글씨) — 쓰면 그 문장 그대로(줄바꿈 포함)
+    if (!introOn) {
+      if (String(KT.heroMain || "").trim()) aboutParas[0] = String(KT.heroMain);
+      if (String(KT.heroSub || "").trim()) aboutParas[1] = String(KT.heroSub);
+      aboutParas = aboutParas.filter(function (x) { return x && String(x).trim(); });
+    }
     // About 첫 줄(한 줄 소개): 사진 아래 소개 문장을 숨기면 대표 문장이 여기로 — klio.text.aboutLead(비우면 대표 문장) · 끄기 show.about.lead
     var aboutLead = !introOn && shown("about", "lead", true) ? txt("aboutLead", tagline).trim() : "";
     var aboutInner = '<div class="cnt about rv rv-g">' + (aboutLead ? '<p class="lead" style="--j:0">' + tx(aboutLead) + '</p>' : '') + aboutParas.map(function (p, i) { return '<p' + (i ? ' class="g"' : '') + ' style="--j:' + (i * 2 + (aboutLead ? 1 : 0)) + '">' + tx(p) + '</p>'; }).join("") + '</div>';
