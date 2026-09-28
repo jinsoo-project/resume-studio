@@ -1,4 +1,4 @@
-/* Ads builder · 콘텐츠 파이프라인 · SEO · PARTNERSHIP 화면 — 전부 가상 데이터 */
+/* Ads builder(META) · SEO 화면 — 전부 가상 데이터 */
 (function (NW) {
   "use strict";
   var esc = NW.esc, ko = NW.ko, won = NW.won, ic = NW.ic, md = NW.md, store = NW.store, ri = NW.ri, pick = NW.pick, chance = NW.chance, dstr = NW.dstr, addD = NW.addD, TODAY = NW.TODAY;
@@ -51,7 +51,7 @@
       + fld("지역 <small>비우면 전국</small>", chips(REG, o.regions, "data-breg"))
       + fld("관심사", '<div class="tagin">' + o.interests.map(function (x, i) { return '<span class="tag">' + esc(x) + '<button data-bint-x="' + i + '">×</button></span>'; }).join("") + '<input placeholder="입력 후 Enter" data-bint></div>')
       + fld("노출 위치", chips(PLACE, o.place, "data-bpl")) + '</section>';
-    else body = '<div class="bad"><section class="bsec"><h3>소재</h3>' + inp("name", "광고 이름") + fld("형식", NW.segHtml([["image", "이미지"], ["video", "영상"]], o.media, "data-bmed"))
+    else body = '<div class="badl"><section class="bsec"><h3>소재</h3>' + inp("name", "광고 이름") + fld("형식", NW.segHtml([["image", "이미지"], ["video", "영상"]], o.media, "data-bmed"))
       + '<div class="thumb1" style="background:' + grad(o.id) + '">' + (o.media === "video" ? '<span class="play">▶</span>' : ic("image")) + '<button class="btn sm" data-toast="데모에서는 가상 썸네일을 써요">교체</button></div>'
       + fld("기본 문구", '<textarea class="inp" rows="3" data-bf="body">' + esc(o.body) + '</textarea>') + inp("title", "제목") + fld("CTA", NW.segHtml(CTA.map(function (x) { return [x, x]; }), o.cta, "data-bcta")) + inp("link", "링크") + '</section>'
       + '<div class="bprev"><div class="lbl2" style="margin-top:0">실시간 미리보기 · 피드</div>' + adPreview(o) + '</div></div>';
@@ -109,34 +109,7 @@
   });
   document.addEventListener("change", function (e) { if (e.target.dataset && (e.target.dataset.bf === "name" || e.target.dataset.bage != null)) NW.rerender(true); });
 
-  /* ── 2. 콘텐츠 파이프라인 — 블로그 여정 맵 ──────────────── */
-  var STEPS = [["01", "키워드 트렌드", "서치", "검색 추이·연관어에서 후보 키워드를 뽑아요", "키워드 후보"], ["02", "아이데이션", "스트래", "후보 키워드를 글 주제로 묶고 우선순위를 매겨요", "주제안"], ["03", "브리프", "플래니", "타깃·검색 의도·목차·CTA 를 한 장으로", "브리프"], ["04", "제작", "하루", "브리프대로 초안을 쓰고 이미지를 붙여요", "초안"], ["05", "검수", "서치", "SEO 체크리스트 · 사실 확인 · 톤", "검수 완료"], ["06", "관리", "플래니", "발행 일정 · 담당 · 버전을 관리해요", "발행 대기"], ["07", "발행", "하루", "블로그 발행 + 채널별 요약 배포", "발행"], ["08", "성과", "퍼포", "유입·체류·전환을 글 단위로 집계", "성과 리포트"], ["09", "자동화", "케어", "잘 된 글은 CRM·뉴스레터로 재활용", "자동화 룰"]];
-  var POSTS = (function () { var T = ["단기임대 계약 전 체크리스트 7가지", "한달살기 비용 현실 정리", "대학가 원룸 vs 단기임대 비교", "외국인 유학생 방 구하기 가이드", "보증금 없는 방 구하는 법", "이사 전 꼭 확인할 관리비 항목", "워케이션 하기 좋은 동네", "첫 자취 준비물 리스트", "출장 한 달, 숙소 고르는 기준", "풀옵션 원룸의 진짜 옵션", "단기임대 후기 읽는 법", "학기 단위 계약 팁"], o = []; for (var i = 0; i < T.length; i++) { var st = Math.min(9, Math.max(1, 9 - Math.floor(i * .8) - ri(0, 1))); o.push({ id: "p" + i, title: T[i], kw: pick(["단기임대", "한달살기", "원룸", "자취", "유학생 숙소", "보증금 없는 방"]), step: st, due: dstr(addD(TODAY, ri(-3, 21))), views: st >= 8 ? ri(300, 4200) : 0 }); } return o; })();
-  function pipeline() {
-    var cnt = STEPS.map(function (s, i) { return POSTS.filter(function (p) { return p.step === i + 1; }).length; });
-    var pub = POSTS.filter(function (p) { return p.step >= 7; }).length;
-    return NW.hero("pipe", "콘텐츠 파이프라인 · 블로그", "블로그 파이프라인 — 여정 맵", "키워드에서 자동화까지 9단계. 단계마다 담당 에이전트가 산출물을 넘겨 줘요. 단계를 누르면 무슨 일을 하는지 볼 수 있어요.")
-      + '<div class="kg" style="margin-top:20px">' + NW.kpi("이번 달 발행", pub + "편", "목표 8편") + NW.kpi("진행 중", (POSTS.length - pub) + "편", "01~06 단계") + NW.kpi("평균 리드타임", "9.4일", "키워드 → 발행") + NW.kpi("자동화 단계", "3 / 9", "05 · 08 · 09 자동") + '</div>'
-      + '<div class="sec-h" style="margin-top:28px"><span class="code">MAP</span><h2>여정 맵</h2><span class="hint">가로로 넘겨 보세요</span></div>'
-      + '<div class="jm">' + STEPS.map(function (s, i) {
-        var agc = AG.filter(function (a) { return a[0] === s[2]; })[0], state = cnt[i] ? "진행중" : i < 3 ? "완료" : "대기";
-        return '<button class="jstep" data-step="' + i + '"><div class="js-n"><span>' + s[0] + '</span>' + (i < 8 ? '<i></i>' : '') + '</div><div class="js-c"><div class="js-h"><b>' + s[1] + '</b><span class="pill sm ' + (state === "진행중" ? "p-sky" : state === "완료" ? "p-em" : "p-gray") + '">' + state + '</span></div>'
-          + '<div class="js-ag">' + av(s[2], 26) + '<div><b>' + s[2] + '</b><small>' + agc[1] + '</small></div></div><p>' + s[3] + '</p><div class="js-o"><span>산출물</span><b>' + s[4] + ' <em class="tnum">' + cnt[i] + '</em></b></div></div></button>';
-      }).join("") + '</div>'
-      + '<div class="sec-h" style="margin-top:28px"><span class="code">NOW</span><h2>진행 중인 글</h2><span class="hint">' + POSTS.length + '편</span></div><div class="card tw"><table class="t" style="min-width:860px"><thead><tr><th>제목</th><th>키워드</th><th>단계</th><th>담당</th><th>마감</th><th class="r">조회</th></tr></thead><tbody>'
-      + POSTS.slice().sort(function (a, b) { return a.step - b.step; }).map(function (p) { var s = STEPS[p.step - 1]; return '<tr class="clk" data-step="' + (p.step - 1) + '"><td><b>' + esc(p.title) + '</b></td><td><span class="pill sm p-gray">' + esc(p.kw) + '</span></td><td><div class="prog">' + STEPS.map(function (_, k) { return '<i class="' + (k < p.step - 1 ? 'd' : k === p.step - 1 ? 'c' : '') + '"></i>'; }).join("") + '<span>' + s[0] + ' ' + s[1] + '</span></div></td><td>' + av(s[2], 20) + ' ' + s[2] + '</td><td class="tnum' + (p.due < dstr(TODAY) && p.step < 7 ? ' danger' : '') + '">' + md(p.due) + '</td><td class="r tnum">' + (p.views ? ko(p.views) : "—") + '</td></tr>'; }).join("") + '</tbody></table></div>';
-  }
-  document.addEventListener("click", function (e) {
-    var b = e.target.closest("[data-step]"); if (!b) return;
-    var i = +b.getAttribute("data-step"), s = STEPS[i], ps = POSTS.filter(function (p) { return p.step === i + 1; });
-    var CHK = [["최근 12주 검색량 추이", "연관어 30개 수집", "경쟁 글 상위 10개 확인"], ["주제 12개로 묶기", "검색 의도 분류", "우선순위 점수"], ["타깃 · 의도 · 목차", "CTA 1개", "내부 링크 3개"], ["초안 2,000자 이상", "이미지 5장", "표 1개"], ["제목에 키워드", "H2 구조", "사실 확인 · 톤"], ["발행일 확정", "담당 배정", "버전 기록"], ["블로그 발행", "인스타 요약 카드", "뉴스레터 후보 등록"], ["유입 · 체류 · 전환", "상위 5편 리포트", "개선 제안"], ["CRM 시나리오 연결", "뉴스레터 재활용", "리라이트 알림"]][i];
-    drawer(s[0] + " · " + s[1], '<div class="js-ag big">' + av(s[2], 40) + '<div><b>' + s[2] + '</b><small>' + AG.filter(function (a) { return a[0] === s[2]; })[0][1] + ' 에이전트</small></div></div><div class="note">' + s[3] + '</div>'
-      + '<div class="lbl2">체크리스트</div><div class="chk">' + CHK.map(function (c, k) { return '<label><input type="checkbox"' + (k < 2 ? ' checked' : '') + '> ' + c + '</label>'; }).join("") + '</div>'
-      + '<div class="lbl2">이 단계에 있는 글 <small>' + ps.length + '</small></div>' + (ps.length ? ps.map(function (p) { return '<div class="dl"><div class="dl-t"><b>' + esc(p.title) + '</b><small>키워드 ' + esc(p.kw) + ' · 마감 ' + md(p.due) + '</small></div></div>'; }).join("") : '<p class="faint">지금은 없어요.</p>')
-      + '<div class="demo-note">데모에서는 여정 맵만 열려 있어요 — 단계별 상세 화면(01~09)은 비활성화돼 있어요.</div>', '<button class="btn" data-close>닫기</button>', 480);
-  });
-
-  /* ── 3. SEO · Keyword Trend ───────────────────────── */
+  /* ── 2. SEO · Keyword Trend ───────────────────────── */
   var KW = store.get("kw", { list: ["단기임대", "한달살기", "원룸 단기"], period: "26", src: "naver" });
   var KC = ["#3b82f6", "#f97316", "#10b981", "#8b5cf6", "#ec4899"];
   function series(k, n, src) { var r = NW.hashRng(k + src), base = 30 + r() * 40, tr = (r() - .35) * .9, out = []; for (var i = 0; i < 52; i++) { var sea = Math.sin((i + r() * 3) / 52 * Math.PI * 4) * 9; out.push(Math.max(2, base + tr * i + sea + (r() - .5) * 10)); } var mx = Math.max.apply(null, out); return out.slice(52 - n).map(function (v) { return Math.round(v / mx * 100); }); }
@@ -164,95 +137,6 @@
   });
   document.addEventListener("keydown", function (e) { var t = e.target; if (e.key === "Enter" && t.hasAttribute && t.hasAttribute("data-kw-in") && !e.isComposing && t.value.trim()) { if (KW.list.indexOf(t.value.trim()) < 0) KW.list.push(t.value.trim()); kwSave(); var n = NW.$("[data-kw-in]"); if (n) n.focus(); } });
 
-  /* ── 4. 입점사 & 공급사 현황 ─────────────────────────── */
-  var STAGE = [["리서치", "#94a3b8"], ["컨택", "#0ea5e9"], ["미팅", "#6366f1"], ["제안", "#8b5cf6"], ["협상", "#f59e0b"], ["계약", "#10b981"], ["온보딩", "#14b8a6"], ["운영", "#16a34a"]];
-  var PT = store.get("partners", null) || (function () {
-    var o = [], P = ["가나", "다온", "라온", "마루", "바른", "새길", "온누리", "한빛", "푸른", "하람", "누리", "새봄"], S = ["부동산", "공인중개", "하우징", "리빙", "스테이", "자산관리", "임대관리"], CH = ["트래블", "캠퍼스 커뮤니티", "이사 앱", "중개 플랫폼", "워케이션 클럽", "유학 커뮤니티", "기업 복지몰", "여행 카페"];
-    for (var i = 0; i < 44; i++) { var ch = i >= 28, st = ri(1, 8), nm = ch ? pick(P) + " " + CH[i % CH.length] : pick(P) + " " + pick(S), logs = []; for (var k = 0; k < ri(0, 4); k++) logs.push({ id: uid(), at: dstr(addD(TODAY, -ri(1, 90))), text: pick(["첫 통화 — 관심 있음", "소개서 메일 발송", "미팅 일정 조율 중", "수수료 조건 문의", "계약서 초안 전달", "온보딩 가이드 공유", "월간 정산 확인"]) }); logs.sort(function (a, b) { return a.at < b.at ? 1 : -1; }); o.push({ id: uid(), kind: ch ? "channel" : "vendor", name: nm, region: pick(["서울", "경기", "인천", "부산", "대전", "온라인"]), stage: st, owner: pick(["스트래", "플래니", "케어", "나"]), last: logs[0] ? logs[0].at : "", contact: { name: pick(["김", "이", "박", "최", "정"]) + "담당", email: "partner" + (100 + i) + "@example.com", phone: "010-0000-" + (1000 + i) }, rooms: ch ? 0 : ri(3, 60), logs: logs }); }
-    return o;
-  })();
-  var savePT = function () { store.set("partners", PT); };
-  var PS = store.get("pt-s", { tab: "vendor", sort: ["last", -1], q: "", st: 0 });
-  function stBadge(p) { var s = STAGE[p.stage - 1]; return '<button class="stb" data-pt-st="' + p.id + '" style="--c:' + s[1] + '" title="눌러서 다음 단계로"><i></i>' + p.stage + ' ' + s[0] + '</button>'; }
-  function partners() {
-    var rows = PT.filter(function (p) { return p.kind === PS.tab && (!PS.st || p.stage === PS.st) && (!PS.q || (p.name + p.contact.name + p.region).indexOf(PS.q) > -1); });
-    var k = PS.sort[0], dir = PS.sort[1]; rows.sort(function (a, b) { var x = a[k], y = b[k]; return (x > y ? 1 : x < y ? -1 : 0) * dir; });
-    var all = PT.filter(function (p) { return p.kind === PS.tab; });
-    var th = function (key, l, cls) { return '<th class="srt ' + (cls || "") + '" data-pt-sort="' + key + '">' + l + (k === key ? (dir > 0 ? " ▲" : " ▼") : "") + '</th>'; };
-    return NW.hero("pt", "PARTNERSHIP · CRM", "입점사 & 공급사 현황", "입점 파트너와 판매 채널을 8단계로 관리해요. 단계 배지를 누르면 다음 단계로, 행을 누르면 연락처·소통 기록이 열려요. (업체명·연락처는 전부 가상)")
-      + '<div style="margin-top:20px;display:flex;flex-wrap:wrap;gap:8px;align-items:center">' + NW.segHtml([["vendor", "입점사", null, PT.filter(function (p) { return p.kind === "vendor"; }).length], ["channel", "판매채널", null, PT.filter(function (p) { return p.kind === "channel"; }).length]], PS.tab, "data-pt-tab", true) + '<span class="sp" style="flex:1"></span><input class="inp" style="width:220px" placeholder="이름·지역 검색" data-pt-q value="' + esc(PS.q) + '"></div>'
-      + '<div class="stages">' + STAGE.map(function (s, i) { var n = all.filter(function (p) { return p.stage === i + 1; }).length; return '<button class="' + (PS.st === i + 1 ? 'on' : '') + '" data-pt-f="' + (i + 1) + '" style="--c:' + s[1] + '"><small>' + (i + 1) + '</small><b>' + s[0] + '</b><em class="tnum">' + n + '</em></button>'; }).join("") + '</div>'
-      + '<div class="card tw"><table class="t" style="min-width:860px"><thead><tr>' + th("name", "이름") + th("region", "지역") + th("stage", "단계") + (PS.tab === "vendor" ? th("rooms", "매물 수", "r") : "") + th("owner", "담당") + th("last", "최근 컨택일") + '<th>담당자</th><th class="c">기록</th></tr></thead><tbody>'
-      + (rows.length ? rows.map(function (p) { return '<tr class="clk" data-pt="' + p.id + '"><td title="' + esc(p.name) + '"><b>' + esc(p.name) + '</b></td><td>' + p.region + '</td><td>' + stBadge(p) + '</td>' + (PS.tab === "vendor" ? '<td class="r tnum">' + p.rooms + '</td>' : '') + '<td>' + av(p.owner, 20) + ' ' + esc(p.owner) + '</td><td class="tnum">' + (p.last || '<span class="faint">—</span>') + '</td><td>' + esc(p.contact.name) + '</td><td class="c tnum">' + p.logs.length + '</td></tr>'; }).join("") : '<tr><td colspan="8"><div class="empty"><b>조건에 맞는 파트너가 없어요</b><p>검색어나 단계 필터를 지워 보세요.</p></div></td></tr>') + '</tbody></table></div>';
-  }
-  function openPt(id) {
-    var p = PT.filter(function (x) { return x.id === id; })[0];
-    var body = '<div class="kvg"><span>구분</span><b>' + (p.kind === "vendor" ? "입점사" : "판매채널") + '</b><span>지역</span><b>' + p.region + '</b><span>담당</span><b>' + av(p.owner, 18) + ' ' + esc(p.owner) + '</b><span>최근 컨택</span><b class="tnum">' + (p.last || "—") + (p.last ? ' <button class="lnk" data-pt-clr="' + p.id + '">비우기</button>' : '') + '</b></div>'
-      + '<div class="lbl2">단계</div><div class="stpick">' + STAGE.map(function (s, i) { return '<button class="' + (p.stage === i + 1 ? 'on' : i + 1 < p.stage ? 'past' : '') + '" style="--c:' + s[1] + '" data-pt-set="' + (i + 1) + '" data-id="' + p.id + '">' + s[0] + '</button>'; }).join("") + '</div>'
-      + '<div class="lbl2">연락처</div><div class="ct">' + [["담당자", p.contact.name], ["이메일", p.contact.email], ["전화", p.contact.phone]].map(function (r) { return '<div><span>' + r[0] + '</span><b class="mono">' + esc(r[1]) + '</b><button class="ib" data-copy="' + esc(r[1]) + '" title="복사">' + ic("copy") + '</button></div>'; }).join("") + '</div>'
-      + '<div class="lbl2">소통 기록 <small>' + p.logs.length + '</small></div><div class="cm-in"><input class="inp" placeholder="예) 소개서 메일 발송 (Enter)" data-pt-log="' + p.id + '"><button class="btn" data-pt-logb="' + p.id + '">추가</button></div>'
-      + '<div class="tl">' + (p.logs.length ? p.logs.map(function (l) { return '<div class="tl-i"><i></i><div><small class="tnum">' + l.at + '</small><p>' + esc(l.text) + '</p></div><button class="ib" data-pt-ldel="' + l.id + '" data-id="' + p.id + '" title="삭제">🗑</button></div>'; }).join("") : '<p class="faint">아직 기록이 없어요.</p>') + '</div>';
-    drawer(esc(p.name), body, '<button class="btn" data-close>닫기</button>', 500);
-  }
-  function addLog(id) { var inp = NW.$('[data-pt-log="' + id + '"]'), p = PT.filter(function (x) { return x.id === id; })[0]; if (!inp.value.trim()) return; p.logs.unshift({ id: uid(), at: dstr(TODAY), text: inp.value.trim() }); p.last = dstr(TODAY); savePT(); openPt(id); NW.rerender(true); var n = NW.$('[data-pt-log="' + id + '"]'); if (n) n.focus(); }
-  document.addEventListener("click", function (e) {
-    var b, byId = function (id) { return PT.filter(function (x) { return x.id === id; })[0]; };
-    if ((b = e.target.closest("[data-pt-st]"))) { e.stopPropagation(); var p = byId(b.getAttribute("data-pt-st")); p.stage = p.stage % 8 + 1; savePT(); NW.rerender(true); return; }
-    if ((b = e.target.closest("[data-pt-tab]"))) { PS.tab = b.getAttribute("data-pt-tab"); PS.st = 0; store.set("pt-s", PS); NW.rerender(true); return; }
-    if ((b = e.target.closest("[data-pt-f]"))) { var v = +b.getAttribute("data-pt-f"); PS.st = PS.st === v ? 0 : v; store.set("pt-s", PS); NW.rerender(true); return; }
-    if ((b = e.target.closest("[data-pt-sort]"))) { var key = b.getAttribute("data-pt-sort"); PS.sort = [key, PS.sort[0] === key ? -PS.sort[1] : 1]; store.set("pt-s", PS); NW.rerender(true); return; }
-    if ((b = e.target.closest("tr[data-pt]"))) { openPt(b.getAttribute("data-pt")); return; }
-    if ((b = e.target.closest("[data-pt-set]"))) { byId(b.getAttribute("data-id")).stage = +b.getAttribute("data-pt-set"); savePT(); openPt(b.getAttribute("data-id")); NW.rerender(true); return; }
-    if ((b = e.target.closest("[data-pt-clr]"))) { byId(b.getAttribute("data-pt-clr")).last = ""; savePT(); openPt(b.getAttribute("data-pt-clr")); NW.rerender(true); return; }
-    if ((b = e.target.closest("[data-pt-logb]"))) { addLog(b.getAttribute("data-pt-logb")); return; }
-    if ((b = e.target.closest("[data-pt-ldel]"))) { var q = byId(b.getAttribute("data-id")); q.logs = q.logs.filter(function (l) { return l.id !== b.getAttribute("data-pt-ldel"); }); savePT(); openPt(q.id); NW.rerender(true); return; }
-    if ((b = e.target.closest("[data-copy]"))) { NW.copy(b.getAttribute("data-copy")); return; }
-  });
-  document.addEventListener("keydown", function (e) { var t = e.target; if (e.key === "Enter" && t.dataset && t.dataset.ptLog && !e.isComposing) addLog(t.dataset.ptLog); });
-  document.addEventListener("input", function (e) { if (e.target.hasAttribute("data-pt-q")) { PS.q = e.target.value; store.set("pt-s", PS); clearTimeout(PS._t); PS._t = setTimeout(function () { NW.rerender(true); var n = NW.$("[data-pt-q]"); if (n) { n.focus(); n.setSelectionRange(n.value.length, n.value.length); } }, 250); } });
-
-  /* ── 5. 소개서 & 제안서 관리 ──────────────────────────── */
-  var CAT = [["univ", "대학교", "#2563eb", "🎓"], ["estate", "부동산", "#16a34a", "🏢"], ["vendor", "입점", "#ea580c", "🏠"], ["channel", "공급채널", "#7c3aed", "🔗"], ["client", "고객제휴", "#db2777", "🤝"]];
-  var DOCS = store.get("docs", null) || (function () {
-    var o = [], T = { univ: ["유학생 숙소 제휴 제안서", "학기 단위 기숙 대안 소개서"], estate: ["공실 해결 파트너십 제안서", "위탁 운영 소개서"], vendor: ["호스트 입점 안내서", "입점 수수료 · 정산 가이드"], channel: ["판매 채널 연동 제안서", "제휴 상품 구성안"], client: ["기업 출장 숙소 제휴안", "임직원 복지 제휴 소개서"] };
-    CAT.forEach(function (c) { T[c[0]].forEach(function (t) { var n = ri(1, 3); for (var v = 1; v <= n; v++) o.push({ id: uid(), cat: c[0], title: t, ver: "v1." + (v - 1), at: dstr(addD(TODAY, -ri(0, 40) - (n - v) * 20)), pages: ri(8, 24), latest: v === n, by: pick(["스트래", "플래니", "픽셀"]) }); }); });
-    return o;
-  })();
-  var DC = store.get("docs-cat", "all");
-  function proposals() {
-    var list = DOCS.filter(function (d) { return DC === "all" || d.cat === DC; }).sort(function (a, b) { return a.at < b.at ? 1 : -1; });
-    var cat = function (k) { return CAT.filter(function (c) { return c[0] === k; })[0]; };
-    return NW.hero("docs", "PARTNERSHIP · 자료", "소개서 & 제안서 관리", "대상별 소개서·제안서를 버전과 함께 모아 둬요. ★ 는 최신 버전이에요.", '<button class="btn btn-p" data-doc-up>' + ic("plus") + '업로드</button>')
-      + '<div class="catp"><button class="' + (DC === "all" ? 'on' : '') + '" data-doc-cat="all"><span class="ce">📁</span><b>전체</b><em>' + DOCS.length + '</em></button>' + CAT.map(function (c) { return '<button class="' + (DC === c[0] ? 'on' : '') + '" data-doc-cat="' + c[0] + '" style="--c:' + c[2] + '"><span class="ce">' + c[3] + '</span><b>' + c[1] + '</b><em>' + DOCS.filter(function (d) { return d.cat === c[0]; }).length + '</em></button>'; }).join("") + '</div>'
-      + '<div class="dgal">' + list.map(function (d) { var c = cat(d.cat); return '<button class="doc" data-doc="' + d.id + '"><div class="doc-th" style="--c:' + c[2] + '"><div class="pg"><i></i><i></i><i></i><i></i></div><span class="pill sm" style="background:' + c[2] + ';color:#fff">' + c[1] + '</span>' + (d.latest ? '<span class="star" title="최신">★</span>' : '') + '</div><div class="doc-b"><b>' + esc(d.title) + '</b><small><span class="mono">' + d.ver + '</span> · ' + d.pages + 'p · ' + md(d.at) + ' · ' + esc(d.by) + '</small></div></button>'; }).join("") + '</div>';
-  }
-  document.addEventListener("click", function (e) {
-    var b;
-    if ((b = e.target.closest("[data-doc-cat]"))) { DC = b.getAttribute("data-doc-cat"); store.set("docs-cat", DC); NW.rerender(true); return; }
-    if ((b = e.target.closest("[data-doc]"))) {
-      var d = DOCS.filter(function (x) { return x.id === b.getAttribute("data-doc"); })[0], c = CAT.filter(function (x) { return x[0] === d.cat; })[0], vers = DOCS.filter(function (x) { return x.title === d.title; }).sort(function (a, b2) { return a.ver < b2.ver ? 1 : -1; });
-      NW.layer('<div class="ov"><div class="md sm"><div class="md-h"><div class="tt"><b>' + esc(d.title) + ' <span class="mono" style="font-weight:500;color:var(--faint)">' + d.ver + '</span></b><span>' + c[1] + ' · ' + d.pages + '페이지 · ' + d.at + ' · ' + esc(d.by) + '</span></div><button class="xb" data-close>' + ic("x") + '</button></div><div class="md-b" style="padding:18px 20px">'
-        + '<div class="pages">' + [1, 2, 3].map(function (n) { return '<div class="pgv" style="--c:' + c[2] + '"><i></i><i></i><i></i><i></i><i></i><small>' + n + '</small></div>'; }).join("") + '</div>'
-        + '<div class="lbl2">버전</div>' + vers.map(function (v) { return '<div class="dl"><span class="mono">' + v.ver + '</span><div class="dl-t"><b>' + (v.latest ? '★ 최신' : '이전 버전') + '</b><small>' + v.at + ' · ' + esc(v.by) + '</small></div></div>'; }).join("")
-        + '</div><div class="md-f"><button class="btn" data-close>닫기</button><button class="btn btn-p" data-toast="다운로드 (데모 — 실제 파일은 없어요)">다운로드</button></div></div></div>');
-      return;
-    }
-    if (e.target.closest("[data-doc-up]")) {
-      NW.layer('<div class="ov"><div class="md sm"><div class="md-h"><div class="tt"><b>소개서 · 제안서 업로드</b><span>데모: 파일은 올라가지 않고 목록에만 추가돼요</span></div><button class="xb" data-close>' + ic("x") + '</button></div><div class="md-b" style="padding:18px 20px;display:flex;flex-direction:column;gap:14px">'
-        + fld("대상", '<select class="inp" id="docC">' + CAT.map(function (c) { return '<option value="' + c[0] + '"' + (DC === c[0] ? ' selected' : '') + '>' + c[3] + ' ' + c[1] + '</option>'; }).join("") + '</select>') + fld("제목", '<input class="inp" id="docT" placeholder="예) 유학생 숙소 제휴 제안서">') + fld("버전", '<input class="inp mono" id="docV" value="v1.0">') + '<label class="dz">PDF 를 끌어다 놓거나 눌러서 선택<input type="file" accept=".pdf" id="docF" hidden></label></div><div class="md-f"><button class="btn" data-close>취소</button><button class="btn btn-p" data-doc-save>추가</button></div></div></div>');
-      return;
-    }
-    if (e.target.closest("[data-doc-save]")) {
-      var t = document.getElementById("docT").value.trim(), f = document.getElementById("docF"); if (!t && f.files[0]) t = f.files[0].name.replace(/\.pdf$/i, ""); if (!t) { document.getElementById("docT").focus(); return; }
-      DOCS.forEach(function (x) { if (x.title === t) x.latest = false; });
-      DOCS.unshift({ id: uid(), cat: document.getElementById("docC").value, title: t, ver: document.getElementById("docV").value || "v1.0", at: dstr(TODAY), pages: ri(6, 20), latest: true, by: "나" }); store.set("docs", DOCS); NW.closeLayer(); NW.rerender(true); NW.toast("추가했어요"); return;
-    }
-  });
-  document.addEventListener("change", function (e) { if (e.target.id === "docF" && e.target.files[0]) { var dz = e.target.closest(".dz"); dz.firstChild.textContent = "📄 " + e.target.files[0].name + " "; } });
-
   NW.PAGES["meta-ads"] = { render: metaAds };
-  NW.PAGES["blog-journey"] = { render: pipeline };
   NW.PAGES["keyword-trend"] = { render: kwTrend };
-  NW.PAGES["partners"] = { render: partners };
-  NW.PAGES["proposals"] = { render: proposals };
 })(window.NW);

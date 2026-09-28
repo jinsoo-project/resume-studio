@@ -1,26 +1,29 @@
-/* 앱 셸 — 사이드바 · 라우터 · 히어로 편집 · 새로고침 · 다크 모드
+/* 앱 셸 — 상단 탭(구조·개요 | 데모 콘솔) · 사이드바 · 라우터 · 히어로 편집 · 새로고침 · 다크 모드
+   /ax 한 주소에서 #/overview = 구조·개요, 그 밖의 #/… = 데모 콘솔 화면이에요.
    데모에서 쓰는 메뉴만 열려 있고, 나머지는 회색(비활성)으로 원래 자리에 남겨 둬요. */
 (function (NW) {
   "use strict";
   var esc = NW.esc, ic = NW.ic, store = NW.store, $ = NW.$;
   var OFF_TIP = "데모에서는 비활성화된 메뉴예요";
+  NW.EMBED = /[?&]embed=1\b/.test(location.search);
+  if (NW.EMBED) document.documentElement.classList.add("embed");
 
   /* [slug | null(비활성), 라벨] · {sub: 하위 그룹} */
+  var BLOG = [["blog-journey", "여정 맵"], ["blog-01", "01 키워드 트렌드"], ["blog-02", "02 아이데이션"], ["blog-03", "03 브리프"], ["blog-04", "04 제작"], ["blog-05", "05 검수"], ["blog-06", "06 관리"], ["blog-07", "07 발행"], ["blog-08", "08 성과"], ["blog-09", "09 자동화"]];
   var NAV = [
-    { g: "DASHBOARD", ic: "folder", kids: [["total-dashboard", "Total Dashboard"], [null, "Open API Dashboard"], ["kpi-okr", "KPI & OKR Tracker"], [null, "Live Roomtype"], [null, "Coupon / Point"], [null, "Referral"], [null, "Catalog"], [null, "Brand table"], [null, "LTV · KPI Logic"]] },
-    { g: "MKT", ic: "chart", kids: [["paid-dashboard", "Paid Dashboard"], ["ga4", "GA4 대시보드"], ["ad-requests", "광고 & 디자인 요청"], ["utm", "UTM 생성기"], [null, "UTM-LOGIC"], ["competitor-ads", "경쟁사 광고 모니터링"], [null, "검색광고 키워드 API"], ["meetings", "회의 캘린더"], [null, "제휴 채널 통합 리포팅"], [null, "리포트 DB"], [null, "GA4 Taxonomy"]] },
-    { g: "Ads builder", ic: "heart", kids: [["meta-ads", "META Ads"], [null, "NAVER SA"]] },
-    { g: "PARTNERSHIP", ic: "globe", kids: [["partners", "입점사 & 공급사 현황"], ["proposals", "소개서 & 제안서 관리"], [null, "운영 대시보드"], [null, "인증 대학 리스트"], [null, "유학생"], [null, "국제처 URL"], [null, "Mapping MAP"], [null, "PARTNER DB"]] },
+    { g: "DASHBOARD", ic: "folder", kids: [["total-dashboard", "Total Dashboard"], [null, "Open API Dashboard"], ["kpi-okr", "KPI & OKR Tracker"], [null, "Live Roomtype"], [null, "Coupon / Point"], [null, "Referral"], ["catalog", "Catalog"], [null, "Brand table"], [null, "LTV · KPI Logic"]] },
+    { g: "MKT", ic: "chart", kids: [["paid-dashboard", "Paid Dashboard"], ["ga4", "GA4 대시보드"], ["ad-requests", "광고 & 디자인 요청"], ["utm", "UTM 생성기"], [null, "UTM-LOGIC"], ["competitor-ads", "경쟁사 광고 모니터링"], ["search-kw", "검색광고 키워드 API"], ["meetings", "회의 캘린더"], [null, "제휴 채널 통합 리포팅"], [null, "리포트 DB"], [null, "GA4 Taxonomy"]] },
+    { g: "Ads builder", ic: "heart", kids: [["meta-ads", "META Ads"], ["naver-sa", "NAVER SA"]] },
     { g: "SEO", ic: "chart", kids: [["keyword-trend", "Keyword Trend"], [null, "NAVER Trend"], [null, "GOOGLE Trend"], [null, "Competitor Trend"]] },
     { g: "NEWS LETTER", ic: "star", off: true },
     { g: "FRAME WORK", ic: "star", off: true },
-    { g: "콘텐츠 파이프라인", ic: "base", kids: [{ sub: "블로그 파이프라인", kids: [["blog-journey", "여정 맵"], [null, "01 키워드 트렌드"], [null, "02 아이데이션"], [null, "03 브리프"], [null, "04 제작"], [null, "05 검수"], [null, "06 관리"], [null, "07 발행"], [null, "08 성과"], [null, "09 자동화"]] }, { sub: "인스타 파이프라인", off: true }] },
+    { g: "콘텐츠 파이프라인", ic: "base", kids: [{ sub: "블로그 파이프라인", kids: BLOG }, { sub: "인스타 파이프라인", off: true }] },
     { g: "OPEN-API-TEST", ic: "globe", off: true }
   ];
   var FOOT = [["image", "이미지 업로드"], ["home", "Agent List"], ["gear", "탭 설정"]];
-  var DEF = "total-dashboard";
-  var route = function () { var h = location.hash.replace(/^#\/?/, ""); return NW.PAGES[h] ? h : DEF; };
-  var OPEN = store.get("sb-open", null) || { "DASHBOARD": 1, "MKT": 1, "Ads builder": 1, "PARTNERSHIP": 1, "SEO": 1, "콘텐츠 파이프라인": 1 };
+  var OV = "overview", DEF = "total-dashboard";
+  var route = function () { if (NW.EMBED) return OV; var h = location.hash.replace(/^#\/?/, ""); return h === OV || !h ? OV : NW.PAGES[h] ? h : DEF; };
+  var OPEN = store.get("sb-open2", null) || { "DASHBOARD": 1, "MKT": 1, "Ads builder": 1, "SEO": 1, "콘텐츠 파이프라인": 1 };
   var COL = !!store.get("sidebar-collapsed", false);
 
   function leaf(k, sub) {
@@ -33,7 +36,7 @@
   function sidebar(variant) {
     var nav = NAV.map(function (g) {
       if (g.off) return '<button class="sb-g off" aria-disabled="true" title="' + OFF_TIP + '">' + ic(g.ic, "sb-ic") + '<span class="sb-lbl">' + esc(g.g) + '</span>' + ic("chev", "sb-chev") + '</button>';
-      var open = !!OPEN[g.g], act = hasCur(g.kids);
+      var open = !!OPEN[g.g] || hasCur(g.kids), act = hasCur(g.kids);
       return '<button class="sb-g' + (act ? ' act' : '') + '" aria-expanded="' + open + '" data-sb-g="' + esc(g.g) + '" data-first="' + firstLive(g.kids) + '" title="' + esc(g.g) + '">' + ic(g.ic, "sb-ic") + '<span class="sb-lbl">' + esc(g.g) + '</span>' + ic("chev", "sb-chev") + '</button>'
         + (open ? '<div class="sb-kids">' + g.kids.map(function (k) {
           if (!k.sub) return leaf(k);
@@ -41,40 +44,56 @@
           return '<span class="sb-sub">' + ic("chev", "rot") + esc(k.sub) + '</span>' + k.kids.map(function (x) { return leaf(x, true); }).join("");
         }).join("") + '</div>' : '');
     }).join("");
-    var dark = document.documentElement.classList.contains("dark");
     return '<aside class="sb' + (variant === "desktop" && COL ? ' col' : '') + '">'
       + (variant === "desktop" ? '<button class="sb-tog" data-sb-col aria-label="사이드바 접기">' + ic("left") + '</button>' : '')
-      + '<div class="sb-logo"><div class="sb-mark">' + ic("user") + '</div><div class="sb-t"><h1>' + NW.BRAND + ' MKT</h1><p>Agent Dashboard</p></div></div>'
+      + '<div class="sb-logo"><div class="sb-mark">' + ic("user") + '</div><div class="sb-t"><h1>' + NW.BRAND + ' MKT</h1><p>Agent Dashboard · 데모</p></div></div>'
       + '<nav class="sb-nav">' + nav + '</nav>'
       + '<div class="sb-foot">' + FOOT.map(function (f) { return '<button class="sb-g off" aria-disabled="true" title="' + OFF_TIP + '">' + ic(f[0], "sb-ic") + '<span class="sb-lbl">' + f[1] + '</span></button>'; }).join("")
-      + '<div class="sb-user"><span class="sb-av">DM</span><span class="sb-foot-t" style="flex:1;min-width:0"><b style="display:block;font-size:12.5px">데모 사용자</b><small style="color:var(--muted-foreground);font-size:11px">읽기·편집 모두 로컬 저장</small></span><button class="xb sb-foot-t" data-dark title="' + (dark ? "라이트 모드" : "다크 모드") + '">' + ic("moon") + '</button></div></div>'
-      + '<div class="sb-live"><span class="pulse"></span><span class="sb-foot-t">7명 에이전트 활동 중</span></div>'
-      + '<a class="sb-back sb-foot-t" href="/portfolio">← 포트폴리오로 돌아가기</a></aside>';
+      + '<div class="sb-user"><span class="sb-av">DM</span><span class="sb-foot-t" style="flex:1;min-width:0"><b style="display:block;font-size:12.5px">데모 사용자</b><small style="color:var(--muted-foreground);font-size:11px">편집 내용은 이 브라우저에만 저장</small></span></div></div>'
+      + '<div class="sb-live"><span class="pulse"></span><span class="sb-foot-t">7명 에이전트 활동 중</span></div></aside>';
   }
-  function shell() {
-    $("#app").innerHTML = sidebar("desktop")
-      + '<div class="mbar"><button class="xb" data-mnav aria-label="메뉴 열기">' + ic("menu") + '</button><b>' + NW.BRAND + ' MKT</b><span class="demo-pill" style="margin-left:auto"><i></i>데모</span></div>'
-      + '<div class="mdrawer" id="mdrawer"><div class="bd" data-mclose></div>' + sidebar("drawer") + '</div>'
-      + '<main id="main"></main>';
+  function topbar() {
+    var r = route(), onOv = r === OV, dark = document.documentElement.classList.contains("dark");
+    return '<header class="tb">' + (onOv ? '' : '<button class="xb tb-menu" data-mnav aria-label="메뉴 열기">' + ic("menu") + '</button>')
+      + '<a class="tb-brand" href="#/overview"><span class="sb-mark">' + ic("base") + '</span><span><b>AX-MKT 콘솔</b><small>김진수 · Marketing &amp; AX</small></span></a>'
+      + '<nav class="tb-tabs" role="tablist"><a role="tab" class="' + (onOv ? 'on' : '') + '" href="#/overview">구조 · 개요</a><a role="tab" class="' + (onOv ? '' : 'on') + '" href="#/' + (store.get("last", DEF)) + '">데모 콘솔</a></nav>'
+      + '<span class="tb-sp"></span><span class="demo-pill tb-pill"><i></i>모든 수치는 예시 · 가상 데이터</span>'
+      + '<button class="xb" data-dark title="' + (dark ? "라이트 모드" : "다크 모드") + '">' + ic("moon") + '</button>'
+      + '<a class="btn tb-back" href="/portfolio">포트폴리오 ↗</a></header>';
+  }
+  function layout() {
+    var onOv = route() === OV;
+    if (NW.EMBED) { $("#app").innerHTML = '<main id="main"></main>'; return; }
+    $("#app").innerHTML = topbar() + '<div class="body">' + (onOv ? NW.OVERVIEW.toc() : sidebar("desktop")) + '<main id="main"></main></div>'
+      + (onOv ? '' : '<div class="mdrawer" id="mdrawer"><div class="bd" data-mclose></div>' + sidebar("drawer") + '</div>');
+    document.documentElement.classList.toggle("is-ov", onOv);
   }
   function paintNav() {
-    var d = $(".app > .sb"); if (d) d.outerHTML = sidebar("desktop");
+    var d = $(".body > .sb:not(.ov-toc)"); if (d) d.outerHTML = sidebar("desktop");
     var m = $("#mdrawer .sb"); if (m) m.outerHTML = sidebar("drawer");
+    var t = $(".tb"); if (t) t.outerHTML = topbar();
   }
   NW.rerender = function (keep) {
     var y = window.scrollY, main = $("#main"); if (!main) return;
     NW.charts.length = 0;
-    main.innerHTML = '<div class="wrap">' + NW.PAGES[route()].render() + '</div>';
-    NW.drawCharts();
+    if (route() === OV) { main.innerHTML = '<div class="wrap ov-wrap">' + NW.OVERVIEW.render() + '</div>'; NW.OVERVIEW.mount(); }
+    else { main.innerHTML = '<div class="wrap">' + NW.PAGES[route()].render() + '</div>'; NW.drawCharts(); }
     if (keep !== false) window.scrollTo(0, y);
   };
+  var lastMode = null;
   function go() {
-    var r = route(); if (location.hash.replace(/^#\/?/, "") !== r) history.replaceState(null, "", "#/" + r);
-    closeM(); paintNav(); NW.closeLayer(); NW.rerender(false); window.scrollTo(0, 0);
-    var t = (function f(list) { for (var i = 0; i < list.length; i++) { var k = list[i]; if (k.sub) { var s = f(k.kids || []); if (s) return s; } else if (k[0] === r) return k[1]; } return null; });
-    NAV.forEach(function (g) { var n = t(g.kids || []); if (n) document.title = n + " · " + NW.BRAND + " MKT (데모)"; });
+    var r = route(), h = location.hash.replace(/^#\/?/, "");
+    if (!NW.EMBED && h !== r) history.replaceState(null, "", "#/" + r);
+    NW.OVERVIEW.unmount(); closeM(); NW.closeLayer();
+    var mode = r === OV ? "ov" : "con";
+    if (mode !== lastMode || !$("#main")) { layout(); lastMode = mode; } else paintNav();
+    if (r !== OV) store.set("last", r);
+    NW.rerender(false); window.scrollTo(0, 0);
+    var name = r === OV ? "구조 · 개요" : null;
+    if (!name) (function f(list) { list.forEach(function (k) { if (k.sub) f(k.kids || []); else if (k[0] === r) name = k[1]; }); })([].concat.apply([], NAV.map(function (g) { return g.kids || []; })));
+    document.title = (name ? name + " · " : "") + "AX-MKT 콘솔 — 김진수";
   }
-  function openM() { $("#mdrawer").classList.add("on"); document.body.style.overflow = "hidden"; }
+  function openM() { var m = $("#mdrawer"); if (!m) return; m.classList.add("on"); document.body.style.overflow = "hidden"; }
   function closeM() { var m = $("#mdrawer"); if (m && m.classList.contains("on")) { m.classList.remove("on"); document.body.style.overflow = ""; } }
 
   /* 히어로 제목·설명: 클릭 → 입력, Enter/blur 저장, Esc 취소, 빈값 = 기본 */
@@ -99,7 +118,7 @@
     if (t.closest("[aria-disabled]")) { e.preventDefault(); return; }
     if ((b = t.closest("[data-sb-g]"))) {
       if (b.closest(".sb.col")) { location.hash = "#/" + b.getAttribute("data-first"); return; }
-      var g = b.getAttribute("data-sb-g"); OPEN[g] = OPEN[g] ? 0 : 1; store.set("sb-open", OPEN); paintNav(); return;
+      var g = b.getAttribute("data-sb-g"); OPEN[g] = b.getAttribute("aria-expanded") === "true" ? 0 : 1; store.set("sb-open2", OPEN); paintNav(); return;
     }
     if (t.closest("[data-sb-col]")) { COL = !COL; store.set("sidebar-collapsed", COL); paintNav(); setTimeout(NW.drawCharts, 220); return; }
     if (t.closest("[data-mnav]")) { openM(); return; }
@@ -117,5 +136,5 @@
   window.addEventListener("hashchange", go);
 
   if (store.get("dark", false)) document.documentElement.classList.add("dark");
-  shell(); go();
+  go();
 })(window.NW);
