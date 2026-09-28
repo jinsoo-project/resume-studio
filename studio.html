@@ -1325,7 +1325,7 @@ function klioNormalize(d){
   // 프로젝트 묶음: 없을 때만 기본 4개(사용자 편집값 유지) · 한 분야는 한 묶음에만 · groupOf = 프로젝트별 예외(작업 id → 묶음 id)
   if(!Array.isArray(d.klio.groups)) d.klio.groups=groupsSeed();
   var usedCat={};
-  d.klio.groups=d.klio.groups.filter(Boolean).map(function(g){ return {id:g.id?String(g.id):uid(), label:g.label!=null?String(g.label):'', cats:(Array.isArray(g.cats)?g.cats:[]).map(String).filter(function(c){ if(usedCat[c])return false; usedCat[c]=1; return true; }), on:g.on!==false, desc:g.desc!=null?String(g.desc):''}; });
+  d.klio.groups=d.klio.groups.filter(Boolean).map(function(g){ return {id:g.id?String(g.id):uid(), label:g.label!=null?String(g.label):'', cats:(Array.isArray(g.cats)?g.cats:[]).map(String).filter(function(c){ if(usedCat[c])return false; usedCat[c]=1; return true; }), on:g.on!==false, desc:g.desc!=null?String(g.desc):'', lead:g.lead?String(g.lead):''}; });
   if(!d.klio.groupOf||typeof d.klio.groupOf!=='object'||Array.isArray(d.klio.groupOf))d.klio.groupOf={};
   // 카드별 설정(cards[작업 id] = {title, off, kpi, thumb}) · 카드 순서(cardOrder = 작업 id 목록) — 없을 때만 빈 그릇
   if(!d.klio.cards||typeof d.klio.cards!=='object'||Array.isArray(d.klio.cards))d.klio.cards={};
@@ -1607,6 +1607,7 @@ function renderAXAdmin(){
           +`<button class="kd-tpick art${ti<0||!md.length?' on':''}" data-kc-thumb="${axAttr(id)}:-1" style="background:${KCAT_COL[w.category]||'#eae6da'}" title="자동 일러스트(분야별 미니 차트 + 대표 지표)">일러스트</button>`;
         const ci=cos.indexOf(x.c), wi=(x.c.works||[]).indexOf(w);
         det=`<div class="kd-cdet">`+G2(F('묶음',grpSel),F('대표 지표',kpiSel,'카드 아래 굵은 숫자'))
+          +F('한 줄 설명',`<textarea class="kd-in" data-kc-sum="${axAttr(id)}" rows="2" placeholder="${axAttr((w.summary||'카드·목록·상세 맨 위에 보일 한 줄 (비우면 프로젝트 요약)').slice(0,80))}">${axText(CC.sum||'')}</textarea>`,'카드 아래 · 전체 목록 미리보기 · 상세 첫 문장')
           +F('썸네일',`<div class="kd-tpicks">${picks}</div>`,md.length?'고른 게 카드·상세 첫 화면 (메인 타일에도 같이)':'이미지가 없어 자동 일러스트로 보여요 — 아래에서 올리면 바로 썸네일이 돼요')
           +`<div class="kd-row" style="margin:8px 0 2px;gap:8px">${ci>=0&&wi>=0?upl(`work:${ci}:${wi}`,'＋ 이미지 올리기',true):''}<input class="kd-in" data-kc-imgurl="${ci}:${wi}" placeholder="또는 이미지 주소(https://…) 붙여넣고 Enter"></div>`
           +(th?F('썸네일 맞춤',kcCropHtml(id,CC,th.src),'미리보기를 드래그하면 위치가 옮겨져요 · 기본 = 잘림 없이 전체 보이기'):'')
@@ -1619,17 +1620,21 @@ function renderAXAdmin(){
       const n=sorted.filter(x=>x.g===g.id&&!(KC[x.w.id]||{}).off).length;
       const chipsH=(g.cats||[]).map(k=>`<button class="kd-cat on" data-kg-cat="${i}|${axAttr(k)}" title="누르면 이 묶음에서 빼요">${axText(CAT_EN[k]||k)}<i>${nCat(k)}</i><b aria-hidden="true">×</b></button>`).join('')
         +`<select class="kd-in kd-catadd" data-kg-addcat="${i}"><option value="">＋ 분야 담기</option>${cats.filter(k=>(g.cats||[]).indexOf(k)<0).map(k=>{ const o=catG(k); return `<option value="${axAttr(k)}">${axText(CAT_EN[k]||k)} (${nCat(k)})${o?' · 지금 '+axText(o.label||'다른 묶음'):' · 묶음 없음'}</option>`; }).join('')}</select>`;
-      return `<div class="kd-grp${g.on===false?' off':''}" data-row><div class="kd-row">${sw(`data-kg-on="${i}"`,g.on!==false,'','분류 버튼 노출')}<input class="kd-in kd-glabel" data-kg-label="${i}" value="${axAttr(g.label||'')}" placeholder="묶음 이름 (예: Performance & Growth)"><span class="kd-cnt">${n}개</span>${upDown('data-kg-move',i,i===0,i===G.length-1)}${delB('data-kg-del',i)}</div><div class="kd-cats">${chipsH}</div><textarea class="kd-in" data-kg-desc="${i}" rows="2" placeholder="묶음 소개 문장 (스크롤 모양에서 묶음 위에 크게 · 비우면 분야·대표 성과로 자동)" style="margin:8px 0 4px">${axText(g.desc||'')}</textarea>${cardsOf(g.id)}</div>`;
+      return `<div class="kd-grp${g.on===false?' off':''}" data-row><div class="kd-row">${sw(`data-kg-on="${i}"`,g.on!==false,'','분류 버튼 노출')}<input class="kd-in kd-glabel" data-kg-label="${i}" value="${axAttr(g.label||'')}" placeholder="묶음 이름 (예: Performance & Growth)"><span class="kd-cnt">${n}개</span>${upDown('data-kg-move',i,i===0,i===G.length-1)}${delB('data-kg-del',i)}</div><div class="kd-cats">${chipsH}</div><textarea class="kd-in" data-kg-desc="${i}" rows="2" placeholder="묶음 소개 문장 (스크롤 모양에서 묶음 위에 크게 · 비우면 분야·대표 성과로 자동)" style="margin:8px 0 4px">${axText(g.desc||'')}</textarea>${(()=>{ const L=sorted.filter(x=>x.g===g.id&&!(KC[x.w.id]||{}).off); return L.length?`<div class="kd-row" style="margin:0 0 6px;gap:8px"><span class="kd-note" style="margin:0;flex:none">대표 프로젝트 (큰 패널)</span><select class="kd-in" data-kg-lead="${i}"><option value="">자동 · 이미지 있는 첫 카드</option>${L.map(x=>`<option value="${axAttr(x.w.id)}"${g.lead===x.w.id?' selected':''}>${axText((KC[x.w.id]||{}).title||x.w.title||'')}</option>`).join('')}</select></div>`:''; })()}${cardsOf(g.id)}</div>`;
     }).join('')||`<p class="kd-note" style="margin:0 0 6px">묶음이 없어요 — 추가하거나 기본값으로 채우세요. (없으면 화면엔 ‘전체’만 보여요)</p>`;
     const etc=sorted.filter(x=>x.g==='etc');
     const etcH=etc.length?`<div class="kd-grp etc"><div class="kd-row"><b class="kd-glabel" style="flex:1">기타 <small>어느 묶음에도 없는 카드</small></b><span class="kd-cnt">${etc.length}개</span></div>${cardsOf('etc')}</div>`:'';
     const ppUrl='https://kimjinsoo-mkt-ax.vercel.app/'+encodeURIComponent(axDoc().slug||'portfolio')+'/projects';
-    return intro('원형 휠 페이지를 여기서 다 편집해요. <b>묶음</b> = 아래 분류 버튼(분야를 담으면 그 분야 카드가 들어감) · <b>카드</b> = 이름·노출·순서, ▸에서 묶음·대표 지표·썸네일. 오른쪽 미리보기에 바로 반영돼요.')
+    return intro('전체 프로젝트 페이지를 여기서 다 편집해요. <b>묶음</b> = 분야를 담아 그룹 만들기 · 대표 프로젝트(큰 패널) · 소개 문장 · <b>카드</b> = 이름·노출·순서, ▸에서 묶음·한 줄 설명·대표 지표·썸네일 · <b>페이지 문구</b> = 첫 화면·전체 목록·마지막 문장. 오른쪽 미리보기에 바로 반영돼요.')
       +card('페이지 모양',(()=>{ const cur=(kd.ui||{}).ppLayout==='wheel'?'wheel':'scroll';
         const OPTS=[['scroll','스크롤','머리 문장 → 묶음마다 소개 · 큰 패널 · 3열 카드 → 누르면 전체 화면 상세'],['wheel','원형 휠','카드가 원을 따라 도는 이전 모양 · 옆에서 열리는 상세']];
         return `<div class="kd-fonts" style="grid-template-columns:1fr 1fr">${OPTS.map(([k2,l,dsc])=>`<button class="kd-font${cur===k2?' on':''}" data-kpplayout="${k2}"><span>${l}</span><small>${dsc}</small></button>`).join('')}</div>`; })(),'고르면 바로 미리보기')
       +card('페이지 문구',F('머리 문장',kta('ppTitle','Work that *moved*\nthe numbers',2),'위쪽 가운데 큰 문장 · 줄바꿈 = 줄 나눔 · *단어* = 기울임 강조')
         +G2(F('머리말(작은 글씨)',kt('ppEyebrow','Selected Projects'),'뒤에 연도 범위 자동'),F('돌아가기 버튼',kt('ppBack','포트폴리오')))
+        +G2(F('머리 아래 한 줄',kt('ppSub','{n}개 프로젝트 · {g}개 분야'),'{n} = 프로젝트 수 · {g} = 분야 수'),F('스크롤 안내',kt('ppScroll','스크롤해서 분야별로 보기')))
+        +`<div class="kd-sws" style="margin:4px 0 10px">${showSw('pp','gindex',true,'첫 화면 분야 카드')}${showSw('pp','marquee',true,'첫 화면 썸네일 흐름')}${showSw('pp','index',true,'맨 아래 전체 목록')}</div>`
+        +G2(F('전체 목록 제목',kt('ppIndexT','전체 목록')),F('전체 목록 설명',kt('ppIndexD','모든 프로젝트를 한 줄로 — 올리면 미리보기, 누르면 자세히 볼 수 있어요.')))
+        +G2(F('마지막 문장',kt('ppEnd','더 궁금한 점이 있다면')),F('마지막 버튼',kt('ppEndBtn','연락하기')))
         +G2(F('메인 버튼 제목',kt('pjAllTitle','전체 프로젝트 보기')),F('메인 버튼 보조 문구',kt('pjAllSub','원형 휠로 한눈에 돌려보기')))
         +G2(F('자세히 보기 버튼',kt('ppMore','자세히 보기')),F('안내 문구 (PC)',kt('ppHint','드래그 · 휠 · ← →')))
         +G2(F('안내 문구 (모바일)',kt('ppHintM','좌우로 밀어서 돌리기')),F('자동 넘김',`<div class="kd-row" style="height:36px">${showSw('pp','autoplay',true,'가만두면 한 장씩 넘기기')}</div>`))
@@ -1802,6 +1807,7 @@ function renderAXAdmin(){
       if(ds.knum){ const v=+t.value; kSet(ds.knum,v); const o=left.querySelector(`[data-knum-out="${ds.knum}"]`); if(o)o.textContent=v+'%'; axSchedule(); return; }
       if(ds.ph!=null){ const L=phList(true); L[+ds.ph]=t.value.trim(); phSync(); axSchedule(); return; }
       if(ds.kgDesc!=null){ const g=(k.groups||[])[+ds.kgDesc]; if(g)g.desc=t.value; axSchedule(); return; }
+      if(ds.kcSum!=null){ const c=kcCard(ds.kcSum); if(t.value.trim())c.sum=t.value; else delete c.sum; kcClean(ds.kcSum); axSchedule(); return; } // 카드 한 줄 설명
       if(ds.xpj){ const [ci,i,f]=ds.xpj.split(':'), L=xpjList(+ci,true); if(L&&L[+i])L[+i][f]=t.value; axSchedule(); return; }
       if(ds.xsv){ const [ci,si,f]=ds.xsv.split(':'), L=xsvList(+ci,true); if(L&&L[+si])L[+si][f]=t.value; axSchedule(); return; }
       if(ds.xsvp){ const [ci,si,pi,f]=ds.xsvp.split(':'), v=(xsvList(+ci,true)||[])[+si]; if(v&&v.projects&&v.projects[+pi])v.projects[+pi][f]=t.value; axSchedule(); return; }
@@ -1910,6 +1916,7 @@ function renderAXAdmin(){
         if(!w||!/^https?:\/\/\S+$/i.test(url)){ if(url)toast('https:// 로 시작하는 이미지 주소를 넣어 주세요'); return; }
         if(!Array.isArray(w.media))w.media=[]; w.media.push({id:uid(),type:'image',url}); if(typeof normalizeIds==='function')normalizeIds(); rerender(); toast('이미지 추가 ✓'); return; }
       if(t.dataset&&t.dataset.kcKpi!=null){ const id=t.dataset.kcKpi, c=kcCard(id); if(t.value==='')delete c.kpi; else c.kpi=+t.value; kcClean(id); rerender(); return; } // 카드 대표 지표
+      if(t.dataset&&t.dataset.kgLead!=null){ const g=(axDoc().klio.groups||[])[+t.dataset.kgLead]; if(g){ if(t.value)g.lead=t.value; else delete g.lead; } rerender(); return; } // 묶음 대표 프로젝트
       if(t.dataset&&t.dataset.kgW!=null){ const k=axDoc().klio; if(!k.groupOf||typeof k.groupOf!=='object')k.groupOf={}; if(t.value)k.groupOf[t.dataset.kgW]=t.value; else delete k.groupOf[t.dataset.kgW]; rerender(); return; } // 프로젝트별 묶음 예외
       if(t.dataset.ksel){ kSet(t.dataset.ksel,t.value); axSchedule(); return; }
       if(t.tagName==='SELECT'&&t.dataset.p){ axSet(t.dataset.p,t.value); axSchedule(); return; }
