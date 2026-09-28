@@ -59,7 +59,7 @@
     return '<div class="ovw">'
       + '<section class="ov-hero" id="ov-top"><div class="eyebrow">AX PROJECT · MARKETING CONSOLE <span class="demo-pill"><i></i>모든 수치는 예시 · 가상 데이터</span></div>'
       + '<h1>흩어진 도구와 지표를,<br><em>하나의 마케팅 콘솔</em>로</h1>'
-      + '<p class="ov-lede">지표가 흩어지면 판단이 느려지고, 반복되는 세팅은 실행을 늦춥니다.<br>그 사이를 구조로 메워 — 콘텐츠 기획부터 광고 집행·측정·협업까지 직접 만들어 운영합니다.<br><span class="faint">이 페이지는 구조와 목적을, 옆 탭 <b>데모 콘솔</b>은 실제 화면을 가상 데이터로 보여 줘요.</span></p>'
+      + '<p class="ov-lede">지표가 흩어지면 판단이 느려지고, 반복되는 세팅은 실행을 늦춥니다.<br>그 사이를 구조로 메워 — 콘텐츠 기획부터 광고 집행·측정·협업까지 직접 만들어 운영합니다.<br><span class="faint">이 페이지는 구조와 목적을, 위 <b>데모 콘솔</b> 탭은 실제 화면을 가상 데이터로 보여 줘요.</span></p>'
       + '<div class="ov-cta"><a class="btn btn-p lg" href="#/total-dashboard">데모 콘솔 열기 →</a><button class="btn lg" data-ov-to="ov-loop">구조부터 보기 ↓</button><span class="ov-rot">현재 운영 중 — <b id="ovRot">전환 대시보드</b></span></div>'
       + '<div class="kg ov-stats">' + [["30", "+", "운영 중인 화면 · 도구"], ["600", "+", "누적 배포 횟수"], ["8", "", "자동 데이터 파이프라인"], ["½", "일", "요청 → 배포 리드타임"]].map(function (s) { return '<div class="kpi"><div class="kl">' + s[2] + '</div><div class="kv tnum"' + (/^\d+$/.test(s[0]) ? ' data-ov-n="' + s[0] + '"' : '') + '>' + s[0] + s[1] + '</div><div class="ks">예시 수치</div></div>'; }).join("") + '</div>'
       + '<div class="ov-feat">' + FEAT.map(function (f) { return f[1].charAt(0) === "#" ? '<button class="chip2" data-ov-to="' + f[1].slice(1) + '">' + f[0] + '</button>' : '<a class="chip2" href="#/' + f[1] + '">' + f[0] + ' <span class="faint">↗</span></a>'; }).join("") + '</div></section>'
@@ -106,7 +106,7 @@
 
   /* 사이드바 대신 쓰는 목차 */
   function toc() {
-    return '<aside class="sb ov-toc"><div class="sb-logo"><div class="sb-mark">' + NW.ic("base") + '</div><div class="sb-t"><h1>AX-MKT 콘솔</h1><p>구조 · 개요</p></div></div><nav class="sb-nav"><div class="sb-sec">목차</div>'
+    return '<aside class="sb ov-toc"><nav class="sb-nav"><div class="sb-sec">목차</div>'
       + TOC.map(function (t, i) { return '<button class="sb-l' + (i ? '' : ' act') + '" data-ov-to="' + t[0] + '"><span class="ov-tn">' + ("0" + i).slice(-2) + '</span>' + t[1] + '</button>'; }).join("")
       + '</nav><div class="sb-foot"><a class="btn btn-p" style="width:100%;justify-content:center" href="#/total-dashboard">데모 콘솔 열기 →</a></div></aside>';
   }

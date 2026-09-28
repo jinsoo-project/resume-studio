@@ -54,12 +54,12 @@
   }
   function topbar() {
     var r = route(), onOv = r === OV, dark = document.documentElement.classList.contains("dark");
-    return '<header class="tb">' + (onOv ? '' : '<button class="xb tb-menu" data-mnav aria-label="메뉴 열기">' + ic("menu") + '</button>')
-      + '<a class="tb-brand" href="#/overview"><span class="sb-mark">' + ic("base") + '</span><span><b>AX-MKT 콘솔</b><small>김진수 · Marketing &amp; AX</small></span></a>'
-      + '<nav class="tb-tabs" role="tablist"><a role="tab" class="' + (onOv ? 'on' : '') + '" href="#/overview">구조 · 개요</a><a role="tab" class="' + (onOv ? '' : 'on') + '" href="#/' + (store.get("last", DEF)) + '">데모 콘솔</a></nav>'
+    return '<header class="tb"><a class="tb-back" href="/portfolio" title="포트폴리오로 돌아가기">' + ic("left") + '<span>포트폴리오</span></a><span class="tb-div"></span>'
+      + (onOv ? '' : '<button class="xb tb-menu" data-mnav aria-label="메뉴 열기">' + ic("menu") + '</button>')
+      + '<a class="tb-brand" href="#/overview"><span class="sb-mark">' + ic("base") + '</span><b>AX-MKT 콘솔</b></a>'
+      + '<nav class="tb-tabs" role="tablist"><a role="tab" class="' + (onOv ? 'on' : '') + '" href="#/overview">개요</a><a role="tab" class="' + (onOv ? '' : 'on') + '" href="#/' + (store.get("last", DEF)) + '">데모 콘솔</a></nav>'
       + '<span class="tb-sp"></span><span class="demo-pill tb-pill"><i></i>모든 수치는 예시 · 가상 데이터</span>'
-      + '<button class="xb" data-dark title="' + (dark ? "라이트 모드" : "다크 모드") + '">' + ic("moon") + '</button>'
-      + '<a class="btn tb-back" href="/portfolio">포트폴리오 ↗</a></header>';
+      + '<button class="xb" data-dark title="' + (dark ? "라이트 모드" : "다크 모드") + '">' + ic("moon") + '</button></header>';
   }
   function layout() {
     var onOv = route() === OV;
@@ -89,7 +89,7 @@
     if (mode !== lastMode || !$("#main")) { layout(); lastMode = mode; } else paintNav();
     if (r !== OV) store.set("last", r);
     NW.rerender(false); window.scrollTo(0, 0);
-    var name = r === OV ? "구조 · 개요" : null;
+    var name = r === OV ? "개요" : null;
     if (!name) (function f(list) { list.forEach(function (k) { if (k.sub) f(k.kids || []); else if (k[0] === r) name = k[1]; }); })([].concat.apply([], NAV.map(function (g) { return g.kids || []; })));
     document.title = (name ? name + " · " : "") + "AX-MKT 콘솔 — 김진수";
   }
