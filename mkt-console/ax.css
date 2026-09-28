@@ -50,7 +50,7 @@ a.btn,a.btn-p{text-decoration:none}
 .ov-sec h2{margin:10px 0 0;font-size:clamp(20px,2.4vw,26px);font-weight:700;letter-spacing:-.03em;line-height:1.35}
 .ov-desc{margin:8px 0 20px;max-width:760px;font-size:14px;line-height:1.75;color:var(--subtle)}
 .ov-note{margin:10px 0 0;font-size:12.5px;color:var(--faint)}
-.ov-loop{display:flex;align-items:stretch;gap:0;overflow-x:auto;padding-bottom:4px}
+.ov-loop{display:flex;align-items:stretch;gap:0;overflow-x:auto;padding:10px 8px 16px;margin:-10px -8px -12px}
 .ov-node{flex:1 0 150px;border-radius:12px;background:var(--surface);box-shadow:var(--shadow),0 0 0 1px var(--ring);padding:16px;display:flex;flex-direction:column;gap:4px;transition:box-shadow .3s,transform .3s}
 .ov-node b{font-size:14px}.ov-node span{font-size:12px;color:var(--faint)}
 .ov-node.hot{box-shadow:0 0 0 2px var(--accent),0 10px 24px rgba(0,0,0,.08);transform:translateY(-2px)}
