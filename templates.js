@@ -1760,10 +1760,11 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
           var panel = function (m, big) {
             return '<div class="pd-p pr' + (big ? ' big' : '') + '" style="--c:' + cm.c + '">' + (m ? '<span class="pd-m img' + (m.yt ? ' yt' : '') + '"' + (m.yt ? ' data-yt="' + esc(m.yt) + '" role="button" tabindex="0" aria-label="영상 재생"' : '') + '>' + pImg(m, m.t || it.title) + '</span>' : '<span class="pd-m art">' + coverArt(w, it.m0) + '</span>') + '</div>';
           };
+          var restM = it.md.filter(function (m) { return m !== it.main; });
           var flow = panel(it.main, true)
-            + (it.mets.length ? '<div class="pd-kpis">' + it.mets.slice(0, 4).map(function (m) { return '<div><b>' + esc(m.value) + '</b><span>' + esc(m.label || "") + '</span></div>'; }).join("") + '</div>' : '')
-            + (more ? '<div class="pd-card"><h3>자세히</h3><p>' + esc(more).replace(/\n/g, "<br>") + '</p></div>' : '')
-            + it.md.filter(function (m) { return m !== it.main; }).map(function (m) { return panel(m, false); }).join("");
+            + (it.mets.length ? '<div class="pd-kpis"><h3 class="pd-h">Key results</h3><div class="pd-kr">' + it.mets.slice(0, 4).map(function (m) { return '<div><b>' + esc(m.value) + '</b><span>' + esc(m.label || "") + '</span></div>'; }).join("") + '</div></div>' : '')
+            + (more ? '<div class="pd-card"><h3 class="pd-h">Overview</h3><p>' + esc(more).replace(/\n/g, "<br>") + '</p></div>' : '')
+            + (restM.length ? '<div class="pd-gal' + (restM.length === 1 ? ' one' : '') + '">' + restM.map(function (m) { return panel(m, false); }).join("") + '</div>' : '');
           var next = items.length > 1 ? '<button class="pd-next" type="button" data-open="' + nx.i + '" style="--c:' + nx.cm.c + '"><span class="pd-next-t"><small>다음 프로젝트</small><b>' + esc(nx.title) + '</b><em>' + capOf(nx) + '</em><span class="ps-go">보기 <i>→</i></span></span>' + pMedia(nx, nx.main, "pd-next-m") + '</button>' : '';
           return '<template id="pd-' + it.i + '"><div class="pd-main"><aside class="pd-side"><div class="pd-stick"><em class="pd-cat">' + esc(cm.en) + '</em><h1>' + esc(it.title) + '</h1>' + (desc ? '<p class="pd-desc">' + esc(desc) + '</p>' : '')
             + '<dl class="pd-meta">' + meta + '</dl>' + (acc ? '<div class="pd-accs">' + acc + '</div>' : '') + (tags ? '<div class="pd-tags">' + tags + '</div>' : '') + (links ? '<div class="pd-links">' + links + '</div>' : '') + '</div></aside>'
@@ -1775,7 +1776,7 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
             return '<button class="ps-gc" type="button" data-goto="' + esc(s.g.id) + '" style="--c:' + esc(s.items[0].cm.c) + ';--k:' + si + ';--gk:' + [30, 70, 45, 90, 55, 80][si % 6] + '"><span class="ps-gc-n">' + pad2(si + 1) + '</span><b>' + esc(s.g.label) + '</b><span class="ps-gc-m">' + s.items.slice(0, 3).map(miniOf).join("") + '</span><span class="ps-gc-c">' + s.items.length + '개 <i>→</i></span></button>';
           }).join("") + '</div>' : '';
         var mqItems = items.filter(function (it) { return it.main; }).concat(items.filter(function (it) { return !it.main; })).slice(0, 18);
-        var mqTile = function (it) { return '<button class="ps-mt" type="button" data-open="' + it.i + '" style="--c:' + it.cm.c + '" tabindex="-1">' + pMedia(it, it.main, "ps-mth") + '<span>' + esc(it.title) + '</span></button>'; };
+        var mqTile = function (it) { return '<button class="ps-mt" type="button" data-open="' + it.i + '" style="--c:' + it.cm.c + '" tabindex="-1">' + pMedia(it, it.main, "ps-mth") + '<span class="ps-mtx"><small>' + esc(dispName(it.co)) + '</small><b>' + esc(it.title) + '</b></span></button>'; };
         var mqRow = mqItems.map(mqTile).join("");
         var marquee = shown("pp", "marquee", true) && mqItems.length > 3 ? '<div class="ps-mq" aria-label="프로젝트 미리보기 — 누르면 상세"><div class="ps-mq-t">' + mqRow + mqRow + '</div></div>' : '';
         var subTxt = String(txt("ppSub", "{n}개 프로젝트 · {g}개 분야")).replace(/\{n\}/g, N).replace(/\{g\}/g, secs.length);
@@ -1920,8 +1921,8 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
           + '.js .pd .pd-p.pr{opacity:0;transform:translateY(80px);clip-path:inset(10% 7% round 60px);transition:opacity 1s var(--ez),transform 1.2s var(--ez),clip-path 1.3s var(--ez)}'
           + '.js .pd .pd-p.pr.in{opacity:1;transform:none;clip-path:inset(0 round 28px)}'
           + '.js .pd .pd-p.pr .pd-m{scale:1.12;filter:blur(6px);transition:scale 1.6s var(--ez),filter 1s var(--ez)}.js .pd .pd-p.pr.in .pd-m{scale:1;filter:none}'
-          + '.js .pd .pd-kpis.pr{opacity:1;transform:none}.js .pd .pd-kpis.pr>div{opacity:0;transform:translateY(40px) scale(.94);transition:opacity .8s var(--ez),transform 1s var(--ez)}.js .pd .pd-kpis.pr.in>div{opacity:1;transform:none}'
-          + '.js .pd .pd-kpis.pr.in>div:nth-child(2){transition-delay:.1s}.js .pd .pd-kpis.pr.in>div:nth-child(3){transition-delay:.2s}.js .pd .pd-kpis.pr.in>div:nth-child(4){transition-delay:.3s}'
+          + '.js .pd .pd-kpis.pr{opacity:1;transform:none}.js .pd .pd-kr>div{opacity:0;transform:translateY(40px) scale(.94);transition:opacity .8s var(--ez),transform 1s var(--ez)}.js .pd .pd-kpis.pr.in .pd-kr>div{opacity:1;transform:none}'
+          + '.js .pd .pd-kpis.pr.in .pd-kr>div:nth-child(2){transition-delay:.1s}.js .pd .pd-kpis.pr.in .pd-kr>div:nth-child(3){transition-delay:.2s}.js .pd .pd-kpis.pr.in .pd-kr>div:nth-child(4){transition-delay:.3s}'
           + '.js .pd .pd-card.pr{opacity:0;transform:translateX(-40px);transition:opacity .9s var(--ez),transform 1.1s var(--ez)}.js .pd .pd-card.pr.in{opacity:1;transform:none}'
           + '.js .pd .pd-next.pr{opacity:0;transform:translateY(60px) scale(.94);transition:opacity 1s var(--ez),transform 1.2s var(--ez)}.js .pd .pd-next.pr.in{opacity:1;transform:none}.js .pd .pd-next.pr .pd-next-m{transform:translateY(40px) rotate(4deg);transition:transform 1.4s var(--ez) .15s}.js .pd .pd-next.pr.in .pd-next-m{transform:none}.js .pd .pd-next.pr.in:hover .pd-next-m{transform:translateY(-6px) rotate(-1.5deg)}'
           + '.ps-row{grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);align-items:end;gap:48px;margin-bottom:56px}'
@@ -1938,7 +1939,24 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
           + '@media(prefers-reduced-motion:reduce){.ps-no{background:none;color:var(--ink);-webkit-text-stroke:0}.js .ps-kc{opacity:1;transform:none}}'
           + '.pd-side{align-self:stretch}@media(max-width:900px){.pd-side{align-self:auto}}'
           + '.pd-acc{transition:background .3s}.pd-acc[open] p{animation:psIn .6s var(--ez)}'
-          + '@media(prefers-reduced-motion:reduce){.js .pd .pd-p.pr,.js .pd .pd-kpis.pr>div,.js .pd .pd-card.pr,.js .pd .pd-next.pr,.js .pd .pd-next.pr .pd-next-m,.js .pd .pd-p.pr .pd-m{opacity:1;transform:none;clip-path:none;scale:1;filter:none;transition:none}}'
+          + '@media(prefers-reduced-motion:reduce){.js .pd .pd-p.pr,.js .pd .pd-kr>div,.js .pd .pd-card.pr,.js .pd .pd-next.pr,.js .pd .pd-next.pr .pd-next-m,.js .pd .pd-p.pr .pd-m{opacity:1;transform:none;clip-path:none;scale:1;filter:none;transition:none}}'
+          // ── 상세 오른쪽 · 모던 정리(덮어쓰기)
+          + '.ps-mtx{display:flex;flex-direction:column;gap:1px;min-width:0}.ps-mtx small{font-size:11px;font-weight:600;letter-spacing:.02em;color:var(--gray);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.ps-mtx b{font-size:13px;font-weight:600;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}'
+          + '.pd-flow{gap:28px}.pd-p{border-radius:24px;background:color-mix(in srgb,var(--c) 22%,#fff);box-shadow:inset 0 0 0 1px rgba(0,0,0,.04)}.pd-p.big{aspect-ratio:16/11}'
+          + '.pd-h{font-size:11.5px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--gray);margin:0 0 14px}'
+          + '.pd-kpis{display:block;padding:0}.pd-kr{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));border-top:1px solid var(--ink)}'
+          + '.pd-kr>div{padding:18px 20px 4px 0;border-radius:0;background:none}.pd-kr>div+div{padding-left:20px;border-left:1px solid var(--bd)}'
+          + '.pd-kr b{display:block;font-size:clamp(26px,2.6vw,34px);font-weight:600;letter-spacing:-.04em;line-height:1.05;font-variant-numeric:tabular-nums}.pd-kr span{display:block;margin-top:8px;font-size:12.5px;line-height:1.45;color:var(--ink60)}'
+          + '.pd-kpis div:hover{transform:none}'
+          + '.pd-kpis .pd-kr{padding:0;border-radius:0;background:none}.pd-x:focus{outline:none}.pd-x:focus-visible{outline:none;box-shadow:0 0 0 .5px var(--bd),0 0 0 3px rgba(29,29,31,.12)}'
+          + '.pd-card{max-width:none;padding:22px 0 0;border-radius:0;background:none;border-top:1px solid var(--bd);display:grid;grid-template-columns:140px minmax(0,1fr);gap:20px}.pd-card .pd-h{margin:3px 0 0}.pd-card p{margin:0;font-size:15px;line-height:1.8;color:var(--ink)}'
+          + '.pd-gal{display:grid;grid-template-columns:1fr 1fr;gap:14px}.pd-gal.one{grid-template-columns:1fr}.pd-gal .pd-p{aspect-ratio:4/3.2;border-radius:20px}.pd-gal.one .pd-p{aspect-ratio:16/10}.pd-gal .pd-m.img{inset:9% 8%}'
+          + '.pd-acc summary{padding:18px 0}.pd-acc summary i{width:26px;height:26px;border-radius:50%;box-shadow:inset 0 0 0 1px var(--bd);flex:none;transition:background .3s,box-shadow .3s}'
+          + '.pd-acc summary i::before,.pd-acc summary i::after{left:50%;top:50%;width:10px;height:1.4px;margin:-.7px 0 0 -5px;border-radius:2px;background:var(--ink)}.pd-acc summary i::after{transform:rotate(90deg)}.pd-acc[open] summary i::after{transform:rotate(0)}'
+          + '.pd-acc summary:hover i{box-shadow:inset 0 0 0 1px var(--ink)}.pd-acc[open] summary i{background:var(--ink);box-shadow:none}.pd-acc[open] summary i::before,.pd-acc[open] summary i::after{background:#fff}'
+          + '.js .pd .pd-card.pr{transform:translateY(24px)}'
+          + '@media(max-width:900px){.pd-card{grid-template-columns:1fr;gap:8px}.pd-kr{grid-template-columns:1fr 1fr}.pd-kr>div:nth-child(3){padding-left:0;border-left:0}.pd-kr>div:nth-child(n+3){border-top:1px solid var(--bd)}}'
+          + '@media(max-width:600px){.pd-gal{grid-template-columns:1fr}}'
           + '.ps-f.f1{transform:translate3d(calc(var(--h1,0px) + (1 - var(--rp,1)) * 38%),calc(var(--pk,0) * 46px),0) rotate(calc(var(--r1,-8deg) * var(--rp,1)))}.ps-f.f3{transform:translate3d(calc(var(--h3,0px) - (1 - var(--rp,1)) * 38%),calc(var(--pk,0) * -46px),0) rotate(calc(var(--r3,8deg) * var(--rp,1)))}';
         var psRuntime = function () {
           "use strict";
@@ -2012,8 +2030,8 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
           };
           var enhance = function () {
             [].slice.call(pin.querySelectorAll(".pd-stick>*")).forEach(function (x, k) { x.style.setProperty("--k", k); });
-            [].slice.call(pin.querySelectorAll(".pr,.pd-kpis,.pd-card,.pd-next")).forEach(function (x) { x.classList.add("pr"); if (pio && !reduce) pio.observe(x); else x.classList.add("in"); });
-            setTimeout(function () { [].slice.call(pin.querySelectorAll(".pd-kpis b")).forEach(count); }, 350);
+            [].slice.call(pin.querySelectorAll(".pr,.pd-kpis,.pd-card,.pd-next,.pd-gal .pd-p")).forEach(function (x) { x.classList.add("pr"); if (pio && !reduce) pio.observe(x); else x.classList.add("in"); });
+            setTimeout(function () { [].slice.call(pin.querySelectorAll(".pd-kr b")).forEach(count); }, 350);
           };
           var pprog = document.querySelector(".pd-prog");
           pd.addEventListener("scroll", function () { var mx = Math.max(1, pd.scrollHeight - pd.clientHeight); if (pprog) pprog.style.setProperty("--pp", Math.min(1, pd.scrollTop / mx).toFixed(4)); pd.classList.toggle("sc", pd.scrollTop > 40); }, { passive: true });
