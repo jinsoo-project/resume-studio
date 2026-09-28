@@ -1732,7 +1732,8 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
           var rest = its.filter(function (it) { return it !== lead; });
           var cats = []; its.forEach(function (it) { var c = it.w.category || "기타"; if (cats.indexOf(c) < 0) cats.push(c); });
           var kps = its.filter(function (it) { return it.m0; }).slice(0, 3).map(function (it) { return it.m0.value + " " + (it.m0.label || ""); });
-          var gtx = s.g.desc || (cats.join(" · ") + " 분야의 프로젝트 " + its.length + "개." + (kps.length ? " 대표 성과는 " + kps.join(", ") + "." : ""));
+          var gtx = s.g.desc || (cats.join(" · ") + " 분야의 프로젝트 " + its.length + "개 — 대표 성과부터 보세요.");
+          var kchips = its.filter(function (it) { return it.m0; }).slice(0, 3).map(function (it, q) { return '<button class="ps-kc" type="button" data-open="' + it.i + '" style="--q:' + q + '"><b>' + esc(it.m0.value) + '</b><span>' + esc(it.m0.label || it.title) + '</span></button>'; }).join("");
           var side = rest.slice(0, 2), ld = lead.md.length > 2 ? [lead.md[1], lead.md[2]] : null;
           var fan = (ld ? pMedia(lead, ld[0], "ps-f f1") + pMedia(lead, ld[1], "ps-f f3") : side.length === 2 ? pMedia(side[0], side[0].main, "ps-f f1") + pMedia(side[1], side[1].main, "ps-f f3") : '') + pMedia(lead, lead.main, "ps-f f2");
           var panel = '<button class="ps-p rv" type="button" data-open="' + lead.i + '" style="--c:' + lead.cm.c + '" aria-label="' + esc(lead.title) + ' 자세히 보기"><span class="ps-fan">' + fan + '</span>'
@@ -1742,8 +1743,8 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
               return '<button class="ps-c rv" type="button" data-open="' + it.i + '" style="--d:' + (k % 3 * 80) + 'ms;--c:' + it.cm.c + '">' + pMedia(it, it.main, "ps-th")
                 + '<span class="ps-r1"><b>' + esc(it.title) + '</b><em>' + esc(it.cm.en) + '</em></span><span class="ps-r2">' + esc(dispName(it.co)) + (it.yr ? ' · ' + esc(it.yr) : '') + (it.m0 ? ' · <strong>' + esc(it.m0.value) + '</strong> ' + esc(it.m0.label || "") : '') + '</span>' + (it.sum ? '<span class="ps-r3">' + esc(it.sum) + '</span>' : '') + '</button>';
             }).join("") + '</div>' : '';
-          return '<section class="ps-sec" id="g-' + esc(s.g.id) + '" data-g="' + esc(s.g.id) + '" data-c="' + esc(lead.cm.c) + '"><div class="ps-row"><h2 class="ps-lb rv"><span>' + pad2(si + 1) + '</span>' + esc(s.g.label) + '<small>' + its.length + '</small></h2>'
-            + '<p class="ps-tx sw-p">' + String(gtx).split(/\s+/).filter(Boolean).map(function (t) { return '<span class="sw">' + esc(t) + '</span>'; }).join(" ") + '</p></div>' + panel + grid + '</section>';
+          return '<section class="ps-sec" id="g-' + esc(s.g.id) + '" data-g="' + esc(s.g.id) + '" data-c="' + esc(lead.cm.c) + '" style="--c:' + esc(lead.cm.c) + '"><div class="ps-row"><div class="ps-hd"><span class="ps-no" aria-hidden="true">' + pad2(si + 1) + '</span><div class="ps-ht rv"><em class="ps-kick"><i></i>Chapter ' + pad2(si + 1) + ' · ' + its.length + ' projects</em><h2 class="ps-lb">' + esc(s.g.label) + '</h2></div></div>'
+            + '<div class="ps-rt"><p class="ps-tx sw-p">' + String(gtx).split(/\s+/).filter(Boolean).map(function (t) { return '<span class="sw">' + esc(t) + '</span>'; }).join(" ") + '</p>' + (kchips ? '<div class="ps-kcs">' + kchips + '</div>' : '') + '</div></div>' + panel + grid + '</section>';
         }).join("");
         // 상세(전체 화면): 항목마다 template
         var pdT = items.map(function (it, k) {
@@ -1780,7 +1781,7 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
         var subTxt = String(txt("ppSub", "{n}개 프로젝트 · {g}개 분야")).replace(/\{n\}/g, N).replace(/\{g\}/g, secs.length);
         var cue = '<button class="ps-cue" type="button" data-goto="' + esc(secs[0] ? secs[0].g.id : "*") + '"><span>' + esc(txt("ppScroll", "스크롤해서 분야별로 보기")) + '</span><i aria-hidden="true"></i></button>';
         // 전체 목록: 한 줄씩 · 올리면 오른쪽에 미리보기 · 누르면 상세
-        var idxList = shown("pp", "index", true) && items.length ? '<section class="ps-idx" id="g-index" data-g="index" data-c="var(--bg)"><div class="ps-row"><h2 class="ps-lb rv"><span>' + pad2(secs.length + 1) + '</span>' + esc(txt("ppIndexT", "전체 목록")) + '<small>' + N + '</small></h2><p class="ps-tx">' + esc(txt("ppIndexD", "모든 프로젝트를 한 줄로 — 올리면 미리보기, 누르면 자세히 볼 수 있어요.")) + '</p></div>'
+        var idxList = shown("pp", "index", true) && items.length ? '<section class="ps-idx" id="g-index" data-g="index" data-c="var(--bg)" style="--c:var(--sand)"><div class="ps-row"><div class="ps-hd"><span class="ps-no" aria-hidden="true">' + pad2(secs.length + 1) + '</span><div class="ps-ht rv"><em class="ps-kick"><i></i>Index · ' + N + ' projects</em><h2 class="ps-lb">' + esc(txt("ppIndexT", "전체 목록")) + '</h2></div></div><div class="ps-rt"><p class="ps-tx">' + esc(txt("ppIndexD", "모든 프로젝트를 한 줄로 — 올리면 미리보기, 누르면 자세히 볼 수 있어요.")) + '</p></div></div>'
           + '<div class="ps-if">' + '<button class="ps-if-b on" type="button" data-if="*">전체</button>' + secs.map(function (s) { return '<button class="ps-if-b" type="button" data-if="' + esc(s.g.id) + '">' + esc(s.g.label) + '</button>'; }).join("") + '</div>'
           + '<div class="ps-ig"><ol class="ps-il">' + items.map(function (it, k) {
               return '<li class="rv" style="--d:' + (k % 8 * 45) + 'ms"><button class="ps-ir" type="button" data-open="' + it.i + '" data-ig="' + esc(it.g) + '" data-pv="' + it.i + '"><span class="ps-in">' + pad2(k + 1) + '</span><b>' + esc(it.title) + '</b><em>' + esc(dispName(it.co)) + '</em><span class="ps-ik">' + (it.m0 ? '<strong>' + esc(it.m0.value) + '</strong> ' + esc(it.m0.label || "") : esc(it.cm.en)) + '</span><span class="ps-iy">' + esc(it.yr || "") + '</span><i class="ps-ia">→</i></button></li>';
@@ -1823,7 +1824,7 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
           + '.ps-aura{scale:calc(1 + var(--hp,0) * .35);opacity:calc(1 - var(--hp,0) * .6)}'
           + '.ps-mq{transform:skewX(calc(var(--sk,0) * 1deg)) translateY(calc(var(--hp,0) * -20px));transition:transform .5s var(--ez)}.ps-mq-t{gap:calc(14px + var(--sa,0) * 1px);transition:gap .5s var(--ez)}'
           + '.ps-row{position:relative}.ps-row::before{content:"";position:absolute;left:0;top:-30px;height:1px;width:calc(var(--sp,0) * 100%);background:var(--ink);opacity:.18}'
-          + '.ps-lb span{display:inline-block;transform:translateY(calc((1 - var(--sp,1)) * 12px));opacity:calc(.3 + var(--sp,1) * .7)}'
+          + ''
           + '.ps-p{clip-path:inset(calc((1 - var(--rp,1)) * 7%) calc((1 - var(--rp,1)) * 9%) round calc(36px + (1 - var(--rp,1)) * 40px))}'
           + '.ps-cap{transform:translateY(calc((1 - var(--rp,1)) * 46px));opacity:calc(var(--rp,1) * 1.3 - .3)}.ps-p>.ps-go{opacity:calc(var(--rp,1) * 1.5 - .5)}'
           + '.ps-f.f2{scale:calc(.9 + var(--rp,1) * .1)}'
@@ -1923,6 +1924,18 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
           + '.js .pd .pd-kpis.pr.in>div:nth-child(2){transition-delay:.1s}.js .pd .pd-kpis.pr.in>div:nth-child(3){transition-delay:.2s}.js .pd .pd-kpis.pr.in>div:nth-child(4){transition-delay:.3s}'
           + '.js .pd .pd-card.pr{opacity:0;transform:translateX(-40px);transition:opacity .9s var(--ez),transform 1.1s var(--ez)}.js .pd .pd-card.pr.in{opacity:1;transform:none}'
           + '.js .pd .pd-next.pr{opacity:0;transform:translateY(60px) scale(.94);transition:opacity 1s var(--ez),transform 1.2s var(--ez)}.js .pd .pd-next.pr.in{opacity:1;transform:none}.js .pd .pd-next.pr .pd-next-m{transform:translateY(40px) rotate(4deg);transition:transform 1.4s var(--ez) .15s}.js .pd .pd-next.pr.in .pd-next-m{transform:none}.js .pd .pd-next.pr.in:hover .pd-next-m{transform:translateY(-6px) rotate(-1.5deg)}'
+          + '.ps-row{grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);align-items:end;gap:48px;margin-bottom:56px}'
+          + '.ps-hd{position:relative;display:flex;align-items:flex-end;gap:clamp(14px,2vw,28px);min-width:0}'
+          + '.ps-no{flex:none;font-family:var(--disp);font-weight:400;font-size:clamp(84px,11vw,168px);line-height:.78;letter-spacing:-.06em;color:transparent;-webkit-text-stroke:1.3px color-mix(in srgb,var(--ink) 30%,transparent);background:linear-gradient(90deg,var(--ink) calc(var(--sp,1) * 100%),transparent calc(var(--sp,1) * 100%));-webkit-background-clip:text;background-clip:text;font-variant-numeric:tabular-nums}'
+          + '.ps-ht{min-width:0;padding-bottom:6px}.ps-kick{display:inline-flex;align-items:center;gap:8px;font-style:normal;font-size:11.5px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--gray)}.ps-kick i{width:8px;height:8px;border-radius:50%;background:var(--c,var(--ink));box-shadow:0 0 0 4px color-mix(in srgb,var(--c,var(--ink)) 30%,transparent)}'
+          + '.ps-row h2.ps-lb{display:block;margin-top:10px;font-family:var(--disp);font-weight:400;font-size:clamp(34px,4.4vw,62px);line-height:1.02;letter-spacing:-.035em;text-wrap:balance}'
+          + '.ps-rt{display:flex;flex-direction:column;gap:18px;padding-bottom:6px}.ps-row .ps-tx{max-width:none;font-size:clamp(16px,1.35vw,19px);color:var(--ink60)}'
+          + '.ps-kcs{display:flex;flex-wrap:wrap;gap:8px}.ps-kc{display:inline-flex;align-items:baseline;gap:8px;max-width:100%;padding:10px 14px 10px 12px;border-radius:14px;background:color-mix(in srgb,var(--c) 26%,#fff);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--c) 70%,transparent);text-align:left;transition:transform .4s var(--ez),background .3s}'
+          + '.ps-kc:hover{transform:translateY(-3px);background:color-mix(in srgb,var(--c) 45%,#fff)}.ps-kc b{font-size:19px;font-weight:700;letter-spacing:-.03em;white-space:nowrap}.ps-kc span{font-size:12.5px;color:var(--ink60);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:240px}'
+          + '.js .ps-kc{opacity:0;transform:translateY(16px);transition:opacity .7s var(--ez),transform .8s var(--ez);transition-delay:calc(var(--q) * 90ms + .1s)}.js .ps-row.on .ps-kc{opacity:1;transform:none}.js .ps-row.on .ps-kc:hover{transform:translateY(-3px)}body[data-still] .ps-kc{opacity:1!important;transform:none!important}'
+          + '.ps-row::before{top:-36px;opacity:.14}'
+          + '@media(max-width:900px){.ps-row{grid-template-columns:1fr;gap:18px;margin-bottom:32px}.ps-no{font-size:clamp(64px,20vw,96px)}.ps-row h2.ps-lb{font-size:clamp(28px,8vw,40px)}}'
+          + '@media(prefers-reduced-motion:reduce){.ps-no{background:none;color:var(--ink);-webkit-text-stroke:0}.js .ps-kc{opacity:1;transform:none}}'
           + '.pd-side{align-self:stretch}@media(max-width:900px){.pd-side{align-self:auto}}'
           + '.pd-acc{transition:background .3s}.pd-acc[open] p{animation:psIn .6s var(--ez)}'
           + '@media(prefers-reduced-motion:reduce){.js .pd .pd-p.pr,.js .pd .pd-kpis.pr>div,.js .pd .pd-card.pr,.js .pd .pd-next.pr,.js .pd .pd-next.pr .pd-next-m,.js .pd .pd-p.pr .pd-m{opacity:1;transform:none;clip-path:none;scale:1;filter:none;transition:none}}'
@@ -1965,7 +1978,7 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
             body.style.setProperty("--hp", clamp01(y / (vh * .9)).toFixed(3));
             vel = vel * .82 + (y - lastY) * .18; lastY = y;
             if (mq) { mq.style.setProperty("--sk", Math.max(-8, Math.min(8, -vel * .12)).toFixed(2)); mq.style.setProperty("--sa", Math.min(30, Math.abs(vel) * .5).toFixed(1)); }
-            rows.forEach(function (r) { var t = r.getBoundingClientRect().top; r.style.setProperty("--sp", clamp01((vh - t) / (vh * .55)).toFixed(3)); });
+            rows.forEach(function (r) { var t = r.getBoundingClientRect().top, v = clamp01((vh - t) / (vh * .55)); r.style.setProperty("--sp", v.toFixed(3)); if (v > .5) r.classList.add("on"); });
             pans.forEach(function (pn) { var t = pn.getBoundingClientRect().top; pn.style.setProperty("--rp", clamp01((vh - t) / (vh * .7)).toFixed(3)); });
             if (endP) { var et = endP.getBoundingClientRect().top; endP.style.setProperty("--ep", clamp01((vh - et) / (vh * .6)).toFixed(3)); }
           };
