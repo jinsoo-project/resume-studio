@@ -164,7 +164,7 @@ aside.gray{background:#fafafa}.dark aside.gray{background:var(--surface)}
 .rv{border-radius:10px;border:1px solid var(--border);padding:10px 12px;font-size:12.5px;display:flex;flex-direction:column;gap:4px;margin-top:10px}
 .rv small{color:var(--faint)}.rv1{padding-left:18px}.rv2{padding-left:36px;color:var(--subtle)}
 /* 파이프라인 여정 맵 */
-.jm{display:flex;gap:0;overflow-x:auto;padding:4px 2px 12px;scroll-snap-type:x proximity}
+.jm{display:flex;gap:0;overflow-x:auto;padding:10px 8px 16px;margin:-6px -8px 0;scroll-snap-type:x proximity}
 .jstep{flex:0 0 236px;display:flex;flex-direction:column;text-align:left;border:0;background:none;padding:0;scroll-snap-align:start}
 .js-n{display:flex;align-items:center;height:30px}
 .js-n span{width:30px;height:30px;border-radius:50%;background:var(--accent);color:var(--bg);display:grid;place-items:center;font-size:11px;font-weight:800;flex:none}
