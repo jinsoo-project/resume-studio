@@ -16,7 +16,7 @@
   function catalog() {
     var list = ITEMS.filter(function (i) { return CF.st === "all" || i.st === CF.st; }), n = function (s) { return ITEMS.filter(function (i) { return i.st === s; }).length; };
     var sync = store.get("cat-sync", "오늘 06:00");
-    var xml = ITEMS.slice(0, 3).map(function (i) { return '&lt;item&gt;\n  &lt;id&gt;' + i.id + '&lt;/id&gt;\n  &lt;title&gt;' + esc(i.title) + '&lt;/title&gt;\n  &lt;price&gt;' + i.price + ' KRW&lt;/price&gt;\n  &lt;availability&gt;' + (i.stock ? "in stock" : "out of stock") + '&lt;/availability&gt;\n  &lt;link&gt;https://nestwell.example/rooms/' + i.id + '&lt;/link&gt;\n  &lt;custom_label_0&gt;' + i.seg + '&lt;/custom_label_0&gt;\n&lt;/item&gt;'; }).join("\n");
+    var xml = ITEMS.slice(0, 3).map(function (i) { return '&lt;item&gt;\n  &lt;id&gt;' + i.id + '&lt;/id&gt;\n  &lt;title&gt;' + esc(i.title) + '&lt;/title&gt;\n  &lt;price&gt;' + i.price + ' KRW&lt;/price&gt;\n  &lt;availability&gt;' + (i.stock ? "in stock" : "out of stock") + '&lt;/availability&gt;\n  &lt;link&gt;https://demo.example/rooms/' + i.id + '&lt;/link&gt;\n  &lt;custom_label_0&gt;' + i.seg + '&lt;/custom_label_0&gt;\n&lt;/item&gt;'; }).join("\n");
     return NW.hero("catalog", "대시보드 · 상품 피드", "Catalog", "게시 중인 룸타입이 광고 매체의 상품 카탈로그로 자동 동기화돼요. 매체별 승인·경고·오류를 한 화면에서 보고 고쳐요.", '<button class="btn" data-cat-sync>' + ic("refresh") + '지금 동기화 <span style="color:var(--faint);font-weight:400">· 마지막 ' + sync + '</span></button>')
       + '<div style="margin-top:20px;display:flex;flex-wrap:wrap;gap:8px;align-items:center">' + NW.segHtml(Object.keys(FEED).map(function (k) { return [k, FEED[k][0]]; }), CF.feed, "data-cat-feed", true) + '<span class="fl-note" style="margin-left:8px">' + FEED[CF.feed][1] + '</span></div>'
       + '<div class="kg" style="margin-top:14px">' + NW.kpi("피드 상품", ko(ITEMS.length) + "개", "게시 중 룸타입 = 피드 1:1") + NW.kpi("승인", ko(n("ok")) + "개", ((n("ok") / ITEMS.length) * 100).toFixed(1) + "%", "acc") + NW.kpi("경고", ko(n("warn")) + "개", "노출은 되지만 품질 저하") + NW.kpi("오류", ko(n("err")) + "개", "노출 중단 — 우선 수정", "bad") + NW.kpi("동기화 주기", "매일 06:00", "가격·재고 변경 시 즉시") + '</div>'
@@ -27,7 +27,7 @@
   }
   function openCat(id) {
     var i = ITEMS.filter(function (x) { return x.id === id; })[0];
-    var kv = [["id", i.id], ["title", i.title], ["price", i.price + " KRW / 주"], ["availability", i.stock ? "in stock" : "out of stock"], ["inventory", i.stock], ["link", "https://nestwell.example/rooms/" + i.id], ["image_link", "(가상 이미지)"], ["custom_label_0", i.seg], ["custom_label_1", i.sido]];
+    var kv = [["id", i.id], ["title", i.title], ["price", i.price + " KRW / 주"], ["availability", i.stock ? "in stock" : "out of stock"], ["inventory", i.stock], ["link", "https://demo.example/rooms/" + i.id], ["image_link", "(가상 이미지)"], ["custom_label_0", i.seg], ["custom_label_1", i.sido]];
     NW.drawer(esc(i.title), '<div class="kv2">' + kv.map(function (r) { return '<span class="mono">' + r[0] + '</span><b class="mono">' + esc(r[1]) + '</b>'; }).join("") + '</div>'
       + (i.issue ? '<div class="warn"><b>⚠ ' + ST[i.st][0] + '</b><div>' + esc(i.issue) + '</div></div>' : '<div class="okb">✓ 모든 매체에서 승인됐어요</div>')
       + '<div class="lbl2">카탈로그 광고 미리보기 (캐러셀 한 칸)</div><div class="fb" style="max-width:260px"><div class="fb-img" style="background:' + grad(i.id) + '"></div><div class="fb-c"><div><b>' + esc(i.title) + '</b><span>주 ' + won(i.price) + '</span></div></div></div>',
@@ -81,7 +81,7 @@
 
   /* ── 3. NAVER SA 빌더 — 캠페인 › 광고그룹(키워드) › 소재 ──── */
   var CTYPE = ["파워링크", "쇼핑검색", "브랜드검색", "플레이스"];
-  function newAdN(n) { return { id: uid(), name: "소재 " + n, title: "1주부터 풀옵션 단기임대", desc: "보증금 부담 없이 원하는 기간만. 가구·가전 모두 포함, 계약은 3분이면 끝.", disp: "nestwell.example", url: "https://nestwell.example/stay?utm_source=naver&utm_medium=cpc" }; }
+  function newAdN(n) { return { id: uid(), name: "소재 " + n, title: "1주부터 풀옵션 단기임대", desc: "보증금 부담 없이 원하는 기간만. 가구·가전 모두 포함, 계약은 3분이면 끝.", disp: "demo.example", url: "https://demo.example/stay?utm_source=naver&utm_medium=cpc" }; }
   function newGroup(n) { return { id: uid(), name: "광고그룹 " + n, bid: 700, device: ["PC", "모바일"], keywords: [{ kw: "단기임대", bid: 900 }], ads: [newAdN(1)] }; }
   function seedNS() { var g1 = newGroup(1); g1.name = "단기임대 · 일반"; g1.keywords = [{ kw: "단기임대", bid: 1100 }, { kw: "단기임대 서울", bid: 900 }, { kw: "원룸 단기", bid: 700 }]; g1.ads.push(newAdN(2)); g1.ads[1].title = "보증금 없는 한 달 살기"; var g2 = newGroup(2); g2.name = "한달살기 · 비용"; g2.keywords = [{ kw: "한달살기", bid: 800 }, { kw: "한달살기 비용", bid: 600 }]; return { camps: [{ id: uid(), name: "파워링크 — 단기임대", type: "파워링크", daily: 80000, groups: [g1, g2] }], sel: null, made: [] }; }
   var NS = store.get("naver-sa", null) || seedNS(); if (!NS.sel) NS.sel = NS.camps[0].id;

@@ -75,8 +75,8 @@
 
   function fbPreview(r, s) {
     var m = s.media ? '<div class="fb-img" style="background:' + grad(r.id + s.id) + '"><span>' + esc(s.title) + '</span></div>' : '<div class="fb-img empty-img">' + ic("image") + '</div>';
-    return '<div class="fb"><div class="fb-h"><span class="fb-av">N</span><div><b>' + NW.BRAND + '</b><small>광고 · 🌐</small></div></div><div class="fb-t" data-pv="body">' + esc(s.body) + '</div>' + m
-      + '<div class="fb-c"><div><small>NESTWELL.EXAMPLE</small><b data-pv="title">' + esc(s.title) + '</b><span data-pv="desc">' + esc(s.desc) + '</span></div><button type="button">더 알아보기</button></div>'
+    return '<div class="fb"><div class="fb-h"><span class="fb-av">김</span><div><b>' + NW.BRAND + '</b><small>광고 · 🌐</small></div></div><div class="fb-t" data-pv="body">' + esc(s.body) + '</div>' + m
+      + '<div class="fb-c"><div><small>DEMO.EXAMPLE</small><b data-pv="title">' + esc(s.title) + '</b><span data-pv="desc">' + esc(s.desc) + '</span></div><button type="button">더 알아보기</button></div>'
       + '<div class="fb-a"><span>♡ 좋아요</span><span>💬 댓글</span><span>➤ 공유</span><span style="margin-left:auto">🔖</span></div></div>';
   }
   var rqSet = {};
@@ -147,9 +147,9 @@
 
   /* ── 2. UTM 생성기 ────────────────────────────────── */
   var PRESET = [["Meta 피드", "meta", "paid_social", "feed"], ["Meta 스토리", "meta", "paid_social", "story"], ["Google 검색", "google", "cpc", ""], ["Naver 파워링크", "naver", "cpc", "powerlink"], ["카카오 비즈보드", "kakao", "display", "bizboard"], ["뉴스레터", "newsletter", "email", ""], ["인스타 프로필", "instagram", "social", "bio"]];
-  var UTM = store.get("utm-cur", { url: "https://nestwell.example/stay", source: "meta", medium: "paid_social", campaign: "fall_move_2026", content: "feed", term: "" });
+  var UTM = store.get("utm-cur", { url: "https://demo.example/stay", source: "meta", medium: "paid_social", campaign: "fall_move_2026", content: "feed", term: "" });
   function utmUrl(u) { var q = ["source", "medium", "campaign", "content", "term"].filter(function (k) { return u[k]; }).map(function (k) { return "utm_" + k + "=" + encodeURIComponent(u[k].trim().replace(/\s+/g, "_")); }).join("&"); return (u.url || "") + (q ? ((u.url || "").indexOf("?") > -1 ? "&" : "?") + q : ""); }
-  var UTMH = store.get("utm-hist", null) || (function () { var h = []; for (var i = 0; i < 12; i++) { var p = PRESET[i % PRESET.length]; h.push({ id: uid(), at: dstr(addD(TODAY, -i * 3 - ri(0, 2))), by: pick(["퍼포", "하루", "케어", "나"]), url: "https://nestwell.example/" + pick(["stay", "event/fall", "host/join", "rooms"]), source: p[1], medium: p[2], campaign: pick(["fall_move_2026", "semester_start", "host_recruit", "longstay_promo", "retarget_30d"]), content: p[3], term: "" }); } return h; })();
+  var UTMH = store.get("utm-hist", null) || (function () { var h = []; for (var i = 0; i < 12; i++) { var p = PRESET[i % PRESET.length]; h.push({ id: uid(), at: dstr(addD(TODAY, -i * 3 - ri(0, 2))), by: pick(["퍼포", "하루", "케어", "나"]), url: "https://demo.example/" + pick(["stay", "event/fall", "host/join", "rooms"]), source: p[1], medium: p[2], campaign: pick(["fall_move_2026", "semester_start", "host_recruit", "longstay_promo", "retarget_30d"]), content: p[3], term: "" }); } return h; })();
   function utm() {
     var inp = function (k, l, ph) { return fld(l, '<input class="inp mono" data-utm="' + k + '" value="' + esc(UTM[k]) + '" placeholder="' + ph + '">'); };
     return '<div style="max-width:1440px;margin:0 auto">' + NW.hero("utm", "마케팅 · 트래킹", "UTM 생성기", "링크에 붙일 UTM 을 규칙대로 만들고, 만든 링크는 히스토리에 남겨요.")
