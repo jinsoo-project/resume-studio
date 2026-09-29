@@ -63,7 +63,7 @@
       + (onOv ? '' : ticker());
   }
   /* 데모 안내 롤링 띠 — 포트폴리오용 데모 데이터임을 눈에 띄게 */
-  var NOTICE = ["포트폴리오 목적을 위해 실제 운영환경에서 활용하고 있는 대표 부분들을 추려 데모데이터로 구성했습니다.", "실데이터가 아님을 밝힙니다.", "모든 수치 · 업체명 · 인물은 가상이며, 편집 내용은 이 브라우저에만 저장돼요."];
+  var NOTICE = ["포트폴리오 목적을 위해 실제 운영환경에서 활용하고 있는 대표 부분들을 추려 데모데이터로 구성했습니다.", "실데이터가 아님을 밝힙니다."];
   function ticker() {
     var one = NOTICE.map(function (t, i) { return '<span class="tk-i' + (i === 1 ? ' em' : '') + '">' + esc(t) + '</span><i class="tk-d" aria-hidden="true">✦</i>'; }).join("");
     return '<div class="tk" role="note" aria-label="' + esc(NOTICE[0] + ' ' + NOTICE[1]) + '"><span class="tk-l"><i></i>DEMO DATA</span><div class="tk-v" aria-hidden="true"><div class="tk-t">' + one + one + one + one + '</div></div></div>';
