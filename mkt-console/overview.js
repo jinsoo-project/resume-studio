@@ -98,7 +98,7 @@
         + '<div class="ov-g2x"><div class="card ov-rail" id="ovRail"><div class="lbl2" style="margin:0 0 8px" id="ovRailH">지금 실행 중 — 기능 추가</div>' + RAIL.map(function (r, i) { return '<div class="rl"><i>' + (i + 1) + '</i>' + r + '</div>'; }).join("") + '</div>' + term("ovT", "console — delivery.log") + '</div>'
         + impact([["⚡", "리드타임 단축", "요청 → 배포가 반나절 — 실험과 개선의 주기가 빨라집니다."], ["↓", "재작업·사고 감소", "정의 우선 + AI 코드리뷰·자동 게이트 + 검증으로 되돌리는 일을 줄입니다."], ["🔒", "보안 리스크 최소화", "키는 서버 시크릿 전용·노출 0, 롤백·헬스체크를 상비합니다."]]))
 
-      + sec("ov-guide", "08", "DEMO GUIDE", "데모 콘솔 둘러보기", "위 구조가 실제로 어떤 화면이 되는지, 가상 브랜드 " + NW.BRAND + " 의 가상 데이터로 직접 눌러 볼 수 있어요. 회색 메뉴는 원래 운영하던 화면이고, 데모에서는 닫아 뒀어요.",
+      + sec("ov-guide", "08", "DEMO GUIDE", "데모 콘솔 둘러보기", "위 구조가 실제로 어떤 화면이 되는지, " + NW.BRAND + " 데모 콘솔에서 데모 데이터로 직접 눌러 볼 수 있어요. 회색 메뉴는 원래 운영하던 화면이고, 데모에서는 닫아 뒀어요.",
         '<div class="ov-guide">' + GUIDE.map(function (g) { return '<div class="card ov-gd"><div class="ov-gd-h"><b>' + g[0] + '</b><small>' + g[1] + '</small></div>' + g[2].map(function (p) { return '<a href="#/' + p[0] + '"><b>' + p[1] + '</b><span>' + p[2] + '</span><i>→</i></a>'; }).join("") + '</div>'; }).join("") + '</div>'
         + '<div class="ov-end"><div><b>이제 데모 콘솔에서 직접 눌러 보세요</b><span>숫자 클릭 · 드로어 · 빌더 · 자동화 실행까지 모두 동작해요 (가상 데이터 · 이 브라우저에만 저장)</span></div><a class="btn btn-p lg" href="#/total-dashboard">데모 콘솔 열기 →</a></div>')
       + '<footer class="ov-foot">김진수 · Marketing &amp; AX — 이 페이지와 데모의 수치는 모두 예시이며 실제 데이터가 아닙니다</footer></div>';

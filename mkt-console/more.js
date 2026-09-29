@@ -7,7 +7,7 @@
   /* ── 1. META Ads 캠페인 빌더 ──────────────────────────── */
   var OBJ = ["인지도", "트래픽", "참여", "잠재 고객", "앱 홍보", "판매"], CTA = ["더 알아보기", "지금 예약하기", "가입하기", "문의하기"];
   var REG = ["서울", "경기", "인천", "부산", "대구", "대전", "광주", "제주"], PLACE = ["피드", "스토리", "릴스", "탐색", "메신저", "오디언스 네트워크"];
-  function newAd(n) { return { id: uid(), name: "광고 " + n, media: "image", body: "보증금 부담 없이, 1주부터 시작하는 내 방.", title: "풀옵션 단기임대", cta: "더 알아보기", link: "https://nestwell.example/stay?utm_source=meta&utm_medium=paid_social" }; }
+  function newAd(n) { return { id: uid(), name: "광고 " + n, media: "image", body: "보증금 부담 없이, 1주부터 시작하는 내 방.", title: "풀옵션 단기임대", cta: "더 알아보기", link: "https://demo.example/stay?utm_source=meta&utm_medium=paid_social" }; }
   function newSet(n) { return { id: uid(), name: "광고세트 " + n, daily: 30000, start: dstr(addD(TODAY, 1)), end: dstr(addD(TODAY, 30)), age: [20, 34], gender: "all", regions: ["서울", "경기"], interests: ["자취", "이사"], place: ["피드", "스토리", "릴스"], ads: [newAd(1)] }; }
   function seedB() {
     var s1 = newSet(1); s1.name = "20~34 · 대학가"; s1.interests = ["대학생", "자취", "이사"]; s1.ads.push(newAd(2)); s1.ads[1].media = "video"; s1.ads[1].name = "룸 투어 릴스"; s1.ads[1].body = "캐리어만 들고 오세요. 가구·가전 다 있어요.";
@@ -31,9 +31,9 @@
   }
   function chips(list, on, attr) { return '<div class="mchips">' + list.map(function (x) { return '<button type="button" class="chip2' + (on.indexOf(x) > -1 ? ' on' : '') + '" ' + attr + '="' + esc(x) + '">' + esc(x) + '</button>'; }).join("") + '</div>'; }
   function adPreview(a) {
-    return '<div class="fb"><div class="fb-h"><span class="fb-av">N</span><div><b>' + NW.BRAND + '</b><small>광고 · 🌐</small></div></div><div class="fb-t" data-pv="body">' + esc(a.body) + '</div>'
+    return '<div class="fb"><div class="fb-h"><span class="fb-av">김</span><div><b>' + NW.BRAND + '</b><small>광고 · 🌐</small></div></div><div class="fb-t" data-pv="body">' + esc(a.body) + '</div>'
       + '<div class="fb-img" style="background:' + grad(a.id) + '">' + (a.media === "video" ? '<span class="play">▶</span>' : '') + '</div>'
-      + '<div class="fb-c"><div><small>NESTWELL.EXAMPLE</small><b data-pv="title">' + esc(a.title) + '</b></div><button type="button" data-pv="cta">' + esc(a.cta) + '</button></div><div class="fb-a"><span>♡ 좋아요</span><span>💬 댓글</span><span>➤ 공유</span><span style="margin-left:auto">🔖</span></div></div>';
+      + '<div class="fb-c"><div><small>DEMO.EXAMPLE</small><b data-pv="title">' + esc(a.title) + '</b></div><button type="button" data-pv="cta">' + esc(a.cta) + '</button></div><div class="fb-a"><span>♡ 좋아요</span><span>💬 댓글</span><span>➤ 공유</span><span style="margin-left:auto">🔖</span></div></div>';
   }
   function editor() {
     var f = find(B.sel.id); if (!f) { B.sel = { t: "c", id: B.camps[0] ? B.camps[0].id : "" }; f = find(B.sel.id); }

@@ -1,5 +1,6 @@
 /* AX-MKT 콘솔 통합 — 상단 탭 · 구조·개요 · 파이프라인 · 신규 데모 화면 (콘솔 토큰만 사용) */
 :root{--tb:56px}
+html:not(.is-ov):not(.embed){--tb:90px}
 html.embed{--tb:0px}
 .app{flex-direction:column}
 .body{display:flex;flex:1;min-width:0}
@@ -7,7 +8,7 @@ html.embed{--tb:0px}
 .fbar{top:var(--tb)}
 @media(min-width:1280px){.btree{top:calc(var(--tb) + 16px);max-height:calc(100vh - var(--tb) - 110px)}}
 /* 상단 바 */
-.tb{position:sticky;top:0;z-index:40;height:var(--tb);display:flex;align-items:center;gap:12px;padding:0 16px;border-bottom:1px solid var(--border-g);background:color-mix(in oklab,var(--background) 92%,transparent);backdrop-filter:blur(10px)}
+.tb{position:sticky;top:0;z-index:40;height:56px;display:flex;align-items:center;gap:12px;padding:0 16px;border-bottom:1px solid var(--border-g);background:color-mix(in oklab,var(--background) 92%,transparent);backdrop-filter:blur(10px)}
 .tb-back{display:inline-flex;align-items:center;gap:6px;height:34px;padding:0 12px 0 8px;border-radius:8px;border:1px solid var(--border2);background:var(--surface);font-size:13px;font-weight:600;text-decoration:none;white-space:nowrap;flex:none;transition:border-color .15s}
 .tb-back svg{width:16px;height:16px;transition:transform .15s}.tb-back:hover{border-color:var(--accent)}.tb-back:hover svg{transform:translateX(-2px)}
 .tb-div{width:1px;height:22px;background:var(--border);flex:none}
@@ -184,3 +185,17 @@ a.jstep{text-decoration:none;color:inherit}
 .serp-ad.dim{opacity:.45;border-top:1px solid var(--border);padding-top:10px}
 button[disabled]{cursor:not-allowed}
 @media(max-width:640px){.hero>div:first-child{flex:1 1 100%!important}.eyebrow{flex-wrap:wrap}}
+/* 데모 안내 롤링 띠 */
+.tk{position:sticky;top:56px;z-index:39;height:34px;display:flex;align-items:center;overflow:hidden;background:oklch(0.2 0 0);color:#fff;border-bottom:1px solid rgba(255,255,255,.08)}
+.dark .tk{background:oklch(0.26 0 0)}
+.tk-l{flex:none;display:inline-flex;align-items:center;gap:7px;height:100%;padding:0 14px 0 16px;background:#f59e0b;color:#1a1a1a;font-size:11px;font-weight:800;letter-spacing:.1em;position:relative;z-index:1}
+.tk-l::after{content:"";position:absolute;right:-12px;top:0;border-left:12px solid #f59e0b;border-top:17px solid transparent;border-bottom:17px solid transparent}
+.tk-l i{width:7px;height:7px;border-radius:50%;background:#1a1a1a;animation:pulse 1.2s infinite}
+.tk-v{flex:1;min-width:0;overflow:hidden;-webkit-mask:linear-gradient(90deg,transparent,#000 3%,#000 97%,transparent);mask:linear-gradient(90deg,transparent,#000 3%,#000 97%,transparent)}
+.tk-t{display:flex;align-items:center;gap:18px;width:max-content;padding-left:24px;animation:tkRoll 60s linear infinite}
+.tk:hover .tk-t{animation-play-state:paused}
+@keyframes tkRoll{to{transform:translateX(-50%)}}
+.tk-i{font-size:12.5px;font-weight:500;white-space:nowrap;color:rgba(255,255,255,.88)}.tk-i.em{color:#fbbf24;font-weight:700}
+.tk-d{font-style:normal;font-size:10px;color:rgba(255,255,255,.35)}
+@media(max-width:560px){.tk-l{padding:0 10px 0 12px;font-size:10px}.tk-t{animation-duration:45s}}
+@media(prefers-reduced-motion:reduce){.tk-t{animation:none}}

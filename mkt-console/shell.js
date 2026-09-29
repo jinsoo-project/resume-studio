@@ -46,7 +46,7 @@
     }).join("");
     return '<aside class="sb' + (variant === "desktop" && COL ? ' col' : '') + '">'
       + (variant === "desktop" ? '<button class="sb-tog" data-sb-col aria-label="사이드바 접기">' + ic("left") + '</button>' : '')
-      + '<div class="sb-logo"><div class="sb-mark">' + ic("user") + '</div><div class="sb-t"><h1>' + NW.BRAND + ' MKT</h1><p>Agent Dashboard · 데모</p></div></div>'
+      + '<div class="sb-logo"><div class="sb-mark">' + ic("user") + '</div><div class="sb-t"><h1>' + NW.BRAND + '</h1><p>Agent Dashboard · 데모 데이터</p></div></div>'
       + '<nav class="sb-nav">' + nav + '</nav>'
       + '<div class="sb-foot">' + FOOT.map(function (f) { return '<button class="sb-g off" aria-disabled="true" title="' + OFF_TIP + '">' + ic(f[0], "sb-ic") + '<span class="sb-lbl">' + f[1] + '</span></button>'; }).join("")
       + '<div class="sb-user"><span class="sb-av">DM</span><span class="sb-foot-t" style="flex:1;min-width:0"><b style="display:block;font-size:12.5px">데모 사용자</b><small style="color:var(--muted-foreground);font-size:11px">편집 내용은 이 브라우저에만 저장</small></span></div></div>'
@@ -59,7 +59,14 @@
       + '<a class="tb-brand" href="#/overview"><span class="sb-mark">' + ic("base") + '</span><b>AX-MKT 콘솔</b></a>'
       + '<nav class="tb-tabs" role="tablist"><a role="tab" class="' + (onOv ? 'on' : '') + '" href="#/overview">개요</a><a role="tab" class="' + (onOv ? '' : 'on') + '" href="#/' + (store.get("last", DEF)) + '">데모 콘솔</a></nav>'
       + '<span class="tb-sp"></span><span class="demo-pill tb-pill"><i></i>모든 수치는 예시 · 가상 데이터</span>'
-      + '<button class="xb" data-dark title="' + (dark ? "라이트 모드" : "다크 모드") + '">' + ic("moon") + '</button></header>';
+      + '<button class="xb" data-dark title="' + (dark ? "라이트 모드" : "다크 모드") + '">' + ic("moon") + '</button></header>'
+      + (onOv ? '' : ticker());
+  }
+  /* 데모 안내 롤링 띠 — 포트폴리오용 데모 데이터임을 눈에 띄게 */
+  var NOTICE = ["포트폴리오 목적을 위해 실제 운영환경에서 활용하고 있는 대표 부분들을 추려 데모데이터로 구성했습니다.", "실데이터가 아님을 밝힙니다.", "모든 수치 · 업체명 · 인물은 가상이며, 편집 내용은 이 브라우저에만 저장돼요."];
+  function ticker() {
+    var one = NOTICE.map(function (t, i) { return '<span class="tk-i' + (i === 1 ? ' em' : '') + '">' + esc(t) + '</span><i class="tk-d" aria-hidden="true">✦</i>'; }).join("");
+    return '<div class="tk" role="note" aria-label="' + esc(NOTICE[0] + ' ' + NOTICE[1]) + '"><span class="tk-l"><i></i>DEMO DATA</span><div class="tk-v" aria-hidden="true"><div class="tk-t">' + one + one + one + one + '</div></div></div>';
   }
   function layout() {
     var onOv = route() === OV;
@@ -71,7 +78,7 @@
   function paintNav() {
     var d = $(".body > .sb:not(.ov-toc)"); if (d) d.outerHTML = sidebar("desktop");
     var m = $("#mdrawer .sb"); if (m) m.outerHTML = sidebar("drawer");
-    var t = $(".tb"); if (t) t.outerHTML = topbar();
+    var t = $(".tb"), k = $(".tk"); if (k) k.remove(); if (t) t.outerHTML = topbar();
   }
   NW.rerender = function (keep) {
     var y = window.scrollY, main = $("#main"); if (!main) return;

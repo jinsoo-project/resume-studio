@@ -1,9 +1,9 @@
-/* NESTWELL MKT — Agent Dashboard (데모)
+/* 김진수 마케팅 콘솔 — Agent Dashboard (데모)
    모든 수치는 시드 고정 RNG로 만든 가상 데이터예요. 외부 API·키·실데이터 없음.
    화면 편집(제목·상태 등)은 이 브라우저 localStorage 에만 저장돼요. */
 (function () {
   "use strict";
-  var BRAND = "NESTWELL";
+  var BRAND = "김진수 마케팅 콘솔";
   var $ = function (s, r) { return (r || document).querySelector(s); };
   var $$ = function (s, r) { return [].slice.call((r || document).querySelectorAll(s)); };
   var esc = function (s) { return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; }); };
