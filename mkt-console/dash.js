@@ -62,9 +62,9 @@
   var TD = NW.store.get("td", { tab: "snap", mode: "simple" });
   function totalDashboard() {
     var r = NW.rangeOf(F.range), K = calc(r);
-    var tabs = NW.segHtml([["snap", "스냅샷"], ["sum", "요약"], ["all", "전체 현황"], ["host", "호스트"], ["guest", "게스트"]], TD.tab, "data-td-tab", true);
-    var head = NW.hero("total", "대시보드 · " + NW.BRAND, "Total Dashboard", "거래·계약·가입·매물을 한 화면에서 봐요. 모든 숫자를 누르면 그 숫자를 만든 행 목록이 열려요.", NW.refreshBtn());
-    var body = TD.tab === "snap" ? snapshot(r, K) : TD.tab === "all" ? overview(r, K) : TD.tab === "host" ? hostTab(r, K) : TD.tab === "guest" ? guestTab(r, K) : summaryTab(r, K);
+    var tabs = NW.segHtml([["snap", "스냅샷"], ["mkt", "마케팅 성과"], ["sum", "요약"], ["all", "전체 현황"], ["host", "호스트"], ["guest", "게스트"]], TD.tab, "data-td-tab", true);
+    var head = NW.hero("total", "대시보드 · " + NW.BRAND, "Total Dashboard", "거래·매출·광고비·획득 채널을 한 화면에서 — 전체 성과 중 마케팅이 만든 몫까지 같은 정의로 봐요. 숫자를 누르면 그 숫자를 만든 행 목록이 열려요.", NW.refreshBtn());
+    var body = TD.tab === "snap" ? snapshot(r, K) : TD.tab === "mkt" ? paidBody(r, K) : TD.tab === "all" ? overview(r, K) : TD.tab === "host" ? hostTab(r, K) : TD.tab === "guest" ? guestTab(r, K) : summaryTab(r, K);
     return head + filterBar({ right: tabs }) + body;
   }
   function snapshot(r, K) {
@@ -93,7 +93,7 @@
     var title = F.range === "all" ? "전체" : NW.RANGES.filter(function (x) { return x[0] === F.range; })[0][1];
     var panel = '<section class="card gp" style="margin-top:12px"><div class="gp-h"><b>📌 해당 기간 · ' + esc(title) + ' (' + md(r.s) + '~' + md(r.e) + ')</b><span>' + r.days + '일 · 결제 = 완료일 기준 확정(취소 제외) · 매출 = 결제금액에 포함된 게스트 수수료 · 계약 = 기간 내 신청 코호트</span></div><div class="g7">' + cards.join("") + '</div></section>';
     if (TD.mode === "detail") panel = detailView(r, K);
-    return sumBar + panel + weeks4();
+    return sumBar + panel + mktTrack(r, K) + weeks4();
   }
   function detailView(r, K) {
     var ap = K.appr.length, dn = K.done.length + K.cAfter.length;
@@ -174,30 +174,100 @@
 
   /* ── Paid Dashboard ─────────────────────────────────── */
   var CH = { meta: "Meta", google: "Google", naver: "Naver", kakao: "Kakao" }, CHC = { meta: "#4c6ab0", google: "#1baf7a", naver: "#0ca30c", kakao: "#d4a106" };
-  function paidDashboard() {
-    var r = NW.rangeOf(F.range), K = calc(r), B = NW.buckets(r, F.gran), margin = NW.store.get("margin", 18);
+  function paidDashboard() { TD.tab = "mkt"; NW.store.set("td", TD); return totalDashboard(); }
+  function paidBody(r, K) {
+    var B = NW.buckets(r, F.gran), margin = NW.store.get("margin", 18);
     var ads = D.ads.filter(function (a) { return inR(a.date, r); }), spend = ads.reduce(function (t, a) { return t + a.spend; }, 0);
-    var gs = K.gNew.length, hs = K.hNew.length, ls = K.lNew.length, roas = spend ? K.pay / spend : 0, roi = spend ? (K.pay * margin / 100 - spend) / spend : 0;
-    var ltv = K.cnt ? K.pay / K.cnt * 1.32 : 0, cac = gs ? spend / gs : 0, lc = cac ? ltv / cac : 0;
-    var right = '<button class="btn" data-margin>실마진율 ' + margin + '%</button><button class="btn" data-spend-add>' + ic("plus") + '광고비 수기 입력</button>';
-    var grid = '<div class="kg" style="margin-top:18px">' + [
-      kpi("총 광고비", won(spend), "4개 채널 합계", "big"), kpi("게스트 가입 CAC", won(cac), "광고비 ÷ 가입 " + ko(gs) + "명"), kpi("호스트 가입 CAC", won(hs ? spend / hs : 0), "광고비 ÷ 가입 " + ko(hs) + "명"), kpi("방등록 CPA", won(ls ? spend / ls : 0), "광고비 ÷ 신규 룸타입 " + ko(ls)), kpi("결제 CPA", won(K.cnt ? spend / K.cnt : 0), "광고비 ÷ 결제 " + ko(K.cnt) + "건"),
-      kpi("결제금액", won(K.pay), "확정 · 보증금 제외", "acc", "accent"), kpi("ROAS", (roas * 100).toFixed(0) + "%", "결제금액 ÷ 광고비", "acc"), kpi("ROI (실마진)", (roi * 100).toFixed(0) + "%", "마진율 " + margin + "% 가정", roi >= 0 ? "acc" : "bad"), kpi("게스트 LTV", won(ltv), "건당 결제금액 × 재계약 1.32 (가정)"), kpi("LTV : CAC", lc.toFixed(1) + " : 1", lc >= 3 ? "건강" : lc < 1 ? "⚠ 손실 구간" : "관찰", lc >= 3 ? "acc" : lc < 1 ? "bad" : "")].join("") + '</div>';
+    var gs = K.gNew.length, hs = K.hNew.length, ls = K.lNew.length, roas = spend ? K.rev / spend : 0, REVK = K.pay ? K.rev / K.pay : 0, roi = spend ? (K.rev - spend) / spend : 0;
+    var ltv = K.cnt ? K.rev / K.cnt * 1.32 : 0, cac = gs ? spend / gs : 0, lc = cac ? ltv / cac : 0;
+    var right = '<button class="btn" data-spend-add>' + ic("plus") + '광고비 수기 입력</button>';
+    var A = attrib(r), pctN = function (a, b) { return b ? (a / b * 100).toFixed(1) + "%" : "—"; };
+    var attrRow = '<div class="mk-head"><div><b>광고 기여 요약</b><span>전체 거래 중 광고(페이드)가 만든 몫 · 채널 귀속은 라스트 클릭 가정(데모)</span></div><div style="display:flex;gap:8px">' + right + '</div></div>'
+      + '<div class="kg">' + kpi("전체 거래액", wS(K.gmv), "결제금액 + 보증금", "big") + kpi("광고 기여 거래액", wS(A.pGmv), "전체의 " + pctN(A.pGmv, K.gmv), "acc", "accent") + kpi("자연·추천·직접 거래액", wS(K.gmv - A.pGmv), "전체의 " + pctN(K.gmv - A.pGmv, K.gmv)) + kpi("광고비 ÷ 매출", pctN(A.spend, K.rev), "매출(수수료) " + wS(K.rev) + " 대비", A.spend > K.rev ? "bad" : "") + kpi("페이드 ROAS", (A.spend ? A.pRev / A.spend * 100 : 0).toFixed(0) + "%", "광고 기여 매출 ÷ 광고비") + kpi("신규 게스트 광고 획득", pctN(A.gPaid, A.gAll), ko(A.gPaid) + " / " + ko(A.gAll) + "명") + '</div>';
+    var grid = '<div class="lbl">퍼포먼스 지표</div><div class="kg">' + [
+      kpi("총 광고비", wS(spend), "4개 채널 합계", "big"), kpi("게스트 가입 CAC", won(cac), "광고비 ÷ 가입 " + ko(gs) + "명"), kpi("호스트 가입 CAC", won(hs ? spend / hs : 0), "광고비 ÷ 가입 " + ko(hs) + "명"), kpi("방등록 CPA", won(ls ? spend / ls : 0), "광고비 ÷ 신규 룸타입 " + ko(ls)), kpi("결제 CPA", won(K.cnt ? spend / K.cnt : 0), "광고비 ÷ 결제 " + ko(K.cnt) + "건"),
+      kpi("결제금액", wS(K.pay), "확정 · 보증금 제외", "acc", "accent"), kpi("ROAS", (roas * 100).toFixed(0) + "%", "매출(수수료) ÷ 광고비", "acc"), kpi("ROI", (roi * 100).toFixed(0) + "%", "(매출 − 광고비) ÷ 광고비", roi >= 0 ? "acc" : "bad"), kpi("게스트 LTV", wS(ltv), "건당 매출(수수료) × 재계약 1.32 (가정)"), kpi("LTV : CAC", lc.toFixed(1) + " : 1", lc >= 3 ? "건강" : lc < 1 ? "⚠ 손실 구간" : "관찰", lc >= 3 ? "acc" : lc < 1 ? "bad" : "")].join("") + '</div>';
     var sB = B.map(function (b) { return D.ads.filter(function (a) { return inR(a.date, b); }).reduce(function (t, a) { return t + a.spend; }, 0); });
     var pB = B.map(function (b) { return D.contracts.filter(function (c) { return NW.segOk(c) && c.status === "COMPLETED" && inR(c.completed_at, b); }).reduce(function (t, c) { return t + c.paid_amount; }, 0); });
     var gB = B.map(function (b) { return D.guests.filter(function (g) { return inR(g.joined_at, b); }).length; });
     var labels = B.map(function (b) { return b.label; }), pc = function (v) { return Math.round(v) + "%"; };
     var charts = '<div class="lbl">추이</div><div class="g2">'
-      + NW.chartCard("광고비 vs 결제금액", { labels: labels, h: 230, tipFmt: won, series: [{ name: "광고비", color: "var(--c2)", values: sB }, { name: "결제금액", type: "line", color: "var(--accent)", values: pB }] })
+      + NW.chartCard("광고비 vs 매출(수수료)", { labels: labels, h: 230, tipFmt: won, series: [{ name: "광고비", color: "var(--c2)", values: sB }, { name: "매출(수수료)", type: "line", color: "var(--accent)", values: pB.map(function (v) { return v * REVK; }) }] })
       + NW.chartCard("게스트 CAC 추이", { labels: labels, h: 230, tipFmt: won, series: [{ name: "CAC", type: "line", color: "var(--guest)", values: sB.map(function (s, i) { return gB[i] ? s / gB[i] : 0; }) }] })
-      + NW.chartCard("ROAS · ROI", { labels: labels, h: 230, fmt: pc, series: [{ name: "ROAS", type: "line", color: "var(--accent)", values: sB.map(function (s, i) { return s ? pB[i] / s * 100 : 0; }) }, { name: "ROI(실마진)", type: "line", color: "var(--seg-private)", dash: true, values: sB.map(function (s, i) { return s ? (pB[i] * margin / 100 - s) / s * 100 : 0; }) }] })
+      + NW.chartCard("ROAS · ROI", { labels: labels, h: 230, fmt: pc, series: [{ name: "ROAS", type: "line", color: "var(--accent)", values: sB.map(function (s, i) { return s ? pB[i] * REVK / s * 100 : 0; }) }, { name: "ROI", type: "line", color: "var(--seg-private)", dash: true, values: sB.map(function (s, i) { return s ? (pB[i] * REVK - s) / s * 100 : 0; }) }] })
       + NW.chartCard("채널별 광고비", { labels: labels, h: 230, stacked: true, tipFmt: won, series: Object.keys(CH).map(function (k) { return { name: CH[k], color: CHC[k], values: B.map(function (b) { return D.ads.filter(function (a) { return a.channel === k && inR(a.date, b); }).reduce(function (t, a) { return t + a.spend; }, 0); }) }; }) }) + '</div>';
     var share = { meta: .38, google: .3, naver: .22, kakao: .1 }, eff = { meta: 1.05, google: 1.15, naver: .95, kakao: .7 };
     var rows = Object.keys(CH).map(function (k) { var sp = ads.filter(function (a) { return a.channel === k; }).reduce(function (t, a) { return t + a.spend; }, 0), g = Math.round(gs * share[k] * eff[k] / 1.03), pay = K.pay * share[k] * eff[k] / 1.03; return { k: k, sp: sp, clk: ads.filter(function (a) { return a.channel === k; }).reduce(function (t, a) { return t + a.clicks; }, 0), g: g, n: Math.round(K.cnt * share[k] * eff[k] / 1.03), pay: pay }; });
     var srt = NW.store.get("paid-sort", ["sp", -1]); rows.sort(function (a, b) { var va = srt[0] === "cac" ? (a.g ? a.sp / a.g : 1e12) : srt[0] === "roas" ? (a.sp ? a.pay / a.sp : 0) : a[srt[0]], vb = srt[0] === "cac" ? (b.g ? b.sp / b.g : 1e12) : srt[0] === "roas" ? (b.sp ? b.pay / b.sp : 0) : b[srt[0]]; return (va - vb) * srt[1]; });
     var th = function (k, l) { return '<th class="r srt" data-psort="' + k + '">' + l + (srt[0] === k ? (srt[1] < 0 ? " ▼" : " ▲") : "") + '</th>'; };
-    var table = '<div class="lbl">채널</div><div class="card tw"><table class="t tnum"><thead><tr><th>채널</th>' + th("sp", "광고비") + th("clk", "클릭") + th("g", "가입") + th("n", "결제") + th("cac", "CAC") + th("roas", "ROAS") + '</tr></thead><tbody>' + rows.map(function (x) { return '<tr><td><i class="tdot" style="display:inline-block;margin-right:8px;background:' + CHC[x.k] + '"></i><b>' + CH[x.k] + '</b></td><td class="r">' + won(x.sp) + '</td><td class="r">' + ko(x.clk) + '</td><td class="r">' + ko(x.g) + '명</td><td class="r">' + ko(x.n) + '건</td><td class="r">' + won(x.g ? x.sp / x.g : 0) + '</td><td class="r"><b>' + (x.sp ? (x.pay / x.sp * 100).toFixed(0) : 0) + '%</b></td></tr>'; }).join("") + '</tbody></table></div>';
-    return NW.hero("paid", "MKT · 퍼포먼스", "Paid Dashboard", "광고비·CAC·ROAS·LTV를 한 줄로. 채널 귀속은 데모 가정 비율이에요.", right + NW.refreshBtn()) + filterBar() + grid + charts + table;
+    var table = '<div class="lbl">채널</div><div class="card tw"><table class="t tnum"><thead><tr><th>채널</th>' + th("sp", "광고비") + th("clk", "클릭") + th("g", "가입") + th("n", "결제") + th("cac", "CAC") + th("roas", "ROAS") + '</tr></thead><tbody>' + rows.map(function (x) { return '<tr><td><i class="tdot" style="display:inline-block;margin-right:8px;background:' + CHC[x.k] + '"></i><b>' + CH[x.k] + '</b></td><td class="r">' + won(x.sp) + '</td><td class="r">' + ko(x.clk) + '</td><td class="r">' + ko(x.g) + '명</td><td class="r">' + ko(x.n) + '건</td><td class="r">' + won(x.g ? x.sp / x.g : 0) + '</td><td class="r"><b>' + (x.sp ? (x.pay * REVK / x.sp * 100).toFixed(0) : 0) + '%</b></td></tr>'; }).join("") + '</tbody></table></div>';
+    var sh = B.map(function (b) { var aa = attrib(b); return aa.gmv ? aa.pGmv / aa.gmv * 100 : 0; });
+    var shareCh = NW.chartCard("광고 기여 비중 추이", { labels: labels, h: 200, max: 100, fmt: pc, series: [{ name: "거래액 중 광고 기여 %", type: "line", color: "var(--accent)", values: sh }, { name: "신규 게스트 중 광고 획득 %", type: "line", dash: true, color: "var(--guest)", values: B.map(function (b) { var aa = attrib(b); return aa.gAll ? aa.gPaid / aa.gAll * 100 : 0; }) }] }, "두 선이 같이 오르면 광고가 규모를 키우는 중 · 따로 놀면 채널 효율 점검");
+    return '<div style="margin-top:18px">' + attrRow + '</div><div style="margin-top:12px">' + shareCh + '</div>' + grid + charts + table;
+  }
+
+  /* ── 획득 채널 귀속(데모 가정: 계약·가입 id 해시로 채널 배정 — 라스트 클릭 가정) ── */
+  var ACH = ["meta", "google", "naver", "kakao", "organic", "referral", "direct"], AW = [.2, .15, .11, .05, .24, .1, .15];
+  var ACHN = { meta: "Meta", google: "Google", naver: "Naver", kakao: "Kakao", organic: "자연 검색·SNS", referral: "추천·제휴", direct: "직접 방문" };
+  var ACHC = { meta: "#4c6ab0", google: "#1baf7a", naver: "#0ca30c", kakao: "#d4a106", organic: "#8b5cf6", referral: "#ec4899", direct: "#94a3b8" };
+  var PAID = { meta: 1, google: 1, naver: 1, kakao: 1 };
+  function chOf(n) { var x = ((n * 2654435761) >>> 0) % 1000 / 1000, a = 0; for (var i = 0; i < ACH.length; i++) { a += AW[i]; if (x < a) return ACH[i]; } return "direct"; }
+  var cCh = function (c) { return c._ch || (c._ch = chOf(c.contract_id)); }, gCh = function (g) { return g._ch || (g._ch = chOf(parseInt(String(g.guest_key).slice(1), 10) * 7 + g.joined_at.length)); };
+  var wS = function (v) { var a = Math.abs(v); return a >= 1e8 ? (v / 1e8).toFixed(a >= 1e10 ? 0 : 1) + "억원" : a >= 1e4 ? Math.round(v / 1e4).toLocaleString("ko-KR") + "만원" : won(v); };
+  function attrib(r) {
+    var paid = D.contracts.filter(function (c) { return NW.segOk(c) && c.status === "COMPLETED" && inR(c.completed_at, r); });
+    var o = { gmv: 0, pGmv: 0, pay: 0, pPay: 0, rev: 0, pRev: 0, by: {}, spend: 0, gAll: 0, gPaid: 0, gBy: {} };
+    ACH.forEach(function (k) { o.by[k] = 0; o.gBy[k] = 0; });
+    paid.forEach(function (c) { var k = cCh(c); o.gmv += c.gmv; o.pay += c.paid_amount; o.rev += c.commission; o.by[k] += c.gmv; if (PAID[k]) { o.pGmv += c.gmv; o.pPay += c.paid_amount; o.pRev += c.commission; } });
+    D.ads.forEach(function (a) { if (inR(a.date, r)) o.spend += a.spend; });
+    D.guests.forEach(function (g) { if (inR(g.joined_at, r)) { var k = gCh(g); o.gAll++; o.gBy[k]++; if (PAID[k]) o.gPaid++; } });
+    return o;
+  }
+  NW.attrib = attrib;
+  function mktTrack(r, K) {
+    var A = attrib(r), B = NW.buckets(r, F.gran), labels = B.map(function (b) { return b.label; });
+    var P = function (a, b) { return b ? (a / b * 100).toFixed(1) + "%" : "—"; };
+    var prevR = { s: NW.dstr(NW.addD(NW.parseD(r.s), -r.days)), e: NW.dstr(NW.addD(NW.parseD(r.s), -1)) }, A0 = attrib(prevR);
+    var dlt = function (a, b, inv) { if (!b) return '<span class="dlt eq">—</span>'; var d = (a - b) / b * 100, good = inv ? d < 0 : d > 0; return '<span class="dlt ' + (Math.abs(d) < .05 ? "eq" : good ? "up" : "dn") + '">' + (d >= 0 ? "▲" : "▼") + Math.abs(d).toFixed(1) + '%</span>'; };
+    var roas = A.spend ? A.pRev / A.spend : 0, roas0 = A0.spend ? A0.pRev / A0.spend : 0, cac = A.gPaid ? A.spend / A.gPaid : 0, cac0 = A0.gPaid ? A0.spend / A0.gPaid : 0;
+    var kk = function (l, v, s, d, tone) { return '<div class="kpi"><div class="kl">' + (tone ? '<i class="tdot" style="background:' + tone + '"></i>' : '') + esc(l) + '</div><div class="kv tnum">' + v + '</div><div class="ks">' + s + ' ' + (d || "") + '</div></div>'; };
+    var krow = '<div class="kg">'
+      + kk("광고 기여 거래액", wS(A.pGmv), "전체의 " + P(A.pGmv, A.gmv), dlt(A.pGmv, A0.pGmv), "var(--accent)")
+      + kk("광고 기여 비중", P(A.pGmv, A.gmv), "직전 기간 " + P(A0.pGmv, A0.gmv), "", "var(--accent)")
+      + kk("광고비", wS(A.spend), "4개 매체 합", dlt(A.spend, A0.spend, true), "#4c6ab0")
+      + kk("광고비 ÷ 매출", P(A.spend, K.rev), "마케팅 비용률", "", "#f59e0b")
+      + kk("페이드 ROAS", (roas * 100).toFixed(0) + "%", "광고 기여 매출 ÷ 광고비", dlt(roas, roas0), "#10b981")
+      + kk("신규 게스트 광고 획득", P(A.gPaid, A.gAll), ko(A.gPaid) + "명 / " + ko(A.gAll) + "명", "", "#b95d18")
+      + kk("페이드 CAC", wS(cac), "광고비 ÷ 광고 획득 가입", dlt(cac, cac0, true), "#ec4899")
+      + kk("건당 거래액", wS(K.cnt ? K.gmv / K.cnt : 0), "결제 " + ko(K.cnt) + "건", "", "#94a3b8") + '</div>';
+    var paidB = [], orgB = [], spB = [];
+    B.forEach(function (b) { var a = attrib(b); paidB.push(a.pGmv); orgB.push(a.gmv - a.pGmv); spB.push(a.spend); });
+    var ch1 = NW.chartCard("거래액 구성 추이 — 광고 기여 vs 그 외", { labels: labels, h: 240, stacked: true, right: true, tipFmt: won, fmt2: NW.short, series: [{ name: "광고 기여 거래액", color: "var(--accent)", values: paidB }, { name: "자연·추천·직접", color: "var(--c1)", values: orgB }, { name: "광고비 (오른쪽 축)", type: "line", color: "#f59e0b", values: spB }] }, "막대 = 거래액(광고 기여 + 그 외) · 선 = 광고비");
+    var gSer = [["paid", "광고 (Meta·Google·Naver·Kakao)", "var(--accent)"], ["organic", "자연 검색·SNS", "#8b5cf6"], ["referral", "추천·제휴", "#ec4899"], ["direct", "직접 방문", "var(--c1)"]].map(function (x) {
+      return { name: x[1], color: x[2], values: B.map(function (b) { var a = attrib(b); return x[0] === "paid" ? a.gPaid : a.gBy[x[0]]; }) };
+    });
+    var ch2 = NW.chartCard("신규 게스트 획득 채널 믹스", { labels: labels, h: 240, stacked: true, fmt: function (v) { return Math.round(v); }, series: gSer }, "가입 시점의 유입 채널(라스트 클릭 가정)");
+    // 퍼널
+    var ga = D.ga4.filter(function (g) { return inR(g.date, r); }), sum = function (k) { return ga.reduce(function (t, g) { return t + g[k]; }, 0); };
+    var steps = [["페이지 조회", sum("page_view")], ["상세 조회", sum("view_item")], ["계약 신청", K.req], ["호스트 승인", K.appr.length], ["결제 완료", K.cnt]];
+    var fun = '<div class="card mk-card"><div class="mk-ct"><b>전환 퍼널</b><span>GA4 × 계약 데이터 연결</span></div>' + steps.map(function (st, i) {
+      var w = steps[0][1] ? Math.max(3, Math.sqrt(st[1] / steps[0][1]) * 100) : 0;
+      return '<div class="fn-r"><span class="fn-l">' + st[0] + '</span><div class="fn-b"><i style="width:' + w + '%"></i></div><b class="tnum">' + ko(st[1]) + '</b><em class="tnum">' + (i ? P(st[1], steps[i - 1][1]) : "") + '</em></div>';
+    }).join("") + '<p class="mk-note">오른쪽 % = 바로 앞 단계 대비 전환율 · 막대는 규모 차이가 커서 제곱근 스케일</p></div>';
+    // 채널 기여
+    var tot = A.gmv || 1, chs = ACH.slice().sort(function (a, b) { return A.by[b] - A.by[a]; });
+    var cc = '<div class="card mk-card"><div class="mk-ct"><b>채널별 거래액 기여</b><span>광고 ' + P(A.pGmv, A.gmv) + ' · 그 외 ' + P(A.gmv - A.pGmv, A.gmv) + '</span></div><div class="mk-stack">' + chs.map(function (k) { return '<i style="width:' + (A.by[k] / tot * 100) + '%;background:' + ACHC[k] + '" title="' + ACHN[k] + ' ' + P(A.by[k], tot) + '"></i>'; }).join("") + '</div>'
+      + chs.map(function (k) { return '<div class="mk-li"><span><i style="background:' + ACHC[k] + '"></i>' + ACHN[k] + (PAID[k] ? ' <em>광고</em>' : '') + '</span><b class="tnum">' + NW.short(A.by[k]) + '원</b><em class="tnum">' + P(A.by[k], tot) + '</em></div>'; }).join("") + '</div>';
+    // 목표 대비
+    var goalG = Math.round(A0.gmv * 1.12 / 1e6) * 1e6 || 1, budget = Math.round(A0.spend * 1.05 / 1e5) * 1e5 || 1;
+    var bar = function (l, v, g, fmt, note, warn) { var q = Math.min(1.2, v / g); return '<div class="gl-r"><div class="gl-h"><span>' + l + '</span><b class="tnum">' + fmt(v) + ' <em>/ ' + fmt(g) + '</em></b></div><div class="gl-b"><i style="width:' + Math.min(100, q * 100) + '%;background:' + (warn && q > 1 ? "var(--danger)" : q >= 1 ? "#10b981" : "var(--accent)") + '"></i></div><div class="gl-n"><span>' + (q * 100).toFixed(0) + '% 달성</span><span>' + note + '</span></div></div>'; };
+    var goals = '<div class="card mk-card"><div class="mk-ct"><b>목표 대비</b><span>직전 기간 기준 자동 목표(데모)</span></div>'
+      + bar("거래액", A.gmv, goalG, function (v) { return NW.short(v) + "원"; }, "직전 +12%")
+      + bar("광고비 소진", A.spend, budget, function (v) { return NW.short(v) + "원"; }, "예산 = 직전 +5%", true)
+      + bar("페이드 ROAS", roas * 100, 300, function (v) { return Math.round(v) + "%"; }, "목표 300%")
+      + bar("광고 기여 비중", A.gmv ? A.pGmv / A.gmv * 100 : 0, 50, function (v) { return v.toFixed(1) + "%"; }, "목표 50%") + '</div>';
+    return '<section class="mk"><div class="mk-head"><div><b>마케팅 기여 트래킹</b><span>전체 성과 중 광고가 만든 몫 · 획득 채널 · 전환 퍼널 · 목표 — 직전 같은 기간 대비 ▲▼</span></div><button class="btn" data-td-tab="mkt">마케팅 성과 탭 자세히 →</button></div>'
+      + krow + '<div class="g2" style="margin-top:12px">' + ch1 + ch2 + '</div><div class="mk-g3">' + fun + cc + goals + '</div></section>';
   }
 
   /* ── GA4 대시보드 ──────────────────────────────────── */
@@ -269,7 +339,7 @@
   });
 
   NW.PAGES["total-dashboard"] = { render: totalDashboard };
-  NW.PAGES["paid-dashboard"] = { render: paidDashboard };
+  NW.PAGES["paid-dashboard"] = { render: function () { setTimeout(function () { history.replaceState(null, "", "#/total-dashboard"); }, 0); return paidDashboard(); } };
   NW.PAGES["ga4"] = { render: ga4 };
   NW.PAGES["kpi-okr"] = { render: okr };
 })(window.NW);

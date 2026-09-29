@@ -12,7 +12,7 @@
   var BLOG = [["blog-journey", "여정 맵"], ["blog-01", "01 키워드 트렌드"], ["blog-02", "02 아이데이션"], ["blog-03", "03 브리프"], ["blog-04", "04 제작"], ["blog-05", "05 검수"], ["blog-06", "06 관리"], ["blog-07", "07 발행"], ["blog-08", "08 성과"], ["blog-09", "09 자동화"]];
   var NAV = [
     { g: "DASHBOARD", ic: "folder", kids: [["total-dashboard", "Total Dashboard"], [null, "Open API Dashboard"], ["kpi-okr", "KPI & OKR Tracker"], [null, "Live Roomtype"], [null, "Coupon / Point"], [null, "Referral"], ["catalog", "Catalog"], [null, "Brand table"], [null, "LTV · KPI Logic"]] },
-    { g: "MKT", ic: "chart", kids: [["paid-dashboard", "Paid Dashboard"], ["ga4", "GA4 대시보드"], ["ad-requests", "광고 & 디자인 요청"], ["utm", "UTM 생성기"], [null, "UTM-LOGIC"], ["competitor-ads", "경쟁사 광고 모니터링"], ["search-kw", "검색광고 키워드 API"], ["meetings", "회의 캘린더"], [null, "제휴 채널 통합 리포팅"], [null, "리포트 DB"], [null, "GA4 Taxonomy"]] },
+    { g: "MKT", ic: "chart", kids: [["ga4", "GA4 대시보드"], ["ad-requests", "광고 & 디자인 요청"], ["utm", "UTM 생성기"], [null, "UTM-LOGIC"], ["competitor-ads", "경쟁사 광고 모니터링"], ["search-kw", "검색광고 키워드 API"], ["meetings", "회의 캘린더"], [null, "제휴 채널 통합 리포팅"], [null, "리포트 DB"], [null, "GA4 Taxonomy"]] },
     { g: "Ads builder", ic: "heart", kids: [["meta-ads", "META Ads"], ["naver-sa", "NAVER SA"]] },
     { g: "SEO", ic: "chart", kids: [["keyword-trend", "Keyword Trend"], [null, "NAVER Trend"], [null, "GOOGLE Trend"], [null, "Competitor Trend"]] },
     { g: "NEWS LETTER", ic: "star", off: true },
@@ -89,7 +89,7 @@
   };
   var lastMode = null;
   function go() {
-    var r = route(), h = location.hash.replace(/^#\/?/, "");
+    var r = route(), h = location.hash.replace(/^#\/?/, ""); if (r === "paid-dashboard") { NW.PAGES[r].render(); r = "total-dashboard"; }
     if (!NW.EMBED && h !== r) history.replaceState(null, "", "#/" + r);
     NW.OVERVIEW.unmount(); closeM(); NW.closeLayer();
     var mode = r === OV ? "ov" : "con";
