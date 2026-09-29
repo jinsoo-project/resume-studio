@@ -36,10 +36,12 @@ var PAGE='';
 function cardOf(h){try{return CARD_RE.test(h)?decodeURIComponent(h.slice(2)):'';}catch(e){return '';}}
 function gotoSec(id,instant){var f=document.getElementById('frame');try{if(f&&f.contentWindow)f.contentWindow.postMessage({klio:'goto',id:id,instant:!!instant},'*');}catch(e){}}
 function gotoCard(id){var f=document.getElementById('frame');try{if(f&&f.contentWindow)f.contentWindow.postMessage({klio:'goto-card',id:id},'*');}catch(e){}}
+// 전체 프로젝트 페이지 계열: projects(기존) · projects-test(토스식 레이아웃 실험, /{slug}/projects-test 또는 /{slug}/projects/test)
+function isPP(){return PAGE==='projects'||PAGE==='projects-test';}
 function render(doc,sec,card){
   var f=document.getElementById('frame');
-  if(PAGE==='projects') doc.page='projects';
-  document.title=(doc.profile&&doc.profile.nameKo?doc.profile.nameKo+' — ':'')+(PAGE==='projects'?'Projects':(doc.title||'이력서'));
+  if(isPP()) doc.page=PAGE;
+  document.title=(doc.profile&&doc.profile.nameKo?doc.profile.nameKo+' — ':'')+(isPP()?'Projects':(doc.title||'이력서'));
   if(sec||card){ f.addEventListener('load',function once(){ f.removeEventListener('load',once); if(card) gotoCard(card); else gotoSec(sec,true); }); }
   f.setAttribute('srcdoc', window.TEMPLATES.render(doc));
   document.getElementById('bar').style.display = (doc.template==='ax'||doc.template==='klio'||doc.template==='web') ? 'none' : 'flex';
@@ -67,10 +69,10 @@ async function trackViews(slug){
 // 전체 프로젝트 페이지에서 카드 넘김 → 주소창 #p-<id> (그 카드로 바로 공유 가능)
 window.addEventListener('message',function(e){var f=document.getElementById('frame');if(!f||e.source!==f.contentWindow)return;var m=e.data;
   if(m&&m.klio==='sec'&&typeof m.id==='string'&&SEC_RE.test(m.id)){try{history.replaceState(null,'',location.pathname+location.search+(m.id==='home'?'':'#'+m.id));}catch(_){}}
-  else if(m&&m.klio==='card-close'&&PAGE==='projects'){try{history.replaceState(null,'',location.pathname+location.search);}catch(_){}}
-  else if(m&&m.klio==='card'&&PAGE==='projects'&&typeof m.id==='string'&&m.id&&m.id.length<=120){try{history.replaceState(null,'',location.pathname+location.search+'#p-'+encodeURIComponent(m.id));}catch(_){}}
+  else if(m&&m.klio==='card-close'&&isPP()){try{history.replaceState(null,'',location.pathname+location.search);}catch(_){}}
+  else if(m&&m.klio==='card'&&isPP()&&typeof m.id==='string'&&m.id&&m.id.length<=120){try{history.replaceState(null,'',location.pathname+location.search+'#p-'+encodeURIComponent(m.id));}catch(_){}}
 });
-window.addEventListener('hashchange',function(){var h=location.hash.slice(1),c=PAGE==='projects'?cardOf(h):'';if(c)gotoCard(c);else if(SEC_RE.test(h))gotoSec(h,false);});
+window.addEventListener('hashchange',function(){var h=location.hash.slice(1),c=isPP()?cardOf(h):'';if(c)gotoCard(c);else if(SEC_RE.test(h))gotoSec(h,false);});
 
 (async function(){
   var msg=document.getElementById('msg');
@@ -79,12 +81,15 @@ window.addEventListener('hashchange',function(){var h=location.hash.slice(1),c=P
   // /{slug}/projects (또는 ?page=projects) = 전체 프로젝트 페이지 (/p/projects 처럼 슬러그가 projects인 경우는 제외)
   var segs=location.pathname.split('/').filter(Boolean);
   if(params.get('page')==='projects') PAGE='projects';
+  if(params.get('page')==='projects-test') PAGE='projects-test';
   if(segs.length>1&&segs[segs.length-1]==='projects'&&!(segs.length===2&&/^[rp]$/.test(segs[0]))){ PAGE='projects'; segs.pop(); }
+  else if(segs.length>1&&segs[segs.length-1]==='projects-test'){ PAGE='projects-test'; segs.pop(); }
+  else if(segs.length>2&&segs[segs.length-1]==='test'&&segs[segs.length-2]==='projects'){ PAGE='projects-test'; segs.splice(-2,2); }
   var slug=params.get('slug');
   if(!slug){var m=location.pathname.match(/\/[rp]\/([^/?#]+)/);if(m)slug=decodeURIComponent(m[1]);}
   if(!slug&&segs.length)slug=decodeURIComponent(segs[segs.length-1]);
   var hash=location.hash.slice(1);
-  var cardHash=PAGE==='projects'?cardOf(hash):'';
+  var cardHash=isPP()?cardOf(hash):'';
   var secHash=!cardHash&&SEC_RE.test(hash)?hash:'';
 
   // 1) hash 인코딩 모드 (오프라인/자체완결) 우선 — 단, #projects 같은 섹션 해시·#p-카드 해시는 제외(딥링크)
@@ -102,10 +107,10 @@ window.addEventListener('hashchange',function(){var h=location.hash.slice(1),c=P
       var tplOverride=params.get('tpl')||FORCE_TPL[slug];
       if(row&&row.snapshot){
         if(tplOverride) row.snapshot.template=tplOverride;
-        if(PAGE==='projects'&&row.snapshot.template!=='klio') PAGE=''; // 전체 프로젝트 페이지는 klio 전용
+        if(isPP()&&row.snapshot.template!=='klio') PAGE=''; // 전체 프로젝트 페이지는 klio 전용
         // 타일(→ …/projects)·돌아가기 링크는 지금 연 주소 기준 (/portfolio · /p/x · /mkt/portfolio). /view?slug= 경유면 슬러그 기준
         row.snapshot.slug=slug;
-        var base=location.pathname.replace(/\/+$/,''); if(PAGE==='projects') base=base.replace(/\/projects$/,'');
+        var base=location.pathname.replace(/\/+$/,''); if(isPP()) base=base.replace(/\/projects(-test|\/test)?$/,'');
         if(!base||/^\/view(\.html)?$/.test(base)) base='/'+encodeURIComponent(slug);
         row.snapshot.homePath=base; row.snapshot.pjPath=base+'/projects';
         render(row.snapshot,secHash,cardHash); if(row.snapshot.template==='klio') trackViews(slug); return;

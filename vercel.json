@@ -13,7 +13,9 @@
     { "source": "/mkt/portfolio/projects", "destination": "/view" },
     { "source": "/p/:slug/projects", "destination": "/view" },
     { "source": "/r/:slug/projects", "destination": "/view" },
-    { "source": "/:slug/projects", "destination": "/view" }
+    { "source": "/:slug/projects", "destination": "/view" },
+    { "source": "/:slug/projects-test", "destination": "/view" },
+    { "source": "/:slug/projects/test", "destination": "/view" }
   ],
   "headers": [
     {
