@@ -2205,16 +2205,32 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
         var tossPage = function () {
           var ea = function (s) { return esc(s).replace(/"/g, "&quot;"); };
           var DEEP = { "var(--lav)": "#2f5f99", "var(--mint)": "#2b6a5f", "var(--coral)": "#93503c", "var(--sand)": "#6a6b36", "var(--beige)": "#86674d" };
-          var deep = function (it) { return DEEP[it.cm.c] || "#4e5968"; };
+          var deep = function (it) { return (gOf[it.i] && gOf[it.i].bg) || DEEP[it.cm.c] || "#4e5968"; }; // 카드 색 = 분류 색(아래 TAXO)
           var score = function (it) { return (it.main ? 3 : 0) + Math.min(it.mets.length, 3) + ((it.sum || it.w.summary) ? .5 : 0); };
           var byScore = function (a, b) { return score(b) - score(a) || a.i - b.i; };
-          var byG = {}; secs.forEach(function (s) { byG[s.g.id] = s.items.slice(); });
+          // ── 프로젝트 분류(이 페이지 전용 · KILO 대시보드의 묶음 데이터와 기존 /projects는 그대로): '하는 일' 기준 5가지 — 이름 · 정의 · 담긴 일
+          //    규칙: 소재 제작인 퍼포먼스 + 콘텐츠·영상 → 광고 소재·콘텐츠 / 성과·AX → 데이터·AX / 브랜딩 → 브랜드 캠페인 / 커머스·제휴 → 커머스·제휴 / 나머지(퍼포먼스·그로스·CRM) → 퍼포먼스·그로스
+          var TAXO = [
+            { id: "t-perf", bg: "#2f5f99", ko: "퍼포먼스·그로스", en: "Performance & Growth", def: "광고 매체를 운영하고 예산을 나눠 설치·매출을 끌어올린 일, 그리고 신규 유입과 재방문 구조를 만든 일이에요.", tags: ["매체 운영", "예산 관리", "그로스 설계", "CRM"] },
+            { id: "t-crea", bg: "#86674d", ko: "광고 소재·콘텐츠", en: "Creative & Content", def: "성과가 나는 광고 소재와 영상, 유튜브 채널 콘텐츠를 직접 기획하고 만든 일이에요.", tags: ["광고 소재", "영상 제작", "채널 운영"] },
+            { id: "t-data", bg: "#2b6a5f", ko: "데이터·AX", en: "Data & AX", def: "지표 체계와 데이터 파이프라인, 어트리뷰션을 세우고 AI로 마케팅 도구를 직접 만든 일이에요.", tags: ["지표 설계", "데이터 파이프라인", "어트리뷰션", "AI 자동화"] },
+            { id: "t-brand", bg: "#93503c", ko: "브랜드 캠페인", en: "Brand Campaign", def: "브랜드 인지도와 신뢰를 쌓은 캠페인, 그리고 그 근거가 된 소비자 조사예요.", tags: ["CSR 캠페인", "사연 콘텐츠", "소비자 조사"] },
+            { id: "t-com", bg: "#6a6b36", ko: "커머스·제휴", en: "Commerce & Partnership", def: "특가·핫딜·제휴 프로모션으로 실제 판매를 만든 일이에요.", tags: ["특가 기획", "핫딜", "제휴 프로모션", "쇼핑 최적화"] }
+          ];
+          var taxOf = function (it) {
+            var c = it.w.category || "", t = String(it.w.title || "") + " " + String(it.title || "");
+            if ((c === "퍼포먼스" && /소재/.test(t)) || c === "콘텐츠" || c === "영상") return "t-crea";
+            if (c === "성과" || c === "AX") return "t-data";
+            if (c === "브랜딩") return "t-brand";
+            if (c === "커머스" || c === "제휴") return "t-com";
+            return "t-perf";
+          };
+          var TS = TAXO.map(function (g) { return { g: g, items: items.filter(function (it) { return taxOf(it) === g.id; }).sort(byScore) }; }).filter(function (s) { return s.items.length; });
+          var gOf = {}, byG = {}; TS.forEach(function (s) { byG[s.g.id] = s.items; s.items.forEach(function (it) { gOf[it.i] = s.g; }); });
           var ko = function (c) { return c === "성과" ? "데이터" : c; };
-          var catsKo = function (its) { var cs = []; its.forEach(function (it) { var c = ko(it.w.category || "기타"); if (cs.indexOf(c) < 0) cs.push(c); }); return cs; };
           var mail = P.email ? "mailto:" + P.email : homeUrl + "#contact";
           var mailS = function (sub) { return P.email ? "mailto:" + P.email + "?subject=" + encodeURIComponent(sub) : homeUrl + "#contact"; };
           var chk = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.2 4.2L19 7" fill="none" stroke="#3182f6" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';
-          var mailIc = '<svg viewBox="0 0 24 24" width="26" height="26" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="3" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M3.8 7.2 12 13l8.2-5.8" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>';
           // 이미지는 잘림 없이 원래 비율 · 영상은 16:9 + ▶ · 없으면 분야 일러스트
           var frame = function (it, cls) {
             var m = it.main;
@@ -2226,7 +2242,7 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
           var split = function (it) { var p = String(it.title || "").split(/\s+[—–]\s+/); return p.length > 1 ? { k: p[0], t: p.slice(1).join(" — ") } : { k: dispName(it.co), t: it.title }; };
           var head = function (it) {
             var s = split(it), q = it.sum || it.w.summary || "";
-            return '<span class="tp-ct"><em>' + esc(s.k === it.cm.en ? dispName(it.co) : s.k) + ' · ' + esc(it.cm.en) + '</em><b>' + esc(s.t) + '</b>' + (q ? '<span class="tp-q">' + esc(q) + '</span>' : '') + '<span class="tp-more">자세히 <i aria-hidden="true">〉</i></span></span>';
+            return '<span class="tp-ct"><em>' + esc(s.k === it.cm.en ? dispName(it.co) : s.k) + ' · ' + esc((gOf[it.i] || {}).ko || it.cm.en) + '</em><b>' + esc(s.t) + '</b>' + (q ? '<span class="tp-q">' + esc(q) + '</span>' : '') + '<span class="tp-more">자세히 <i aria-hidden="true">〉</i></span></span>';
           };
           // 토스 '재고관리' 카드의 흰 위젯처럼: 지표 행(라벨 · 파란 숫자) + 구분선
           var widget = function (it) {
@@ -2248,42 +2264,49 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
             }
             return out;
           };
-          // 모드: 대표(분야별 최고 + 점수순 7개) · 분야별 · 전체
-          var top = []; secs.forEach(function (s) { var b = s.items.slice().sort(byScore)[0]; if (b) top.push(b); });
+          // 모드: 대표(분야별 최고 + 점수순, 7개) · 분야 5가지 · 전체(분야 순서)
+          var top = []; TS.forEach(function (s) { if (s.items[0]) top.push(s.items[0]); });
           items.slice().sort(byScore).forEach(function (it) { if (top.length < 7 && top.indexOf(it) < 0) top.push(it); });
           var SETS = [{ m: "all", tab: "대표", t: txt("tpBentoT", "대표 프로젝트예요"), list: top }]
-            .concat(secs.map(function (s) { return { m: s.g.id, tab: s.g.label, t: s.g.label + " 프로젝트예요", list: s.items.slice().sort(byScore) }; }))
-            .concat([{ m: "every", tab: "전체", t: "전체 프로젝트 " + N + "개예요", list: items }]);
-          var setsHtml = SETS.map(function (S, x) { return '<div class="tp-set' + (x ? '' : ' on') + '" data-m="' + ea(S.m) + '" data-t="' + ea(S.t) + '" role="tabpanel">' + bento(S.list) + '</div>'; }).join("");
+            .concat(TS.map(function (s) { return { m: s.g.id, tab: s.g.ko, t: s.g.ko + " 프로젝트예요", list: s.items, g: s.g }; }))
+            .concat([{ m: "every", tab: "전체", t: "전체 프로젝트 " + N + "개예요", list: TS.reduce(function (a, s) { return a.concat(s.items); }, []) }]);
+          // 모드마다 카드 위 정의 칸: 대표 = 고른 기준 + 분야 바로가기 · 분야 = 이름·영문·정의·하는 일·담긴 프로젝트 · 전체 = 분류 기준표
+          var gmBtn = function (s) { return '<button class="tp-gm" type="button" data-m="' + ea(s.g.id) + '"><span class="tp-gcl" style="--gc:' + s.g.bg + '"></span>' + esc(s.g.ko) + '<i>' + s.items.length + '</i></button>'; };
+          var defOf = function (S) {
+            if (S.m === "all") return '<div class="tp-gdef lite"><p>' + esc(txt("tpTopD", "분야마다 성과가 가장 뚜렷한 프로젝트를 골랐어요.")) + '</p><div class="tp-gq"><span>분야별로 보기</span>' + TS.map(gmBtn).join("") + '</div></div>';
+            if (S.m === "every") return '<div class="tp-gdef"><div class="tp-gdh"><b>프로젝트 분류 기준</b><span>' + N + '개를 하는 일에 따라 ' + TS.length + '가지로 나눴어요</span></div><div class="tp-gmap">'
+              + TS.map(function (s, k) { return '<button class="tp-gm row" type="button" data-m="' + ea(s.g.id) + '"><span class="tp-gn">' + pad2(k + 1) + '</span><span class="tp-gt"><b class="tp-gcl" style="--gc:' + s.g.bg + '">' + esc(s.g.ko) + '</b><em>' + esc(s.g.en) + '</em></span><span class="tp-gd">' + esc(s.g.def) + '</span><span class="tp-gc">' + s.items.length + '개<i aria-hidden="true">〉</i></span></button>'; }).join("") + '</div></div>';
+            var g = S.g;
+            return '<div class="tp-gdef"><div class="tp-gdh"><b class="tp-gcl" style="--gc:' + g.bg + '">' + esc(g.ko) + '</b><span>' + esc(g.en) + ' · 프로젝트 ' + S.list.length + '개</span></div><p>' + esc(g.def) + '</p>'
+              + '<div class="tp-gtags">' + g.tags.map(function (t) { return '<span>' + esc(t) + '</span>'; }).join("") + '</div>'
+              + '<div class="tp-gl"><span class="tp-glk">담긴 프로젝트</span><ol>' + S.list.map(function (it) { return '<li><button type="button" data-open="' + it.i + '"><em>' + esc(dispName(it.co)) + '</em>' + esc(split(it).t) + '</button></li>'; }).join("") + '</ol></div></div>';
+          };
+          var setsHtml = SETS.map(function (S, x) { return '<div class="tp-set' + (x ? '' : ' on') + '" data-m="' + ea(S.m) + '" data-t="' + ea(S.t) + '" role="tabpanel">' + defOf(S) + bento(S.list) + '</div>'; }).join("");
           var tabsHtml = SETS.map(function (S, x) { return '<button class="tp-tab' + (x ? '' : ' on') + '" type="button" role="tab" aria-selected="' + (x ? 'false' : 'true') + '" data-m="' + ea(S.m) + '">' + esc(S.tab) + '<i>' + S.list.length + '</i></button>'; }).join("");
           // 첫 화면 벽(배경) · 문장 슬롯 단어(분야별 많은 순으로 돌아가며)
           var wallIt = items.filter(function (it) { return it.main; }).concat(items.filter(function (it) { return !it.main; }));
           var tile = function (it) { return '<span class="tp-wt" style="--bg:' + deep(it) + ';--c:' + it.cm.c + '">' + (it.main ? '<img src="' + ea(it.main.src) + '" alt="" decoding="async">' : coverArt(it.w, it.m0)) + '</span>'; };
           var rowOf = function (off, n) { var r = []; for (var q = 0; q < n && wallIt.length; q++) r.push(wallIt[(off + q * 3) % wallIt.length]); var h = r.map(tile).join(""); return h + h; };
           var wall = '<div class="tp-wall" aria-hidden="true">' + [0, 1, 2].map(function (x) { return '<div class="tp-wrow' + (x % 2 ? ' rev' : '') + '" style="--dur:' + [90, 110, 80][x] + 's">' + rowOf(x, 9) + '</div>'; }).join("") + '</div>';
-          var wordsBy = secs.map(function (s) { var cnt = {}; s.items.forEach(function (it) { var c = ko(it.w.category || ""); if (c) cnt[c] = (cnt[c] || 0) + 1; }); return Object.keys(cnt).sort(function (a, b) { return cnt[b] - cnt[a]; }); });
+          var wordsBy = TS.map(function (s) { var cnt = {}; s.items.forEach(function (it) { var c = ko(it.w.category || ""); if (c) cnt[c] = (cnt[c] || 0) + 1; }); return Object.keys(cnt).sort(function (a, b) { return cnt[b] - cnt[a]; }); });
           var words = []; for (var rr = 0; rr < 3; rr++) wordsBy.forEach(function (L) { if (L[rr] && words.indexOf(L[rr]) < 0 && words.length < 8) words.push(L[rr]); });
           if (!words.length) words = ["마케팅"];
           var heroB = String(txt("tpHeroB", "성과로 말하는 {w} 마케터")), bP = heroB.split("{w}");
           var nav = '<header class="tp-nav"><div class="tp-nav-in"><button class="tp-logo" type="button" data-tgo="tp-top">' + esc(nameEn || nameKo || "Portfolio") + '<small>프로젝트</small></button>'
-            + '<nav class="tp-links" aria-label="바로가기"><button type="button" data-tgo="tp-pick">분야 고르기</button><button type="button" data-tgo="tp-bento">대표 프로젝트</button><button type="button" data-tgo="tp-rec">추천 조합</button></nav>'
-            + '<div class="tp-nr"><a class="tp-nback" href="' + ea(homeUrl) + '#projects" target="_top">← ' + esc(txt("ppBack", "포트폴리오")) + '</a><a class="tp-nbtn" href="' + ea(mail) + '" target="_top">연락하기</a></div></div></header>';
+            + '<nav class="tp-links" aria-label="바로가기"><button type="button" data-tgo="tp-bento">대표 프로젝트</button></nav>'
+            + '<div class="tp-nr"><a class="tp-nback" href="' + ea(homeUrl) + '#projects" target="_top">← ' + esc(txt("ppBack", "포트폴리오")) + '</a></div></div></header>';
           var hero = '<section class="tp-hero" id="tp-top">' + wall
             + '<div class="tp-hc"><h1 class="tp-hh" aria-label="' + ea(N + "개 프로젝트의 기록") + '">'
             + '<span class="tp-hp a" aria-hidden="true"><span class="tp-odo" data-n="' + N + '">' + N + '</span>' + esc(txt("tpHeroA", "개 프로젝트의 기록")) + '</span>'
             + '<span class="tp-hp b" aria-hidden="true">' + esc(bP[0]) + (bP.length > 1 ? '<span class="tp-slot" data-w="' + ea(JSON.stringify(words)) + '"><i>' + esc(words[0]) + '</i></span>' + esc(bP.slice(1).join("")) : '') + '</span></h1>'
-            + '<div class="tp-hb"><button class="tp-b pri" type="button" data-tgo="tp-bento">대표 프로젝트 보기</button><a class="tp-b sec" href="' + ea(mail) + '" target="_top">연락하기</a></div></div>'
-            + '<button class="tp-cue" type="button" data-tgo="tp-pick" aria-label="아래로"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M6 9l6 6 6-6" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button></section>';
-          var pick = '<section class="tp-pick" id="tp-pick"><h2 class="tp-h2 tp-rv">' + esc(txt("tpPickT", "어떤 분야가 궁금하세요?")) + '</h2><div class="tp-chips">'
-            + secs.map(function (s, k) { return '<button class="tp-chip tp-rv" type="button" data-mode="' + ea(s.g.id) + '" style="--dl:' + k * 60 + 'ms">' + esc(s.g.label) + '<i>' + s.items.length + '</i></button>'; }).join("")
-            + '<button class="tp-chip tp-rv" type="button" data-mode="every" style="--dl:' + secs.length * 60 + 'ms">전체 보기<i>' + N + '</i></button>'
-            + '<a class="tp-chip tp-rv" href="' + ea(mail) + '" target="_top" style="--dl:' + (secs.length + 1) * 60 + 'ms">' + mailIc + '바로 연락하기</a></div></section>';
+            + '<div class="tp-hb"><button class="tp-b pri" type="button" data-tgo="tp-bento">대표 프로젝트 보기</button></div></div>'
+            + '<button class="tp-cue" type="button" data-tgo="tp-bento" aria-label="아래로"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M6 9l6 6 6-6" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button></section>';
           var bentoS = '<section class="tp-bento" id="tp-bento"><div class="tp-bh"><h2 class="tp-bt">' + esc(SETS[0].t) + '</h2><div class="tp-tabs" role="tablist" aria-label="분야">' + tabsHtml + '</div></div>' + setsHtml
             + '<button class="tp-all" type="button" data-m="every">프로젝트 ' + N + '개 모두 보기</button></section>';
-          // 추천 조합: 필요(세그먼트) 고르기 → 왼쪽 기본 조합(그 분야 대표 3) · 오른쪽 확장 조합(대표 2 + 짝 분야 2) — 줄마다 칸을 맞춘 2단 비교
-          var NEED = { "g-perf": "광고 효율을 올리고 싶어요", "g-data": "데이터·자동화가 필요해요", "g-brand": "브랜드를 알리고 싶어요", "g-com": "매출·제휴를 늘리고 싶어요" };
-          var WHO = { "g-perf": "앱·커머스 서비스, 광고 효율이 고민인 팀", "g-data": "지표 체계가 없거나 반복 업무가 많은 팀", "g-brand": "알려야 할 브랜드, 캠페인이 필요한 팀", "g-com": "매출 채널을 늘려야 하는 커머스·플랫폼" };
-          var PAIR = { "g-perf": "g-data", "g-data": "g-perf", "g-brand": "g-com", "g-com": "g-brand" };
+          // 추천 조합: 필요(세그먼트) 고르기 → 왼쪽 기본 조합(그 분야 대표 3) · 오른쪽 확장 조합(대표 2 + 짝 분야 2) — 줄마다 칸을 맞춘 2단 비교 (분류는 위 5가지)
+          var NEED = { "t-perf": "광고 효율을 올리고 싶어요", "t-crea": "성과 나는 소재가 필요해요", "t-data": "데이터·자동화가 필요해요", "t-brand": "브랜드를 알리고 싶어요", "t-com": "매출·제휴를 늘리고 싶어요" };
+          var WHO = { "t-perf": "앱·커머스 서비스, 광고 효율이 고민인 팀", "t-crea": "소재가 금방 지치거나 콘텐츠가 부족한 팀", "t-data": "지표 체계가 없거나 반복 업무가 많은 팀", "t-brand": "알려야 할 브랜드, 캠페인이 필요한 팀", "t-com": "매출 채널을 늘려야 하는 커머스·플랫폼" };
+          var PAIR = { "t-perf": "t-data", "t-crea": "t-perf", "t-data": "t-perf", "t-brand": "t-crea", "t-com": "t-perf" };
           var stackOf = function (its) { var s = []; its.forEach(function (it) { (it.w.stack || []).forEach(function (t) { if (t && s.indexOf(t) < 0) s.push(t); }); }); return s.slice(0, 6); };
           var fan = function (its) { return '<span class="tp-stk">' + its.slice(0, 3).map(function (it, k) { return '<span class="tp-sc s' + k + '" style="--bg:' + deep(it) + ';--c:' + it.cm.c + '">' + frame(it, "tp-sf") + '</span>'; }).join("") + '</span>'; };
           var list = function (t, rows) { return rows.length ? '<span class="tp-clt">' + t + '</span><ul>' + rows.join("") + '</ul>' : ''; };
@@ -2300,19 +2323,19 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
               list("이런 도구를 써요", st.length ? ['<li class="tp-tl">' + st.map(function (t) { return '<span>' + esc(t) + '</span>'; }).join("") + '</li>'] : [])
             ];
           };
-          var recPanels = secs.map(function (s, x) {
-            var g = s.g.id, its = s.items.slice().sort(byScore), base = its.slice(0, 3);
-            var pg = (PAIR[g] && byG[PAIR[g]]) ? PAIR[g] : (secs[(x + 1) % secs.length] || s).g.id;
-            var pS = secs.filter(function (q) { return q.g.id === pg; })[0] || s, pl = pS.items.slice().sort(byScore), ext = its.slice(0, 2).concat(pg === g ? [] : pl.slice(0, 2));
-            var L = colCells(base, WHO[g] || (catsKo(its).join(" · ") + " 분야가 필요한 팀"), s.g.label, catsKo(base).join(" + "), "", "대표 프로젝트 " + base.length + "개");
-            var R = colCells(ext, "여기에 " + pS.g.label + "까지 더하면", s.g.label + "\n+ " + pS.g.label, catsKo(its.slice(0, 2)).join(" + "), pg === g ? "" : catsKo(pl.slice(0, 2)).join(" · "), "대표 프로젝트 " + ext.length + "개 · 두 분야를 함께");
+          var recPanels = TS.map(function (s, x) {
+            var g = s.g.id, its = s.items, base = its.slice(0, 3);
+            var pg = (PAIR[g] && byG[PAIR[g]]) ? PAIR[g] : (TS[(x + 1) % TS.length] || s).g.id;
+            var pS = TS.filter(function (q) { return q.g.id === pg; })[0] || s, pl = pS.items, ext = its.slice(0, 2).concat(pg === g ? [] : pl.slice(0, 2));
+            var L = colCells(base, WHO[g] || (s.g.ko + "이 필요한 팀"), s.g.ko, s.g.tags.slice(0, 3).join(" + "), "", "대표 프로젝트 " + base.length + "개");
+            var R = colCells(ext, "여기에 " + pS.g.ko + "까지 더하면", s.g.ko + "\n+ " + pS.g.ko, s.g.tags.slice(0, 2).join(" + "), pg === g ? "" : pS.g.tags.slice(0, 2).join(" · "), "대표 프로젝트 " + ext.length + "개 · 두 분야를 함께");
             var cells = ""; for (var r = 0; r < L.length; r++) cells += '<div class="tp-cell r' + r + '" style="--o:' + r + ';--r:' + r + '">' + L[r] + '</div><div class="tp-cell r' + r + ' rc" style="--o:' + (10 + r) + ';--r:' + r + '">' + R[r] + '</div>';
             return '<div class="tp-rp' + (x ? '' : ' on') + '" data-need="' + ea(g) + '" role="tabpanel"><div class="tp-cols">' + cells + '</div></div>';
           }).join("");
           var recT = String(txt("tpRecT", "추천 조합"));
           var rec = '<section class="tp-rec" id="tp-rec"><div class="tp-rh tp-rw"><h2 class="tp-rt" aria-label="' + ea(recT) + '">' + Array.from(recT).map(function (ch, k) { return '<span' + (ch === " " ? ' class="sp"' : '') + ' style="--i:' + k + '" aria-hidden="true">' + esc(ch) + '</span>'; }).join("") + '</h2>'
             + '<p class="tp-rs">' + esc(txt("tpRecS", "지금 필요한 걸 고르면, 맞는 프로젝트 조합을 보여드려요")) + '</p>'
-            + '<div class="tp-seg" role="tablist" aria-label="필요한 것 고르기"><span class="tp-thumb" aria-hidden="true"></span>' + secs.map(function (s, x) { return '<button type="button" role="tab" aria-selected="' + (x ? 'false' : 'true') + '"' + (x ? '' : ' class="on"') + ' data-need="' + ea(s.g.id) + '">' + esc(NEED[s.g.id] || (s.g.label + " 쪽이 필요해요")) + '</button>'; }).join("") + '</div></div>'
+            + '<div class="tp-seg" role="tablist" aria-label="필요한 것 고르기"><span class="tp-thumb" aria-hidden="true"></span>' + TS.map(function (s, x) { return '<button type="button" role="tab" aria-selected="' + (x ? 'false' : 'true') + '"' + (x ? '' : ' class="on"') + ' data-need="' + ea(s.g.id) + '">' + esc(NEED[s.g.id] || (s.g.ko + " 쪽이 필요해요")) + '</button>'; }).join("") + '</div></div>'
             + recPanels + '</section>';
           var me = PHOTOS[0];
           var cta = '<section class="tp-ctas"><div class="tp-ctas-in tp-rv"><div><p class="tp-ctat">' + esc(txt("tpCtaT", "더 궁금한 점이 있다면\n편하게 연락 주세요")).replace(/\n/g, "<br>") + '</p><div class="tp-ctab"><a class="tp-sb l" href="' + ea(mail) + '" target="_top">' + esc(P.email || "연락처 보기") + '</a><a class="tp-sb p" href="' + ea(homeUrl) + '" target="_top">포트폴리오 보기</a></div></div>'
@@ -2340,17 +2363,25 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
             + '.tp-slot{position:relative;display:inline-block;height:1.3em;overflow:hidden;vertical-align:top;text-align:left;color:#9ccaff;transition:width .55s var(--te)}.tp-slot>i{position:absolute;left:0;top:0;font-style:normal;white-space:nowrap;transition:transform .65s var(--te),opacity .5s}.tp-slot>i.nx{transform:translateY(100%);opacity:0}.tp-slot>i.out{transform:translateY(-100%);opacity:0}'
             + '.tp-hb{display:flex;flex-wrap:wrap;justify-content:center;gap:12px}.tp-b{display:inline-flex;align-items:center;justify-content:center;height:56px;padding:0 26px;border-radius:16px;font-size:18px;font-weight:600;transition:transform .2s var(--te),filter .2s}.tp-b:active{transform:scale(.96)}.tp-b.pri{background:var(--bl);color:#fff}.tp-b.pri:hover{filter:brightness(1.08)}.tp-b.sec{background:var(--bl1);color:var(--bl)!important}.tp-b.sec:hover{filter:brightness(.97)}'
             + '.tp-cue{position:absolute;left:50%;bottom:28px;z-index:2;width:44px;height:44px;margin-left:-22px;border-radius:50%;background:rgba(255,255,255,.14);display:grid;place-items:center;animation:tpBob 2.2s ease-in-out infinite}.tp-cue:hover{background:rgba(255,255,255,.24)}@keyframes tpBob{50%{transform:translateY(6px)}}'
-            // 분야 고르기 칩
-            + '.tp-pick{padding:clamp(120px,17vh,190px) 0 clamp(110px,15vh,170px);text-align:center}.tp-h2{font-size:clamp(26px,2.6vw,36px);font-weight:700;line-height:1.35;letter-spacing:-.02em;color:var(--g8)}'
-            + '.tp-chips{display:flex;flex-wrap:wrap;justify-content:center;gap:20px;width:var(--tw);max-width:1040px;margin:56px auto 0}'
-            + '.tp-chip{display:inline-flex;align-items:center;gap:12px;height:80px;padding:0 34px;border-radius:24px;background:var(--g1);color:var(--g6)!important;font-size:24px;font-weight:700;transition:background .25s,color .25s,transform .2s var(--te),opacity .8s var(--te)}.tp-chip i{font-style:normal;font-size:17px;font-weight:600;opacity:.55}'
-            + '.tp-chip:hover,.tp-chip:focus-visible{background:var(--g7);color:#fff!important}.js .tp-chip.tp-rv.in:active,.tp-chip:active{transform:scale(.96)}'
             // 벤토(토스 '자주 쓰는 기능이에요'): 반 칸 둘 · 가로 한 칸, 깊은 분야 색 바탕 + 흰 제목 + 아래서 올라오는 이미지
-            + '.tp-bento{width:var(--tw);margin:0 auto;padding-bottom:clamp(120px,14vh,170px);scroll-margin-top:70px}'
+            + '.tp-bento{width:var(--tw);margin:0 auto;padding:clamp(110px,15vh,170px) 0 clamp(120px,14vh,170px);scroll-margin-top:70px}'
             + '.tp-bh{display:flex;align-items:flex-end;justify-content:space-between;flex-wrap:wrap;gap:16px 24px;margin-bottom:40px}.tp-bt{font-size:clamp(26px,2.6vw,36px);font-weight:700;letter-spacing:-.02em;color:var(--g9)}.tp-bt.sw{animation:tpUp .6s var(--te)}'
             + '.tp-tabs{display:flex;gap:2px;max-width:100%;overflow-x:auto;scrollbar-width:none}.tp-tabs::-webkit-scrollbar{display:none}.tp-tab{position:relative;flex:none;height:44px;padding:0 12px;font-size:16px;font-weight:600;color:var(--g5);white-space:nowrap;transition:color .2s}.tp-tab:hover{color:var(--g7)}.tp-tab i{margin-left:5px;font-style:normal;font-weight:500;color:var(--g4)}'
             + '.tp-tab.on{color:var(--g9)}.tp-tab::after{content:"";position:absolute;left:12px;right:12px;bottom:0;height:2px;border-radius:2px;background:var(--g9);transform:scaleX(0);transition:transform .35s var(--te)}.tp-tab.on::after{transform:none}'
             + '.tp-set{display:none;grid-template-columns:1fr 1fr;gap:40px}.tp-set.on{display:grid}'
+            // 분류 정의 칸(카드 위): 대표 = 고른 기준 + 분야 바로가기 · 분야 = 이름·정의·하는 일·담긴 프로젝트 · 전체 = 분류 기준표
+            + '.tp-gdef{grid-column:1/-1;padding:32px 36px;border-radius:24px;background:#f9fafb;box-shadow:inset 0 0 0 1px var(--g2)}.js .tp-set.on .tp-gdef{animation:tpUp .6s var(--te) backwards}'
+            + '.tp-gdh{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 12px}.tp-gdh b{font-size:clamp(20px,1.8vw,24px);font-weight:700;letter-spacing:-.02em;color:var(--g9)}.tp-gdh span{font-size:14px;font-weight:500;color:var(--g5)}'
+            + '.tp-gdef>p{margin-top:10px;font-size:clamp(16px,1.3vw,18px);line-height:1.6;color:var(--g7)}'
+            + '.tp-gtags{display:flex;flex-wrap:wrap;gap:6px;margin-top:16px}.tp-gtags span{display:inline-flex;align-items:center;height:30px;padding:0 11px;border-radius:9px;background:#fff;box-shadow:inset 0 0 0 1px var(--g2);font-size:13.5px;font-weight:600;color:var(--g6)}'
+            + '.tp-gl{display:flex;gap:16px;margin-top:20px;padding-top:18px;border-top:1px solid var(--g2)}.tp-glk{flex:none;padding-top:7px;font-size:14px;font-weight:600;color:var(--g5)}.tp-gl ol{display:flex;flex-wrap:wrap;gap:8px;margin:0;padding:0;list-style:none}'
+            + '.tp-gl button{display:inline-flex;align-items:center;gap:6px;min-height:34px;padding:4px 12px;border-radius:10px;background:#fff;box-shadow:inset 0 0 0 1px var(--g2);font-size:14.5px;font-weight:600;color:var(--g8);text-align:left;transition:box-shadow .2s,color .2s}.tp-gl button em{font-style:normal;font-size:12.5px;font-weight:500;color:var(--g5)}.tp-gl button:hover{color:var(--bl);box-shadow:inset 0 0 0 1px var(--bl)}'
+            + '.tp-gdef.lite{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:14px 24px;padding:22px 28px}.tp-gdef.lite p{font-size:16px;font-weight:500;color:var(--g7)}'
+            + '.tp-gq{display:flex;flex-wrap:wrap;align-items:center;gap:8px}.tp-gq>span{margin-right:4px;font-size:14px;font-weight:600;color:var(--g5)}'
+            + '.tp-gq .tp-gm{display:inline-flex;align-items:center;gap:6px;height:38px;padding:0 14px;border-radius:12px;background:#fff;box-shadow:inset 0 0 0 1px var(--g2);font-size:15px;font-weight:600;color:var(--g7);transition:box-shadow .2s,color .2s}.tp-gq .tp-gm i{font-style:normal;font-weight:500;color:var(--g4)}.tp-gq .tp-gm:hover{color:var(--g9);box-shadow:inset 0 0 0 1px var(--g5)}'
+            + '.tp-gmap{margin-top:18px;border-top:1px solid var(--g2)}.tp-gm.row{display:grid;grid-template-columns:36px minmax(150px,210px) minmax(0,1fr) auto;align-items:center;gap:18px;width:100%;padding:18px 8px;border-bottom:1px solid var(--g2);text-align:left;transition:background .2s}.tp-gm.row:last-child{border-bottom:0;padding-bottom:4px}.tp-gm.row:hover{background:#fff}'
+            + '.tp-gcl::before{content:"";display:inline-block;width:10px;height:10px;margin-right:9px;border-radius:3px;background:var(--gc);vertical-align:.12em}.tp-gq .tp-gcl::before{margin-right:2px}'
+            + '.tp-gn{font-size:13px;font-weight:600;color:var(--g4);font-variant-numeric:tabular-nums}.tp-gt b{display:block;font-size:17px;font-weight:700;color:var(--g9)}.tp-gt em{display:block;margin-top:2px;font-style:normal;font-size:12.5px;color:var(--g5)}.tp-gd{font-size:15px;line-height:1.55;color:var(--g7)}.tp-gc{font-size:14px;font-weight:600;color:var(--g6);white-space:nowrap}.tp-gc i{margin-left:6px;font-style:normal;transition:transform .3s var(--te);display:inline-block}.tp-gm.row:hover .tp-gc i{transform:translateX(3px)}'
             + '.tp-card{position:relative;display:flex;flex-direction:column;min-width:0;border-radius:24px;overflow:hidden;background:var(--bg);color:#fff;text-align:left;isolation:isolate}.js .tp-card.tp-rv.in:active{transform:scale(.985);transition-duration:.2s}'
             + '.tp-card.half{aspect-ratio:480/564}.tp-card.wide,.tp-card.wide-kpi{grid-column:1/-1;flex-direction:row;min-height:clamp(380px,34vw,480px)}'
             + '.tp-ct{position:relative;z-index:2;display:flex;flex-direction:column;align-items:flex-start;padding:44px 48px 0}.tp-ct em{font-style:normal;font-size:14px;font-weight:600;color:rgba(255,255,255,.7)}'
@@ -2397,17 +2428,17 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
             + '.tp-foot{padding:44px 0 90px;background:var(--g8);color:#d1d6db;font-size:14px}.tp-foot-in{display:flex;flex-wrap:wrap;justify-content:space-between;gap:12px 32px;width:var(--tw);max-width:1000px;margin:0 auto}.tp-foot b{margin-right:4px;font-size:16px;color:#fff}.tp-foot a{font-weight:600;color:#fff}.tp-foot em{margin-left:14px;font-style:normal;color:#8b95a1}'
             + '@supports (corner-shape:squircle){.tp-card,.tp-stk,.tp-me{corner-shape:squircle}.tp-card{border-radius:44px}.tp-stk{border-radius:36px}.tp-me{border-radius:64px}}'
             + '@media(max-width:900px){.tp-links{display:none}.tp-cols{column-gap:16px}}'
-            + '@media(max-width:760px){body.tp{--tw:calc(100vw - 32px)}.tp-nback{display:none}.tp-set{grid-template-columns:1fr;gap:16px}.tp-card.half{aspect-ratio:auto;min-height:460px}'
+            + '@media(max-width:760px){body.tp{--tw:calc(100vw - 32px)}.tp-links{display:none}.tp-set{grid-template-columns:1fr;gap:16px}.tp-card.half{aspect-ratio:auto;min-height:460px}'
             + '.tp-card.wide,.tp-card.wide-kpi{flex-direction:column;min-height:0}.tp-fl{flex:none;padding-bottom:0}.tp-fv{flex:none;height:300px;margin-top:24px}.tp-card.wide .tp-fr,.tp-card.wide-kpi .tp-fr{left:24px;right:24px;top:0}'
             + '.tp-ct{padding:30px 26px 0}.tp-card.half .tp-fr{left:26px;right:26px;top:auto;height:50%}.tp-wg{left:14px;right:14px;bottom:14px;width:auto;padding:4px 18px}.tp-wr{padding:10px 0}.tp-wr b{font-size:21px}.tp-wr span{font-size:14px}'
             + '.tp-fv.solo{height:auto;padding:0 20px 22px}.tp-fv.solo .tp-wg{position:relative;left:auto;right:auto;top:auto;bottom:auto;transform:none;width:100%}'
-            + '.tp-chips{gap:10px;margin-top:36px}.tp-chip{height:56px;padding:0 20px;border-radius:18px;font-size:17px}.tp-chip svg{width:20px;height:20px}.tp-chip i{font-size:14px}'
+            + '.tp-gdef{padding:24px 22px;border-radius:20px}.tp-gl{flex-direction:column;gap:10px}.tp-glk{padding-top:0}.tp-gm.row{grid-template-columns:26px minmax(0,1fr) auto;gap:4px 10px;padding:16px 4px}.tp-gd{grid-column:2/-1;font-size:14px}.tp-gdef.lite{padding:20px 22px}'
             + '.tp-cols{grid-template-columns:1fr}.tp-cell{order:var(--o)}.tp-cell.rc.r0{margin-top:72px}.tp-rp{margin-top:44px}.tp-ctas-in{flex-direction:column-reverse;align-items:flex-start}.tp-foot em{display:block;margin:6px 0 0}}'
             + '@media(prefers-reduced-motion:reduce){.tp-wrow,.tp-cue,.js .tp-hc{animation:none}.js .tp-rv,.js .tp-card.tp-rv .tp-fr,.js .tp-card .tp-wr,.js .tp-rt span{opacity:1;transform:none;transition:none}.tp-rp.ani .tp-cell{animation:none}}';
           return '<!doctype html><html lang="ko"><head><script>document.documentElement.classList.add("js")<\/script><meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>'
             + '<title>' + esc(nameKo || nameEn || "포트폴리오") + ' — Projects (test)</title><link rel="icon" href="data:,"/>' + fontHead
             + '<style>' + PSCSS + fontVars + TCSS + '</style></head><body class="tp ft-' + FKEY + '"' + (d.hostStudio ? ' data-host="studio"' : '') + '>'
-            + nav + '<main>' + hero + pick + bentoS + rec + cta + '</main>' + foot
+            + nav + '<main>' + hero + bentoS + rec + cta + '</main>' + foot
             + '<button class="ps-top-b" type="button" data-goto="*" aria-label="맨 위로">↑</button><div class="pd" role="dialog" aria-modal="true" aria-label="프로젝트 상세" aria-hidden="true"><div class="pd-prog" aria-hidden="true"><i></i></div><div class="pd-top"><span class="pd-ttl">' + esc(txt("ppEyebrow", "Selected Projects")) + '</span><span><span class="pd-no"></span><button class="pd-x" type="button" data-close>← 목록으로</button></span></div><div class="pd-in"></div></div>'
             + pdT
             + '<script>(' + psRuntime.toString() + ')();(' + tpRuntime.toString() + ')();<\/script></body></html>';
@@ -2490,7 +2521,7 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
             var t = e.target, b;
             if (!t.closest) return;
             if ((b = t.closest("[data-tgo]"))) { e.preventDefault(); go(b.getAttribute("data-tgo")); return; }
-            if ((b = t.closest("[data-mode]"))) { setMode(b.getAttribute("data-mode"), true); return; }
+            if ((b = t.closest(".tp-gm"))) { setMode(b.getAttribute("data-m"), true); return; }
             if ((b = t.closest(".tp-tab,.tp-all"))) { setMode(b.getAttribute("data-m"), false); return; }
             if ((b = t.closest(".tp-seg button"))) { need(b.getAttribute("data-need")); return; }
           });
