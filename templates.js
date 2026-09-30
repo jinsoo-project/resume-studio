@@ -2208,16 +2208,22 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
           var deep = function (it) { return (gOf[it.i] && gOf[it.i].bg) || DEEP[it.cm.c] || "#4e5968"; }; // 카드 색 = 분류 색(아래 TAXO)
           var score = function (it) { return (it.main ? 3 : 0) + Math.min(it.mets.length, 3) + ((it.sum || it.w.summary) ? .5 : 0); };
           var byScore = function (a, b) { return score(b) - score(a) || a.i - b.i; };
-          // ── 프로젝트 분류(이 페이지 전용 · KILO 대시보드의 묶음 데이터와 기존 /projects는 그대로): 3가지 — 퍼포먼스 / 콘텐츠 / 캠페인 / 데이터 / AX
-          //    규칙: 성과·AX → 데이터 / AX · 제목에 '소재'(광고 소재 제작)·퍼포먼스·그로스·CRM → 퍼포먼스 · 나머지(콘텐츠·영상·브랜딩·커머스·제휴) → 콘텐츠 / 캠페인
+          // ── 프로젝트 분류(이 페이지 전용 · KILO 대시보드의 묶음 데이터와 기존 /projects는 그대로): 4가지 — AX / 최근 · 퍼포먼스 / CRM · 콘텐츠 / 캠페인 · 데이터 / 택소노미
+          //    최근 = 지금 다니는(가장 최근) 회사에서 한 일 전부 + AX. 나머지: 성과 → 데이터 / 택소노미 · 제목 '소재'·퍼포먼스·그로스·CRM → 퍼포먼스 / CRM · 콘텐츠·영상·브랜딩·커머스·제휴 → 콘텐츠 / 캠페인
+          var coEnd = function (co) { return co.endDate ? String(co.endDate) : "9999-99"; };
+          var nowCo = items.map(function (it) { return it.co; }).filter(function (co, k, a) { return co && a.indexOf(co) === k; })
+            .sort(function (a, b) { return coEnd(b).localeCompare(coEnd(a)) || String(b.startDate || "").localeCompare(String(a.startDate || "")); })[0] || null;
+          var nowCoName = nowCo ? dispName(nowCo) : "";
           var TAXO = [
-            { id: "t-perf", bg: "#2f5f99", ko: "퍼포먼스", en: "Performance", def: "광고 매체 운영·예산·소재로 설치와 매출을 끌어올리고, 신규 유입과 재방문 구조를 만든 일이에요.", tags: ["매체 운영", "예산 관리", "광고 소재", "그로스·CRM"] },
+            { id: "t-recent", bg: "#2d3038", ko: "AX / 최근", en: "AX & Recent", t: "최근 프로젝트예요", def: (nowCoName ? "지금 다니는 " + nowCoName + "에서 한 일이에요. " : "가장 최근에 한 일이에요. ") + "AI로 마케팅 플랫폼을 직접 만들고, 자사 채널 퍼포먼스와 신사업 그로스를 함께 운영했어요.", tags: ["AI 마케팅 플랫폼", "업무 자동화", "D2C 퍼포먼스", "신사업 그로스"] },
+            { id: "t-perf", bg: "#2f5f99", ko: "퍼포먼스 / CRM", en: "Performance & CRM", def: "광고 매체 운영·예산·소재로 설치와 매출을 끌어올리고, 앱 푸시·카카오 플친으로 다시 돌아오게 만든 일이에요.", tags: ["매체 운영", "예산 관리", "광고 소재", "앱 푸시·플친 CRM"] },
             { id: "t-camp", bg: "#93503c", ko: "콘텐츠 / 캠페인", en: "Content & Campaign", def: "영상·채널 콘텐츠와 브랜드 캠페인, 특가·제휴 프로모션으로 사람을 모으고 판매까지 이은 일이에요.", tags: ["영상·채널", "브랜드 캠페인", "소비자 조사", "커머스·제휴"] },
-            { id: "t-data", bg: "#2b6a5f", ko: "데이터 / AX", en: "Data & AX", def: "지표 체계와 데이터 파이프라인, 어트리뷰션을 세우고 AI로 마케팅 도구를 직접 만든 일이에요.", tags: ["지표 설계", "데이터 파이프라인", "어트리뷰션", "AI 자동화"] }
+            { id: "t-data", bg: "#2b6a5f", ko: "데이터 / 택소노미", en: "Data & Taxonomy", def: "이벤트 택소노미와 지표 체계를 설계하고, 데이터 파이프라인과 어트리뷰션으로 성과를 읽을 수 있게 만든 일이에요.", tags: ["이벤트 택소노미", "지표 설계", "데이터 파이프라인", "어트리뷰션"] }
           ];
           var taxOf = function (it) {
             var c = it.w.category || "", t = String(it.w.title || "") + " " + String(it.title || "");
-            if (c === "성과" || c === "AX") return "t-data";
+            if ((nowCo && it.co === nowCo) || c === "AX") return "t-recent";
+            if (c === "성과") return "t-data";
             if (/소재/.test(t) || c === "퍼포먼스" || c === "그로스" || c === "CRM") return "t-perf";
             if (c === "콘텐츠" || c === "영상" || c === "브랜딩" || c === "커머스" || c === "제휴") return "t-camp";
             return "t-perf";
@@ -2261,17 +2267,12 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
             }
             return out;
           };
-          // 모드: 대표(분야별 최고 + 점수순, 7개) · 분야 3가지
-          var top = []; TS.forEach(function (s) { if (s.items[0]) top.push(s.items[0]); });
-          items.slice().sort(byScore).forEach(function (it) { if (top.length < 7 && top.indexOf(it) < 0) top.push(it); });
-          var SETS = [{ m: "all", tab: "대표", t: txt("tpBentoT", "대표 프로젝트예요"), list: top }]
-            .concat(TS.map(function (s) { return { m: s.g.id, tab: s.g.ko, t: s.g.ko + " 프로젝트예요", list: s.items, g: s.g }; }));
-          // 모드마다 카드 위 정의 칸: 대표 = 고른 기준 + 분야 바로가기 · 분야 = 이름·영문·정의·하는 일·담긴 프로젝트
-          var gmBtn = function (s) { return '<button class="tp-gm" type="button" data-m="' + ea(s.g.id) + '"><span class="tp-gcl" style="--gc:' + s.g.bg + '"></span>' + esc(s.g.ko) + '<i>' + s.items.length + '</i></button>'; };
+          // 모드 = 분류 4가지(첫 탭 AX / 최근이 기본)
+          var SETS = TS.map(function (s) { return { m: s.g.id, tab: s.g.ko, t: s.g.t || (s.g.ko + " 프로젝트예요"), list: s.items, g: s.g }; });
+          // 모드마다 카드 위 정의 칸: 이름·영문(·최근은 기간)·정의·하는 일·담긴 프로젝트
           var defOf = function (S) {
-            if (S.m === "all") return '<div class="tp-gdef lite"><p>' + esc(txt("tpTopD", "분야마다 성과가 가장 뚜렷한 프로젝트를 골랐어요.")) + '</p><div class="tp-gq"><span>분야별로 보기</span>' + TS.map(gmBtn).join("") + '</div></div>';
             var g = S.g;
-            return '<div class="tp-gdef"><div class="tp-gdh"><b class="tp-gcl" style="--gc:' + g.bg + '">' + esc(g.ko) + '</b><span>' + esc(g.en) + ' · 프로젝트 ' + S.list.length + '개</span></div><p>' + esc(g.def) + '</p>'
+            return '<div class="tp-gdef"><div class="tp-gdh"><b class="tp-gcl" style="--gc:' + g.bg + '">' + esc(g.ko) + '</b><span>' + esc(g.en) + (g.id === "t-recent" && nowCo && nowCo.startDate ? ' · ' + esc(fmt(nowCo.startDate)) + ' – ' + (nowCo.endDate ? esc(fmt(nowCo.endDate)) : '현재') : '') + ' · 프로젝트 ' + S.list.length + '개</span></div><p>' + esc(g.def) + '</p>'
               + '<div class="tp-gtags">' + g.tags.map(function (t) { return '<span>' + esc(t) + '</span>'; }).join("") + '</div>'
               + '<div class="tp-gl"><span class="tp-glk">담긴 프로젝트</span><ol>' + S.list.map(function (it) { return '<li><button type="button" data-open="' + it.i + '"><em>' + esc(dispName(it.co)) + '</em>' + esc(split(it).t) + '</button></li>'; }).join("") + '</ol></div></div>';
           };
@@ -2287,20 +2288,19 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
           if (!words.length) words = ["마케팅"];
           var heroB = String(txt("tpHeroB", "성과로 말하는 {w} 마케터")), bP = heroB.split("{w}");
           var nav = '<header class="tp-nav"><div class="tp-nav-in"><button class="tp-logo" type="button" data-tgo="tp-top">' + esc(nameEn || nameKo || "Portfolio") + '<small>프로젝트</small></button>'
-            + '<nav class="tp-links" aria-label="바로가기"><button type="button" data-tgo="tp-bento">대표 프로젝트</button></nav>'
             + '<div class="tp-nr"><a class="tp-nback" href="' + ea(homeUrl) + '#projects" target="_top">← ' + esc(txt("ppBack", "포트폴리오")) + '</a></div></div></header>';
           var hero = '<section class="tp-hero" id="tp-top">' + wall
             + '<div class="tp-hc"><h1 class="tp-hh" aria-label="' + ea(N + "개 프로젝트의 기록") + '">'
             + '<span class="tp-hp a" aria-hidden="true"><span class="tp-odo" data-n="' + N + '">' + N + '</span>' + esc(txt("tpHeroA", "개 프로젝트의 기록")) + '</span>'
             + '<span class="tp-hp b" aria-hidden="true">' + esc(bP[0]) + (bP.length > 1 ? '<span class="tp-slot" data-w="' + ea(JSON.stringify(words)) + '"><i>' + esc(words[0]) + '</i></span>' + esc(bP.slice(1).join("")) : '') + '</span></h1>'
-            + '<div class="tp-hb"><button class="tp-b pri" type="button" data-tgo="tp-bento">대표 프로젝트 보기</button></div></div>'
+            + '<div class="tp-hb"><button class="tp-b pri" type="button" data-tgo="tp-bento">프로젝트 보기</button></div></div>'
             + '<button class="tp-cue" type="button" data-tgo="tp-bento" aria-label="아래로"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M6 9l6 6 6-6" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button></section>';
           var bentoS = '<section class="tp-bento" id="tp-bento"><div class="tp-bh"><h2 class="tp-bt">' + esc(SETS[0].t) + '</h2><div class="tp-tabs" role="tablist" aria-label="분야">' + tabsHtml + '</div></div>' + setsHtml
             + '</section>';
           // 추천 조합: 필요(세그먼트) 고르기 → 왼쪽 기본 조합(그 분야 대표 3) · 오른쪽 확장 조합(대표 2 + 짝 분야 2) — 줄마다 칸을 맞춘 2단 비교 (분류는 위 3가지)
-          var NEED = { "t-perf": "광고 효율을 올리고 싶어요", "t-camp": "브랜드와 판매를 함께 키우고 싶어요", "t-data": "데이터·자동화가 필요해요" };
-          var WHO = { "t-perf": "앱·커머스 서비스, 광고 효율이 고민인 팀", "t-camp": "알릴 이야기와 팔 상품이 있는 브랜드", "t-data": "지표 체계가 없거나 반복 업무가 많은 팀" };
-          var PAIR = { "t-perf": "t-data", "t-camp": "t-perf", "t-data": "t-perf" };
+          var NEED = { "t-recent": "AI로 마케팅을 자동화하고 싶어요", "t-perf": "광고 효율·재방문을 올리고 싶어요", "t-camp": "브랜드와 판매를 함께 키우고 싶어요", "t-data": "데이터 체계가 필요해요" };
+          var WHO = { "t-recent": "반복 업무가 많은 마케팅 팀, 신사업을 시작하는 팀", "t-perf": "앱·커머스 서비스, 광고 효율과 재방문이 고민인 팀", "t-camp": "알릴 이야기와 팔 상품이 있는 브랜드", "t-data": "지표가 흩어져 있거나 어트리뷰션이 불분명한 팀" };
+          var PAIR = { "t-recent": "t-data", "t-perf": "t-data", "t-camp": "t-perf", "t-data": "t-recent" };
           var stackOf = function (its) { var s = []; its.forEach(function (it) { (it.w.stack || []).forEach(function (t) { if (t && s.indexOf(t) < 0) s.push(t); }); }); return s.slice(0, 6); };
           var fan = function (its) { return '<span class="tp-stk">' + its.slice(0, 3).map(function (it, k) { return '<span class="tp-sc s' + k + '" style="--bg:' + deep(it) + ';--c:' + it.cm.c + '">' + frame(it, "tp-sf") + '</span>'; }).join("") + '</span>'; };
           var list = function (t, rows) { return rows.length ? '<span class="tp-clt">' + t + '</span><ul>' + rows.join("") + '</ul>' : ''; };
@@ -2363,7 +2363,7 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
             + '.tp-tabs{display:flex;gap:2px;max-width:100%;overflow-x:auto;scrollbar-width:none}.tp-tabs::-webkit-scrollbar{display:none}.tp-tab{position:relative;flex:none;height:44px;padding:0 12px;font-size:16px;font-weight:600;color:var(--g5);white-space:nowrap;transition:color .2s}.tp-tab:hover{color:var(--g7)}.tp-tab i{margin-left:5px;font-style:normal;font-weight:500;color:var(--g4)}'
             + '.tp-tab.on{color:var(--g9)}.tp-tab::after{content:"";position:absolute;left:12px;right:12px;bottom:0;height:2px;border-radius:2px;background:var(--g9);transform:scaleX(0);transition:transform .35s var(--te)}.tp-tab.on::after{transform:none}'
             + '.tp-set{display:none;grid-template-columns:1fr 1fr;gap:40px}.tp-set.on{display:grid}'
-            // 분류 정의 칸(카드 위): 대표 = 고른 기준 + 분야 바로가기 · 분야 = 이름·정의·하는 일·담긴 프로젝트 · 전체 = 분류 기준표
+            // 분류 정의 칸(카드 위): 이름·정의·하는 일·담긴 프로젝트
             + '.tp-gdef{grid-column:1/-1;padding:32px 36px;border-radius:24px;background:#f9fafb;box-shadow:inset 0 0 0 1px var(--g2)}.js .tp-set.on .tp-gdef{animation:tpUp .6s var(--te) backwards}'
             + '.tp-gdh{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 12px}.tp-gdh b{font-size:clamp(20px,1.8vw,24px);font-weight:700;letter-spacing:-.02em;color:var(--g9)}.tp-gdh span{font-size:14px;font-weight:500;color:var(--g5)}'
             + '.tp-gdef>p{margin-top:10px;font-size:clamp(16px,1.3vw,18px);line-height:1.6;color:var(--g7)}'
@@ -2489,7 +2489,7 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
           var hh = $(".tp-hh");
           later(function () { if (hh) hh.classList.add("sw"); if (!reduce && !still) setInterval(swap, 2000); }, reduce || still ? 0 : 3000);
           var go = function (id) { var el = document.getElementById(id); if (!el) return; scrollTo({ top: id === "tp-top" ? 0 : el.getBoundingClientRect().top + scrollY - 64, behavior: reduce ? "auto" : "smooth" }); };
-          // 벤토 모드: 대표 · 분야별 · 전체 — 바꾸면 카드가 차례로 다시 올라옴
+          // 벤토 모드(분류 탭) — 바꾸면 카드가 차례로 다시 올라옴
           var sets = $$(".tp-set"), tabs = $$(".tp-tab"), bt = $(".tp-bt"), allB = $(".tp-all");
           var setMode = function (m, jump) {
             var nx = sets.filter(function (s) { return s.getAttribute("data-m") === m; })[0]; if (!nx) return;
