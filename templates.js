@@ -2215,7 +2215,7 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
             .sort(function (a, b) { return coEnd(b).localeCompare(coEnd(a)) || String(b.startDate || "").localeCompare(String(a.startDate || "")); })[0] || null;
           var nowCoName = nowCo ? dispName(nowCo) : "";
           var TAXO = [
-            { id: "t-recent", bg: "#2d3038", ko: "AX / 최근", en: "AX & Recent", t: "최근 프로젝트예요", def: (nowCoName ? "지금 다니는 " + nowCoName + "에서 한 일이에요. " : "가장 최근에 한 일이에요. ") + "AI로 마케팅 플랫폼을 직접 만들고, 자사 채널 퍼포먼스와 신사업 그로스를 함께 운영했어요.", tags: ["AI 마케팅 플랫폼", "업무 자동화", "D2C 퍼포먼스", "신사업 그로스"] },
+            { id: "t-recent", bg: "#2d3038", ko: "AX / NOW", en: "AX & Now", t: "최근 프로젝트예요", def: (nowCoName ? "지금 다니는 " + nowCoName + "에서 한 일이에요. " : "가장 최근에 한 일이에요. ") + "AI로 마케팅 플랫폼을 직접 만들고, 자사 채널 퍼포먼스와 신사업 그로스를 함께 운영했어요.", tags: ["AI 마케팅 플랫폼", "업무 자동화", "D2C 퍼포먼스", "신사업 그로스"] },
             { id: "t-perf", bg: "#2f5f99", ko: "퍼포먼스 / CRM", en: "Performance & CRM", def: "광고 매체 운영·예산·소재로 설치와 매출을 끌어올리고, 앱 푸시·카카오 플친으로 다시 돌아오게 만든 일이에요.", tags: ["매체 운영", "예산 관리", "광고 소재", "앱 푸시·플친 CRM"] },
             { id: "t-camp", bg: "#93503c", ko: "콘텐츠 / 캠페인", en: "Content & Campaign", def: "영상·채널 콘텐츠와 브랜드 캠페인, 특가·제휴 프로모션으로 사람을 모으고 판매까지 이은 일이에요.", tags: ["영상·채널", "브랜드 캠페인", "소비자 조사", "커머스·제휴"] },
             { id: "t-data", bg: "#2b6a5f", ko: "데이터 / 택소노미", en: "Data & Taxonomy", def: "이벤트 택소노미와 지표 체계를 설계하고, 데이터 파이프라인과 어트리뷰션으로 성과를 읽을 수 있게 만든 일이에요.", tags: ["이벤트 택소노미", "지표 설계", "데이터 파이프라인", "어트리뷰션"] }
@@ -2267,17 +2267,16 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
             }
             return out;
           };
-          // 모드 = 분류 4가지(첫 탭 AX / 최근이 기본)
-          var SETS = TS.map(function (s) { return { m: s.g.id, tab: s.g.ko, t: s.g.t || (s.g.ko + " 프로젝트예요"), list: s.items, g: s.g }; });
-          // 모드마다 카드 위 정의 칸: 이름·영문(·최근은 기간)·정의·하는 일·담긴 프로젝트
-          var defOf = function (S) {
-            var g = S.g;
-            return '<div class="tp-gdef"><div class="tp-gdh"><b class="tp-gcl" style="--gc:' + g.bg + '">' + esc(g.ko) + '</b><span>' + esc(g.en) + (g.id === "t-recent" && nowCo && nowCo.startDate ? ' · ' + esc(fmt(nowCo.startDate)) + ' – ' + (nowCo.endDate ? esc(fmt(nowCo.endDate)) : '현재') : '') + ' · 프로젝트 ' + S.list.length + '개</span></div><p>' + esc(g.def) + '</p>'
-              + '<div class="tp-gtags">' + g.tags.map(function (t) { return '<span>' + esc(t) + '</span>'; }).join("") + '</div>'
-              + '<div class="tp-gl"><span class="tp-glk">담긴 프로젝트</span><ol>' + S.list.map(function (it) { return '<li><button type="button" data-open="' + it.i + '"><em>' + esc(dispName(it.co)) + '</em>' + esc(split(it).t) + '</button></li>'; }).join("") + '</ol></div></div>';
-          };
-          var setsHtml = SETS.map(function (S, x) { return '<div class="tp-set' + (x ? '' : ' on') + '" data-m="' + ea(S.m) + '" data-t="' + ea(S.t) + '" role="tabpanel">' + defOf(S) + bento(S.list) + '</div>'; }).join("");
-          var tabsHtml = SETS.map(function (S, x) { return '<button class="tp-tab' + (x ? '' : ' on') + '" type="button" role="tab" aria-selected="' + (x ? 'false' : 'true') + '" data-m="' + ea(S.m) + '">' + esc(S.tab) + '<i>' + S.list.length + '</i></button>'; }).join("");
+          // 분류별 섹션(토스 '자주 쓰는 기능이에요'처럼): 작은 분류 이름(색) → 큰 제목 → 한 줄 설명 → 벤토 카드 · 위에 따라붙는 분류 탭(누르면 그 섹션으로, 스크롤하면 현재 분류 표시)
+          var HEAD = { "t-recent": "최근 프로젝트예요", "t-perf": "광고와 CRM으로 성과를 냈어요", "t-camp": "콘텐츠와 캠페인으로 알렸어요", "t-data": "데이터로 판단하게 만들었어요" };
+          var period = nowCo && nowCo.startDate ? fmt(nowCo.startDate) + " – " + (nowCo.endDate ? fmt(nowCo.endDate) : "현재") : "";
+          var grpHtml = TS.map(function (s) {
+            var g = s.g;
+            return '<div class="tp-grp" id="tp-' + ea(g.id) + '" data-m="' + ea(g.id) + '"><div class="tp-gh tp-rv"><span class="tp-gk tp-gcl" style="--gc:' + g.bg + '">' + esc(g.ko) + '<i>' + (g.id === "t-recent" && period ? esc(period) + ' · ' : '') + s.items.length + '개 프로젝트</i></span>'
+              + '<h2 class="tp-bt">' + esc(txt("tpH_" + g.id.slice(2), HEAD[g.id] || (g.ko + " 프로젝트예요"))) + '</h2><p class="tp-gs">' + esc(g.def) + '</p></div>'
+              + '<div class="tp-set">' + bento(s.items) + '</div></div>';
+          }).join("");
+          var tabsHtml = TS.map(function (s, x) { return '<button class="tp-tab' + (x ? '' : ' on') + '" type="button" data-sec="' + ea(s.g.id) + '">' + esc(s.g.ko) + '<i>' + s.items.length + '</i></button>'; }).join("");
           // 첫 화면 벽(배경) · 문장 슬롯 단어(분야별 많은 순으로 돌아가며)
           var wallIt = items.filter(function (it) { return it.main; }).concat(items.filter(function (it) { return !it.main; }));
           var tile = function (it) { return '<span class="tp-wt" style="--bg:' + deep(it) + ';--c:' + it.cm.c + '">' + (it.main ? '<img src="' + ea(it.main.src) + '" alt="" decoding="async">' : coverArt(it.w, it.m0)) + '</span>'; };
@@ -2286,51 +2285,46 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
           var wordsBy = TS.map(function (s) { var cnt = {}; s.items.forEach(function (it) { var c = ko(it.w.category || ""); if (c) cnt[c] = (cnt[c] || 0) + 1; }); return Object.keys(cnt).sort(function (a, b) { return cnt[b] - cnt[a]; }); });
           var words = []; for (var rr = 0; rr < 3; rr++) wordsBy.forEach(function (L) { if (L[rr] && words.indexOf(L[rr]) < 0 && words.length < 8) words.push(L[rr]); });
           if (!words.length) words = ["마케팅"];
-          var heroB = String(txt("tpHeroB", "성과로 말하는 {w} 마케터")), bP = heroB.split("{w}");
+          // 첫 화면 문장: A(로딩 · 자릿수 롤링) "{c}개 회사, {n}개 프로젝트" → B "{w}도 직접 해봤어요"(단어 슬롯) — 여러 일을 직접 해봤다는 뜻
+          var nCo = items.map(function (it) { return it.co; }).filter(function (co, k, a) { return co && a.indexOf(co) === k; }).length;
+          var heroA = String(txt("tpHeroA", "{c}개 회사, {n}개 프로젝트")), heroB = String(txt("tpHeroB", "{w}도 직접 해봤어요")), bP = heroB.split("{w}");
+          var odo = function (n) { return '<span class="tp-odo" data-n="' + n + '">' + n + '</span>'; };
+          var aHtml = esc(heroA).replace(/\{c\}/g, odo(nCo)).replace(/\{n\}/g, odo(N)), aTxt = heroA.replace(/\{c\}/g, nCo).replace(/\{n\}/g, N);
           var nav = '<header class="tp-nav"><div class="tp-nav-in"><button class="tp-logo" type="button" data-tgo="tp-top">' + esc(nameEn || nameKo || "Portfolio") + '<small>프로젝트</small></button>'
             + '<div class="tp-nr"><a class="tp-nback" href="' + ea(homeUrl) + '#projects" target="_top">← ' + esc(txt("ppBack", "포트폴리오")) + '</a></div></div></header>';
           var hero = '<section class="tp-hero" id="tp-top">' + wall
-            + '<div class="tp-hc"><h1 class="tp-hh" aria-label="' + ea(N + "개 프로젝트의 기록") + '">'
-            + '<span class="tp-hp a" aria-hidden="true"><span class="tp-odo" data-n="' + N + '">' + N + '</span>' + esc(txt("tpHeroA", "개 프로젝트의 기록")) + '</span>'
+            + '<div class="tp-hc"><h1 class="tp-hh" aria-label="' + ea(aTxt) + '">'
+            + '<span class="tp-hp a" aria-hidden="true">' + aHtml + '</span>'
             + '<span class="tp-hp b" aria-hidden="true">' + esc(bP[0]) + (bP.length > 1 ? '<span class="tp-slot" data-w="' + ea(JSON.stringify(words)) + '"><i>' + esc(words[0]) + '</i></span>' + esc(bP.slice(1).join("")) : '') + '</span></h1>'
             + '<div class="tp-hb"><button class="tp-b pri" type="button" data-tgo="tp-bento">프로젝트 보기</button></div></div>'
             + '<button class="tp-cue" type="button" data-tgo="tp-bento" aria-label="아래로"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M6 9l6 6 6-6" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button></section>';
-          var bentoS = '<section class="tp-bento" id="tp-bento"><div class="tp-bh"><h2 class="tp-bt">' + esc(SETS[0].t) + '</h2><div class="tp-tabs" role="tablist" aria-label="분야">' + tabsHtml + '</div></div>' + setsHtml
-            + '</section>';
-          // 추천 조합: 필요(세그먼트) 고르기 → 왼쪽 기본 조합(그 분야 대표 3) · 오른쪽 확장 조합(대표 2 + 짝 분야 2) — 줄마다 칸을 맞춘 2단 비교 (분류는 위 3가지)
-          var NEED = { "t-recent": "AI로 마케팅을 자동화하고 싶어요", "t-perf": "광고 효율·재방문을 올리고 싶어요", "t-camp": "브랜드와 판매를 함께 키우고 싶어요", "t-data": "데이터 체계가 필요해요" };
-          var WHO = { "t-recent": "반복 업무가 많은 마케팅 팀, 신사업을 시작하는 팀", "t-perf": "앱·커머스 서비스, 광고 효율과 재방문이 고민인 팀", "t-camp": "알릴 이야기와 팔 상품이 있는 브랜드", "t-data": "지표가 흩어져 있거나 어트리뷰션이 불분명한 팀" };
-          var PAIR = { "t-recent": "t-data", "t-perf": "t-data", "t-camp": "t-perf", "t-data": "t-recent" };
-          var stackOf = function (its) { var s = []; its.forEach(function (it) { (it.w.stack || []).forEach(function (t) { if (t && s.indexOf(t) < 0) s.push(t); }); }); return s.slice(0, 6); };
+          var bentoS = '<section class="tp-bento" id="tp-bento"><nav class="tp-tabs" aria-label="분류">' + tabsHtml + '</nav>' + grpHtml + '</section>';
+          // 이렇게 일해요: 상황(세그먼트) 고르기 → 왼쪽 '이런 상황에서'(상황 · 실제 프로젝트) · 오른쪽 '이렇게 일해요'(방식 3단계 · 결과) — 줄 맞춘 2단
+          var CASES = [
+            { id: "c-eff", seg: "효율이 안 날 때", sit: "광고비는 쓰는데 효율이 안 날 때", how: "구조부터 진단하고 다시 짜요", steps: ["매체·캠페인 구조와 예산 흐름부터 뜯어봐요", "예산을 다시 나누고 소재를 빠르게 테스트해요", "전환 추적을 정비해 실제 기여를 확인해요"], pick: function (it) { return it.w.category === "퍼포먼스"; } },
+            { id: "c-zero", seg: "0부터 키울 때", sit: "새 서비스를 0부터 키워야 할 때", how: "측정부터 깔고 채널을 하나씩 열어요", steps: ["전환 스크립트와 지표를 먼저 심어요", "랜딩·파트너·획득 채널을 직접 만들어요", "작게 돌려 보고 되는 채널에 집중해요"], pick: function (it) { return it.w.category === "그로스" || /신사업|0→1/.test(String(it.w.title || "") + " " + (it.mets || []).map(function (m) { return m.value; }).join(" ")); } },
+            { id: "c-data", seg: "지표가 흩어졌을 때", sit: "지표가 흩어져 판단이 어려울 때", how: "택소노미와 파이프라인으로 한곳에 모아요", steps: ["이벤트 택소노미를 정리하고 QA해요", "API → 시트 → 대시보드로 자동 적재해요", "어트리뷰션으로 채널 기여를 나눠 봐요"], pick: function (it) { return it.w.category === "성과"; } },
+            { id: "c-ax", seg: "반복 업무가 많을 때", sit: "반복 업무에 시간이 새어 나갈 때", how: "AI와 함께 도구를 직접 만들어요", steps: ["반복되는 집계·리포트 업무부터 찾아요", "Claude Code·MCP로 사내 콘솔을 만들어요", "쓰면서 고쳐 팀 전체가 쓰게 해요"], pick: function (it) { return it.w.category === "AX" || /파이프라인|자동/.test(String(it.w.title || "")); } },
+            { id: "c-sell", seg: "알리고 팔아야 할 때", sit: "브랜드를 알리고 판매까지 이어야 할 때", how: "이야기를 만들고 판매 동선으로 이어요", steps: ["브랜드가 할 수 있는 이야기를 캠페인으로 만들어요", "모인 관심을 특가·제휴로 연결해요", "조회·완판·CAC로 결과를 확인해요"], pick: function (it) { var c = it.w.category; return c === "브랜딩" || c === "커머스" || c === "제휴"; } }
+          ].map(function (c) { return { c: c, its: items.filter(c.pick).sort(byScore).slice(0, 3) }; }).filter(function (x) { return x.its.length; });
           var fan = function (its) { return '<span class="tp-stk">' + its.slice(0, 3).map(function (it, k) { return '<span class="tp-sc s' + k + '" style="--bg:' + deep(it) + ';--c:' + it.cm.c + '">' + frame(it, "tp-sf") + '</span>'; }).join("") + '</span>'; };
           var list = function (t, rows) { return rows.length ? '<span class="tp-clt">' + t + '</span><ul>' + rows.join("") + '</ul>' : ''; };
-          var colCells = function (its, who, need, combo, extra, sub) {
-            var st = stackOf(its);
-            return [
-              '<span class="tp-who">' + esc(who) + '</span><h3 class="tp-need">' + esc(need).replace(/\n/g, "<br>") + '</h3>',
-              fan(its),
-              '<p class="tp-combo">' + esc(combo) + (extra ? '<span> + ' + esc(extra) + ' (확장)</span>' : '') + '</p><p class="tp-cdesc">' + esc(sub) + '</p><a class="tp-cta" href="' + ea(mailS("[포트폴리오] " + need.replace(/\n/g, " ") + " 문의")) + '" target="_top">이 조합으로 문의하기</a>',
-              list("이런 일을 했어요", its.map(function (it) { return '<li>' + chk + '<button type="button" data-open="' + it.i + '">' + esc(split(it).t) + '</button></li>'; })),
-              '<hr>',
-              list("이런 결과를 냈어요", its.filter(function (it) { return it.m0; }).map(function (it) { return '<li>' + chk + '<span><b>' + esc(it.m0.value) + '</b> ' + esc(it.m0.label || "") + '</span></li>'; })),
-              st.length ? '<hr>' : '',
-              list("이런 도구를 써요", st.length ? ['<li class="tp-tl">' + st.map(function (t) { return '<span>' + esc(t) + '</span>'; }).join("") + '</li>'] : [])
-            ];
-          };
-          var recPanels = TS.map(function (s, x) {
-            var g = s.g.id, its = s.items, base = its.slice(0, 3);
-            var pg = (PAIR[g] && byG[PAIR[g]]) ? PAIR[g] : (TS[(x + 1) % TS.length] || s).g.id;
-            var pS = TS.filter(function (q) { return q.g.id === pg; })[0] || s, pl = pS.items, ext = its.slice(0, 2).concat(pg === g ? [] : pl.slice(0, 2));
-            var L = colCells(base, WHO[g] || (s.g.ko + "이 필요한 팀"), s.g.ko, s.g.tags.slice(0, 3).join(" + "), "", "대표 프로젝트 " + base.length + "개");
-            var R = colCells(ext, "여기에 " + pS.g.ko + "까지 더하면", s.g.ko + "\n+ " + pS.g.ko, s.g.tags.slice(0, 2).join(" + "), pg === g ? "" : pS.g.tags.slice(0, 2).join(" · "), "대표 프로젝트 " + ext.length + "개 · 두 분야를 함께");
+          var recPanels = CASES.map(function (x, n) {
+            var c = x.c, its = x.its, res = [];
+            its.forEach(function (it) { if (it.m0) res.push('<li>' + chk + '<span><b>' + esc(it.m0.value) + '</b> ' + esc(it.m0.label || "") + '</span></li>'); });
+            var L = ['<span class="tp-who">이런 상황에서</span><h3 class="tp-need">' + esc(c.sit) + '</h3>', fan(its), '<hr>',
+              list("이런 프로젝트였어요", its.map(function (it) { return '<li>' + chk + '<button type="button" data-open="' + it.i + '"><em>' + esc(dispName(it.co)) + '</em>' + esc(split(it).t) + '</button></li>'; }))];
+            var R = ['<span class="tp-who">이렇게 일해요</span><h3 class="tp-need">' + esc(c.how) + '</h3>',
+              '<ol class="tp-steps">' + c.steps.map(function (t, k) { return '<li style="--k:' + k + '"><b>' + (k + 1) + '</b><span>' + esc(t) + '</span></li>'; }).join("") + '</ol>',
+              res.length ? '<hr>' : '', list("이런 결과를 냈어요", res)];
             var cells = ""; for (var r = 0; r < L.length; r++) cells += '<div class="tp-cell r' + r + '" style="--o:' + r + ';--r:' + r + '">' + L[r] + '</div><div class="tp-cell r' + r + ' rc" style="--o:' + (10 + r) + ';--r:' + r + '">' + R[r] + '</div>';
-            return '<div class="tp-rp' + (x ? '' : ' on') + '" data-need="' + ea(g) + '" role="tabpanel"><div class="tp-cols">' + cells + '</div></div>';
+            return '<div class="tp-rp' + (n ? '' : ' on') + '" data-need="' + ea(c.id) + '" role="tabpanel"><div class="tp-cols">' + cells + '</div></div>';
           }).join("");
-          var recT = String(txt("tpRecT", "추천 조합"));
-          var rec = '<section class="tp-rec" id="tp-rec"><div class="tp-rh tp-rw"><h2 class="tp-rt" aria-label="' + ea(recT) + '">' + Array.from(recT).map(function (ch, k) { return '<span' + (ch === " " ? ' class="sp"' : '') + ' style="--i:' + k + '" aria-hidden="true">' + esc(ch) + '</span>'; }).join("") + '</h2>'
-            + '<p class="tp-rs">' + esc(txt("tpRecS", "지금 필요한 걸 고르면, 맞는 프로젝트 조합을 보여드려요")) + '</p>'
-            + '<div class="tp-seg" role="tablist" aria-label="필요한 것 고르기"><span class="tp-thumb" aria-hidden="true"></span>' + TS.map(function (s, x) { return '<button type="button" role="tab" aria-selected="' + (x ? 'false' : 'true') + '"' + (x ? '' : ' class="on"') + ' data-need="' + ea(s.g.id) + '">' + esc(NEED[s.g.id] || (s.g.ko + " 쪽이 필요해요")) + '</button>'; }).join("") + '</div></div>'
-            + recPanels + '</section>';
+          var recT = String(txt("tpRecT", "이렇게 일해요"));
+          var rec = CASES.length ? '<section class="tp-rec" id="tp-rec"><div class="tp-rh tp-rw"><h2 class="tp-rt" aria-label="' + ea(recT) + '">' + Array.from(recT).map(function (ch, k) { return '<span' + (ch === " " ? ' class="sp"' : '') + ' style="--i:' + k + '" aria-hidden="true">' + esc(ch) + '</span>'; }).join("") + '</h2>'
+            + '<p class="tp-rs">' + esc(txt("tpRecS", "상황마다 제가 어떻게 일하는지, 실제 프로젝트로 보여드릴게요")) + '</p>'
+            + '<div class="tp-seg" role="tablist" aria-label="상황 고르기"><span class="tp-thumb" aria-hidden="true"></span>' + CASES.map(function (x, n) { return '<button type="button" role="tab" aria-selected="' + (n ? 'false' : 'true') + '"' + (n ? '' : ' class="on"') + ' data-need="' + ea(x.c.id) + '">' + esc(x.c.seg) + '</button>'; }).join("") + '</div></div>'
+            + recPanels + '</section>' : '';
           var me = PHOTOS[0];
           var cta = '<section class="tp-ctas"><div class="tp-ctas-in tp-rv"><div><p class="tp-ctat">' + esc(txt("tpCtaT", "더 궁금한 점이 있다면\n편하게 연락 주세요")).replace(/\n/g, "<br>") + '</p><div class="tp-ctab"><a class="tp-sb l" href="' + ea(mail) + '" target="_top">' + esc(P.email || "연락처 보기") + '</a><a class="tp-sb p" href="' + ea(homeUrl) + '" target="_top">포트폴리오 보기</a></div></div>'
             + (me ? '<img class="tp-me" src="' + ea(me) + '" alt="' + ea(nameKo || nameEn || "") + '">' : '') + '</div></section>';
@@ -2428,6 +2422,24 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
             + '.tp-fv.solo{height:auto;padding:0 20px 22px}.tp-fv.solo .tp-wg{position:relative;left:auto;right:auto;top:auto;bottom:auto;transform:none;width:100%}'
             + '.tp-gdef{padding:24px 22px;border-radius:20px}.tp-gl{flex-direction:column;gap:10px}.tp-glk{padding-top:0}.tp-gm.row{grid-template-columns:26px minmax(0,1fr) auto;gap:4px 10px;padding:16px 4px}.tp-gd{grid-column:2/-1;font-size:14px}.tp-gdef.lite{padding:20px 22px}'
             + '.tp-cols{grid-template-columns:1fr}.tp-cell{order:var(--o)}.tp-cell.rc.r0{margin-top:72px}.tp-rp{margin-top:44px}.tp-ctas-in{flex-direction:column-reverse;align-items:flex-start}.tp-foot em{display:block;margin:6px 0 0}}'
+            // 로딩(토스 메인처럼): 검은 화면에서 숫자가 굴러 들어오고 → 벽(배경)이 크게에서 제자리로 나타남(.ld) · 스크롤하면 첫 화면이 액자처럼 안쪽으로 줄어들며(--hs) 글자가 올라가 사라짐
+            + '.tp-wall{opacity:0;transform:rotate(-8deg) scale(1.16);transition:opacity 1.6s var(--te),transform 2.6s var(--te)}.tp-hero.ld .tp-wall{opacity:.5;transform:rotate(-8deg) scale(1)}'
+            + '.tp-hero{clip-path:inset(calc(var(--hs,0) * 5%) calc(var(--hs,0) * 3.5%) round calc(var(--hs,0) * 48px))}'
+            + '.tp-hc{transform:translateY(calc(var(--hs,0) * -90px)) scale(calc(1 - var(--hs,0) * .08));opacity:calc(1 - var(--hs,0) * 1.6)}.tp-cue{opacity:calc(1 - var(--hs,0) * 3)}'
+            + '.tp-hb{opacity:0;transform:translateY(12px);transition:opacity .8s var(--te) .2s,transform .9s var(--te) .2s}.tp-hero.ld .tp-hb{opacity:1;transform:none}'
+            // 분류별 섹션 · 따라붙는 탭
+            + '.tp-bento{padding:0 0 clamp(120px,14vh,170px)}'
+            + '.tp-tabs{position:sticky;top:60px;z-index:20;width:100vw;max-width:none;margin-left:calc(50% - 50vw);padding:6px max(16px,calc(50vw - 50%)) 0;background:rgba(255,255,255,.96);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);box-shadow:0 1px 0 var(--g2)}'
+            + '.tp-grp{padding-top:clamp(64px,9vh,110px);scroll-margin-top:120px}.tp-grp:first-of-type{padding-top:clamp(48px,7vh,80px)}.tp-grp .tp-set{display:grid}'
+            + '.tp-gh{margin-bottom:40px}.tp-gk{display:inline-flex;align-items:center;font-size:15px;font-weight:700;color:var(--g8)}.tp-gk i{margin-left:10px;font-style:normal;font-weight:500;color:var(--g5)}'
+            + '.tp-gh .tp-bt{margin-top:10px}.tp-gs{margin-top:12px;max-width:760px;font-size:clamp(16px,1.3vw,18px);line-height:1.6;color:var(--g6)}'
+            // 이렇게 일해요 · 방식 3단계 상자
+            + '.tp-steps{display:flex;flex-direction:column;justify-content:center;gap:16px;height:clamp(200px,20vw,250px);margin:0;padding:24px 28px;border-radius:20px;background:var(--g1);list-style:none}'
+            + '.tp-steps li{display:flex;align-items:flex-start;gap:14px;font-size:clamp(15px,1.25vw,18px);font-weight:600;line-height:1.5;color:var(--g8)}.tp-steps b{flex:none;display:grid;place-items:center;width:28px;height:28px;margin-top:-1px;border-radius:50%;background:var(--bl);color:#fff;font-size:14px;font-weight:700}'
+            + '.tp-rp.ani .tp-steps li{animation:tpUp .6s var(--te) backwards;animation-delay:calc(.25s + var(--k) * 100ms)}.tp-cell li button em{margin-right:8px;font-style:normal;font-weight:500;color:var(--g5)}'
+            + '@supports (corner-shape:squircle){.tp-steps{corner-shape:squircle;border-radius:36px}}'
+            + '@media(max-width:760px){.tp-steps{height:auto;padding:20px 22px;gap:12px}.tp-gh{margin-bottom:28px}.tp-hero{clip-path:inset(calc(var(--hs,0) * 3%) calc(var(--hs,0) * 3%) round calc(var(--hs,0) * 28px))}}'
+            + '@media(prefers-reduced-motion:reduce){.tp-wall{transition:none}.tp-hero{clip-path:none}.tp-hc{transform:none;opacity:1}.tp-hb{opacity:1;transform:none;transition:none}}'
             + '@media(prefers-reduced-motion:reduce){.tp-wrow,.tp-cue,.js .tp-hc{animation:none}.js .tp-rv,.js .tp-card.tp-rv .tp-fr,.js .tp-card .tp-wr,.js .tp-rt span{opacity:1;transform:none;transition:none}.tp-rp.ani .tp-cell{animation:none}}';
           return '<!doctype html><html lang="ko"><head><script>document.documentElement.classList.add("js")<\/script><meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>'
             + '<title>' + esc(nameKo || nameEn || "포트폴리오") + ' — Projects (test)</title><link rel="icon" href="data:,"/>' + fontHead
@@ -2457,10 +2469,6 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
           var io = "IntersectionObserver" in window && !reduce && !still ? new IntersectionObserver(function (es) { es.forEach(function (en) { if (en.isIntersecting) { show(en.target); io.unobserve(en.target); } }); }, { rootMargin: "0px 0px -8% 0px" }) : null;
           var watch = function (el) { if (io) io.observe(el); else show(el); };
           $$(".tp-rv,.tp-rw").forEach(watch);
-          // 상단 바: 첫 화면을 지나면 흰 바탕
-          var nav = $(".tp-nav"), hero = $(".tp-hero");
-          var onSc = function () { if (nav) nav.classList.toggle("solid", scrollY > (hero ? hero.offsetHeight - 70 : 10)); };
-          addEventListener("scroll", onSc, { passive: true }); onSc();
           // 첫 화면: 자릿수마다 0→9를 한 바퀴 돌고 멈추는 숫자 → 3초 뒤 문장 전환 + 단어 슬롯(2초마다 위로 넘어감)
           $$(".tp-odo").forEach(function (o) {
             var s = o.getAttribute("data-n") || ""; o.textContent = "";
@@ -2487,20 +2495,47 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
             later(function () { if (old.parentNode) old.parentNode.removeChild(old); }, 800);
           };
           var hh = $(".tp-hh");
-          later(function () { if (hh) hh.classList.add("sw"); if (!reduce && !still) setInterval(swap, 2000); }, reduce || still ? 0 : 3000);
-          var go = function (id) { var el = document.getElementById(id); if (!el) return; scrollTo({ top: id === "tp-top" ? 0 : el.getBoundingClientRect().top + scrollY - 64, behavior: reduce ? "auto" : "smooth" }); };
-          // 벤토 모드(분류 탭) — 바꾸면 카드가 차례로 다시 올라옴
-          var sets = $$(".tp-set"), tabs = $$(".tp-tab"), bt = $(".tp-bt"), allB = $(".tp-all");
-          var setMode = function (m, jump) {
-            var nx = sets.filter(function (s) { return s.getAttribute("data-m") === m; })[0]; if (!nx) return;
-            var same = nx.classList.contains("on");
-            sets.forEach(function (s) { s.classList.toggle("on", s === nx); });
-            tabs.forEach(function (t) { var on = t.getAttribute("data-m") === m; t.classList.toggle("on", on); t.setAttribute("aria-selected", on ? "true" : "false"); if (on && t.parentNode.scrollTo) t.parentNode.scrollTo({ left: t.offsetLeft - 24, behavior: reduce ? "auto" : "smooth" }); });
-            if (bt && !same) { bt.classList.remove("sw"); void bt.offsetWidth; bt.textContent = nx.getAttribute("data-t") || ""; bt.classList.add("sw"); }
-            if (allB) allB.hidden = m !== "all";
-            if (!same) $$(".tp-card", nx).forEach(function (c, k) { c.classList.remove("in"); c.style.setProperty("--dl", (Math.min(k, 5) * 70) + "ms"); if (io) io.unobserve(c); });
-            later(function () { $$(".tp-card", nx).forEach(function (c) { if (c.classList.contains("in")) return; var r = c.getBoundingClientRect(); if (r.top < innerHeight && r.bottom > 0) show(c); else watch(c); }); }, 40);
-            if (jump) go("tp-bento");
+          later(function () { if (hh) hh.classList.add("sw"); if (!reduce && !still) setInterval(swap, 2000); }, reduce || still ? 0 : 3300);
+          // 로딩: 숫자가 다 굴러간 뒤 벽(배경)이 크게에서 제자리로 나타나고 버튼이 올라옴
+          var hero = $(".tp-hero"), ld = function () { if (hero) hero.classList.add("ld"); };
+          if (reduce || still) ld(); else later(ld, 2300);
+          // 스크롤: 상단 바(조금만 내려도 흰 바탕) · 첫 화면이 액자처럼 줄어듦(--hs) · 지금 보고 있는 분류 탭 표시
+          var nav = $(".tp-nav"), tabBar = $(".tp-tabs"), tabs = $$(".tp-tab"), grps = $$(".tp-grp");
+          var tabsH = function () { return tabBar ? tabBar.offsetHeight : 0; };
+          var spy = function () {
+            var lim = 60 + tabsH() + 80, on = grps.length ? grps[0].getAttribute("data-m") : "";
+            grps.forEach(function (g) { if (g.getBoundingClientRect().top <= lim) on = g.getAttribute("data-m"); });
+            tabs.forEach(function (t) { var a = t.getAttribute("data-sec") === on; if (a !== t.classList.contains("on")) { t.classList.toggle("on", a); if (a && tabBar && tabBar.scrollWidth > tabBar.clientWidth) tabBar.scrollTo({ left: t.offsetLeft - 40, behavior: "smooth" }); } });
+          };
+          var onSc = function () {
+            var y = scrollY, H = hero ? hero.offsetHeight : 1;
+            if (nav) nav.classList.toggle("solid", y > 8);
+            if (hero && !reduce) hero.style.setProperty("--hs", Math.max(0, Math.min(1, y / H)).toFixed(3));
+            spy();
+          };
+          addEventListener("scroll", onSc, { passive: true }); addEventListener("resize", onSc); onSc();
+          // 첫 화면 ↔ 프로젝트(토스처럼): 살짝만 스크롤해도(휠·스와이프·↓·PageDown·Space) 프로젝트 첫 화면까지 부드럽게 미끄러져 내려가고, 거기서 위로 올리면 첫 화면으로
+          var tgt = function () { var b = document.getElementById("tp-bento"); return b ? Math.round(b.getBoundingClientRect().top + scrollY - 60) : 0; };
+          var busy = false, ease = function (t) { return t < .5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2; };
+          var glide = function (y) {
+            if (reduce) { scrollTo({ top: y, behavior: "auto" }); return; }
+            busy = true; var y0 = scrollY, t0 = Date.now(), dur = 1000, done = false;
+            var fin = function () { if (done) return; done = true; setTimeout(function () { busy = false; }, 220); };
+            (function st() { var k = Math.min(1, (Date.now() - t0) / dur); scrollTo({ top: y0 + (y - y0) * ease(k), behavior: "instant" }); if (k < 1) requestAnimationFrame(st); else fin(); })();
+            setTimeout(function () { if (!done) { scrollTo({ top: y, behavior: "instant" }); fin(); } }, dur + 400);
+          };
+          var blocked = function () { return still || body.classList.contains("pd-open"); };
+          var snapDir = function (dir) { var y = scrollY, T = tgt(); if (dir > 0 && y < T - 2) { glide(T); return true; } if (dir < 0 && y > 0 && y <= T + 2) { glide(0); return true; } return false; };
+          addEventListener("wheel", function (e) { if (blocked()) return; if (busy) { e.preventDefault(); return; } if (Math.abs(e.deltaY) < 3) return; if (snapDir(e.deltaY > 0 ? 1 : -1)) e.preventDefault(); }, { passive: false });
+          addEventListener("keydown", function (e) { if (blocked() || /input|textarea|select/i.test((e.target || {}).tagName || "")) return; var k = e.key, dir = (k === "ArrowDown" || k === "PageDown" || k === " ") ? 1 : (k === "ArrowUp" || k === "PageUp") ? -1 : 0; if (!dir) return; if (busy || snapDir(dir)) e.preventDefault(); });
+          var ty = null;
+          addEventListener("touchstart", function (e) { ty = e.touches && e.touches[0] ? e.touches[0].clientY : null; }, { passive: true });
+          addEventListener("touchmove", function (e) { if (blocked()) return; if (busy) { e.preventDefault(); return; } if (ty == null || !e.touches[0]) return; var dy = ty - e.touches[0].clientY; if (Math.abs(dy) < 14) return; ty = null; if (snapDir(dy > 0 ? 1 : -1)) e.preventDefault(); }, { passive: false });
+          var go = function (id) {
+            if (id === "tp-top") { glide(0); return; }
+            if (id === "tp-bento") { glide(tgt()); return; }
+            var el = document.getElementById(id); if (!el) return;
+            scrollTo({ top: el.getBoundingClientRect().top + scrollY - 60 - (/^tp-t-/.test(id) ? tabsH() - 1 : 4), behavior: reduce ? "auto" : "smooth" });
           };
           // 추천 조합 세그먼트: 흰 손잡이가 미끄러지고 패널이 줄마다 올라옴
           var seg = $(".tp-seg"), thumb = $(".tp-thumb"), segB = $$(".tp-seg button"), pans = $$(".tp-rp");
@@ -2515,8 +2550,7 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
             var t = e.target, b;
             if (!t.closest) return;
             if ((b = t.closest("[data-tgo]"))) { e.preventDefault(); go(b.getAttribute("data-tgo")); return; }
-            if ((b = t.closest(".tp-gm"))) { setMode(b.getAttribute("data-m"), true); return; }
-            if ((b = t.closest(".tp-tab,.tp-all"))) { setMode(b.getAttribute("data-m"), false); return; }
+            if ((b = t.closest(".tp-tab"))) { go("tp-" + b.getAttribute("data-sec")); return; }
             if ((b = t.closest(".tp-seg button"))) { need(b.getAttribute("data-need")); return; }
           });
         };
