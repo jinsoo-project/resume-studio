@@ -2287,7 +2287,7 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
           if (!words.length) words = ["마케팅"];
           // 첫 화면 문장: A(로딩 · 자릿수 롤링) "{c}개 회사, {n}개 프로젝트" → B "{w}도 직접 해봤어요"(단어 슬롯) — 여러 일을 직접 해봤다는 뜻
           var nCo = items.map(function (it) { return it.co; }).filter(function (co, k, a) { return co && a.indexOf(co) === k; }).length;
-          var heroA = String(txt("tpHeroA", "{c}개 회사, {n}개 프로젝트")), heroB = String(txt("tpHeroB", "{w}도 직접 해봤어요")), bP = heroB.split("{w}");
+          var heroA = String(txt("tpHeroA", "{c}개 회사, {n}개 프로젝트")), heroB = String(txt("tpHeroB", "진단하고, 설계하고, 실행합니다")), bP = heroB.split("{w}");
           var odo = function (n) { return '<span class="tp-odo" data-n="' + n + '">' + n + '</span>'; };
           var aHtml = esc(heroA).replace(/\{c\}/g, odo(nCo)).replace(/\{n\}/g, odo(N)), aTxt = heroA.replace(/\{c\}/g, nCo).replace(/\{n\}/g, N);
           var nav = '<header class="tp-nav"><div class="tp-nav-in"><button class="tp-logo" type="button" data-tgo="tp-top">' + esc(nameEn || nameKo || "Portfolio") + '<small>프로젝트</small></button>'
@@ -2296,17 +2296,20 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
             + '<div class="tp-hc"><h1 class="tp-hh" aria-label="' + ea(aTxt) + '">'
             + '<span class="tp-hp a" aria-hidden="true">' + aHtml + '</span>'
             + '<span class="tp-hp b" aria-hidden="true">' + esc(bP[0]) + (bP.length > 1 ? '<span class="tp-slot" data-w="' + ea(JSON.stringify(words)) + '"><i>' + esc(words[0]) + '</i></span>' + esc(bP.slice(1).join("")) : '') + '</span></h1>'
-            + '<div class="tp-hb"><button class="tp-b pri" type="button" data-tgo="tp-bento">프로젝트 보기</button></div></div>'
+            + '%%ROT%%<div class="tp-hb"><button class="tp-b pri" type="button" data-tgo="tp-bento">프로젝트 보기</button></div></div>'
             + '<button class="tp-cue" type="button" data-tgo="tp-bento" aria-label="아래로"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M6 9l6 6 6-6" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button></section>';
           var bentoS = '<section class="tp-bento" id="tp-bento"><nav class="tp-tabs" aria-label="분류">' + tabsHtml + '</nav>' + grpHtml + '</section>';
           // 이렇게 일해요: 상황(세그먼트) 고르기 → 왼쪽 '이런 상황에서'(상황 · 실제 프로젝트) · 오른쪽 '이렇게 일해요'(방식 3단계 · 결과) — 줄 맞춘 2단
           var CASES = [
-            { id: "c-eff", seg: "효율이 안 날 때", sit: "광고비는 쓰는데 효율이 안 날 때", how: "구조부터 진단하고 다시 짜요", steps: ["매체·캠페인 구조와 예산 흐름부터 뜯어봐요", "예산을 다시 나누고 소재를 빠르게 테스트해요", "전환 추적을 정비해 실제 기여를 확인해요"], pick: function (it) { return it.w.category === "퍼포먼스"; } },
-            { id: "c-zero", seg: "0부터 키울 때", sit: "새 서비스를 0부터 키워야 할 때", how: "측정부터 깔고 채널을 하나씩 열어요", steps: ["전환 스크립트와 지표를 먼저 심어요", "랜딩·파트너·획득 채널을 직접 만들어요", "작게 돌려 보고 되는 채널에 집중해요"], pick: function (it) { return it.w.category === "그로스" || /신사업|0→1/.test(String(it.w.title || "") + " " + (it.mets || []).map(function (m) { return m.value; }).join(" ")); } },
-            { id: "c-data", seg: "지표가 흩어졌을 때", sit: "지표가 흩어져 판단이 어려울 때", how: "택소노미와 파이프라인으로 한곳에 모아요", steps: ["이벤트 택소노미를 정리하고 QA해요", "API → 시트 → 대시보드로 자동 적재해요", "어트리뷰션으로 채널 기여를 나눠 봐요"], pick: function (it) { return it.w.category === "성과"; } },
-            { id: "c-ax", seg: "반복 업무가 많을 때", sit: "반복 업무에 시간이 새어 나갈 때", how: "AI와 함께 도구를 직접 만들어요", steps: ["반복되는 집계·리포트 업무부터 찾아요", "Claude Code·MCP로 사내 콘솔을 만들어요", "쓰면서 고쳐 팀 전체가 쓰게 해요"], pick: function (it) { return it.w.category === "AX" || /파이프라인|자동/.test(String(it.w.title || "")); } },
-            { id: "c-sell", seg: "알리고 팔아야 할 때", sit: "브랜드를 알리고 판매까지 이어야 할 때", how: "이야기를 만들고 판매 동선으로 이어요", steps: ["브랜드가 할 수 있는 이야기를 캠페인으로 만들어요", "모인 관심을 특가·제휴로 연결해요", "조회·완판·CAC로 결과를 확인해요"], pick: function (it) { var c = it.w.category; return c === "브랜딩" || c === "커머스" || c === "제휴"; } }
+            { id: "c-eff", seg: "효율이 떨어질 때", sit: "광고비 대비 효율이 떨어질 때", how: "계정 구조부터 진단하고 다시 설계해요", line: "계정 구조를 진단하고 예산을 재배분합니다", steps: ["매체·캠페인·소재 단위로 예산 흐름과 병목을 진단해요", "예산을 재배분하고 소재를 A/B로 빠르게 검증해요", "픽셀·MMP 전환 추적을 정비해 증분 기여로 판단해요"], pick: function (it) { return it.w.category === "퍼포먼스"; } },
+            { id: "c-zero", seg: "0부터 키울 때", sit: "새 서비스를 0부터 키워야 할 때", how: "측정 체계부터 심고 채널을 검증해요", line: "측정 체계부터 심고 채널을 하나씩 검증합니다", steps: ["전환 스크립트와 핵심 지표를 먼저 설계해요", "랜딩·파트너·유료 채널을 작게 열어 반응을 봐요", "CAC와 전환율이 맞는 채널에 예산을 집중해요"], pick: function (it) { return it.w.category === "그로스" || /신사업|0→1/.test(String(it.w.title || "") + " " + (it.mets || []).map(function (m) { return m.value; }).join(" ")); } },
+            { id: "c-data", seg: "판단 기준이 없을 때", sit: "지표가 흩어져 판단 기준이 없을 때", how: "택소노미와 파이프라인으로 기준을 세워요", line: "이벤트 택소노미와 파이프라인으로 판단 기준을 세웁니다", steps: ["이벤트 택소노미를 정의하고 QA 체계를 만들어요", "API → 시트 → 대시보드로 적재를 자동화해요", "어트리뷰션으로 채널별 기여를 분리해 봐요"], pick: function (it) { return it.w.category === "성과"; } },
+            { id: "c-ax", seg: "반복 업무가 많을 때", sit: "반복 업무가 팀의 시간을 잡아먹을 때", how: "AI로 사내 도구를 직접 만들어요", line: "AI로 반복 업무를 없애는 사내 도구를 만듭니다", steps: ["집계·리포트처럼 반복되는 업무부터 정의해요", "Claude Code·MCP로 콘솔을 만들고 데이터를 연결해요", "현업 피드백으로 계속 고쳐 팀 전체가 쓰게 해요"], pick: function (it) { return it.w.category === "AX" || /파이프라인|자동/.test(String(it.w.title || "")); } },
+            { id: "c-sell", seg: "판매로 이어야 할 때", sit: "인지도를 쌓고 판매까지 이어야 할 때", how: "캠페인에서 판매 동선까지 한 흐름으로 설계해요", line: "캠페인에서 판매 동선까지 한 흐름으로 설계합니다", steps: ["브랜드가 말할 수 있는 이야기를 캠페인으로 기획해요", "모인 관심을 특가·제휴·핫딜로 전환해요", "조회·완판·CAC로 성과를 검증해요"], pick: function (it) { var c = it.w.category; return c === "브랜딩" || c === "커머스" || c === "제휴"; } }
           ].map(function (c) { return { c: c, its: items.filter(c.pick).sort(byScore).slice(0, 3) }; }).filter(function (x) { return x.its.length; });
+          // 첫 화면 문장 아래: '이렇게 일해요' 케이스가 번갈아 흐름 — [상황] 방식
+          var rotHtml = CASES.length ? '<div class="tp-rot" aria-hidden="true">' + CASES.map(function (x, n) { return '<p class="tp-ri' + (n ? '' : ' on') + '"><b>' + esc(x.c.seg) + '</b><span>' + esc(x.c.line) + '</span></p>'; }).join("") + '</div>' : '';
+          hero = hero.replace("%%ROT%%", rotHtml);
           var fan = function (its) { return '<span class="tp-stk">' + its.slice(0, 3).map(function (it, k) { return '<span class="tp-sc s' + k + '" style="--bg:' + deep(it) + ';--c:' + it.cm.c + '">' + frame(it, "tp-sf") + '</span>'; }).join("") + '</span>'; };
           var list = function (t, rows) { return rows.length ? '<span class="tp-clt">' + t + '</span><ul>' + rows.join("") + '</ul>' : ''; };
           var recPanels = CASES.map(function (x, n) {
@@ -2440,6 +2443,11 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
             + '@supports (corner-shape:squircle){.tp-steps{corner-shape:squircle;border-radius:36px}}'
             + '@media(max-width:760px){.tp-steps{height:auto;padding:20px 22px;gap:12px}.tp-gh{margin-bottom:28px}.tp-hero{clip-path:inset(calc(var(--hs,0) * 3%) calc(var(--hs,0) * 3%) round calc(var(--hs,0) * 28px))}}'
             + '@media(prefers-reduced-motion:reduce){.tp-wall{transition:none}.tp-hero{clip-path:none}.tp-hc{transform:none;opacity:1}.tp-hb{opacity:1;transform:none;transition:none}}'
+            // 첫 화면 케이스 흐름: 문장 B로 바뀐 뒤 나타나고, [상황 칩] 방식 문장이 2.8초마다 아래→위로 교체
+            + '.tp-rot{display:grid;justify-items:center;margin-top:-16px;opacity:0;transform:translateY(10px);transition:opacity .8s var(--te) .35s,transform .9s var(--te) .35s}.tp-hh.sw+.tp-rot{opacity:1;transform:none}'
+            + '.tp-ri{grid-area:1/1;display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:8px 12px;max-width:min(760px,calc(100vw - 40px));font-size:clamp(15px,1.3vw,19px);font-weight:500;line-height:1.5;color:rgba(255,255,255,.84);opacity:0;transform:translateY(14px);transition:opacity .5s var(--te),transform .6s var(--te)}'
+            + '.tp-ri.on{opacity:1;transform:none}.tp-ri.off{opacity:0;transform:translateY(-14px)}.tp-ri b{display:inline-flex;align-items:center;height:30px;padding:0 11px;border-radius:9px;background:rgba(49,130,246,.24);color:#a8d0ff;font-size:14px;font-weight:700}'
+            + '@media(prefers-reduced-motion:reduce){.tp-rot,.tp-ri{transition:none}}'
             + '@media(prefers-reduced-motion:reduce){.tp-wrow,.tp-cue,.js .tp-hc{animation:none}.js .tp-rv,.js .tp-card.tp-rv .tp-fr,.js .tp-card .tp-wr,.js .tp-rt span{opacity:1;transform:none;transition:none}.tp-rp.ani .tp-cell{animation:none}}';
           return '<!doctype html><html lang="ko"><head><script>document.documentElement.classList.add("js")<\/script><meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>'
             + '<title>' + esc(nameKo || nameEn || "포트폴리오") + ' — Projects (test)</title><link rel="icon" href="data:,"/>' + fontHead
@@ -2494,8 +2502,10 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
             later(function () { old.classList.add("out"); n.classList.remove("nx"); }, 30);
             later(function () { if (old.parentNode) old.parentNode.removeChild(old); }, 800);
           };
+          var ris = $$(".tp-ri"), rk = 0;
+          var rotate = function () { if (ris.length < 2) return; var prev = ris[rk]; prev.classList.remove("on"); prev.classList.add("off"); rk = (rk + 1) % ris.length; ris[rk].classList.remove("off"); ris[rk].classList.add("on"); later(function () { prev.classList.remove("off"); }, 700); };
           var hh = $(".tp-hh");
-          later(function () { if (hh) hh.classList.add("sw"); if (!reduce && !still) setInterval(swap, 2000); }, reduce || still ? 0 : 3300);
+          later(function () { if (hh) hh.classList.add("sw"); if (!reduce && !still) { setInterval(swap, 2000); setInterval(rotate, 2800); } }, reduce || still ? 0 : 3300);
           // 로딩: 숫자가 다 굴러간 뒤 벽(배경)이 크게에서 제자리로 나타나고 버튼이 올라옴
           var hero = $(".tp-hero"), ld = function () { if (hero) hero.classList.add("ld"); };
           if (reduce || still) ld(); else later(ld, 2300);
