@@ -2217,7 +2217,7 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
           var TAXO = [
             { id: "t-recent", bg: "#2d3038", ko: "AX / NOW", en: "AX & Now", t: "최근 프로젝트예요", def: (nowCoName ? "지금 다니는 " + nowCoName + "에서 한 일이에요. " : "가장 최근에 한 일이에요. ") + "AI로 마케팅 플랫폼을 직접 만들고, 자사 채널 퍼포먼스와 신사업 그로스를 함께 운영했어요.", tags: ["AI 마케팅 플랫폼", "업무 자동화", "D2C 퍼포먼스", "신사업 그로스"] },
             { id: "t-perf", bg: "#2f5f99", ko: "퍼포먼스 / CRM", en: "Performance & CRM", def: "광고 매체 운영·예산·소재로 설치와 매출을 끌어올리고, 앱 푸시·카카오 플친으로 다시 돌아오게 만든 일이에요.", tags: ["매체 운영", "예산 관리", "광고 소재", "앱 푸시·플친 CRM"] },
-            { id: "t-camp", bg: "#93503c", ko: "콘텐츠 / 캠페인", en: "Content & Campaign", def: "영상·채널 콘텐츠와 브랜드 캠페인, 특가·제휴 프로모션으로 사람을 모으고 판매까지 이은 일이에요.", tags: ["영상·채널", "브랜드 캠페인", "소비자 조사", "커머스·제휴"] },
+            { id: "t-camp", order: "recent", bg: "#93503c", ko: "콘텐츠 / 캠페인", en: "Content & Campaign", def: "영상·채널 콘텐츠와 브랜드 캠페인, 특가·제휴 프로모션으로 사람을 모으고 판매까지 이은 일이에요.", tags: ["영상·채널", "브랜드 캠페인", "소비자 조사", "커머스·제휴"] },
             { id: "t-data", bg: "#2b6a5f", ko: "데이터 / 택소노미", en: "Data & Taxonomy", def: "이벤트 택소노미와 지표 체계를 설계하고, 데이터 파이프라인과 어트리뷰션으로 성과를 읽을 수 있게 만든 일이에요.", tags: ["이벤트 택소노미", "지표 설계", "데이터 파이프라인", "어트리뷰션"] }
           ];
           var taxOf = function (it) {
@@ -2228,7 +2228,10 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
             if (c === "콘텐츠" || c === "영상" || c === "브랜딩" || c === "커머스" || c === "제휴") return "t-camp";
             return "t-perf";
           };
-          var TS = TAXO.map(function (g) { return { g: g, items: items.filter(function (it) { return taxOf(it) === g.id; }).sort(byScore) }; }).filter(function (s) { return s.items.length; });
+          // 카드 순서: 기본은 점수순(이미지·지표 많은 것 먼저) · order:"recent" 분류는 최신 회사순(재직 중 → 최근 퇴사) → 같은 회사 안에서 최근 프로젝트 먼저
+          var wEnd = function (it) { return String(it.w.endDate || it.w.startDate || ""); };
+          var byRecent = function (a, b) { return coEnd(b.co).localeCompare(coEnd(a.co)) || String(b.co.startDate || "").localeCompare(String(a.co.startDate || "")) || wEnd(b).localeCompare(wEnd(a)) || byScore(a, b); };
+          var TS = TAXO.map(function (g) { return { g: g, items: items.filter(function (it) { return taxOf(it) === g.id; }).sort(g.order === "recent" ? byRecent : byScore) }; }).filter(function (s) { return s.items.length; });
           var gOf = {}, byG = {}; TS.forEach(function (s) { byG[s.g.id] = s.items; s.items.forEach(function (it) { gOf[it.i] = s.g; }); });
           var ko = function (c) { return c === "성과" ? "데이터" : c; };
           var mail = P.email ? "mailto:" + P.email : homeUrl + "#contact";
@@ -2258,11 +2261,11 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
             return a + '<span class="tp-fl">' + head(it) + '</span><span class="tp-fv">' + frame(it, "tp-fr") + '</span></button>';
           };
           // 벤토: [반, 반] → [가로 한 칸] 반복 · 가로 칸은 지표 2개 이상인 프로젝트 우선(흰 지표 위젯) · 홀로 남은 반 칸은 가로로
-          var bento = function (list) {
+          var bento = function (list, keep) { // keep = 순서 그대로(가로 칸을 위해 앞당기지 않음)
             var rest = list.slice(), out = "", r = 0, k = 0;
             while (rest.length) {
               if (r % 2 === 0 && rest.length >= 2) { out += card(rest.shift(), "half", k++) + card(rest.shift(), "half", k++); }
-              else { var j = 0; for (var q = 0; q < Math.min(3, rest.length); q++) if (rest[q].mets.length >= 2) { j = q; break; } var f = rest.splice(j, 1)[0]; out += card(f, f.mets.length >= 2 ? "wide-kpi" : "wide", k++); }
+              else { var j = 0; for (var q = 0; !keep && q < Math.min(3, rest.length); q++) if (rest[q].mets.length >= 2) { j = q; break; } var f = rest.splice(j, 1)[0]; out += card(f, f.mets.length >= 2 ? "wide-kpi" : "wide", k++); }
               r++;
             }
             return out;
@@ -2279,7 +2282,7 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
           };
           var storyOf = function (s) {
             var g = s.g, k = g.id.slice(2), st = STORY[g.id] || {}, why = txt("tpWhy_" + k, st.why || ""), what = txt("tpWhat_" + k, st.what || g.def || "");
-            var mets = s.items.filter(function (it) { return it.m0; }).slice(0, 3), tools = [];
+            var mets = s.items.slice().sort(byScore).filter(function (it) { return it.m0; }).slice(0, 3), tools = [];
             s.items.forEach(function (it) { (it.w.stack || []).forEach(function (t) { if (t && tools.indexOf(t) < 0) tools.push(t); }); });
             var third = mets.length
               ? '<div class="tp-wc"><em>무엇이 달라졌나요</em><ul class="tp-wk">' + mets.map(function (it) { return '<li><b>' + esc(it.m0.value) + '</b><span>' + esc(it.m0.label || split(it).t) + '</span></li>'; }).join("") + '</ul></div>'
@@ -2290,7 +2293,7 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
             var g = s.g;
             return '<div class="tp-grp" id="tp-' + ea(g.id) + '" data-m="' + ea(g.id) + '"><div class="tp-gh tp-rv"><span class="tp-gk tp-gcl" style="--gc:' + g.bg + '">' + esc(g.ko) + '<i>' + (g.id === "t-recent" && period ? esc(period) + ' · ' : '') + s.items.length + '개 프로젝트</i></span>'
               + '<h2 class="tp-bt">' + esc(txt("tpH_" + g.id.slice(2), HEAD[g.id] || (g.ko + " 프로젝트예요"))) + '</h2></div>' + storyOf(s)
-              + '<div class="tp-set">' + bento(s.items) + '</div></div>';
+              + '<div class="tp-set">' + bento(s.items, s.g.order === "recent") + '</div></div>';
           }).join("");
           var tabsHtml = TS.map(function (s, x) { return '<button class="tp-tab' + (x ? '' : ' on') + '" type="button" data-sec="' + ea(s.g.id) + '">' + esc(s.g.ko) + '<i>' + s.items.length + '</i></button>'; }).join("");
           // 첫 화면 벽(배경) · 문장 슬롯 단어(분야별 많은 순으로 돌아가며)
