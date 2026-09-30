@@ -2208,21 +2208,18 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
           var deep = function (it) { return (gOf[it.i] && gOf[it.i].bg) || DEEP[it.cm.c] || "#4e5968"; }; // 카드 색 = 분류 색(아래 TAXO)
           var score = function (it) { return (it.main ? 3 : 0) + Math.min(it.mets.length, 3) + ((it.sum || it.w.summary) ? .5 : 0); };
           var byScore = function (a, b) { return score(b) - score(a) || a.i - b.i; };
-          // ── 프로젝트 분류(이 페이지 전용 · KILO 대시보드의 묶음 데이터와 기존 /projects는 그대로): '하는 일' 기준 5가지 — 이름 · 정의 · 담긴 일
-          //    규칙: 소재 제작인 퍼포먼스 + 콘텐츠·영상 → 광고 소재·콘텐츠 / 성과·AX → 데이터·AX / 브랜딩 → 브랜드 캠페인 / 커머스·제휴 → 커머스·제휴 / 나머지(퍼포먼스·그로스·CRM) → 퍼포먼스·그로스
+          // ── 프로젝트 분류(이 페이지 전용 · KILO 대시보드의 묶음 데이터와 기존 /projects는 그대로): 3가지 — 퍼포먼스 / 콘텐츠 / 캠페인 / 데이터 / AX
+          //    규칙: 성과·AX → 데이터 / AX · 제목에 '소재'(광고 소재 제작)·퍼포먼스·그로스·CRM → 퍼포먼스 · 나머지(콘텐츠·영상·브랜딩·커머스·제휴) → 콘텐츠 / 캠페인
           var TAXO = [
-            { id: "t-perf", bg: "#2f5f99", ko: "퍼포먼스·그로스", en: "Performance & Growth", def: "광고 매체를 운영하고 예산을 나눠 설치·매출을 끌어올린 일, 그리고 신규 유입과 재방문 구조를 만든 일이에요.", tags: ["매체 운영", "예산 관리", "그로스 설계", "CRM"] },
-            { id: "t-crea", bg: "#86674d", ko: "광고 소재·콘텐츠", en: "Creative & Content", def: "성과가 나는 광고 소재와 영상, 유튜브 채널 콘텐츠를 직접 기획하고 만든 일이에요.", tags: ["광고 소재", "영상 제작", "채널 운영"] },
-            { id: "t-data", bg: "#2b6a5f", ko: "데이터·AX", en: "Data & AX", def: "지표 체계와 데이터 파이프라인, 어트리뷰션을 세우고 AI로 마케팅 도구를 직접 만든 일이에요.", tags: ["지표 설계", "데이터 파이프라인", "어트리뷰션", "AI 자동화"] },
-            { id: "t-brand", bg: "#93503c", ko: "브랜드 캠페인", en: "Brand Campaign", def: "브랜드 인지도와 신뢰를 쌓은 캠페인, 그리고 그 근거가 된 소비자 조사예요.", tags: ["CSR 캠페인", "사연 콘텐츠", "소비자 조사"] },
-            { id: "t-com", bg: "#6a6b36", ko: "커머스·제휴", en: "Commerce & Partnership", def: "특가·핫딜·제휴 프로모션으로 실제 판매를 만든 일이에요.", tags: ["특가 기획", "핫딜", "제휴 프로모션", "쇼핑 최적화"] }
+            { id: "t-perf", bg: "#2f5f99", ko: "퍼포먼스", en: "Performance", def: "광고 매체 운영·예산·소재로 설치와 매출을 끌어올리고, 신규 유입과 재방문 구조를 만든 일이에요.", tags: ["매체 운영", "예산 관리", "광고 소재", "그로스·CRM"] },
+            { id: "t-camp", bg: "#93503c", ko: "콘텐츠 / 캠페인", en: "Content & Campaign", def: "영상·채널 콘텐츠와 브랜드 캠페인, 특가·제휴 프로모션으로 사람을 모으고 판매까지 이은 일이에요.", tags: ["영상·채널", "브랜드 캠페인", "소비자 조사", "커머스·제휴"] },
+            { id: "t-data", bg: "#2b6a5f", ko: "데이터 / AX", en: "Data & AX", def: "지표 체계와 데이터 파이프라인, 어트리뷰션을 세우고 AI로 마케팅 도구를 직접 만든 일이에요.", tags: ["지표 설계", "데이터 파이프라인", "어트리뷰션", "AI 자동화"] }
           ];
           var taxOf = function (it) {
             var c = it.w.category || "", t = String(it.w.title || "") + " " + String(it.title || "");
-            if ((c === "퍼포먼스" && /소재/.test(t)) || c === "콘텐츠" || c === "영상") return "t-crea";
             if (c === "성과" || c === "AX") return "t-data";
-            if (c === "브랜딩") return "t-brand";
-            if (c === "커머스" || c === "제휴") return "t-com";
+            if (/소재/.test(t) || c === "퍼포먼스" || c === "그로스" || c === "CRM") return "t-perf";
+            if (c === "콘텐츠" || c === "영상" || c === "브랜딩" || c === "커머스" || c === "제휴") return "t-camp";
             return "t-perf";
           };
           var TS = TAXO.map(function (g) { return { g: g, items: items.filter(function (it) { return taxOf(it) === g.id; }).sort(byScore) }; }).filter(function (s) { return s.items.length; });
@@ -2264,18 +2261,15 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
             }
             return out;
           };
-          // 모드: 대표(분야별 최고 + 점수순, 7개) · 분야 5가지 · 전체(분야 순서)
+          // 모드: 대표(분야별 최고 + 점수순, 7개) · 분야 3가지
           var top = []; TS.forEach(function (s) { if (s.items[0]) top.push(s.items[0]); });
           items.slice().sort(byScore).forEach(function (it) { if (top.length < 7 && top.indexOf(it) < 0) top.push(it); });
           var SETS = [{ m: "all", tab: "대표", t: txt("tpBentoT", "대표 프로젝트예요"), list: top }]
-            .concat(TS.map(function (s) { return { m: s.g.id, tab: s.g.ko, t: s.g.ko + " 프로젝트예요", list: s.items, g: s.g }; }))
-            .concat([{ m: "every", tab: "전체", t: "전체 프로젝트 " + N + "개예요", list: TS.reduce(function (a, s) { return a.concat(s.items); }, []) }]);
-          // 모드마다 카드 위 정의 칸: 대표 = 고른 기준 + 분야 바로가기 · 분야 = 이름·영문·정의·하는 일·담긴 프로젝트 · 전체 = 분류 기준표
+            .concat(TS.map(function (s) { return { m: s.g.id, tab: s.g.ko, t: s.g.ko + " 프로젝트예요", list: s.items, g: s.g }; }));
+          // 모드마다 카드 위 정의 칸: 대표 = 고른 기준 + 분야 바로가기 · 분야 = 이름·영문·정의·하는 일·담긴 프로젝트
           var gmBtn = function (s) { return '<button class="tp-gm" type="button" data-m="' + ea(s.g.id) + '"><span class="tp-gcl" style="--gc:' + s.g.bg + '"></span>' + esc(s.g.ko) + '<i>' + s.items.length + '</i></button>'; };
           var defOf = function (S) {
             if (S.m === "all") return '<div class="tp-gdef lite"><p>' + esc(txt("tpTopD", "분야마다 성과가 가장 뚜렷한 프로젝트를 골랐어요.")) + '</p><div class="tp-gq"><span>분야별로 보기</span>' + TS.map(gmBtn).join("") + '</div></div>';
-            if (S.m === "every") return '<div class="tp-gdef"><div class="tp-gdh"><b>프로젝트 분류 기준</b><span>' + N + '개를 하는 일에 따라 ' + TS.length + '가지로 나눴어요</span></div><div class="tp-gmap">'
-              + TS.map(function (s, k) { return '<button class="tp-gm row" type="button" data-m="' + ea(s.g.id) + '"><span class="tp-gn">' + pad2(k + 1) + '</span><span class="tp-gt"><b class="tp-gcl" style="--gc:' + s.g.bg + '">' + esc(s.g.ko) + '</b><em>' + esc(s.g.en) + '</em></span><span class="tp-gd">' + esc(s.g.def) + '</span><span class="tp-gc">' + s.items.length + '개<i aria-hidden="true">〉</i></span></button>'; }).join("") + '</div></div>';
             var g = S.g;
             return '<div class="tp-gdef"><div class="tp-gdh"><b class="tp-gcl" style="--gc:' + g.bg + '">' + esc(g.ko) + '</b><span>' + esc(g.en) + ' · 프로젝트 ' + S.list.length + '개</span></div><p>' + esc(g.def) + '</p>'
               + '<div class="tp-gtags">' + g.tags.map(function (t) { return '<span>' + esc(t) + '</span>'; }).join("") + '</div>'
@@ -2302,11 +2296,11 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
             + '<div class="tp-hb"><button class="tp-b pri" type="button" data-tgo="tp-bento">대표 프로젝트 보기</button></div></div>'
             + '<button class="tp-cue" type="button" data-tgo="tp-bento" aria-label="아래로"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M6 9l6 6 6-6" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button></section>';
           var bentoS = '<section class="tp-bento" id="tp-bento"><div class="tp-bh"><h2 class="tp-bt">' + esc(SETS[0].t) + '</h2><div class="tp-tabs" role="tablist" aria-label="분야">' + tabsHtml + '</div></div>' + setsHtml
-            + '<button class="tp-all" type="button" data-m="every">프로젝트 ' + N + '개 모두 보기</button></section>';
-          // 추천 조합: 필요(세그먼트) 고르기 → 왼쪽 기본 조합(그 분야 대표 3) · 오른쪽 확장 조합(대표 2 + 짝 분야 2) — 줄마다 칸을 맞춘 2단 비교 (분류는 위 5가지)
-          var NEED = { "t-perf": "광고 효율을 올리고 싶어요", "t-crea": "성과 나는 소재가 필요해요", "t-data": "데이터·자동화가 필요해요", "t-brand": "브랜드를 알리고 싶어요", "t-com": "매출·제휴를 늘리고 싶어요" };
-          var WHO = { "t-perf": "앱·커머스 서비스, 광고 효율이 고민인 팀", "t-crea": "소재가 금방 지치거나 콘텐츠가 부족한 팀", "t-data": "지표 체계가 없거나 반복 업무가 많은 팀", "t-brand": "알려야 할 브랜드, 캠페인이 필요한 팀", "t-com": "매출 채널을 늘려야 하는 커머스·플랫폼" };
-          var PAIR = { "t-perf": "t-data", "t-crea": "t-perf", "t-data": "t-perf", "t-brand": "t-crea", "t-com": "t-perf" };
+            + '</section>';
+          // 추천 조합: 필요(세그먼트) 고르기 → 왼쪽 기본 조합(그 분야 대표 3) · 오른쪽 확장 조합(대표 2 + 짝 분야 2) — 줄마다 칸을 맞춘 2단 비교 (분류는 위 3가지)
+          var NEED = { "t-perf": "광고 효율을 올리고 싶어요", "t-camp": "브랜드와 판매를 함께 키우고 싶어요", "t-data": "데이터·자동화가 필요해요" };
+          var WHO = { "t-perf": "앱·커머스 서비스, 광고 효율이 고민인 팀", "t-camp": "알릴 이야기와 팔 상품이 있는 브랜드", "t-data": "지표 체계가 없거나 반복 업무가 많은 팀" };
+          var PAIR = { "t-perf": "t-data", "t-camp": "t-perf", "t-data": "t-perf" };
           var stackOf = function (its) { var s = []; its.forEach(function (it) { (it.w.stack || []).forEach(function (t) { if (t && s.indexOf(t) < 0) s.push(t); }); }); return s.slice(0, 6); };
           var fan = function (its) { return '<span class="tp-stk">' + its.slice(0, 3).map(function (it, k) { return '<span class="tp-sc s' + k + '" style="--bg:' + deep(it) + ';--c:' + it.cm.c + '">' + frame(it, "tp-sf") + '</span>'; }).join("") + '</span>'; };
           var list = function (t, rows) { return rows.length ? '<span class="tp-clt">' + t + '</span><ul>' + rows.join("") + '</ul>' : ''; };
