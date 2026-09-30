@@ -2268,12 +2268,28 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
             return out;
           };
           // 분류별 섹션(토스 '자주 쓰는 기능이에요'처럼): 작은 분류 이름(색) → 큰 제목 → 한 줄 설명 → 벤토 카드 · 위에 따라붙는 분류 탭(누르면 그 섹션으로, 스크롤하면 현재 분류 표시)
-          var HEAD = { "t-recent": "최근 프로젝트예요", "t-perf": "광고와 CRM으로 성과를 냈어요", "t-camp": "콘텐츠와 캠페인으로 알렸어요", "t-data": "데이터로 판단하게 만들었어요" };
+          var HEAD = { "t-recent": "최근 프로젝트예요", "t-perf": "설치는 광고로 늘리고, 재방문은 CRM으로 붙잡았어요", "t-camp": "콘텐츠로 알리고, 캠페인으로 판매까지 이었어요", "t-data": "같은 숫자로 판단할 수 있게 데이터 기준을 세웠어요" };
           var period = nowCo && nowCo.startDate ? fmt(nowCo.startDate) + " – " + (nowCo.endDate ? fmt(nowCo.endDate) : "현재") : "";
+          // 분류 머리글 아래 세 칸: 왜 했나요(배경·문제) · 무엇을 했나요(한 일) · 무엇이 달라졌나요(대표 지표 3개, 지표가 없으면 쓴 도구) — klio.text.tpWhy_/tpWhat_{recent|perf|camp|data}로 덮어쓰기 가능
+          var STORY = {
+            "t-recent": { why: "매체 성과는 오래 낮은 상태였고, 새로 시작한 단기임대 사업은 측정 체계도 획득 채널도 없었어요.", what: "AI 협업으로 20개 넘는 운영 탭을 가진 마케팅 플랫폼을 4개월 만에 혼자 만들고, 그 데이터로 자사 채널 퍼포먼스를 재편하면서 신사업 그로스 기반을 세웠어요." },
+            "t-perf": { why: "앱 서비스는 설치 단가가 계속 오르고, 설치한 유저가 금방 떠나는 게 가장 큰 문제였어요.", what: "월 5억 규모 매체 예산을 운영하며 소재를 직접 만들어 빠르게 테스트했고, 세그먼트별 앱 푸시와 카카오 플친으로 떠난 유저를 다시 데려왔어요." },
+            "t-camp": { why: "광고만으로는 브랜드를 믿게 만들기도, 관심을 실제 구매까지 이어지게 하기도 어려웠어요.", what: "CSR 캠페인과 사연 콘텐츠, 유튜브 채널로 관심을 모으고, 명품 화장품 특가·핫딜·제휴 프로모션으로 판매까지 연결했어요." },
+            "t-data": { why: "팀마다 보는 숫자가 달라서, 어떤 채널이 얼마나 기여했는지 합의하기 어려웠어요.", what: "이벤트 택소노미를 정의하고 QA했고, 외부 API → 시트 → 대시보드로 적재를 자동화했어요. Amplitude·Airbridge로 채널 기여와 퍼널을 나눠 봤어요." }
+          };
+          var storyOf = function (s) {
+            var g = s.g, k = g.id.slice(2), st = STORY[g.id] || {}, why = txt("tpWhy_" + k, st.why || ""), what = txt("tpWhat_" + k, st.what || g.def || "");
+            var mets = s.items.filter(function (it) { return it.m0; }).slice(0, 3), tools = [];
+            s.items.forEach(function (it) { (it.w.stack || []).forEach(function (t) { if (t && tools.indexOf(t) < 0) tools.push(t); }); });
+            var third = mets.length
+              ? '<div class="tp-wc"><em>무엇이 달라졌나요</em><ul class="tp-wk">' + mets.map(function (it) { return '<li><b>' + esc(it.m0.value) + '</b><span>' + esc(it.m0.label || split(it).t) + '</span></li>'; }).join("") + '</ul></div>'
+              : (tools.length ? '<div class="tp-wc"><em>이런 도구로 했어요</em><div class="tp-wt2">' + tools.slice(0, 8).map(function (t) { return '<span>' + esc(t) + '</span>'; }).join("") + '</div></div>' : '');
+            return '<div class="tp-why tp-rv">' + (why ? '<div class="tp-wc"><em>왜 했나요</em><p>' + esc(why) + '</p></div>' : '') + (what ? '<div class="tp-wc"><em>무엇을 했나요</em><p>' + esc(what) + '</p></div>' : '') + third + '</div>';
+          };
           var grpHtml = TS.map(function (s) {
             var g = s.g;
             return '<div class="tp-grp" id="tp-' + ea(g.id) + '" data-m="' + ea(g.id) + '"><div class="tp-gh tp-rv"><span class="tp-gk tp-gcl" style="--gc:' + g.bg + '">' + esc(g.ko) + '<i>' + (g.id === "t-recent" && period ? esc(period) + ' · ' : '') + s.items.length + '개 프로젝트</i></span>'
-              + '<h2 class="tp-bt">' + esc(txt("tpH_" + g.id.slice(2), HEAD[g.id] || (g.ko + " 프로젝트예요"))) + '</h2><p class="tp-gs">' + esc(g.def) + '</p></div>'
+              + '<h2 class="tp-bt">' + esc(txt("tpH_" + g.id.slice(2), HEAD[g.id] || (g.ko + " 프로젝트예요"))) + '</h2></div>' + storyOf(s)
               + '<div class="tp-set">' + bento(s.items) + '</div></div>';
           }).join("");
           var tabsHtml = TS.map(function (s, x) { return '<button class="tp-tab' + (x ? '' : ' on') + '" type="button" data-sec="' + ea(s.g.id) + '">' + esc(s.g.ko) + '<i>' + s.items.length + '</i></button>'; }).join("");
@@ -2448,6 +2464,12 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
             + '.tp-ri{grid-area:1/1;display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:8px 12px;max-width:min(760px,calc(100vw - 40px));font-size:clamp(15px,1.3vw,19px);font-weight:500;line-height:1.5;color:rgba(255,255,255,.84);opacity:0;transform:translateY(14px);transition:opacity .5s var(--te),transform .6s var(--te)}'
             + '.tp-ri.on{opacity:1;transform:none}.tp-ri.off{opacity:0;transform:translateY(-14px)}.tp-ri b{display:inline-flex;align-items:center;height:30px;padding:0 11px;border-radius:9px;background:rgba(49,130,246,.24);color:#a8d0ff;font-size:14px;font-weight:700}'
             + '@media(prefers-reduced-motion:reduce){.tp-rot,.tp-ri{transition:none}}'
+            // 분류 머리글 세 칸: 왜 했나요 · 무엇을 했나요 · 무엇이 달라졌나요(파란 숫자) — 칸마다 윗선
+            + '.tp-grp .tp-gh{margin-bottom:28px}.tp-why{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:0 32px;margin-bottom:48px}.tp-wc{padding-top:18px;border-top:1px solid var(--g2)}'
+            + '.tp-wc em{display:block;margin-bottom:10px;font-style:normal;font-size:14px;font-weight:700;color:var(--g5)}.tp-wc p{font-size:clamp(15px,1.2vw,17px);line-height:1.7;color:var(--g7)}'
+            + '.tp-wk{display:flex;flex-direction:column;gap:12px;margin:0;padding:0;list-style:none}.tp-wk li{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 10px}.tp-wk b{font-size:clamp(20px,1.7vw,24px);font-weight:700;letter-spacing:-.02em;color:var(--bl);font-variant-numeric:tabular-nums}.tp-wk span{font-size:14.5px;line-height:1.5;color:var(--g6)}'
+            + '.tp-wt2{display:flex;flex-wrap:wrap;gap:6px}.tp-wt2 span{display:inline-flex;align-items:center;height:32px;padding:0 12px;border-radius:9px;background:var(--g1);font-size:14px;font-weight:600;color:var(--g7)}'
+            + '@media(max-width:900px){.tp-why{grid-template-columns:1fr;gap:22px;margin-bottom:36px}}'
             + '@media(prefers-reduced-motion:reduce){.tp-wrow,.tp-cue,.js .tp-hc{animation:none}.js .tp-rv,.js .tp-card.tp-rv .tp-fr,.js .tp-card .tp-wr,.js .tp-rt span{opacity:1;transform:none;transition:none}.tp-rp.ani .tp-cell{animation:none}}';
           return '<!doctype html><html lang="ko"><head><script>document.documentElement.classList.add("js")<\/script><meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>'
             + '<title>' + esc(nameKo || nameEn || "포트폴리오") + ' — Projects (test)</title><link rel="icon" href="data:,"/>' + fontHead
