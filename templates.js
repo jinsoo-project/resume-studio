@@ -2280,21 +2280,16 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
             "t-camp": { why: "광고만으로는 브랜드를 믿게 만들기도, 관심을 실제 구매까지 이어지게 하기도 어려웠어요.", what: "CSR 캠페인과 사연 콘텐츠, 유튜브 채널로 관심을 모으고, 명품 화장품 특가·핫딜·제휴 프로모션으로 판매까지 연결했어요." },
             "t-data": { why: "팀마다 보는 숫자가 달라서, 어떤 채널이 얼마나 기여했는지 합의하기 어려웠어요.", what: "이벤트 택소노미를 정의하고 QA했고, 외부 API → 시트 → 대시보드로 적재를 자동화했어요. Amplitude·Airbridge로 채널 기여와 퍼널을 나눠 봤어요." }
           };
-          // 분류 머리글 아래 단계 카드(토스식 자동 넘김): [왜 했나요 · 무엇을 했나요 · 무엇이 달라졌나요] 진행 막대가 차오르면 다음 단계로 · 누르면 그 단계 · 마우스 올리면 멈춤
-          //   마지막 단계 = 그 분류 대표 지표 3개(숫자 올라가기), 지표가 없으면 쓴 도구 · 문구는 klio.text.tpWhy_/tpWhat_{recent|perf|camp|data}로 덮어쓰기
+          // 분류 소개(토스처럼 상자·라벨 없이): 제목 아래 한 단락 — 앞 문장(왜, 회색) + 뒤 문장(무엇을, 진하게) → 큰 숫자 3개(대표 지표, 보일 때 0부터 올라감)
+          //   지표가 없는 분류는 숫자 대신 '사용 도구' 한 줄 · 문구는 klio.text.tpWhy_/tpWhat_{recent|perf|camp|data}로 덮어쓰기
           var storyOf = function (s) {
             var g = s.g, k = g.id.slice(2), st = STORY[g.id] || {}, why = txt("tpWhy_" + k, st.why || ""), what = txt("tpWhat_" + k, st.what || g.def || "");
             var mets = s.items.slice().sort(byScore).filter(function (it) { return it.m0; }).slice(0, 3), tools = [];
             s.items.forEach(function (it) { (it.w.stack || []).forEach(function (t) { if (t && tools.indexOf(t) < 0) tools.push(t); }); });
-            var steps = [];
-            if (why) steps.push({ l: "왜 했나요", h: '<p class="tp-sq">' + esc(why) + '</p>' });
-            if (what) steps.push({ l: "무엇을 했나요", h: '<p class="tp-sq">' + esc(what) + '</p>' });
-            if (mets.length) steps.push({ long: 1, l: "무엇이 달라졌나요", h: '<ul class="tp-sk">' + mets.map(function (it) { return '<li><b data-cnt>' + esc(it.m0.value) + '</b><span>' + esc(it.m0.label || split(it).t) + '</span></li>'; }).join("") + '</ul>' });
-            else if (tools.length) steps.push({ long: 1, l: "이런 도구로 했어요", h: '<div class="tp-stl">' + tools.slice(0, 8).map(function (t) { return '<span>' + esc(t) + '</span>'; }).join("") + '</div>' });
-            if (!steps.length) return '';
-            return '<div class="tp-story tp-rv" style="--sc:' + g.bg + '"><div class="tp-sbar" role="tablist" aria-label="' + ea(g.ko) + ' 이야기">'
-              + steps.map(function (x, n) { return '<button type="button" role="tab" aria-selected="' + (n ? 'false' : 'true') + '" class="tp-sb2' + (n ? '' : ' on') + '" data-s="' + n + '"' + (x.long ? ' style="--sd:7.5s"' : '') + '><i aria-hidden="true"><b></b></i><span><small>' + pad2(n + 1) + '</small>' + esc(x.l) + '</span></button>'; }).join("")
-              + '</div><div class="tp-spanes">' + steps.map(function (x, n) { return '<div class="tp-sp' + (n ? '' : ' on') + '" data-s="' + n + '" role="tabpanel">' + x.h + '</div>'; }).join("") + '</div></div>';
+            var lead = (why || what) ? '<p class="tp-lead">' + (why ? '<span>' + esc(why) + '</span> ' : '') + esc(what) + '</p>' : '';
+            var nums = mets.length ? '<ul class="tp-stats">' + mets.map(function (it) { return '<li><b data-cnt>' + esc(it.m0.value) + '</b><span>' + esc(it.m0.label || split(it).t) + '</span></li>'; }).join("") + '</ul>'
+              : (tools.length ? '<p class="tp-tools"><b>사용 도구</b>' + tools.slice(0, 8).map(esc).join(" · ") + '</p>' : '');
+            return (lead || nums) ? '<div class="tp-intro tp-rv">' + lead + nums + '</div>' : '';
           };
           var grpHtml = TS.map(function (s) {
             var g = s.g;
@@ -2489,19 +2484,13 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
             + '.tp-al2{display:block}.tp-al2 em{font-style:normal;color:#7db7ff}'
             + '.js .tp-aw{animation:tpWord .8s var(--te) backwards;animation-delay:calc(.35s + var(--i) * .18s)}.js .tp-al2{animation:tpWord2 1s var(--te) backwards;animation-delay:calc(.6s + var(--i) * .18s)}'
             + '@keyframes tpWord{from{opacity:0;transform:translateY(70%)}}@keyframes tpWord2{from{opacity:0;transform:translateY(26px) scale(.97)}}body[data-still] .tp-aw,body[data-still] .tp-al2{animation:none}'
-            // 분류 이야기 단계 카드(토스식 자동 넘김): 위 진행 막대 3칸(지금 단계가 차오름 · 지난 단계는 꽉 참) → 아래 큰 문장 / 결과 숫자
-            + '.tp-story{margin-bottom:48px;padding:28px 32px 34px;border-radius:24px;background:#f9fafb;box-shadow:inset 0 0 0 1px var(--g2)}'
-            + '.tp-sbar{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(0,1fr);gap:16px}.tp-sb2{display:flex;flex-direction:column;gap:12px;padding:0;text-align:left;color:var(--g5);transition:color .3s}.tp-sb2:hover{color:var(--g7)}.tp-sb2.on{color:var(--g9)}'
-            + '.tp-sb2 i{position:relative;display:block;height:4px;border-radius:4px;background:var(--g2);overflow:hidden}.tp-sb2 i b{position:absolute;inset:0;border-radius:inherit;background:var(--bl);transform:scaleX(0);transform-origin:0 50%}.tp-sb2.done i b{transform:none}'
-            + '.tp-sb2.on i b{animation:tpFill var(--sd,5.5s) linear forwards}.tp-story:not(.run) .tp-sb2.on i b,.tp-story:hover .tp-sb2.on i b{animation-play-state:paused}@keyframes tpFill{to{transform:scaleX(1)}}'
-            + '.tp-sb2 span{display:flex;align-items:baseline;gap:8px;font-size:15px;font-weight:700}.tp-sb2 small{font-size:12.5px;font-weight:600;color:var(--g4);font-variant-numeric:tabular-nums}'
-            + '.tp-spanes{display:grid;margin-top:26px}.tp-sp{grid-area:1/1;opacity:0;transform:translateY(14px);pointer-events:none;transition:opacity .45s var(--te),transform .6s var(--te)}.tp-sp.on{opacity:1;transform:none;pointer-events:auto}'
-            + '.tp-sq{max-width:880px;font-size:clamp(19px,1.8vw,26px);font-weight:600;line-height:1.55;letter-spacing:-.02em;color:var(--g8);text-wrap:pretty}'
-            + '.tp-sk{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px;margin:0;padding:0;list-style:none}.tp-sk li{display:flex;flex-direction:column;gap:6px}.tp-sk b{font-size:clamp(32px,3.4vw,48px);font-weight:700;line-height:1.05;letter-spacing:-.03em;color:var(--bl);font-variant-numeric:tabular-nums}.tp-sk span{font-size:15px;line-height:1.5;color:var(--g6)}'
-            + '.tp-stl{display:flex;flex-wrap:wrap;gap:8px}.tp-stl span{display:inline-flex;align-items:center;height:40px;padding:0 16px;border-radius:12px;background:#fff;box-shadow:inset 0 0 0 1px var(--g2);font-size:16px;font-weight:600;color:var(--g7)}'
-            + '@supports (corner-shape:squircle){.tp-story{corner-shape:squircle;border-radius:44px}}'
-            + '@media(max-width:760px){.tp-story{padding:22px 20px 24px;border-radius:20px;margin-bottom:36px}.tp-sbar{gap:10px}.tp-sb2 span{flex-direction:column;gap:2px;font-size:13px}.tp-sk{grid-template-columns:1fr;gap:14px}.tp-sk li{flex-direction:row;flex-wrap:wrap;align-items:baseline;gap:4px 10px}}'
-            + 'body[data-still] .tp-sb2.on i b{animation:none;transform:scaleX(1)}@media(prefers-reduced-motion:reduce){.tp-sb2.on i b{animation:none;transform:none}.tp-sp{transition:none}.js .tp-aw,.js .tp-al2{animation:none}}'
+            // 분류 소개(토스처럼): 제목 아래 한 단락(왜 = 회색 · 무엇을 = 진하게) → 큰 숫자 3개(상자·라벨 없음)
+            + '.tp-grp .tp-gh{margin-bottom:0}.tp-intro{margin:16px 0 52px}.tp-lead{max-width:800px;font-size:clamp(16px,1.35vw,19px);font-weight:500;line-height:1.75;letter-spacing:-.01em;color:var(--g8);text-wrap:pretty}.tp-lead span{color:var(--g5)}'
+            + '.tp-stats{display:flex;flex-wrap:wrap;gap:20px 72px;margin:36px 0 0;padding:0;list-style:none}.tp-stats li{display:flex;flex-direction:column;gap:6px}'
+            + '.tp-stats b{font-size:clamp(34px,3.2vw,46px);font-weight:700;line-height:1.05;letter-spacing:-.035em;color:var(--g9);font-variant-numeric:tabular-nums}.tp-stats span{font-size:15px;line-height:1.5;color:var(--g6)}'
+            + '.tp-tools{margin-top:24px;font-size:15px;line-height:1.7;color:var(--g6)}.tp-tools b{margin-right:12px;font-weight:600;color:var(--g8)}'
+            + '@media(max-width:760px){.tp-intro{margin:12px 0 36px}.tp-stats{gap:18px 36px;margin-top:26px}.tp-stats b{font-size:30px}.tp-stats span{font-size:13.5px}}'
+            + '@media(prefers-reduced-motion:reduce){.js .tp-aw,.js .tp-al2{animation:none}}'
             + '@media(prefers-reduced-motion:reduce){.tp-wrow,.tp-cue,.js .tp-hc{animation:none}.js .tp-rv,.js .tp-card.tp-rv .tp-fr,.js .tp-card .tp-wr,.js .tp-rt span{opacity:1;transform:none;transition:none}.tp-rp.ani .tp-cell{animation:none}}';
           return '<!doctype html><html lang="ko"><head><script>document.documentElement.classList.add("js")<\/script><meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>'
             + '<title>' + esc(nameKo || nameEn || "포트폴리오") + ' — Projects (test)</title><link rel="icon" href="data:,"/>' + fontHead
@@ -2527,7 +2516,7 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
             b.textContent = fmtN(0);
             b._t = setInterval(function () { var k = Math.min(1, (Date.now() - t0) / 1200), e = 1 - Math.pow(1 - k, 3); b.textContent = k >= 1 ? raw0 : fmtN(to * e); if (k >= 1) clearInterval(b._t); }, 30);
           };
-          var show = function (el) { el.classList.add("in"); if (el.classList.contains("wide-kpi")) later(function () { $$(".tp-wr b", el).forEach(count); }, 350); };
+          var show = function (el) { el.classList.add("in"); if (el.classList.contains("wide-kpi")) later(function () { $$(".tp-wr b", el).forEach(count); }, 350); if (el.classList.contains("tp-intro")) later(function () { $$("[data-cnt]", el).forEach(count); }, 250); };
           var io = "IntersectionObserver" in window && !reduce && !still ? new IntersectionObserver(function (es) { es.forEach(function (en) { if (en.isIntersecting) { show(en.target); io.unobserve(en.target); } }); }, { rootMargin: "0px 0px -8% 0px" }) : null;
           var watch = function (el) { if (io) io.observe(el); else show(el); };
           $$(".tp-rv,.tp-rw").forEach(watch);
@@ -2558,19 +2547,6 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
           };
           var ris = $$(".tp-ri"), rk = 0;
           var rotate = function () { if (ris.length < 2) return; var prev = ris[rk]; prev.classList.remove("on"); prev.classList.add("off"); rk = (rk + 1) % ris.length; ris[rk].classList.remove("off"); ris[rk].classList.add("on"); later(function () { prev.classList.remove("off"); }, 700); };
-          // 분류 이야기 카드: 진행 막대가 다 차면 다음 단계(끝나면 처음으로) · 화면에 보일 때만 진행 · 마우스 올리면 멈춤 · 누르면 그 단계 · 결과 단계에서 숫자 올라감
-          $$(".tp-story").forEach(function (st) {
-            var bs = $$(".tp-sb2", st), ps = $$(".tp-sp", st), cur = 0;
-            var step = function (k) {
-              cur = (k + bs.length) % bs.length;
-              bs.forEach(function (b, j) { b.classList.toggle("on", j === cur); b.classList.toggle("done", j < cur); b.setAttribute("aria-selected", j === cur ? "true" : "false"); var f = b.querySelector("i b"); if (f) { f.style.animation = "none"; void f.offsetWidth; f.style.animation = ""; } });
-              ps.forEach(function (p, j) { p.classList.toggle("on", j === cur); });
-              if (ps[cur]) $$("[data-cnt]", ps[cur]).forEach(count);
-            };
-            st.addEventListener("animationend", function (e) { var b = e.target.closest && e.target.closest(".tp-sb2"); if (e.animationName === "tpFill" && b && b.classList.contains("on")) step(cur + 1); });
-            st.addEventListener("click", function (e) { var b = e.target.closest && e.target.closest(".tp-sb2"); if (b) step(+b.getAttribute("data-s")); });
-            if ("IntersectionObserver" in window && !reduce && !still) new IntersectionObserver(function (es) { es.forEach(function (en) { st.classList.toggle("run", en.isIntersecting); }); }, { threshold: .35 }).observe(st);
-          });
           var hh = $(".tp-hh");
           later(function () { if (hh) hh.classList.add("sw"); if (!reduce && !still) { setInterval(swap, 2000); setInterval(rotate, 2800); } }, reduce || still ? 0 : 4200);
           // 로딩: 숫자가 다 굴러간 뒤 벽(배경)이 크게에서 제자리로 나타나고 버튼이 올라옴
