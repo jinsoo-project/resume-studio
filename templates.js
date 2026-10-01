@@ -2254,20 +2254,26 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
           var widget = function (it) {
             return '<span class="tp-wg">' + it.mets.slice(0, 3).map(function (m, k) { return (k ? '<i class="tp-hr"></i>' : '') + '<span class="tp-wr" style="--k:' + k + '"><span>' + esc(m.label || "") + '</span><b>' + esc(m.value) + '</b></span>'; }).join("") + '</span>';
           };
-          var card = function (it, kind, k) {
-            var a = '<button class="tp-card tp-rv ' + kind + '" type="button" data-open="' + it.i + '" style="--bg:' + deep(it) + ';--c:' + it.cm.c + ';--dl:' + (k % 2 * 90) + 'ms" aria-label="' + ea(it.title) + ' 자세히 보기">';
-            if (kind === "half") return a + head(it) + frame(it, "tp-fr") + '</button>';
-            if (kind === "wide-kpi") return a + '<span class="tp-fl">' + head(it) + '</span><span class="tp-fv' + (it.main ? '' : ' solo') + '">' + (it.main ? frame(it, "tp-fr") : '') + widget(it) + '</span></button>';
-            return a + '<span class="tp-fl">' + head(it) + '</span><span class="tp-fv">' + frame(it, "tp-fr") + '</span></button>';
+          // 카드 아래쪽 그림: 이미지(잘림 없이) → 없으면 지표 2개 이상일 때 흰 지표 위젯 → 그것도 없으면 분야 일러스트
+          var visual = function (it) {
+            if (it.main) return frame(it, "tp-fr");
+            if (it.mets.length >= 2) return '<span class="tp-fr kpi">' + widget(it) + '</span>';
+            return frame(it, "tp-fr");
           };
-          // 벤토: [반, 반] → [가로 한 칸] 반복 · 가로 칸은 지표 2개 이상인 프로젝트 우선(흰 지표 위젯) · 홀로 남은 반 칸은 가로로
-          var bento = function (list, keep) { // keep = 순서 그대로(가로 칸을 위해 앞당기지 않음)
-            var rest = list.slice(), out = "", r = 0, k = 0;
-            while (rest.length) {
-              if (r % 2 === 0 && rest.length >= 2) { out += card(rest.shift(), "half", k++) + card(rest.shift(), "half", k++); }
-              else { var j = 0; for (var q = 0; !keep && q < Math.min(3, rest.length); q++) if (rest[q].mets.length >= 2) { j = q; break; } var f = rest.splice(j, 1)[0]; out += card(f, f.mets.length >= 2 ? "wide-kpi" : "wide", k++); }
-              r++;
-            }
+          var card = function (it, kind, j) {
+            return '<button class="tp-card tp-rv ' + kind + '" type="button" data-open="' + it.i + '" style="--bg:' + deep(it) + ';--c:' + it.cm.c + ';--dl:' + (j * 80) + 'ms" aria-label="' + ea(it.title) + ' 자세히 보기">' + head(it) + visual(it) + '</button>';
+          };
+          // 벤토 줄 나누기: 한 줄에 3개 또는 2개만(혼자 있는 카드 없음) — 3개 줄부터, 가능하면 3·2 번갈아. 예) 3=[3] · 4=[2,2] · 5=[3,2] · 6=[3,3] · 7=[3,2,2] · 10=[3,2,3,2]
+          var rowsOf = function (n) {
+            if (n <= 0) return []; if (n === 1) return [1];
+            var t = Math.floor(n / 3), two = 0, r = n % 3, out = [];
+            if (r === 1) { t -= 1; two = 2; } else if (r === 2) two = 1;
+            while (t > 0 || two > 0) { var last = out[out.length - 1]; if (last === 3 && two) { out.push(2); two--; } else if (t > 0) { out.push(3); t--; } else { out.push(2); two--; } }
+            return out;
+          };
+          var bento = function (list) {
+            var out = "", i = 0;
+            rowsOf(list.length).forEach(function (c) { for (var j = 0; j < c; j++) out += card(list[i++], c === 3 ? "c3" : "c2", j); });
             return out;
           };
           // 분류별 섹션(토스 '자주 쓰는 기능이에요'처럼): 작은 분류 이름(색) → 큰 제목 → 한 줄 설명 → 벤토 카드 · 위에 따라붙는 분류 탭(누르면 그 섹션으로, 스크롤하면 현재 분류 표시)
@@ -2295,7 +2301,7 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
             var g = s.g;
             return '<div class="tp-grp" id="tp-' + ea(g.id) + '" data-m="' + ea(g.id) + '"><div class="tp-gh tp-rv"><span class="tp-gk tp-gcl" style="--gc:' + g.bg + '">' + esc(g.ko) + '<i>' + (g.id === "t-recent" && period ? esc(period) + ' · ' : '') + s.items.length + '개 프로젝트</i></span>'
               + '<h2 class="tp-bt">' + esc(txt("tpH_" + g.id.slice(2), HEAD[g.id] || (g.ko + " 프로젝트예요"))) + '</h2></div>' + storyOf(s)
-              + '<div class="tp-set">' + bento(s.items, s.g.order === "recent") + '</div></div>';
+              + '<div class="tp-set">' + bento(s.items) + '</div></div>';
           }).join("");
           var tabsHtml = TS.map(function (s, x) { return '<button class="tp-tab' + (x ? '' : ' on') + '" type="button" data-sec="' + ea(s.g.id) + '">' + esc(s.g.ko) + '<i>' + s.items.length + '</i></button>'; }).join("");
           // 첫 화면 벽(배경) · 문장 슬롯 단어(분야별 많은 순으로 돌아가며)
@@ -2491,6 +2497,15 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
             + '.tp-tools{margin-top:24px;font-size:15px;line-height:1.7;color:var(--g6)}.tp-tools b{margin-right:12px;font-weight:600;color:var(--g8)}'
             + '@media(max-width:760px){.tp-intro{margin:12px 0 36px}.tp-stats{gap:18px 36px;margin-top:26px}.tp-stats b{font-size:30px}.tp-stats span{font-size:13.5px}}'
             + '@media(prefers-reduced-motion:reduce){.js .tp-aw,.js .tp-al2{animation:none}}'
+            // 카드 줄: 6칸 격자 — 3개 줄 카드(c3)는 2칸씩, 2개 줄 카드(c2)는 3칸씩 · 줄마다 높이 같게 · 아래쪽 그림은 이미지/흰 지표 위젯/일러스트
+            + '.tp-grp .tp-set{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:28px}.tp-card.c3{grid-column:span 2;aspect-ratio:3/4}.tp-card.c2{grid-column:span 3;aspect-ratio:1/1.02}'
+            + '.tp-card.c3 .tp-ct{padding:30px 30px 0}.tp-card.c3 .tp-ct em{font-size:13px}.tp-card.c3 .tp-ct b{font-size:clamp(19px,1.55vw,23px)}.tp-card.c3 .tp-q{margin-top:10px;font-size:clamp(14px,1.05vw,15.5px)}.tp-card.c3 .tp-more{margin-top:14px;font-size:13.5px}'
+            + '.tp-card.c2 .tp-ct{padding:40px 44px 0}.tp-card.c2 .tp-ct b{font-size:clamp(22px,2vw,30px)}'
+            + '.tp-card.c3 .tp-fr{left:30px;right:30px;top:53%;bottom:0}.tp-card.c2 .tp-fr{left:44px;right:44px;top:48%;bottom:0}'
+            + '.tp-fr.kpi{align-items:flex-end}.tp-fr.kpi .tp-wg{position:relative;left:auto;right:auto;top:auto;bottom:auto;transform:none;width:100%;max-width:380px;margin-bottom:28px;padding:6px 20px}.tp-fr.kpi .tp-wr{padding:12px 0}.tp-fr.kpi .tp-wr b{font-size:22px}.tp-fr.kpi .tp-wr span{font-size:14px}'
+            + '.tp-card.c3 .tp-fr.kpi .tp-wg{margin-bottom:22px;padding:4px 16px}.tp-card.c3 .tp-fr.kpi .tp-wr b{font-size:19px}.tp-card.c3 .tp-fr.kpi .tp-wr span{font-size:13px}'
+            + '@supports (corner-shape:squircle){.tp-card.c3{border-radius:38px}}'
+            + '@media(max-width:760px){.tp-grp .tp-set{grid-template-columns:1fr;gap:16px}.tp-card.c3,.tp-card.c2{grid-column:auto;aspect-ratio:auto;min-height:440px}.tp-card.c3 .tp-ct,.tp-card.c2 .tp-ct{padding:28px 26px 0}.tp-card.c3 .tp-fr,.tp-card.c2 .tp-fr{left:26px;right:26px;top:auto;height:50%}.tp-card.c3 .tp-ct b{font-size:22px}}'
             + '@media(prefers-reduced-motion:reduce){.tp-wrow,.tp-cue,.js .tp-hc{animation:none}.js .tp-rv,.js .tp-card.tp-rv .tp-fr,.js .tp-card .tp-wr,.js .tp-rt span{opacity:1;transform:none;transition:none}.tp-rp.ani .tp-cell{animation:none}}';
           return '<!doctype html><html lang="ko"><head><script>document.documentElement.classList.add("js")<\/script><meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>'
             + '<title>' + esc(nameKo || nameEn || "포트폴리오") + ' — Projects (test)</title><link rel="icon" href="data:,"/>' + fontHead
@@ -2516,7 +2531,7 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
             b.textContent = fmtN(0);
             b._t = setInterval(function () { var k = Math.min(1, (Date.now() - t0) / 1200), e = 1 - Math.pow(1 - k, 3); b.textContent = k >= 1 ? raw0 : fmtN(to * e); if (k >= 1) clearInterval(b._t); }, 30);
           };
-          var show = function (el) { el.classList.add("in"); if (el.classList.contains("wide-kpi")) later(function () { $$(".tp-wr b", el).forEach(count); }, 350); if (el.classList.contains("tp-intro")) later(function () { $$("[data-cnt]", el).forEach(count); }, 250); };
+          var show = function (el) { el.classList.add("in"); if (el.querySelector && el.querySelector(".tp-wg")) later(function () { $$(".tp-wr b", el).forEach(count); }, 350); if (el.classList.contains("tp-intro")) later(function () { $$("[data-cnt]", el).forEach(count); }, 250); };
           var io = "IntersectionObserver" in window && !reduce && !still ? new IntersectionObserver(function (es) { es.forEach(function (en) { if (en.isIntersecting) { show(en.target); io.unobserve(en.target); } }); }, { rootMargin: "0px 0px -8% 0px" }) : null;
           var watch = function (el) { if (io) io.observe(el); else show(el); };
           $$(".tp-rv,.tp-rw").forEach(watch);
