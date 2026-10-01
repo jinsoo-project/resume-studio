@@ -2315,7 +2315,7 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
           };
           // 분류별 섹션(토스 '자주 쓰는 기능이에요'처럼): 작은 분류 이름(색) → 큰 제목 → 한 줄 설명 → 벤토 카드 · 위에 따라붙는 분류 탭(누르면 그 섹션으로, 스크롤하면 현재 분류 표시)
           // 분류 제목 = 제 이야기(위 → 아래로 읽으면 지금 → 처음) · klio.text.tpH_{recent|perf|data|camp}로 덮어쓰기
-          var HEAD = { "t-recent": "지금은 AI로 구조를 효율화하고, 그로스를 고민해요", "t-perf": "그 전엔 퍼포먼스에 집중해 예산·매체·CRM을 맡았어요", "t-data": "그러면서 자동화와 택소노미로 측정 구조를 설계했어요", "t-camp": "처음엔 영상과 콘텐츠로 시작했어요" };
+          var HEAD = { "t-recent": "지금은 AI로 구조를 효율화하고, 그로스를 고민해요", "t-perf": "그 전엔 퍼포먼스에 집중해 예산·매체·CRM을 맡았어요", "t-data": "그러면서 자동화와 택소노미로 측정 구조를 설계했어요", "t-camp": "영상으로 시작해 콘텐츠·브랜딩·특가 마케팅까지 해왔어요" };
           var headOf = function (s) { return txt("tpH_" + s.g.id.slice(2), HEAD[s.g.id] || (s.g.ko + " 프로젝트예요")); };
           // 분류 기간: 프로젝트 날짜에서 자동(AX / NOW는 회사 재직 기간) · 회사 이름
           var yr = function (d) { return String(d || "").slice(0, 4); };
