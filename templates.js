@@ -2314,8 +2314,17 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
             return out;
           };
           // 분류별 섹션(토스 '자주 쓰는 기능이에요'처럼): 작은 분류 이름(색) → 큰 제목 → 한 줄 설명 → 벤토 카드 · 위에 따라붙는 분류 탭(누르면 그 섹션으로, 스크롤하면 현재 분류 표시)
-          var HEAD = { "t-recent": "최근 프로젝트예요", "t-perf": "설치는 광고로 늘리고, 재방문은 CRM으로 붙잡았어요", "t-camp": "처음엔 콘텐츠로 시작했어요", "t-data": "같은 숫자로 판단할 수 있게 데이터 기준을 세웠어요" };
-          var period = nowCo && nowCo.startDate ? fmt(nowCo.startDate) + " – " + (nowCo.endDate ? fmt(nowCo.endDate) : "현재") : "";
+          // 분류 제목 = 제 이야기(위 → 아래로 읽으면 지금 → 처음) · klio.text.tpH_{recent|perf|data|camp}로 덮어쓰기
+          var HEAD = { "t-recent": "지금은 AI로 구조를 효율화하고, 그로스를 고민해요", "t-perf": "그 전엔 퍼포먼스에 집중해 예산·매체·CRM을 맡았어요", "t-data": "그러면서 자동화와 택소노미로 측정 구조를 설계했어요", "t-camp": "처음엔 영상과 콘텐츠로 시작했어요" };
+          var headOf = function (s) { return txt("tpH_" + s.g.id.slice(2), HEAD[s.g.id] || (s.g.ko + " 프로젝트예요")); };
+          // 분류 기간: 프로젝트 날짜에서 자동(AX / NOW는 회사 재직 기간) · 회사 이름
+          var yr = function (d) { return String(d || "").slice(0, 4); };
+          var spanG = function (s) {
+            var a = [], b = [], open = false, byCo = s.g.id === "t-recent";
+            s.items.forEach(function (it) { var s0 = yr(byCo ? it.co.startDate : (it.w.startDate || it.co.startDate)), e0 = yr(byCo ? it.co.endDate : (it.w.endDate || it.co.endDate)); if (s0) a.push(s0); if (e0) b.push(e0); else open = true; });
+            a.sort(); b.sort(); var from = a[0] || "", to = open ? "지금" : (b[b.length - 1] || "");
+            if (open && from) return from + " – 지금"; return from ? from + "년부터" : (to || ""); // 지금 섹션은 '– 지금', 나머지는 시작 연도만
+          };
           // 분류별 이야기: 왜 했나요(배경·문제) · 무엇을 했나요(한 일) — 아래 단계 카드에 들어감
           var STORY = {
             "t-recent": { why: "매체 성과는 오래 낮은 상태였고, 새로 시작한 단기임대 사업은 측정 체계도 획득 채널도 없었어요.", what: "AI 협업으로 20개 넘는 운영 탭을 가진 마케팅 플랫폼을 4개월 만에 혼자 만들고, 그 데이터로 자사 채널 퍼포먼스를 재편하면서 신사업 그로스 기반을 세웠어요." },
@@ -2329,15 +2338,15 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
             var g = s.g, k = g.id.slice(2), st = STORY[g.id] || {}, why = txt("tpWhy_" + k, st.why || ""), what = txt("tpWhat_" + k, st.what || g.def || "");
             var mets = s.items.slice().sort(byScore).filter(function (it) { return it.m0; }).slice(0, 3), tools = [];
             s.items.forEach(function (it) { (it.w.stack || []).forEach(function (t) { if (t && tools.indexOf(t) < 0) tools.push(t); }); });
-            var lead = (why || what) ? '<p class="tp-lead">' + (why ? '<span>' + esc(why) + '</span> ' : '') + esc(what) + '</p>' : '';
+            var lead = ''; // 설명 단락은 빼고(제목이 이야기) 숫자만
             var nums = mets.length ? '<ul class="tp-stats">' + mets.map(function (it) { return '<li><b data-cnt>' + esc(it.m0.value) + '</b><span>' + esc(it.m0.label || split(it).t) + '</span></li>'; }).join("") + '</ul>'
               : (tools.length ? '<p class="tp-tools"><b>사용 도구</b>' + tools.slice(0, 8).map(esc).join(" · ") + '</p>' : '');
             return (lead || nums) ? '<div class="tp-intro tp-rv">' + lead + nums + '</div>' : '';
           };
           var grpHtml = TS.map(function (s) {
             var g = s.g;
-            return '<div class="tp-grp" id="tp-' + ea(g.id) + '" data-m="' + ea(g.id) + '"><div class="tp-gh tp-rv"><span class="tp-gk tp-gcl" style="--gc:' + g.bg + '">' + esc(g.ko) + (g.badge ? '<em class="tp-badge">' + esc(g.badge) + '</em>' : '') + '<i>' + (g.id === "t-recent" && period ? esc(period) + ' · ' : '') + s.items.length + '개 프로젝트</i></span>'
-              + '<h2 class="tp-bt">' + esc(txt("tpH_" + g.id.slice(2), HEAD[g.id] || (g.ko + " 프로젝트예요"))) + '</h2></div>' + storyOf(s)
+            return '<div class="tp-grp" id="tp-' + ea(g.id) + '" data-m="' + ea(g.id) + '"><div class="tp-gh tp-rv"><span class="tp-gk tp-gcl" style="--gc:' + g.bg + '">' + esc(g.ko) + (g.badge ? '<em class="tp-badge">' + esc(g.badge) + '</em>' : '') + '<i>' + esc(spanG(s)) + ' · ' + s.items.length + '개 프로젝트</i></span>'
+              + '<h2 class="tp-bt">' + esc(headOf(s)) + '</h2></div>' + storyOf(s)
               + '<div class="tp-set">' + bento(unitsOf(s)) + '</div></div>';
           }).join("");
           var tabsHtml = TS.map(function (s, x) { return '<button class="tp-tab' + (x ? '' : ' on') + '" type="button" data-sec="' + ea(s.g.id) + '">' + esc(s.g.ko) + '<i>' + s.items.length + '</i></button>'; }).join("");
@@ -2367,35 +2376,9 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
             + '%%ROT%%<div class="tp-hb"><button class="tp-b pri" type="button" data-tgo="tp-bento">프로젝트 보기</button></div></div>'
             + '<button class="tp-cue" type="button" data-tgo="tp-next" aria-label="아래로"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M6 9l6 6 6-6" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button></section>';
           var bentoS = '<section class="tp-bento" id="tp-bento"><nav class="tp-tabs" aria-label="분류">' + tabsHtml + '</nav>' + grpHtml + '</section>';
-          // 제 이야기(첫 화면 바로 아래): 과거 → 현재 세로 타임라인 — 단계마다 [연도 · 회사] → 짧은 한 문장 → 관련 프로젝트 칩(누르면 상세)
-          //   연도·회사는 그 단계 프로젝트에서 자동 · 마지막 두 단계는 '지금' 표시 · 문장은 klio.text.tpStep1~6으로 덮어쓰기
-          var tt = function (it) { return String(it.w.title || "") + " " + String(it.title || ""); };
-          var brandCos = vis.filter(function (it) { return it.w.category === "브랜딩"; }).map(function (it) { return it.co; });
-          var STEPS = [
-            { s: "영상 촬영과 콘텐츠로 시작했어요", m: function (it) { var c = it.w.category; return c === "영상" || (c === "콘텐츠" && /유튜브/.test(tt(it))); } },
-            { s: "콘텐츠와 퍼포먼스를 하며 브랜드 캠페인을 기획했어요", m: function (it) { var c = it.w.category; return brandCos.indexOf(it.co) >= 0 && (c === "브랜딩" || c === "커머스" || (c === "퍼포먼스" && /소재/.test(tt(it)))); } },
-            { s: "퍼포먼스에 집중해 예산·매체·CRM을 맡았어요", m: function (it) { var t = tt(it); return /매체|예산|푸시|플친/.test(t) || it.w.category === "CRM" || (/멜리즈/.test(String(it.co.serviceKo || "")) && /소재/.test(t)); } },
-            { s: "자동화와 택소노미로 측정 구조를 설계했어요", m: function (it) { return it.w.category === "성과"; } },
-            { s: "지금은 AI로 그 구조를 효율화해요", now: 1, m: function (it) { return it.w.category === "AX"; } },
-            { s: "이제 그로스로 서비스 성장을 고민해요", now: 1, m: function (it) { return it.w.category === "그로스" || (nowCo && it.co === nowCo && it.w.category === "퍼포먼스"); } }
-          ].map(function (st, n) { return { s: txt("tpStep" + (n + 1), st.s), now: st.now, its: vis.filter(st.m).sort(byScore).slice(0, 4).sort(function (a, b) { return String(a.w.startDate || a.co.startDate || "").localeCompare(String(b.w.startDate || b.co.startDate || "")); }) }; }).filter(function (st) { return st.its.length; });
-          var yr = function (d) { return String(d || "").slice(0, 4); };
-          var spanOf = function (its, byCo) { // byCo = 회사 재직 기간 기준(지금 단계)
-            var a = [], b = [], open = false;
-            its.forEach(function (it) { var s0 = yr(byCo ? it.co.startDate : (it.w.startDate || it.co.startDate)), e0 = yr(byCo ? it.co.endDate : (it.w.endDate || it.co.endDate)); if (s0) a.push(s0); if (e0) b.push(e0); else open = true; });
-            a.sort(); b.sort(); var from = a[0] || "", to = open ? "지금" : (b[b.length - 1] || "");
-            return from && to && from !== to ? from + " – " + to : (from || to);
-          };
-          var stepHtml = STEPS.map(function (st, k) {
-            var cos = []; st.its.forEach(function (it) { var n = dispName(it.co); if (cos.indexOf(n) < 0) cos.push(n); });
-            return '<li class="tp-st tp-rv' + (st.now ? ' now' : '') + '"><span class="tp-sty">' + esc(spanOf(st.its, st.now)) + '<i>' + esc(cos.slice(0, 2).join(" · ")) + '</i></span>'
-              + '<p class="tp-sts">' + esc(st.s) + '</p>'
-              + '<span class="tp-stp">' + st.its.map(function (it) { return '<button type="button" data-open="' + it.i + '"><span>' + esc(split(it).t) + '</span><i aria-hidden="true">〉</i></button>'; }).join("") + '</span></li>';
-          }).join("");
-          var rec = STEPS.length ? '<section class="tp-tl" id="tp-story"><h2 class="tp-bt tp-rv">' + esc(txt("tpStoryT", "이렇게 일해왔어요")) + '</h2><ol class="tp-steps2">' + stepHtml + '</ol></section>' : '';
-          // 첫 화면 문장 아래 흐름: 이야기 단계가 [연도] 한 문장으로 번갈아
-          var rotHtml = STEPS.length ? '<div class="tp-rot" aria-hidden="true">' + STEPS.map(function (st, n) { return '<p class="tp-ri' + (n ? '' : ' on') + '"><b>' + esc(spanOf(st.its, st.now).split(" ")[0] || "") + '</b><span>' + esc(st.s) + '</span></p>'; }).join("") + '</div>' : '';
-          hero = hero.replace("%%ROT%%", rotHtml);
+          // 첫 화면: 문장 A → B만(아래 흐름 문구 없음 · 이야기는 분류 제목으로)
+          var rec = '';
+          hero = hero.replace("%%ROT%%", "");
           var me = PHOTOS[0];
           var cta = '<section class="tp-ctas"><div class="tp-ctas-in tp-rv"><div><p class="tp-ctat">' + esc(txt("tpCtaT", "더 궁금한 점이 있다면\n편하게 연락 주세요")).replace(/\n/g, "<br>") + '</p><div class="tp-ctab"><a class="tp-sb l" href="' + ea(mail) + '" target="_top">' + esc(P.email || "연락처 보기") + '</a><a class="tp-sb p" href="' + ea(homeUrl) + '" target="_top">포트폴리오 보기</a></div></div>'
             + (me ? '<img class="tp-me" src="' + ea(me) + '" alt="' + ea(nameKo || nameEn || "") + '">' : '') + '</div></section>';
@@ -2570,7 +2553,7 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
           return '<!doctype html><html lang="ko"><head><script>document.documentElement.classList.add("js")<\/script><meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>'
             + '<title>' + esc(nameKo || nameEn || "포트폴리오") + ' — Projects (test)</title><link rel="icon" href="data:,"/>' + fontHead
             + '<style>' + PSCSS + fontVars + TCSS + '</style></head><body class="tp ft-' + FKEY + '"' + (d.hostStudio ? ' data-host="studio"' : '') + '>'
-            + nav + '<main>' + hero + rec + bentoS + cta + '</main>' + foot
+            + nav + '<main>' + hero + bentoS + cta + '</main>' + foot
             + '<button class="ps-top-b" type="button" data-goto="*" aria-label="맨 위로">↑</button><div class="pd" role="dialog" aria-modal="true" aria-label="프로젝트 상세" aria-hidden="true"><div class="pd-prog" aria-hidden="true"><i></i></div><div class="pd-top"><span class="pd-ttl">' + esc(txt("ppEyebrow", "Selected Projects")) + '</span><span><span class="pd-no"></span><button class="pd-x" type="button" data-close>← 목록으로</button></span></div><div class="pd-in"></div></div>'
             + pdT
             + '<script>(' + psRuntime.toString() + ')();(' + tpRuntime.toString() + ')();<\/script></body></html>';
