@@ -173,6 +173,9 @@ select.dbin{min-width:120px;cursor:pointer}
 .empty{color:var(--muted);font-size:14px;padding:40px 0;text-align:center}
 .toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%);background:var(--primary);color:var(--primary-fg);padding:10px 18px;border-radius:9px;font-size:13px;z-index:50;opacity:0;transition:.2s;pointer-events:none}
 .toast.show{opacity:1}
+.pubbar{position:fixed;left:50%;bottom:22px;z-index:60;display:flex;align-items:center;gap:8px;width:min(640px,calc(100vw - 32px));padding:10px 10px 10px 16px;border-radius:12px;background:var(--primary);color:var(--primary-fg);font-size:13px;box-shadow:0 12px 32px -12px rgba(0,0,0,.45);transform:translateX(-50%)}
+.pubbar b{flex:none;font-weight:600}.pubbar.err b{color:#ffb4a8}.pubbar input{flex:1;min-width:0;height:30px;padding:0 8px;border:0;border-radius:7px;background:rgba(255,255,255,.14);color:inherit;font:inherit}
+.pubbar button,.pubbar a{flex:none;height:30px;padding:0 10px;border:0;border-radius:7px;background:rgba(255,255,255,.18);color:inherit;font:inherit;font-weight:600;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center}.pubbar button:hover,.pubbar a:hover{background:rgba(255,255,255,.28)}
 .modalbg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:60;place-items:center;padding:20px}
 .modalcard{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:22px;width:340px;max-width:100%}
 .modalcard input{width:100%;border:1px solid var(--border);background:var(--bg);color:var(--fg);border-radius:8px;padding:10px;font-size:14px;margin-bottom:8px}
@@ -816,7 +819,7 @@ $('#docGrid').addEventListener('click',e=>{
   const card=e.target.closest('.doc'); if(!card)return;
   const d=DOCS.find(x=>x.id===card.dataset.id); const act=e.target.dataset.act; if(!d||!act)return;
   if(act==='edit')openBuilder(d.id);
-  else if(act==='link'){navigator.clipboard.writeText(viewURL(d)).then(()=>toast('공개 링크 복사됨'));}
+  else if(act==='link'){copyAndToast(viewURL(d),'공개 링크 복사됨');}
   else if(act==='pdf'){window.open(viewURL(d),'_blank');toast('열린 창에서 PDF로 저장을 누르세요');}
   else if(act==='del'){if(confirm('삭제할까요?')){DOCS=DOCS.filter(x=>x.id!==d.id);save();renderHome();}}
 });
@@ -886,7 +889,7 @@ $('#bLeft').addEventListener('click',e=>{
     if(mv==='dn'&&pos<arr.length-1){[arr[pos+1],arr[pos]]=[arr[pos],arr[pos+1]];touch();renderBuilder();}
     return;
   }
-  if(e.target.id==='bCopy'){navigator.clipboard.writeText($('#bURL').value).then(()=>toast('링크 복사됨'));}
+  if(e.target.id==='bCopy'){copyAndToast($('#bURL').value,'링크 복사됨');}
 });
 $('#bLeft').addEventListener('input',e=>{
   const d=curDoc(); if(!d)return;
@@ -897,11 +900,7 @@ $('#bLeft').addEventListener('change',e=>{
   const d=curDoc(); if(!d)return;
   if(e.target.id==='bVis'){d.visibility=e.target.value;touch();}
 });
-$('#bPublish').addEventListener('click',async()=>{
-  const d=curDoc();if(!d)return;
-  if(window.CLOUD&&CLOUD.user()){ try{ normalizeIds(); await CLOUD.pushAll(LIB,DOCS,resolveAny); }catch(e){ toast('발행 오류: '+(e.message||e)); return; } }
-  navigator.clipboard.writeText(viewURL(d)).then(()=>toast('발행됨 · 공개 링크 복사 완료'));
-});
+$('#bPublish').addEventListener('click',e=>publishDoc(curDoc(),e.currentTarget));
 $('#bViewOpen').addEventListener('click',()=>{const d=curDoc();if(d)window.open(viewURL(d),'_blank');});
 
 /* ============ PORTFOLIO ============ */
@@ -969,15 +968,13 @@ function renderPfEditor(){
 $('#pfNew').addEventListener('click',()=>{const d=newPortfolio();curPfId=d.id;renderPortfolioView();});
 $('#pfBackList').addEventListener('click',()=>{curPfId=null;renderPortfolioView();});
 $('#pfViewOpen').addEventListener('click',()=>{const d=curPf();if(d)window.open(viewURL(d),'_blank');});
-$('#pfPublish').addEventListener('click',async()=>{const d=curPf();if(!d)return;
-  if(window.CLOUD&&CLOUD.user()){try{normalizeIds();await CLOUD.pushAll(LIB,DOCS,resolveAny);}catch(e){toast('발행 오류: '+(e.message||e));return;}}
-  navigator.clipboard.writeText(viewURL(d)).then(()=>toast('발행됨 · 포트폴리오 링크 복사'));});
+$('#pfPublish').addEventListener('click',e=>publishDoc(curPf(),e.currentTarget));
 $('#pfList').addEventListener('click',e=>{
   if(e.target.id==='pfNewCard'){const d=newPortfolio();curPfId=d.id;renderPortfolioView();return;}
   const card=e.target.closest('.doc'); if(!card)return;
   const d=DOCS.find(x=>x.id===card.dataset.pfid); const act=e.target.dataset.pfact; if(!d||!act)return;
   if(act==='edit'){curPfId=d.id;renderPortfolioView();}
-  else if(act==='link'){navigator.clipboard.writeText(viewURL(d)).then(()=>toast('포트폴리오 링크 복사됨'));}
+  else if(act==='link'){copyAndToast(viewURL(d),'포트폴리오 링크 복사됨');}
   else if(act==='open'){window.open(viewURL(d),'_blank');}
   else if(act==='del'){if(confirm('삭제할까요?')){DOCS=DOCS.filter(x=>x.id!==d.id);save();renderPortfolioView();}}
 });
@@ -990,7 +987,7 @@ $('#pfLeft').addEventListener('click',e=>{
     if(mv==='up'&&pos>0){[d.works[pos-1],d.works[pos]]=[d.works[pos],d.works[pos-1]];pfTouch();renderPfEditor();}
     if(mv==='dn'&&pos<d.works.length-1){[d.works[pos+1],d.works[pos]]=[d.works[pos],d.works[pos+1]];pfTouch();renderPfEditor();}
     return;}
-  if(e.target.id==='pfCopy'){navigator.clipboard.writeText($('#pfURL').value).then(()=>toast('링크 복사됨'));}
+  if(e.target.id==='pfCopy'){copyAndToast($('#pfURL').value,'링크 복사됨');}
 });
 $('#pfLeft').addEventListener('input',e=>{
   const d=curPf(); if(!d)return; const id=e.target.id;
@@ -1202,6 +1199,32 @@ function setSaveState(s,e){
   saveStateLast=s; if(!el)return;
   el.textContent = s==='pending'?'저장 중…' : s==='ok'?'✓ 클라우드 저장됨 '+hm : s==='err'?'⚠ 클라우드 저장 실패 · 다시 로그인 후 아무 칸이나 수정하면 재저장' : '브라우저에만 저장됨 · 로그인하면 DB 반영';
   el.style.color = s==='ok'?'var(--ok)' : s==='err'?'#c0392b' : 'var(--muted)';
+}
+// ── 발행 · 링크 복사 (이력서 · 포트폴리오 · KILO 공통)
+//    복사는 클릭 직후 바로 시도(클라우드 저장을 기다린 뒤 복사하면 브라우저가 막아서 아무 반응 없던 문제) → 막히면 textarea 복사로 대신
+//    발행 = 클라우드 저장을 끝까지 기다림(버튼 '발행 중…') → 실패면 실패 알림 · 성공이면 아래 결과 줄(링크 · 복사 · 열기)
+function legacyCopy(t){ const a=document.createElement('textarea'); a.value=t; a.setAttribute('readonly',''); a.style.cssText='position:fixed;top:-1000px;left:0;opacity:0'; document.body.appendChild(a); a.select(); let ok=false; try{ ok=document.execCommand('copy'); }catch(e){} a.remove(); return ok; }
+function copyText(t){ try{ if(navigator.clipboard&&window.isSecureContext) return navigator.clipboard.writeText(t).then(()=>true,()=>legacyCopy(t)); }catch(e){} return Promise.resolve(legacyCopy(t)); }
+function copyAndToast(t,msg){ copyText(t).then(ok=>ok?toast(msg):showPubBar(t,'자동 복사가 막혔어요 · 직접 복사하세요',false)); }
+let pubBarTimer=null;
+function showPubBar(url,msg,err){
+  let el=document.getElementById('pubBar'); if(!el){ el=document.createElement('div'); el.id='pubBar'; el.className='pubbar'; el.setAttribute('role','status'); document.body.appendChild(el); }
+  el.className='pubbar'+(err?' err':''); el.innerHTML='<b></b>'+(url?'<input readonly><button type="button" data-pb="copy">복사</button><a target="_blank" rel="noopener">열기</a>':'')+'<button type="button" data-pb="x" aria-label="닫기">✕</button>';
+  el.querySelector('b').textContent=msg;
+  if(url){ const i=el.querySelector('input'); i.value=url; i.onfocus=()=>i.select(); el.querySelector('a').href=url; el.querySelector('[data-pb=copy]').onclick=()=>copyText(url).then(ok=>{ if(ok)toast('링크 복사됨'); else { i.focus(); i.select(); toast('선택된 링크를 ⌘C로 복사하세요'); } }); }
+  el.querySelector('[data-pb=x]').onclick=()=>{ el.remove(); };
+  clearTimeout(pubBarTimer); pubBarTimer=setTimeout(()=>{ if(el.isConnected)el.remove(); },err?15000:9000);
+}
+async function publishDoc(d,btn){
+  if(!d)return;
+  const u=viewURL(d), copied=copyText(u);
+  if(!(window.CLOUD&&CLOUD.enabled()&&CLOUD.user())){ setSaveState('local'); showPubBar(u,'로그인이 안 돼 있어 발행 안 됨 · 이 링크는 이 브라우저용이에요',true); return; }
+  const label=btn?btn.textContent:''; if(btn){ btn.disabled=true; btn.textContent='발행 중…'; }
+  clearTimeout(cloudTimer); setSaveState('pending');
+  try{ normalizeIds(); await CLOUD.pushAll(LIB,DOCS,resolveAny); setSaveState('ok'); }
+  catch(e){ setSaveState('err',e); showPubBar('','발행 실패 · '+((e&&e.message)||e||'오류')+' — 다시 로그인 후 눌러 주세요',true); if(btn){ btn.disabled=false; btn.textContent=label; } return; }
+  if(btn){ btn.disabled=false; btn.textContent=label; }
+  const ok=await copied; showPubBar(u,ok?'발행됨 · 링크 복사됨':'발행됨 · 링크를 복사하세요',false);
 }
 async function syncFromCloud(){
   try{
@@ -1936,7 +1959,7 @@ function renderAXAdmin(){
       }catch(err){ toast('업로드 오류: '+(err.message||err)); }
       t.value='';
     });
-    const pub=$('#axPublish'); if(pub)pub.onclick=()=>{ const d=axDoc(); d.updated=Date.now(); save(); const u=viewURL(d); if(navigator.clipboard)navigator.clipboard.writeText(u).then(()=>toast('발행됨 · 링크 복사: '+u)).catch(()=>toast('발행됨: '+u)); else toast('발행됨: '+u); };
+    const pub=$('#axPublish'); if(pub)pub.onclick=()=>{ const d=axDoc(); d.updated=Date.now(); localStorage.setItem(LS_LIB,JSON.stringify(LIB)); localStorage.setItem(LS_DOCS,JSON.stringify(DOCS)); flash(); publishDoc(d,pub); };
     const vo=$('#axViewOpen'); if(vo)vo.onclick=()=>{ const d=axDoc(); save(); const u=viewURL(d), pu=axPvPage==='projects'&&!/[?#]/.test(u)?u.replace(/\/$/,'')+'/projects'+(axPvCard?'#p-'+encodeURIComponent(axPvCard):''):u; setTimeout(()=>window.open(pu,'_blank'),300); };
     // 미리보기 안 클릭 → 화면 전환: 타일·전체보기 = 전체 프로젝트 페이지(그 카드) / 돌아가기 = 메인 Projects / 카드 넘김 = 기억
     window.addEventListener('message',e=>{
