@@ -2302,31 +2302,41 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
           var whyOf = function (it) { return it.why || WHY[it.w.id] || String(it.w.problem || "").trim() || ""; };
           // 결과 = 성과 지표 앞 2개(카드별 대표 지표 선택 순서 그대로) · 숫자 크게 + 이름
           var resOf = function (it) { return it.mets.slice(0, 2).map(function (m) { return '<span><b>' + esc(m.value) + '</b>' + esc(m.label || "") + '</span>'; }).join(""); };
-          // 프로젝트 칸 = 누르지 않아도 다 보이게: 큰 그림(잘림 없이 · 영상은 ▶ 유튜브 새 탭 · 없으면 분야 일러스트) + 그림이 여럿이면 아래 작은 그림 줄(누르면 큰 그림 바뀜)
-          //    → 언제 · 회사 → 제목 → 결과 숫자(최대 3) → 왜 → 한 일 → 결과(문장) · 글은 자르지 않음(길면 그 장만 보통 스크롤)
-          var media = function (it) {
-            var m = it.main;
-            if (!m) return '<div class="sd-m art" style="--c:' + it.cm.c + '">' + coverArt(it.w, it.m0) + '</div>';
-            var bg = ' style="--img:url(&quot;' + ea(m.src) + '&quot;)"';
-            if (m.yt) return '<a class="sd-m yt" href="' + ea(m.url || "https://youtu.be/" + m.yt) + '" target="_blank" rel="noopener"' + bg + ' aria-label="영상 보기"><img src="' + ea(m.src) + '" alt="" decoding="async"><i class="tp-play" aria-hidden="true"></i></a>';
-            return '<div class="sd-m img"' + bg + '><img src="' + ea(m.src) + '" alt="" decoding="async"></div>';
+          // 프로젝트 한 장 = PDF 장 구성 · 메인(이력서) 톤: [회사 로고 · 회사 · 장 번호·분류·묶음 | 기간 · 기여도] → 제목 → 한 줄 요약 → 결과 숫자
+          //    → 왜 | 한 일 | 결과 (줄바꿈 = 글머리표) → 그림 줄(PDF에서 잘라낸 그림 먼저, 최대 3 · 잘림 없이 · 영상은 유튜브 새 탭)
+          var CONTRIB = { // PDF의 기여도
+            "0a3aea35-ccc9-4018-a7a6-e383c303f928": 80, "3080bc75-d773-490f-9a02-35d83886b418": 100, "b0aa1d32-82d9-44bc-897d-b558a425c98c": 100,
+            "2c1ddb7a-e1a3-4adb-a18e-e1b43ad8f731": 90, "43ab6811-42cf-4a1f-afca-62bfd67b17f9": 90, "574f26d3-1fff-49fb-a302-b8c12253df61": 90, "53845c2b-3618-4e8d-968c-1edfabdf4912": 60,
+            "4d333686-6daa-4c8e-9cd7-3e8309ef9900": 100, "e5bb7edf-a48d-4752-a0b4-c05df7903051": 90, "731ea8fe-9bb7-41ce-8cc1-687f77f9c49c": 100, "8fe4e187-9052-4737-9d1b-d0a158d9e156": 100,
+            "199815d6-356c-4959-8219-6c9ea7615102": 100, "e68c8938-fbb0-4a88-a9a1-dbb3d8c71243": 80
           };
-          var strip = function (it) {
-            if (!it.main || it.md.length < 2) return '';
-            return '<div class="sd-tbs">' + it.md.slice(0, 6).map(function (m, k) {
-              if (m.yt) return '<a class="sd-tb yt" href="' + ea(m.url || "https://youtu.be/" + m.yt) + '" target="_blank" rel="noopener" aria-label="영상 보기"><img src="' + ea(m.src) + '" alt="" decoding="async"><i class="tp-play" aria-hidden="true"></i></a>';
-              return '<button class="sd-tb' + (k ? '' : ' on') + '" type="button" data-src="' + ea(m.src) + '" aria-label="그림 ' + (k + 1) + ' 크게 보기"><img src="' + ea(m.src) + '" alt="" decoding="async"></button>';
+          var pad2 = function (n) { return (n < 10 ? "0" : "") + n; };
+          var bullets = function (v) {
+            var a = String(v || "").split(/\n+/).map(function (x) { return x.trim(); }).filter(Boolean);
+            if (!a.length) return "";
+            return a.length > 1 ? '<ul>' + a.map(function (x) { return '<li>' + esc(x) + '</li>'; }).join("") + '</ul>' : '<p>' + esc(a[0]) + '</p>';
+          };
+          var col = function (k, v) { var h = bullets(v); return h ? '<div class="pj-c"><h4>' + k + '</h4>' + h + '</div>' : ''; };
+          var isPdf = function (m) { return /\/pf-img\/pdf\//.test(m.src) ? 1 : 0; };
+          var shots = function (it) {
+            var md = it.md.slice().sort(function (a, b) { return isPdf(b) - isPdf(a); }).slice(0, 3);
+            if (!md.length) return '';
+            return '<div class="pj-shots" style="--n:' + md.length + '">' + md.map(function (m) {
+              var im = '<img src="' + ea(m.src) + '" alt="" loading="lazy" decoding="async">';
+              return m.yt ? '<a class="pj-sh yt" href="' + ea(m.url || "https://youtu.be/" + m.yt) + '" target="_blank" rel="noopener" aria-label="영상 보기">' + im + '<i class="tp-play" aria-hidden="true"></i></a>' : '<figure class="pj-sh">' + im + '</figure>';
             }).join("") + '</div>';
           };
-          var line = function (k, v) { return v ? '<p class="sd-q"><i>' + k + '</i>' + esc(v) + '</p>' : ''; };
-          var panel = function (it, j) {
-            var why = whyOf(it), act = String(it.w.action || it.w.detail || it.w.summary || "").trim(), res = String(it.w.result || "").trim(), mets = it.mets.slice(0, 3);
-            return '<article class="sd-p ri" data-pi="' + it.i + '" style="--j:' + j + '">' + media(it) + strip(it)
-              + '<div class="sd-pb"><span class="sd-w">' + esc(when(it)) + (it.co ? ' · ' + esc(dispName(it.co)) : '') + '</span>'
-              + '<h3 class="sd-t">' + esc(it.title) + '</h3>'
-              + (mets.length ? '<div class="sd-ms">' + mets.map(function (m) { return '<span><b>' + esc(m.value) + '</b>' + esc(m.label || "") + '</span>'; }).join("") + '</div>' : '')
-              + line("왜", why) + line("한 일", act) + line("결과", res)
-              + '</div></article>';
+          var card = function (it, g, ct, no, tot, id) {
+            var co = it.co, mets = it.mets.slice(0, 3), cb = CONTRIB[it.w.id], sum = String(it.w.summary || "").trim();
+            var prob = String(it.w.problem || "").trim() || whyOf(it), act = String(it.w.action || it.w.detail || "").trim(), res = String(it.w.result || "").trim();
+            return '<article class="tp-sd pj" id="' + id + '" data-m="' + ea(g.id) + '" data-pi="' + it.i + '">'
+              + '<div class="pj-top"><div class="pj-co">' + (co && co.logo ? '<img class="pj-lg" src="' + ea(co.logo) + '" alt="">' : '')
+              + '<div><b>' + esc(co ? dispName(co) : "") + '</b><span>' + pad2(no) + ' / ' + pad2(tot) + ' · ' + esc(g.id === "t-recent" ? "NOW" : g.ko) + (g.id === "t-recent" ? '' : ' · ' + esc(ct)) + '</span></div></div>'
+              + '<div class="pj-dt"><b>' + esc(when(it)) + '</b>' + (cb ? '<span>기여도 ' + cb + '%</span>' : '') + '</div></div>'
+              + '<h3 class="pj-t">' + esc(it.title) + '</h3>' + (sum ? '<p class="pj-s">' + esc(sum) + '</p>' : '')
+              + (mets.length ? '<div class="pj-ms">' + mets.map(function (m) { return '<span><b>' + esc(m.value) + '</b><i>' + esc(m.label || "") + '</i></span>'; }).join("") + '</div>' : '')
+              + '<div class="pj-cols">' + col("왜", prob) + col("한 일", act) + col("결과", res) + '</div>'
+              + shots(it) + '</article>';
           };
           // ── 묶음(일의 종류) = 분류 안의 한 줄: 왼쪽 묶음 이름·개수·기간 | 오른쪽 세로 카드들
           //    규칙 순서대로 묶고(1개여도 그 이름으로), 규칙에 안 걸린 건 마지막 줄('AX / 퍼포먼스'는 회사 이름, 나머지는 '그 외')
@@ -2362,24 +2372,18 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
             a.sort(); b.sort(); var from = a[0] || "", to = open ? "지금" : (b[b.length - 1] || "");
             return from && to && from !== to ? from + " – " + to : (from || to);
           };
-          // ── 묶음마다 한 화면 한 장(PPT처럼, 묶음 = 최대 3개): 분류 색 바탕 · 위 = 분류 · 시기 → 묶음 이름 · 개수 | 아래 = 프로젝트 칸 2~3개를 나란히(세부 페이지 없이 다 보임)
-          //    장 = PPT 한 장처럼 둥근 카드, 회색 바탕 위에 쭉 이어짐(보통 스크롤)
-          //    분류의 첫 장 id = tp-{분류} (상단 탭 이동) · 모든 장 data-m = 분류(탭 표시) · slideOf[프로젝트] = 장 id ('한눈에' 숫자 누르면 그 장으로)
-          //    제목 덮어쓰기: klio.text.tpH_{recent|perf|data|camp}(지금 장 제목)
+          // ── 분류마다 번호 머리글(메인 '02 Experience'처럼: 번호 · 시기 → 분류 이름 → 개수 · 묶음들) → 프로젝트마다 한 장(카드, PDF처럼) · 회색 바탕 위에 쭉
+          //    분류 머리글 id = tp-{분류}(상단 탭 이동) · 카드 data-m = 분류(탭 표시) · slideOf[프로젝트] = 카드 id('한눈에' 숫자 누르면 그 장으로)
+          //    제목 덮어쓰기: klio.text.tpH_{recent|perf|data|camp}
           var headOf = function (s) { return txt("tpH_" + s.g.id.slice(2), s.g.id === "t-recent" ? "AX / 퍼포먼스" : s.g.ko); };
           var spanG = function (s) { return yrsOf(s.items, s.g.id === "t-recent"); };
-          var slideOf = {};
-          var slides = TS.map(function (s) {
+          var slideOf = {}, NO = 0, TOT = TS.reduce(function (a, x) { return a + x.items.length; }, 0);
+          var slides = TS.map(function (s, si) {
             var g = s.g, now = g.id === "t-recent", cl = clustersOf(s);
-            return cl.map(function (c, ci) {
-              var id = "tp-" + g.id + (ci ? "-" + (ci + 1) : "");
-              c.its.forEach(function (it) { slideOf[it.i] = id; });
-              return '<section class="tp-sd cat" id="' + ea(id) + '" data-m="' + ea(g.id) + '" style="--bg:' + g.bg + ';--cols:' + c.its.length + '"><div class="tp-sd-in">'
-                + '<div class="sd-hd"><div><span class="tp-ey ri' + (now ? ' now' : '') + '" style="--j:0">' + (now ? 'NOW · ' + esc(nowCoName) + ' · ' + esc(spanG(s)) : esc(g.ko) + ' · ' + esc(spanG(s))) + '</span>'
-                + '<h2 class="ri" style="--j:1">' + esc(now ? headOf(s) : c.t) + '</h2></div>'
-                + '<span class="sd-pg ri" style="--j:1">' + c.its.length + '개 프로젝트 · ' + esc(yrsOf(c.its, false)) + (cl.length > 1 ? '<i>' + (ci + 1) + ' / ' + cl.length + '</i>' : '') + '</span></div>'
-                + '<div class="sd-ps">' + c.its.map(function (it, k) { return panel(it, 2 + k); }).join("") + '</div></div></section>';
-            }).join("");
+            return '<header class="pj-cat" id="tp-' + ea(g.id) + '" data-m="' + ea(g.id) + '"><span class="pj-cn">' + pad2(si + 1) + '</span><div>'
+              + '<span class="tp-ey">' + (now ? 'NOW · ' + esc(nowCoName) + ' · ' : '') + esc(spanG(s)) + '</span><h2>' + esc(headOf(s)) + '</h2>'
+              + '<p>' + s.items.length + '개 프로젝트' + (now ? '' : ' · ' + cl.map(function (c) { return esc(c.t); }).join(' · ')) + '</p></div></header>'
+              + cl.map(function (c) { return c.its.map(function (it) { NO++; var id = "tp-p" + it.i; slideOf[it.i] = id; return card(it, g, c.t, NO, TOT, id); }).join(""); }).join("");
           }).join("");
           // ── 한눈에(첫 화면 바로 다음) — 5분 안에 판단: 지금(AX · 퍼포먼스 + 지금 회사 숫자) → 해온 일(시간순 회사 줄 · 맡은 일 · 대표 숫자)
           //    숫자는 누르면 그 프로젝트가 있는 장으로 이동 · 문구 덮어쓰기: klio.text.tpNowT(지금 하는 일) · tpNowS(아래 한 줄)
@@ -2418,47 +2422,7 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
             + (nowPf ? '<div class="tp-pfs">' + nowPf + '</div>' : '')
             + (pathHtml ? '<div class="tp-path"><span class="tp-ey tp-rv">해온 일' + (yrs ? ' · ' + yrs + '년 · ' + cos.length + '개 회사' : '') + '</span><ol>' + pathHtml + '</ol></div>' : '')
             + '</div></section>';
-          // ── PDF 포트폴리오 그대로(2026-10-04 사용자 요청 "내가 준 PDF 디자인·텍스트 그대로"): 26쪽을 PPT처럼 쭉 · 위 탭 = PDF 구성 · 기본 화면
-          //    쪽 이미지 /pf-img/deck/pNN.jpg(1920) · pNNs.jpg(960) — PDF 글꼴(Freesentation)을 웹에서 못 써서 글자는 이미지 안, 같은 텍스트를 안 보이게 넣어 검색·화면낭독
-          //    PDF 링크(유튜브·노션)는 원래 자리에서 눌림 · 1쪽 휴대폰 번호·생년월일은 가림 · klio.ui.tpDeck=false면 예전 화면(한눈에 + 묶음 장)
-          var DK = (K.ui || {}).tpDeck !== false, DECK_IMG = "https://kimjinsoo-mkt-ax.vercel.app/pf-img/deck/";
-          var DECK_SEC = [["intro", "소개"], ["perf", "퍼포먼스 마케팅"], ["brand", "브랜드 / 세일즈"], ["seo", "네이버쇼핑 / SEO"], ["more", "이런 업무도"]];
-          var DECK = [ // [쪽, 묶음, 텍스트, [[링크, x0%, y0%, x1%, y1%]…]]
-            [1, "intro", "ㅎ Skills & Tools Education 2011.03-2017.06 수원대학교 언론정보학 졸업 Experience 2022.10 ~ 현재 WAUG | 마케팅팀 | 팀장 브랜드 인지도 및 세일즈 증대를 위한 마케팅업무 총괄 2021.12 ~ 2022.04 에이블리블랙| 마케팅파트 | 매니저 UA 액션을 위한 크리에이티브 제작 – 퍼포먼스 마케팅 2019.04 ~ 2021.12 ㈜바비톡| 마케팅파트 | 매니저 브랜드 인지도 및 UA-Retention 증대를 위한 콘텐츠마케팅 김 진 수 - 인하우스 마케팅 업무 전과정의 이해도를 높이기 위해 고민합니다. - 서비스 사용의 핵심 타겟과 유저를 찾고 기획 > 실행 > 분석의 사이클을 유지하면서 성과를 내기위해 노력합니다. - 유저의 상황에 맞는 최적의 CTA를 찾기위해 고민하고 실행합니다. 2017.08 ~ 2019.1 ㈜레드브릭스| 영상팀 | 주임 광고주 영상 기획 및 촬영 – 제작 – 소통", []],
-            [2, "intro", "03 04 02 01 데이터 분석 SQL을 통한 퍼스트파티 데이터 및 앰플리튜드 및 에어브릿지 등의 써드파티와 툴을 동시에 활용합니다. 이를 통해 데이터의 정합성과 오차율을 파악해 판단 기준을 명확히하여 인사이트를 찾거나 대시보드로 구현합니다. 커뮤니케이션 협업의 중요성을 인지하고, 상대방이 필요로 한 것들을 캐치하여 상호간의 존중을 바탕으로 시너지 극대화하기 위해 노력합니다. 퍼포먼스 월5억 정도의예산 집행 경험을 바탕으로주요 매체별 캠페인 셀프 서브 합니다. 목표에 부합하는 퍼포먼스 캠페인 전략 수립과 미디어믹스 구성이 가능합니다. 셀프 제작 촬영 및 에프터이팩트를활용하여 영상 콘텐츠를 제작하거나 피그마, 어도비 툴을 활용하여 서비스 KPI에 부합하는 소재를 직접 제작합니다. 저는이역량을가지고있어요", []],
-            [3, "intro", "저는이렇게성장했어요 1️⃣ 2️⃣ 3️⃣ 1️⃣ 2️⃣ 3️⃣ 4️⃣ 1️⃣ 2️⃣ 3️⃣ 4️⃣ 2017 ~ 2019 2019 ~ 2022 2022 ~ 현재", []],
-            [4, "perf", "퍼포먼스 마케팅", []],
-            [5, "perf", "퍼포먼스 마케팅운영 사이클 및 현황 분석 웹&앱 트래킹 MMP 이관 / Airbridge 퍼포먼스 마케팅 현황 파악 및 미디어 믹스 & 플래닝 수립 서비스 & 매체별 실시간 성과 대시보드 세팅 Solution Problem WEB 지면 트래킹의 부재 매체 & 캠페인별 플래닝의 부재 성과 & 효율 체크의 많은 리소스 투입 운영 사이클 미디어 믹스 플래닝 - 예산 & 매체 믹디어 믹스 플래닝 - 캠페인 구조 (웹&앱) / UA & 리타게팅 캠페인 구조별 콘텐츠 제작 - 이미지 & 영상 or 텍스트 캠페인 세팅 및 운영 – A/B테스트 - KPI 설정 - 타겟 정의 및 세그먼트 분류 성과 모니터링 -자동화 대시보드 활용 분석 및 인사이트 도출 매체&캠페인 구조 및 소재 개선 현황 파악", []],
-            [6, "perf", "2023. 01 ~ | 기여도 80% UA & 리타게팅 캠페인 최적화 • 웹&앱 회원가입 유도를 위한 신규회원 전용 쿠폰팩 도입 • 메타 & 구글애즈 CAC 최적화 캠페인 집행 - 메타 : A+A / 수동 리타게팅 캠페인 - 구글애즈 : AC 캠페인 • 설치 및 방문 후 이탈 유저 대상 타겟 확장 UA 캠페인 최적화 전략 ACTION RESULT • 평균 CPC 24% 및 신규 CAC 19% 감소 • 구매 전환율 17% 증가 및 평균 주문건 수 0.6회 증가 • 타캠페인 대비 D+3 평균 리텐션 5% 증가 소재 제작 예시 웹&앱 캠페인 + 이탈 유저 타겟 리타게팅 캠페인 추가 운영 캠페인 대시보드 세팅 및 성과 효율 분석", []],
-            [7, "perf", "카탈로그 캠페인을 활용한 광고 상품 수 증가 A/B테스트를 통한 소재 템플릿화 구글 시트 연동으로 실시간상품 정보 업데이트 광고 반영 Problem Solution 많은 상품 개수에 따른 개별 운영에 대한리소스 부족 콘텐츠 제작에 대한 리소스 부족 잦은 상품 정보 변경으로 인한 개별 광고의 어려움 전략 내용 뒷장과 연결되는 페이지 입니다 주요 상품단위 전환 극대화 및 리소스 효율화를 위한 카탈로그 캠페인 운영 카탈로그 캠페인 최적화 2023. 01 ~ | 기여도 100%", []],
-            [8, "perf", "• 카탈로그 상품 리스팅 – 카테고리별 세트 지정 • 칼럼값 업데이트 자동화 시트 세팅 • 일단위, 매체별 데이터 분석으로 미디어 운영 최적화 및 고도화 진행 카탈로그 캠페인 최적화 전략 ACTION RESULT 앞장과 연결되는 페이지 입니다 • 타캠페인 대비 평균cpc 15% 감소 • 주요 상품에 대한 트래픽 및 구매전환 리소스 최소화로 유지 • 카탈로그 캠페인 > 연계상품군으로 확장하여 트래픽 및 전환 집중 프로세스 구축 카탈로그 캠페인 세팅 및 광고 운영 캠페인 대시보드 세팅 및 성과 효율 분석 카탈로그 소재 제작 : 영상 & 이미지 주요 상품단위 전환 극대화 및 리소스 효율화를 위한 카탈로그 캠페인 운영 카탈로그 캠페인 최적화 2023. 01 ~ | 기여도 100%", []],
-            [9, "perf", "USP에 따른 소재 다양화 > 단가 확인 > 운영 > 최적화 *최근 대체로 ‘숏폼’ 소재가 성과 우수 다방면의 기준을 만들어 캠페인 효율에 대한 근거 마련 * Android / 오가닉 / SKAN 등의 데이터를 조합 기준에 따라 변하는 수치에 대한 해석을 명확하게 하도 록 매체 통합 대시보드 운영 Key Point Solution 서비스 및 캠페인별 최적의 CPI를 찾자 IOS 단가의 기준을 찾자 분석은 쉽고 명확하게 하자 전략 내용 CPI 캠페인 운영 뒷장과 연결되는 페이지 입니다 앱 설치 – 전환 목표의 서비스별 CPI캠페인 최적화 2019. 06 ~ 현재| 기여도 100%", []],
-            [10, "perf", "광고 세팅 & 운영 USP 정리 & 소재 제작 분석 & 디벨롭 담당업무 • 앱설치 및 인앱 액션 최대화를 위한 전략 수립, KPI 설정 • 최대 월 예산 5억 수준의 CPI 캠페인 집행 : Meta, Google, GFA 등 셀프 서브 매체 위주로 운영 • 매체별 최적화된 소재 기획 및 제작 • MMP를 통한 일단위, 매체별 데이터 분석으로 미디어 운영 최적화 및 고도화 진행 성과 평균 CPM 3% ▼ 평균 CPC 4% ▼ 평균 CPI 10% ▼ • 서비스별 평균 신규/재방문 관련 주요지표 효율화 및 최적화 • 예산의 효율적 활용 워크플로우 기여 • 모니터링 및 분석의 효율화 구축 CPI 캠페인 운영 앱 설치 – 전환 목표의 서비스별 CPI캠페인 최적화 +외 다수 2019. 06 ~ 현재| 기여도 100%", []],
-            [11, "brand", "", []],
-            [12, "brand", "l 유니버셜 스튜디오 재팬 협업 캠페인 2024.06~ | 기여도 90% • 유니버셜 스튜디오 재팬 (이하 USJ) 세일즈업을 위한 마케팅 캠페인 실행 • 미디어믹스 / 프로모션 기획 / 인플루언서 릴스 콘텐츠 협업 • 인사이트를 기반으로 한 크리에이티브 구성 및 이벤트 페이지/배너/소재 제작 • 세일즈업을 극대화할 수 있는 이벤트 기획 및 운영 업무 • 성과 모니터링및 리포팅 담당업무 혜택과 콘텐츠는 쉽게 프로모션 전략 타겟들에 적합한 혜택인가 참여하기 쉬운가 뒷장과 연결되는 페이지 입니다 이벤트 페이지 / 배너 (예시) 일본 오사카 지역 유니버셜 스튜디오 재팬 세일즈 부스트업을 위한 마케팅 캠페인 집행", []],
-            [13, "brand", "담당업무 전략내용 성과 As-is To-be • 프로모션 특성상 리소스 대비일회성으로 소모되는 부분이 많음 • 실제 혜택의 대상이 되는 유저의 ARPPU 및 LTV에 대한 고민 매체운영및최적화 CTR 5.00% ▲ Meta Google UAC NAVER SA KAKAO PF 신규 릴스 소재 운영 & 리타게팅 세팅 DA / Shorts / TEXT 등의 소재 활용 개별 광고 그룹 세팅 & 노출 우선도 조정 페이지 이탈 유저 대상 프로모션 추가 유도 CPI 15.00% ▼ CPC 5.00% ▼ CTR 3.00% ▲ • 전환 최대화를 위한 전략 수립, KPI 설정 • 총 예산 3억 규모의 미디어믹스 작성, 캠페인 집행, 미디어리포트 작성등 진행 : Meta, Google AC, NAVER SA 등 셀프 서브 매체 위주로 운영 • 매체별 최적화된 소재 기획 및 카피라이팅 • MMP를 통한 일단위, 매체별 데이터 분석으로 미디어 운영 최적화 및 고도화 진행 • 예상 판매기간 대비 약 2주빠르게 KPI 달성(선착순 1,000장 소진 목표) • 평균 CPC, CPM의 200% 효율 달성 • 웹 랜딩 캠페인임에도 CPI캠페인 보다 낮은 단가 • 캠페인영상KPI(유입)대비34%초과달성: Imp. 830만/ Click 28만/ CTR 3.45% • 일회성으로 소모되지 않고 콘텐츠가 장기적으로 운영될 수 있도록 • 연계상품에 대한 혜택을 제공함으로써 자연스러운 업셀링&크로스셀링 유도 l 유니버셜 스튜디오 재팬 협업 캠페인 일본 오사카 지역 유니버셜 스튜디오 재팬 세일즈 부스트업을 위한 마케팅 캠페인 집행 2024.06~ | 기여도 90%", []],
-            [14, "brand", "숏폼 콘텐츠 – KOLs 협업 캠페인 소개이미지, 사례 등 추가 캠페인 소개이미지, 사례 등 추가 앞장과 연결되는 페이지 입니다 일본 오사카 지역 유니버셜 스튜디오 재팬 세일즈 부스트업을 위한 마케팅 캠페인 집행 기획 & 제작 & 운영 미디어 믹스 소재 제작 광고 부스팅/운영 성과 모니터링 l 유니버셜 스튜디오 재팬 협업 캠페인 2024.06~ | 기여도 90%", []],
-            [15, "brand", "• 바비톡 – 성형 서비스 긍정적 인지도 향상을 위한 브랜딩 캠페인 기획/진행 • 서비스, 유저, 오가닉 분석 등을 통한 캠페인 전략 기획 • 서비스 이용에 가장 근본적인 부분을 키포인트로 한 컨셉&메시지 도출 • 브랜드 인지도를 극대화할 수 있는 콘텐츠 및 소재 기획 제작 업무 • • • • 성형에 대한 근본적인 부분인 ‘부작용＇에 대해 알리자 실제 유저를 대상으로 하여 신뢰도를 높이자 l 성형 부작용 알리기 캠페인 성형 부작용에 대한 위험성을 알리면서, 바비톡 브랜드 인지도 향상을 위한 캠페인 기획 및 실행 담당업무 전략 결과 캠페인 소재 리소스 성형 부작용 ‘나’에게도 일어날 수 있는 일 캠페인영상 • 캠페인 영상 • 캠페인 페이지 • 캠페인 배너 (Click) 2021. 09 ~ 2021. 12 | 기여도 90%", [["https://www.youtube.com/watch?v=rJv83UTiYvw", 81.7, 62.95, 89.0, 67.99], ["https://www.youtube.com/watch?v=rJv83UTiYvw", 87.61, 62.97, 93.2, 68.06]]],
-            [16, "brand", "• 서비스 목표 설정, 캠페인 기획 – 워크플로우 고민 및 세팅 • 캠페인 소재 기획 및 촬영 • 소재 제작 및 운영을 통한 추가 소재 발굴 & 베리에이션 • • • ‘성형’을 한다고 했을 때 우리를 이용하는 ‘포인트＇를 찾자 맨파워를 활용해 서비스 인지도와 신뢰감을 주자 바비톡 서비스 인지 및 앱설치 목적으로 기획 & 박나래 맨파워를 활용한 효과 극대화 전략 담당업무 전략 결과 바비톡 ‘대리수술 안심존’ 캠페인 캠페인 소재 리소스 • 소재 베리에이션 • 개그우먼 박나래님 캠페인 영상 (Click) l 대리수술 안심존 캠페인 2019. 08 ~ 2019. 11 | 기여도 90%", [["https://www.youtube.com/watch?v=iPHT8Q3zGqs", 73.86, 36.56, 79.45, 41.65]]],
-            [17, "brand", "• 굿즈 및 판매 페이지 기획&세팅 • 바비톡 및 캠페인 홍보 목적의 광고 소재 촬영 및 제작 • 캠페인 운영 - 굿즈 제작사 협업 & 스토어 세팅 & 배송 및 재고 관리 • • • 매스한 프로젝트로 ‘필요할 때’ 바비톡을 떠오르게 하자 맨파워를 활용해 후킹을 하고 직접 참여를 유도하자 바비톡 주최, 마라톤 굿즈 수익금을 암환우에게 기부하는 기부런 프로젝트 담당업무 전략 결과 캠페인 소재 리소스 ‘퍼플라이’ 바비톡 기부런 캠페인 개그우먼김민경님캠페인영상 • 개그우먼 김민경님 캠페인 영상 • 참여 인증 및 관련 PR • 실제 수익금 기부 사례 • 캠페인 굿즈 & 리플렛 (Click) l 기부런 ‘퍼플라이＇ 캠페인 2021. 04 ~ 2021. 08 | 기여도 60%", [["https://www.youtube.com/watch?v=yPTSQnWt-PA", 80.06, 60.61, 96.23, 65.64], ["https://www.youtube.com/watch?v=yPTSQnWt-PA", 89.12, 88.2, 94.71, 93.29]]],
-            [18, "seo", "네이버쇼핑 /", []],
-            [19, "seo", "네이버 쇼핑 영역 상품 노출 및 운영을 위한 세팅 및 피드 최적화 프로젝트 2024.01~ | 기여도 100% • 네이버 쇼핑 지면 상품 노출을 위한 피드 로직 설정 및 연동 • 상품별 노출 & 클릭 모니터링 지표세팅 • 신규 & 주요 상품별 네이버 쇼핑 영역 활용한 마케팅 전개 담당 업무 성과 개선 내용 • 주단위 평균 노출상품수 2배 상승 • 주단위 평균 Imp 30만 달성, CTR 25% 기록 • 네이버 쇼핑 클린위반 건 수 및 대응기간 최소화 - 네이버 쇼핑 전용 세팅 페이지 기획 - 칼럼값 로직 세팅 - 피드 송수신 시간 단축 조정 - 내부 상품 정보 업데이트 시간 개선 - 피드 생성&완료 시각 리포팅을 통한 원인파악 및 생성 시간 단축 Problem Solution 상품별 커스텀 노출이 불가능함에 따른 클린위반 케이스 존재 피드 송수신 시각에 따른 상품 정보의 늦은 업데이트 주기 피드 생성 시간이 오래걸림에 따라 100%의 상품 노출의 어려움 네이버 쇼핑 피드 전용 세팅 페이지 피드 업데이트 모니터링 네이버 쇼핑 – 성과 지표 및 대시보드 클린위반 이슈 대응 신속화 l 네이버 쇼핑 운영 최적화", []],
-            [20, "seo", "• 소비자 검색 노출 모수 증가를 위한 콘텐츠 SEO & 테크니컬 SEO 개선 • 내&외부 키워드 지표를 활용한 핵심 키워드 선정 • 페이지 디스크립션, 콘텐츠 세부 내용 등 개선작업 및 SEO 반영을 위한 프로세스 구축 • 포털 검색 환경에서의 실 노출 현황 모니터링하며 상위노출 최적화 진행 담당업무 성과 전략 내용 외부 소비자 탐색~ 내부 상품 서칭 단계까지 노출 커버리지 확대를 위한 SEO 최적화 프로젝트 • 포털 사이트 내 콘텐츠 및 검색 노출 현황 분석 • 테크니컬 SEO 현황 점검 > 페이지 디스크립션, 키워드중요도 및 사이트맵 업데이트 주기 체크 • 사이트 내 서칭 키워드별 트랜드 파악 • 키워드 별 노출 순위 및 중요도 조정 • 내부 상품 어드민 내 SEO 적용 요소 체크 후 실시간 업데이트되어 반영될 수 있도록 로직 체크 • 타이틀, 디스크립션, 키워드 등 • 주요 상품 노출 순위 체크 대시보드 구축 / 내부 어트리뷰션 툴 리포트 세팅 외부 포털 SEO 내부 사이트 SEO 프로세스 구축 모니터링 • 구글 포털 4개월 기간 총 노출 수 약 250만건 증가 • 평균 게재 노출 순위 1단계 상승 • 평균 CTR 1% 상승 프로젝트를 위한 지표 세팅 예시 l 사이트 SEO 최적화 프로젝트 2024. 09 ~ 2024. 10 | 기여도 90%", []],
-            [21, "more", "이런 업무도 할 수 있어요", []],
-            [22, "more", "- 사내 데이터 모니터링이 가능한 통합 ‘자동화 대시보드’ 구성 프로젝트 - 추정 매출 & 추정 이익 기준 마련 및 소진 비용에 따른 데일리 분석 활용 담당업무 • 전사 지표 확립 및 모니터링 효율화를 위한 대시보드 구축 • 서비스 & 비즈니스 & 마케팅 지표의 구분 및 통일화 • 일 단위 / 주 단위 / 월 단위의 성과 관리 • 실 DB연동 작업 및 광고데이터 작업 연동 진행 (3rd 파티 분석 툴 연동 포함) 성과 • 사내 전사 기준 마련 및 가치 판단 리소스 효율화 • 효율적인 전사 지표 통합 관리 가능 • 팀 내부 및 타 부서간의 공통의 목표 및 상호 공유 전사 지표 정립 및 대시보드 세팅 프로젝트 사례 이미지를 넣어주세요 프로젝트 사례 이미지를 넣어주세요 2022. 11 ~ 현재| 기여도 100%", []],
-            [23, "more", "담당업무 • 내부 업무 효율성 증진을 위한 주요 지표 웹훅 리포팅 구성 • 비즈니스 부서 & 마케팀팀 협업 과정에서 필요한 주요 지표 관련 자동화 리포팅 • 실DB 데이터를 기반으로 한 스프레드시트 – 앱스크립트 구성 성과 • 사내 커뮤니케이션 및 업무 효율화 추진 • 효율적인 성과 추이 모니터링 가능 및 가치 판단 효율화 • 특이사항 및 이슈 대응 시간 단축 주요 지표 웹훅 슬랙 자동화 / 대시보드 자동화 연동 업무 지표 리포팅 프로젝트 2023. 06 ~ 현재| 기여도 100%", []],
-            [24, "more", "사내 MMP툴 및 데이터 분석 툴 활용을 위한 텍소노미 및 QA 작업 담당업무 • 내부 마케팅 업무 효율성 증진을 위한 어트리뷰션 툴 텍소노미 작업 • 전사 유관 부서 핵심 지표 및 목표 설정 취합을 위한 커뮤니케이션 과정 • 부서별 리포트 및 주요 지표 환경 구축 • 텍소노미 이슈 확인 및 QA 진행 성과 • 부서별 데이터 이해도 및 간극을 최소화 • 부서별 연관 데이터 프로세스 구축을 통한 상호 간 커뮤니케이션 리소스 최소화 데이터 어트리뷰션 Taxonomy 프로젝트 사례 이미지를 넣어주세요 2023. 06 ~ 2023. 08 | 기여도 100%", []],
-            [25, "more", "영상 광고를 위한 자체 영상 촬영 및 편집 스킬 역량 보유 담당업무 • 고객사 요청에 따른 영상 제작에 관련된 모든 업무 • 고객사의 니즈에 맞는 시놉시스 및 스토리보드 구상 – 기획 • 스케치 / 인플루언서 / 연예인 등 광고 콘텐츠 관련 직접 촬영 • 프리미어 & 에프터이펙트를 활용한 기획에 맞는 영상편집 성과 • 영상 콘텐츠 관련 리소스 효율화 • 자체 제작 및 분석으로 인한 최적화 사이클 단축 • 관련 이해도에 따른 타부서 및 대행사 관련 커뮤니케이션 원활 VIDEOㅣ영상촬영 & 편집 관련영상보러가기 관련 영상 보러가기 2017. 08 ~ 2019. 01 | 기여도 80%", [["https://jinxxsoo.notion.site/fed7aa4cc7d14cafa8658c3e551dce91?pvs=4", 63.89, 36.32, 75.36, 44.36]]],
-            [26, "more", "감사합니다", []]
-          ];
-          var deckMain = '<div class="pdk-deck" id="tp-bento">' + DECK.map(function (pg, k) {
-            var nn = (pg[0] < 10 ? "0" : "") + pg[0], first = !k || DECK[k - 1][1] !== pg[1];
-            return '<section class="tp-sd pdk"' + (first ? ' id="tp-' + pg[1] + '"' : '') + ' data-m="' + pg[1] + '" aria-label="' + pg[0] + '쪽">'
-              + '<img src="' + DECK_IMG + 'p' + nn + '.jpg" srcset="' + DECK_IMG + 'p' + nn + 's.jpg 960w, ' + DECK_IMG + 'p' + nn + '.jpg 1920w" sizes="(max-width: 760px) 100vw, min(1280px, 100vw - 48px)" width="1920" height="1080" alt="포트폴리오 ' + pg[0] + '쪽"' + (k < 2 ? '' : ' loading="lazy"') + ' decoding="async">'
-              + pg[3].map(function (l) { return '<a class="pdk-l" href="' + ea(l[0]) + '" target="_blank" rel="noopener" aria-label="링크 열기" style="left:' + l[1] + '%;top:' + l[2] + '%;width:' + (l[3] - l[1]) + '%;height:' + (l[4] - l[2]) + '%"></a>'; }).join("")
-              + '<div class="pdk-t">' + esc(pg[2]) + '</div></section>';
-          }).join("") + '</div>';
-          var tabsHtml = DK ? DECK_SEC.map(function (x) { return '<button class="tp-tab" type="button" data-sec="' + x[0] + '">' + esc(x[1]) + '</button>'; }).join("") : '<button class="tp-tab" type="button" data-sec="glance">한눈에</button>' + TS.map(function (s) { return '<button class="tp-tab" type="button" data-sec="' + ea(s.g.id) + '">' + esc(s.g.id === "t-recent" && nowCoName ? "NOW · " + nowCoName : s.g.ko) + '</button>'; }).join("");
+          var tabsHtml = '<button class="tp-tab" type="button" data-sec="glance">한눈에</button>' + TS.map(function (s) { return '<button class="tp-tab" type="button" data-sec="' + ea(s.g.id) + '">' + esc(s.g.id === "t-recent" && nowCoName ? "NOW · " + nowCoName : s.g.ko) + '</button>'; }).join("");
           // 첫 화면 벽(배경) · 문장 슬롯 단어(분야별 많은 순으로 돌아가며)
           var wallIt = vis.filter(function (it) { return it.main; }).concat(vis.filter(function (it) { return !it.main; }));
           var tile = function (it) { return '<span class="tp-wt" style="--bg:' + deep(it) + ';--c:' + it.cm.c + '">' + (it.main ? '<img src="' + ea(it.main.src) + '" alt="" decoding="async">' : coverArt(it.w, it.m0)) + '</span>'; };
@@ -2530,23 +2494,20 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
             + '.tp-path li{position:relative;padding:22px 16px 0 0;border-top:2px solid var(--g2)}.tp-path li::before{content:"";position:absolute;left:0;top:-6px;width:10px;height:10px;border-radius:50%;background:var(--g4)}.tp-path li.now{border-top-color:var(--bl)}.tp-path li.now::before{background:var(--bl)}'
             + '.tp-py{display:block;font-size:14px;font-weight:600;color:var(--g5);font-variant-numeric:tabular-nums}.tp-path li>b{display:block;margin-top:6px;font-size:18px;font-weight:700;color:var(--g9)}.tp-pw{display:block;margin-top:4px;font-size:14px;line-height:1.45;color:var(--g6);word-break:keep-all}.tp-path li.now>b,.tp-path li.now .tp-py{color:var(--bl)}'
             + '.tp-pks{display:flex;flex-direction:column;align-items:flex-start;gap:4px;margin-top:12px}.tp-pk{display:inline-flex;align-items:baseline;flex-wrap:wrap;gap:0 6px;text-align:left;font-size:13px;color:var(--g6);white-space:normal}.tp-pk b{font-size:18px;font-weight:700;letter-spacing:-.02em;color:var(--g9);transition:color .2s}.tp-pk:hover b{color:var(--bl)}'
-            // 묶음 장: 분류 색 바탕 + 흰 글씨 · 위 머리(분류 · 시기 → 묶음 이름 | 개수 · 기간 · 몇 번째 장) → 프로젝트 칸 2~3개 나란히
-            + '.tp-sd.cat{background:var(--bg);color:#fff}.sd-hd{display:flex;align-items:flex-end;justify-content:space-between;gap:12px 32px;flex-wrap:wrap;margin-bottom:clamp(18px,3.2vh,34px)}'
-            + '.sd-hd .tp-ey{color:rgba(255,255,255,.66)}.sd-hd .tp-ey.now{color:#9ccaff}.sd-hd h2{margin-top:10px;font-size:clamp(30px,3vw,46px);font-weight:700;line-height:1.2;letter-spacing:-.035em;word-break:keep-all}'
-            + '.sd-pg{display:flex;align-items:baseline;gap:16px;padding-bottom:6px;font-size:15px;color:rgba(255,255,255,.62);font-variant-numeric:tabular-nums}.sd-pg i{font-style:normal;font-weight:700;color:#fff}'
-            + '.sd-ps{display:grid;grid-template-columns:repeat(var(--cols,3),minmax(0,1fr));gap:16px;align-items:stretch}'
-            // 프로젝트 칸: 위 그림(잘림 없이 가운데 · 남는 자리는 같은 그림을 흐리게) → 글(언제 · 회사 → 제목 → 결과 숫자 → 왜 → 한 일)
-            + '.sd-p{display:flex;flex-direction:column;min-width:0;border-radius:20px;overflow:hidden;background:rgba(255,255,255,.09);transition:box-shadow .4s var(--te)}.sd-p.hl{box-shadow:0 0 0 3px #fff}'
-            + '.sd-m{position:relative;display:grid;place-items:center;flex:none;height:clamp(160px,27vh,300px);overflow:hidden;background:rgba(255,255,255,.1)}'
-            + '.sd-m.img::before,.sd-m.yt::before{content:"";position:absolute;inset:-24px;background:var(--img) center/cover no-repeat;filter:blur(18px) saturate(1.1);opacity:.55}'
-            + '.sd-m img{position:relative;max-width:calc(100% - 28px);max-height:calc(100% - 24px);width:auto;height:auto;border-radius:8px;box-shadow:0 12px 28px -12px rgba(0,0,0,.5)}.sd-m.img img{background:#fff}'
-            + '.sd-m.yt img{height:calc(100% - 24px);aspect-ratio:16/9;object-fit:cover}.sd-m.yt:hover .tp-play{background:rgba(0,0,0,.7)}'
-            + '.sd-m.art{background:color-mix(in srgb,var(--c) 80%,#fff)}.sd-m.art svg{width:auto;max-width:100%;height:100%}'
-            + '.sd-tbs{display:flex;gap:6px;padding:8px 10px 0;overflow-x:auto;scrollbar-width:none}.sd-tbs::-webkit-scrollbar{display:none}.sd-tb{position:relative;flex:none;width:52px;height:38px;border-radius:7px;overflow:hidden;background:rgba(255,255,255,.14);opacity:.55;transition:opacity .2s;box-shadow:inset 0 0 0 1px rgba(255,255,255,.2)}.sd-tb:hover,.sd-tb.on{opacity:1}.sd-tb.on{box-shadow:inset 0 0 0 2px #fff}.sd-tb img{width:100%;height:100%;object-fit:cover}.sd-tb .tp-play{transform:scale(.4)}'
-            + '.sd-pb{display:flex;flex-direction:column;min-width:0;padding:16px 18px 20px}.sd-w{font-size:12.5px;font-weight:600;color:rgba(255,255,255,.6);font-variant-numeric:tabular-nums}'
-            + '.sd-t{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;margin-top:6px;font-size:clamp(17px,1.3vw,20px);font-weight:700;line-height:1.35;letter-spacing:-.02em;word-break:keep-all}'
-            + '.sd-ms{display:flex;flex-wrap:wrap;gap:2px 16px;margin-top:10px}.sd-ms span{display:inline-flex;align-items:baseline;gap:5px;font-size:12px;color:rgba(255,255,255,.66)}.sd-ms b{font-size:22px;font-weight:700;letter-spacing:-.02em;color:#fff;font-variant-numeric:tabular-nums}'
-            + '.sd-q{margin-top:10px;font-size:14px;line-height:1.55;color:rgba(255,255,255,.86);word-break:keep-all}.sd-q i{margin-right:8px;font-style:normal;font-weight:700;color:rgba(255,255,255,.5)}'
+            // 분류 머리글(메인 '02 Experience' 톤): 번호(회색) · 시기(파랑) → 분류 이름 → 개수 · 묶음
+            + '.pj-cat{display:flex;gap:18px;width:var(--tw3);margin:clamp(56px,8vh,96px) auto 22px;scroll-margin-top:76px}.pj-cn{padding-top:2px;font-size:15px;font-weight:600;color:var(--g5);font-variant-numeric:tabular-nums}'
+            + '.pj-cat h2{margin-top:6px;font-size:clamp(28px,2.6vw,38px);font-weight:700;line-height:1.25;letter-spacing:-.03em;color:var(--g9)}.pj-cat p{margin-top:8px;font-size:15px;color:var(--g6);word-break:keep-all}'
+            // 프로젝트 한 장: 흰 카드 · 얇은 테두리 · 위 회사/기간 → 제목·요약 → 숫자(위아래 선) → 왜 | 한 일 | 결과 → 그림 줄
+            + '.tp-sd.pj{padding:clamp(28px,3.4vw,52px);border:1px solid #e8eaed;box-shadow:none;scroll-margin-top:76px;transition:box-shadow .4s var(--te)}.tp-sd.pj.hl{box-shadow:0 0 0 3px var(--bl)}'
+            + '.pj-top{display:flex;justify-content:space-between;align-items:flex-start;gap:12px 24px}.pj-co{display:flex;align-items:center;gap:12px;min-width:0}.pj-lg{flex:none;width:42px;height:42px;border-radius:10px;border:1px solid var(--g2);background:#fff;object-fit:contain}'
+            + '.pj-co b{display:block;font-size:16px;font-weight:700;color:var(--g9)}.pj-co span{display:block;margin-top:3px;font-size:13px;color:var(--g5);font-variant-numeric:tabular-nums;word-break:keep-all}'
+            + '.pj-dt{flex:none;text-align:right}.pj-dt b{display:block;font-size:15px;font-weight:600;color:var(--g8);font-variant-numeric:tabular-nums}.pj-dt span{display:inline-block;margin-top:6px;padding:3px 9px;border-radius:7px;background:var(--bl1);font-size:12.5px;font-weight:600;color:var(--bl)}'
+            + '.pj-t{margin-top:clamp(20px,2.4vw,32px);font-size:clamp(24px,2.2vw,32px);font-weight:700;line-height:1.3;letter-spacing:-.03em;color:var(--g9);word-break:keep-all}.pj-s{margin-top:10px;font-size:clamp(15px,1.15vw,17px);line-height:1.6;color:var(--g6);word-break:keep-all}'
+            + '.pj-ms{display:flex;flex-wrap:wrap;gap:14px 48px;margin-top:24px;padding:20px 0;border-top:1px solid var(--g2);border-bottom:1px solid var(--g2)}.pj-ms span{display:flex;flex-direction:column}.pj-ms b{font-size:clamp(28px,2.4vw,36px);font-weight:700;line-height:1.15;letter-spacing:-.03em;color:var(--g9);font-variant-numeric:tabular-nums}.pj-ms i{margin-top:4px;font-style:normal;font-size:13.5px;color:var(--g6)}'
+            + '.pj-cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:20px 36px;margin-top:26px}.pj-c h4{font-size:13px;font-weight:700;letter-spacing:.02em;color:var(--bl)}'
+            + '.pj-c ul{margin:10px 0 0;padding:0;list-style:none}.pj-c li{position:relative;margin-top:7px;padding-left:14px;font-size:15px;line-height:1.6;color:var(--g8);word-break:keep-all}.pj-c li::before{content:"";position:absolute;left:2px;top:.72em;width:4px;height:4px;border-radius:50%;background:var(--g5)}.pj-c p{margin-top:10px;font-size:15px;line-height:1.6;color:var(--g8);word-break:keep-all}'
+            + '.pj-shots{display:grid;grid-template-columns:repeat(var(--n,3),minmax(0,1fr));gap:12px;margin-top:30px}.pj-sh{position:relative;display:grid;place-items:center;height:clamp(160px,17vw,250px);margin:0;border:1px solid #eceef1;border-radius:14px;background:var(--g1);overflow:hidden}.pj-shots[style*="--n:1"] .pj-sh{height:clamp(200px,26vw,380px)}'
+            + '.pj-sh img{max-width:calc(100% - 20px);max-height:calc(100% - 20px);width:auto;height:auto;border-radius:6px}.pj-sh.yt{background:#000}.pj-sh.yt img{max-width:100%;max-height:100%;border-radius:0}.pj-sh.yt:hover .tp-play{background:rgba(0,0,0,.7)}'
             + '.tp-play{position:absolute;left:50%;top:50%;width:48px;height:48px;margin:-24px 0 0 -24px;border-radius:50%;background:rgba(0,0,0,.5);box-shadow:inset 0 0 0 1.5px rgba(255,255,255,.85)}.tp-play::after{content:"";position:absolute;left:19px;top:15px;border-left:14px solid #fff;border-top:9px solid transparent;border-bottom:9px solid transparent}'
             // 연락 · 바닥 (마지막 장 위로 올라옴)
             + '.tp-ctas{position:relative;z-index:1;padding:clamp(56px,8vh,80px) 0;background:#f6f6f6}.tp-ctas-in{display:flex;align-items:center;justify-content:space-between;gap:32px;width:var(--tw);max-width:1000px;margin:0 auto}'
@@ -2554,31 +2515,24 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
             + '.tp-sb{display:inline-flex;align-items:center;height:48px;padding:0 18px;border-radius:12px;font-size:17px;font-weight:600}.tp-sb.l{background:rgba(100,168,255,.15);color:var(--bl)!important}.tp-sb.p{background:var(--bl);color:#fff!important}'
             + '.tp-me{flex:none;width:clamp(140px,15vw,210px);aspect-ratio:1;border-radius:40px;object-fit:cover}'
             + '.tp-foot{position:relative;z-index:1;padding:44px 0 90px;background:var(--g8);color:#d1d6db;font-size:14px}.tp-foot-in{display:flex;flex-wrap:wrap;justify-content:space-between;gap:12px 32px;width:var(--tw);max-width:1000px;margin:0 auto}.tp-foot b{margin-right:4px;font-size:16px;color:#fff}'
-            + '@supports (corner-shape:squircle){.tp-sd,.sd-p,.tp-me{corner-shape:squircle}.tp-sd{border-radius:48px}.sd-p{border-radius:30px}.tp-me{border-radius:64px}}'
-            // 화면 폭별: 1100 이하 = 칸 최대 2개 · 900 이하 = 상단 탭 숨김 · 760 이하 = 장 여백 줄이고 칸 한 줄씩
-            + '@media(max-width:1100px){.sd-ps{grid-template-columns:repeat(min(var(--cols,3),2),minmax(0,1fr))}.tp-tab{padding:0 9px;font-size:14px}}'
+            + '@supports (corner-shape:squircle){.tp-sd,.pj-sh,.tp-me{corner-shape:squircle}.tp-sd{border-radius:48px}.pj-sh{border-radius:24px}.tp-me{border-radius:64px}}'
+            // 화면 폭별: 1100 이하 = 탭 좁게 · 900 이하 = 상단 탭 숨김 · 760 이하 = 장 여백 줄이고 위아래로
+            + '@media(max-width:1100px){.tp-tab{padding:0 9px;font-size:14px}}'
             + '@media(max-width:900px){.tp-ntabs{display:none}}'
             + '@media(max-width:760px){body.tp{--tw:calc(100vw - 32px);--tw2:calc(100vw - 32px);--tw3:calc(100vw - 32px)}'
-            + '.tp-deck{padding:72px 0 32px}.tp-sd{margin-bottom:14px;border-radius:20px}.tp-sd-in{padding:28px 20px}.sd-ps{grid-template-columns:1fr}.sd-m{height:200px}'
+            + '.tp-deck{padding:72px 0 32px}.tp-sd{margin-bottom:14px;border-radius:20px}.tp-sd-in{padding:28px 20px}.tp-sd.pj{padding:24px 20px}.pj-top{flex-direction:column}.pj-dt{text-align:left}.pj-shots{grid-template-columns:1fr}.pj-sh,.pj-shots[style*="--n:1"] .pj-sh{height:200px}.pj-cat{margin-top:48px}'
             + '.tp-pfs{grid-template-columns:1fr;gap:22px}.tp-pf{display:grid;grid-template-columns:112px minmax(0,1fr);column-gap:12px;align-items:baseline}.tp-pf b{grid-row:span 2;font-size:34px}.tp-pf span{margin-top:0}.tp-pf i{margin-top:2px}.tp-path ol{grid-auto-flow:row;grid-template-columns:1fr}.tp-path li{padding:0 0 22px 22px;border-top:0;border-left:2px solid var(--g2)}.tp-path li::before{left:-6px;top:3px}.tp-path li.now{border-left-color:var(--bl)}.tp-path li>b{margin-top:2px}'
             + '.tp-ctas-in{flex-direction:column-reverse;align-items:flex-start}}'
             + '@media(prefers-reduced-motion:reduce){.tp-wrow,.tp-cue,.js .tp-hc,.js .tp-aw,.js .tp-al2{animation:none}.tp-wall,.tp-hb{transition:none}.tp-hb{opacity:1;transform:none}}';
-          var DCSS = '.pdkb .tp-nav{background:rgba(255,255,255,.96);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);box-shadow:0 1px 0 var(--g2)}.pdkb .tp-logo{color:var(--g9)}.pdkb .tp-nback{color:var(--g7)}.pdkb .tp-nback:hover{background:var(--g1)}.pdkb .tp-ntabs{opacity:1;pointer-events:auto}'
-            + '.pdk-deck{padding:84px 0 48px;background:var(--g1)}'
-            + '.tp-sd.pdk{width:min(1280px,calc(100vw - 48px));aspect-ratio:16/9;margin:0 auto 24px;padding:0;border-radius:16px;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.06),0 12px 32px -20px rgba(0,0,0,.3)}.pdk img{display:block;width:100%;height:100%}'
-            + '.pdk-l{position:absolute;z-index:1;border-radius:6px;transition:background .2s,box-shadow .2s}.pdk-l:hover{background:rgba(49,130,246,.12);box-shadow:0 0 0 2px rgba(49,130,246,.55)}'
-            + '.pdk-t{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}'
-            + '@supports (corner-shape:squircle){.tp-sd.pdk{border-radius:24px}}'
-            + '@media(max-width:760px){.pdk-deck{padding:68px 0 24px}.tp-sd.pdk{width:calc(100vw - 16px);margin-bottom:10px;border-radius:10px}}';
           return '<!doctype html><html lang="ko"><head><script>document.documentElement.classList.add("js")<\/script><meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>'
             + '<title>' + esc(nameKo || nameEn || "포트폴리오") + ' — Projects (test)</title><link rel="icon" href="data:,"/>' + fontHead
-            + '<style>' + PSCSS + fontVars + TCSS + (DK ? DCSS : '') + '</style></head><body class="tp ft-' + FKEY + (DK ? ' pdkb' : '') + '"' + (d.hostStudio ? ' data-host="studio"' : '') + '>'
-            + nav + '<main>' + (DK ? deckMain : hero + bentoS + cta) + '</main>' + foot
+            + '<style>' + PSCSS + fontVars + TCSS + '</style></head><body class="tp ft-' + FKEY + '"' + (d.hostStudio ? ' data-host="studio"' : '') + '>'
+            + nav + '<main>' + hero + bentoS + cta + '</main>' + foot
             + '<button class="ps-top-b" type="button" data-goto="*" aria-label="맨 위로">↑</button><div class="pd" role="dialog" aria-modal="true" aria-label="프로젝트 상세" aria-hidden="true"><div class="pd-prog" aria-hidden="true"><i></i></div><div class="pd-top"><span class="pd-ttl">' + esc(txt("ppEyebrow", "Selected Projects")) + '</span><span><span class="pd-no"></span><button class="pd-x" type="button" data-close>← 목록으로</button></span></div><div class="pd-in"></div></div>'
             + pdT
             + '<script>(' + psRuntime.toString() + ')();(' + tpRuntime.toString() + ')();<\/script></body></html>';
         };
-        // 테스트 페이지 동작: 상단 바 · 첫 화면 문장 전환(단어 슬롯) · 상단 분류 탭 표시·이동 · 작은 그림 전환 (숨은 탭에서도 돌게 타이머 기반)
+        // 테스트 페이지 동작: 상단 바 · 첫 화면 문장 전환(단어 슬롯) · 상단 분류 탭 표시·이동 · '한눈에' 숫자 → 그 프로젝트 장 (숨은 탭에서도 돌게 타이머 기반)
         var tpRuntime = function () {
           "use strict";
           var body = document.body, reduce = matchMedia("(prefers-reduced-motion: reduce)").matches, still = body.hasAttribute("data-still");
@@ -2615,14 +2569,13 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
           addEventListener("scroll", onSc, { passive: true }); addEventListener("resize", onSc); onSc();
           var go = function (id) {
             var el = id === "tp-top" ? null : document.getElementById(id === "tp-next" ? "tp-bento" : id);
-            scrollTo({ top: el ? Math.round(el.getBoundingClientRect().top + scrollY - (el.classList.contains("tp-sd") ? 76 : 0)) : 0, behavior: reduce ? "auto" : "smooth" });
+            scrollTo({ top: el ? Math.round(el.getBoundingClientRect().top + scrollY - (el.id === "tp-bento" ? 0 : 76)) : 0, behavior: reduce ? "auto" : "smooth" });
           };
           document.addEventListener("click", function (e) {
             var t = e.target, b;
             if (!t.closest) return;
             if ((b = t.closest("[data-tgo]"))) { e.preventDefault(); go(b.getAttribute("data-tgo")); return; }
-            if ((b = t.closest(".sd-tb[data-src]"))) { var pm = b.closest(".sd-p"), mi = pm && pm.querySelector(".sd-m.img img"); if (mi) { mi.src = b.getAttribute("data-src"); mi.parentNode.style.setProperty("--img", 'url("' + b.getAttribute("data-src") + '")'); $$(".sd-tb", pm).forEach(function (x) { x.classList.toggle("on", x === b); }); } return; }
-            if ((b = t.closest("[data-go]"))) { e.preventDefault(); go(b.getAttribute("data-go")); var pi = b.getAttribute("data-pi"), pe = pi != null && $('.sd-p[data-pi="' + pi + '"]'); if (pe) { pe.classList.remove("hl"); later(function () { pe.classList.add("hl"); }, reduce ? 0 : 700); later(function () { pe.classList.remove("hl"); }, 2600); } return; }
+            if ((b = t.closest("[data-go]"))) { e.preventDefault(); go(b.getAttribute("data-go")); var pi = b.getAttribute("data-pi"), pe = pi != null && $('.pj[data-pi="' + pi + '"]'); if (pe) { pe.classList.remove("hl"); later(function () { pe.classList.add("hl"); }, reduce ? 0 : 700); later(function () { pe.classList.remove("hl"); }, 2600); } return; }
             if ((b = t.closest(".tp-tab"))) { go("tp-" + b.getAttribute("data-sec")); return; }
           });
         };
