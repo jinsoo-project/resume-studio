@@ -2206,14 +2206,14 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
           var ea = function (s) { return esc(s).replace(/"/g, "&quot;"); };
           var score = function (it) { return (it.main ? 3 : 0) + Math.min(it.mets.length, 3) + ((it.sum || it.w.summary) ? .5 : 0); };
           var byScore = function (a, b) { return score(b) - score(a) || a.i - b.i; };
-          // ── 프로젝트 분류(이 페이지 전용 · KILO 대시보드의 묶음 데이터와 기존 /projects는 그대로): 4가지 — AX / NOW · 퍼포먼스 / CRM · 데이터 / 택소노미 · 콘텐츠 / 캠페인
-          //    AX / NOW = 지금 다니는(가장 최근) 회사에서 한 일 전부 + AX. 나머지: 성과 → 데이터 / 택소노미 · 제목 '소재'·퍼포먼스·그로스·CRM → 퍼포먼스 / CRM · 콘텐츠·영상·브랜딩·커머스·제휴 → 콘텐츠 / 캠페인
+          // ── 프로젝트 분류(이 페이지 전용 · KILO 대시보드의 묶음 데이터와 기존 /projects는 그대로): 4가지 — AX / 퍼포먼스(지금) · 퍼포먼스 / CRM · 데이터 / 택소노미 · 콘텐츠 / 캠페인
+          //    AX / 퍼포먼스 = 지금 다니는(가장 최근) 회사에서 한 일 전부 + AX. 나머지: 성과 → 데이터 / 택소노미 · 제목 '소재'·퍼포먼스·그로스·CRM → 퍼포먼스 / CRM · 콘텐츠·영상·브랜딩·커머스·제휴 → 콘텐츠 / 캠페인
           var coEnd = function (co) { return co.endDate ? String(co.endDate) : "9999-99"; };
           var nowCo = items.map(function (it) { return it.co; }).filter(function (co, k, a) { return co && a.indexOf(co) === k; })
             .sort(function (a, b) { return coEnd(b).localeCompare(coEnd(a)) || String(b.startDate || "").localeCompare(String(a.startDate || "")); })[0] || null;
           var nowCoName = nowCo ? dispName(nowCo) : "";
           var TAXO = [
-            { id: "t-recent", bg: "#2d3038", ko: "AX / NOW", en: "AX & Now" },
+            { id: "t-recent", bg: "#2d3038", ko: "AX / 퍼포먼스", en: "AX & Performance" },
             { id: "t-perf", bg: "#2f5f99", ko: "퍼포먼스 / CRM", en: "Performance & CRM" },
             { id: "t-data", bg: "#2b6a5f", ko: "데이터 / 택소노미", en: "Data & Taxonomy" },
             { id: "t-camp", bg: "#93503c", ko: "콘텐츠 / 캠페인", en: "Content & Campaign" }
@@ -2282,15 +2282,18 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
             "5afefe01-835b-48eb-9568-e6f51f6650ce": "재고 3,000개 소진"
           };
           var whyOf = function (it) { return it.why || WHY[it.w.id] || String(it.w.problem || "").trim() || ""; };
+          // 결과 = 성과 지표 앞 2개(카드별 대표 지표 선택 순서 그대로) · 숫자 크게 + 이름
+          var resOf = function (it) { return it.mets.slice(0, 2).map(function (m) { return '<span><b>' + esc(m.value) + '</b>' + esc(m.label || "") + '</span>'; }).join(""); };
           var card = function (it, j) {
+            var why = whyOf(it), res = resOf(it);
             return '<button class="tp-card tp-rv" type="button" data-open="' + it.i + '" style="--bg:' + deep(it) + ';--c:' + it.cm.c + ';--dl:' + (j * 70) + 'ms" aria-label="' + ea(it.title) + ' 자세히 보기">'
               + '<span class="tp-ct"><span class="tp-when">' + esc(when(it)) + (it.co ? '<i>' + esc(dispName(it.co)) + '</i>' : '') + '</span>'
               + '<b class="tp-ttl">' + esc(it.title).replace(/\s+[—–]\s+/, "<br>") + '</b>'
-              + (whyOf(it) ? '<span class="tp-why">' + esc(whyOf(it)) + '</span>' : '') + '</span>'
+              + (why || res ? '<span class="tp-pr">' + (why ? '<span class="tp-why">' + esc(why) + '</span>' : '') + (res ? '<span class="tp-res">' + res + '</span>' : '') + '</span>' : '') + '</span>'
               + frame(it, "tp-fr") + '</button>';
           };
           // ── 묶음(일의 종류) = 분류 안의 한 줄: 왼쪽 묶음 이름·개수·기간 | 오른쪽 세로 카드들
-          //    규칙 순서대로 묶고(1개여도 그 이름으로), 규칙에 안 걸린 건 마지막 줄('AX / NOW'는 회사 이름, 나머지는 '그 외')
+          //    규칙 순서대로 묶고(1개여도 그 이름으로), 규칙에 안 걸린 건 마지막 줄('AX / 퍼포먼스'는 회사 이름, 나머지는 '그 외')
           var BUN = {
             "t-perf": [
               { t: "매체 · 예산 · CRM 운영", m: function (it) { return /매체|예산|푸시|플친/.test(String(it.w.title || "")) || it.w.category === "CRM"; } },
@@ -2324,17 +2327,52 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
             return '<div class="tp-shelf"><div class="tp-sl tp-rv"><b>' + esc(c.t) + '</b><span>' + c.its.length + '개 · ' + esc(yrsOf(c.its, false)) + '</span></div>'
               + '<div class="tp-row">' + c.its.map(card).join("") + '</div></div>';
           };
-          // 분류 섹션: 작은 분류 이름(색) · 기간 · 개수 → 큰 제목(제 이야기) → 묶음 줄들 · 위에 따라붙는 분류 탭
-          //   제목은 klio.text.tpH_{recent|perf|data|camp}로 덮어쓰기
-          var HEAD = { "t-recent": "지금은 AI로 구조를 효율화하고, 그로스를 고민해요", "t-perf": "그 전엔 퍼포먼스에 집중해 예산·매체·CRM을 맡았어요", "t-data": "그러면서 자동화와 택소노미로 측정 구조를 설계했어요", "t-camp": "영상으로 시작해 콘텐츠·브랜딩·특가 마케팅까지 해왔어요" };
-          var headOf = function (s) { return txt("tpH_" + s.g.id.slice(2), HEAD[s.g.id] || (s.g.ko + " 프로젝트예요")); };
-          var spanG = function (s) { var r = yrsOf(s.items, s.g.id === "t-recent"); return s.g.id === "t-recent" ? r : r.split(" – ")[0] + "년부터"; };
+          // 분류 섹션: 위 시기(지금 = 파랑 '지금' · 나머지 = 회색 연도 범위) → 큰 제목 = 분류 이름(색 점) → 아래 개수 → 묶음 줄들 · 위에 따라붙는 분류 탭
+          //   긴 이야기 문장은 쓰지 않음(흐름은 위 '한눈에'의 경력 줄이 맡음) · 제목은 klio.text.tpH_{recent|perf|data|camp}로 덮어쓰기
+          var headOf = function (s) { return txt("tpH_" + s.g.id.slice(2), s.g.ko); };
+          var spanG = function (s) { return yrsOf(s.items, s.g.id === "t-recent"); };
           var grpHtml = TS.map(function (s) {
             var g = s.g;
-            return '<div class="tp-grp" id="tp-' + ea(g.id) + '" data-m="' + ea(g.id) + '"><div class="tp-gh tp-rv"><span class="tp-gk tp-gcl" style="--gc:' + g.bg + '">' + esc(g.ko) + '<i>' + esc(spanG(s)) + ' · ' + s.items.length + '개 프로젝트</i></span>'
-              + '<h2 class="tp-bt">' + esc(headOf(s)) + '</h2></div>'
+            return '<div class="tp-grp" id="tp-' + ea(g.id) + '" data-m="' + ea(g.id) + '"><div class="tp-gh tp-rv"><span class="tp-ey' + (g.id === "t-recent" ? '' : ' old') + '">' + (g.id === "t-recent" ? '지금' : esc(spanG(s))) + '</span><h2 class="tp-bt tp-gcl" style="--gc:' + g.bg + '">' + esc(headOf(s)) + '</h2>'
+              + '<span class="tp-gk">' + (g.id === "t-recent" ? esc(spanG(s)) + ' · ' : '') + s.items.length + '개 프로젝트</span></div>'
               + clustersOf(s).map(shelf).join("") + '</div>';
           }).join("");
+          // ── 한눈에(첫 화면 바로 다음) — 5분 안에 판단: 지금(AX · 퍼포먼스 + 지금 회사 숫자) → 해온 일(시간순 회사 줄 · 맡은 일 · 대표 숫자)
+          //    숫자는 누르면 그 프로젝트 상세 · 문구 덮어쓰기: klio.text.tpNowT(지금 하는 일) · tpNowS(아래 한 줄)
+          var FOCUS = {
+            "880f2595-41db-43f8-8fc4-d7b2b7a82ed9": "AX · 퍼포먼스 · 그로스",
+            "df04e065-83b0-4fe3-9d89-c08103b1f3fc": "데이터 · 퍼포먼스 · 제휴",
+            "d6ac38d6-bc00-4f6f-8bce-2579cf6ce020": "광고 소재 · 지표 세팅",
+            "9a240366-d8d0-47b3-a1fd-3259532182b3": "퍼포먼스 · CRM",
+            "64000e6d-362f-4ed7-a9e6-e64be85cd95a": "콘텐츠 · 브랜딩 · 커머스",
+            "6add97f4-49f2-44fe-b6bb-a70f6a0ee024": "영상 PD"
+          };
+          // 숫자 고르기: [프로젝트 id, 지표 순서] — 지금(위) · 회사별(해온 일 줄)
+          var NOWPF = [["77afd48a-668b-4ab1-b385-32fa41400211", 0], ["dff32975-e504-47e3-8ee1-744f2267ac91", 0], ["dff32975-e504-47e3-8ee1-744f2267ac91", 1]];
+          var COPF = {
+            "9a240366-d8d0-47b3-a1fd-3259532182b3": [["aab659e9-be16-46dc-9730-18d845c1dc64", 0], ["b0aa1d32-82d9-44bc-897d-b558a425c98c", 0]],
+            "64000e6d-362f-4ed7-a9e6-e64be85cd95a": [["2380b3b4-8dba-4b9d-9f96-38568a79936b", 0], ["53845c2b-3618-4e8d-968c-1edfabdf4912", 0]]
+          };
+          var pick = function (L) { return (L || []).map(function (q) { var it = vis.filter(function (x) { return x.w.id === q[0]; })[0], m = it && (it.w.metrics || []).filter(function (mm) { return mm && mm.value; })[q[1]]; return m ? { it: it, m: m } : null; }).filter(Boolean); };
+          var subOf = function (it) { var t = String(it.title).split(/\s+[—–]\s+/); return t[1] || t[0]; };
+          var ymTxt = function (s) { var m = ym(s); return m ? m.y + "." + m.m : ""; };
+          var cos = vis.map(function (it) { return it.co; }).filter(function (co, k, a) { return co && co.startDate && a.indexOf(co) === k; })
+            .sort(function (a, b) { return String(a.startDate).localeCompare(String(b.startDate)); });
+          var t0 = cos.length ? ym(cos[0].startDate) : null, nd = new Date();
+          var yrs = t0 ? Math.floor(((nd.getFullYear() - +t0.y) * 12 + nd.getMonth() + 1 - +t0.m) / 12) : 0;
+          var nowPf = pick(NOWPF).map(function (p, k) {
+            return '<button class="tp-pf tp-rv" type="button" data-open="' + p.it.i + '" style="--dl:' + (k * 80) + 'ms"><b>' + esc(p.m.value) + '</b><span>' + esc(p.m.label || "") + '</span><i>' + esc(subOf(p.it)) + '</i></button>';
+          }).join("");
+          var pathHtml = cos.map(function (co, k) {
+            var now = !co.endDate, pk = now ? [] : pick(COPF[co.id]);
+            return '<li class="tp-rv' + (now ? ' now' : '') + '" style="--dl:' + (k * 60) + 'ms"><span class="tp-py">' + esc(ymTxt(co.startDate).slice(0, 4)) + (now ? ' – 지금' : '') + '</span><b>' + esc(dispName(co)) + '</b><span class="tp-pw">' + esc(FOCUS[co.id] || co.role || "") + '</span>'
+              + (pk.length ? '<span class="tp-pks">' + pk.map(function (p) { return '<button class="tp-pk" type="button" data-open="' + p.it.i + '"><b>' + esc(p.m.value) + '</b>' + esc(p.m.label || "") + '</button>'; }).join("") + '</span>' : '') + '</li>';
+          }).join("");
+          var glance = '<section class="tp-gl" id="tp-glance"><div class="tp-gl-in">'
+            + (nowCo ? '<div class="tp-now tp-rv"><span class="tp-ey">지금</span><h2>' + esc(txt("tpNowT", "AX · 퍼포먼스 마케팅")) + '</h2><p>' + esc(txt("tpNowS", nowCoName + " · " + ymTxt(nowCo.startDate) + " – 지금")) + '</p></div>' : '')
+            + (nowPf ? '<div class="tp-pfs">' + nowPf + '</div>' : '')
+            + (pathHtml ? '<div class="tp-path"><span class="tp-ey tp-rv">해온 일' + (yrs ? ' · ' + yrs + '년 · ' + cos.length + '개 회사' : '') + '</span><ol>' + pathHtml + '</ol></div>' : '')
+            + '</div></section>';
           var tabsHtml = TS.map(function (s, x) { return '<button class="tp-tab' + (x ? '' : ' on') + '" type="button" data-sec="' + ea(s.g.id) + '">' + esc(s.g.ko) + '<i>' + s.items.length + '</i></button>'; }).join("");
           // 첫 화면 벽(배경) · 문장 슬롯 단어(분야별 많은 순으로 돌아가며)
           var wallIt = vis.filter(function (it) { return it.main; }).concat(vis.filter(function (it) { return !it.main; }));
@@ -2393,6 +2431,17 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
             // 스크롤하면 첫 화면이 액자처럼 안쪽으로 줄어들며(--hs) 글자가 올라가 사라짐
             + '.tp-hero{clip-path:inset(calc(var(--hs,0) * 5%) calc(var(--hs,0) * 3.5%) round calc(var(--hs,0) * 48px))}'
             + '.tp-hc{transform:translateY(calc(var(--hs,0) * -90px)) scale(calc(1 - var(--hs,0) * .08));opacity:calc(1 - var(--hs,0) * 1.6)}.tp-cue{opacity:calc(1 - var(--hs,0) * 3)}'
+            // 한눈에: 지금 하는 일(큰 제목) → 성과 숫자 4칸(누르면 그 프로젝트) → 해온 일(가로 경력 줄, 지금 = 파랑)
+            + '.tp-gl{padding:clamp(84px,12vh,140px) 0 clamp(56px,8vh,96px)}.tp-gl-in{width:var(--tw2);margin:0 auto}'
+            + '.tp-ey{display:block;font-size:16px;font-weight:600;color:var(--bl)}'
+            + '.tp-now h2{margin-top:12px;font-size:clamp(30px,3.2vw,46px);font-weight:700;line-height:1.3;letter-spacing:-.03em;color:var(--g9);word-break:keep-all}.tp-now p{margin-top:12px;font-size:18px;color:var(--g6);font-variant-numeric:tabular-nums}'
+            + '.tp-pfs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:32px;margin-top:clamp(44px,6vh,64px)}'
+            + '.tp-pf{display:flex;flex-direction:column;align-items:flex-start;width:100%;min-width:0;text-align:left;white-space:normal}.tp-pf>*{max-width:100%}.tp-pf b{font-size:clamp(40px,4vw,56px);font-weight:700;line-height:1.1;letter-spacing:-.04em;color:var(--g9);font-variant-numeric:tabular-nums;transition:color .2s}.tp-pf:hover b{color:var(--bl)}'
+            + '.tp-pf span{margin-top:10px;font-size:16px;font-weight:600;color:var(--g8)}.tp-pf i{margin-top:4px;font-style:normal;font-size:14px;color:var(--g5);word-break:keep-all}'
+            + '.tp-path{margin-top:clamp(64px,9vh,100px)}.tp-path ol{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(0,1fr);margin:22px 0 0;padding:0;list-style:none}'
+            + '.tp-path li{position:relative;padding:22px 16px 0 0;border-top:2px solid var(--g2)}.tp-path li::before{content:"";position:absolute;left:0;top:-6px;width:10px;height:10px;border-radius:50%;background:var(--g4)}.tp-path li.now{border-top-color:var(--bl)}.tp-path li.now::before{background:var(--bl)}'
+            + '.tp-py{display:block;font-size:14px;font-weight:600;color:var(--g5);font-variant-numeric:tabular-nums}.tp-path li>b{display:block;margin-top:6px;font-size:18px;font-weight:700;color:var(--g9)}.tp-pw{display:block;margin-top:4px;font-size:14px;line-height:1.45;color:var(--g6);word-break:keep-all}.tp-path li.now>b,.tp-path li.now .tp-py{color:var(--bl)}'
+            + '.tp-pks{display:flex;flex-direction:column;align-items:flex-start;gap:4px;margin-top:12px}.tp-pk{display:inline-flex;align-items:baseline;flex-wrap:wrap;gap:0 6px;text-align:left;font-size:13px;color:var(--g6);white-space:normal}.tp-pk b{font-size:18px;font-weight:700;letter-spacing:-.02em;color:var(--g9);transition:color .2s}.tp-pk:hover b{color:var(--bl)}'
             // 프로젝트 영역 · 따라붙는 분류 탭
             + '.tp-bento{width:var(--tw2);margin:0 auto;padding:0 0 clamp(120px,14vh,170px);scroll-margin-top:70px}'
             + '.tp-tabs{position:sticky;top:60px;z-index:20;display:flex;gap:2px;width:100vw;max-width:none;margin-left:calc(50% - 50vw);padding:6px max(16px,calc(50vw - 50%)) 0;overflow-x:auto;scrollbar-width:none;background:rgba(255,255,255,.96);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);box-shadow:0 1px 0 var(--g2)}.tp-tabs::-webkit-scrollbar{display:none}'
@@ -2400,9 +2449,9 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
             + '.tp-tab.on{color:var(--g9)}.tp-tab::after{content:"";position:absolute;left:12px;right:12px;bottom:0;height:2px;border-radius:2px;background:var(--g9);transform:scaleX(0);transition:transform .35s var(--te)}.tp-tab.on::after{transform:none}'
             // 분류 섹션 머리: 색 점 · 분류 이름 · 기간·개수 → 큰 제목
             + '.tp-grp{padding-top:clamp(72px,10vh,120px);scroll-margin-top:120px}.tp-grp:first-of-type{padding-top:clamp(52px,7vh,84px)}'
-            + '.tp-gh{margin-bottom:clamp(28px,4vh,44px)}.tp-gk{display:inline-flex;align-items:center;font-size:15px;font-weight:700;color:var(--g8)}.tp-gk i{margin-left:10px;font-style:normal;font-weight:500;color:var(--g5)}'
-            + '.tp-gcl::before{content:"";display:inline-block;width:10px;height:10px;margin-right:9px;border-radius:3px;background:var(--gc);vertical-align:.12em}'
-            + '.tp-bt{margin-top:10px;font-size:clamp(26px,2.6vw,36px);font-weight:700;line-height:1.35;letter-spacing:-.02em;color:var(--g9);text-wrap:balance}'
+            + '.tp-gh{margin-bottom:clamp(24px,3.4vh,36px)}.tp-gk{display:block;margin-top:8px;font-size:16px;font-weight:500;color:var(--g5);font-variant-numeric:tabular-nums}'
+            + '.tp-gcl::before{content:"";display:inline-block;width:12px;height:12px;margin-right:12px;border-radius:4px;background:var(--gc);vertical-align:.16em}'
+            + '.tp-gh .tp-ey{margin-bottom:10px;font-variant-numeric:tabular-nums}.tp-ey.old{color:var(--g5)}.tp-bt{font-size:clamp(30px,3vw,42px);font-weight:700;line-height:1.3;letter-spacing:-.03em;color:var(--g9)}'
             // 묶음 줄: 윗선 · 왼쪽 묶음 이름(개수·기간) | 오른쪽 세로 카드 3칸
             + '.tp-shelf{display:grid;grid-template-columns:minmax(0,200px) minmax(0,1fr);gap:20px 40px;padding:28px 0 40px;border-top:1px solid var(--g2)}'
             + '.tp-sl{padding-top:2px}.tp-sl b{display:block;font-size:18px;font-weight:700;line-height:1.4;letter-spacing:-.02em;color:var(--g9);word-break:keep-all}.tp-sl span{display:block;margin-top:6px;font-size:14px;color:var(--g5);font-variant-numeric:tabular-nums}'
@@ -2412,7 +2461,10 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
             + '.tp-ct{flex:none;display:flex;flex-direction:column;padding:24px 24px 0}'
             + '.tp-when{display:flex;flex-wrap:wrap;gap:2px 8px;font-size:13px;font-weight:600;color:rgba(255,255,255,.72);font-variant-numeric:tabular-nums;letter-spacing:0}.tp-when i{font-style:normal;font-weight:500;color:rgba(255,255,255,.55)}'
             + '.tp-ttl{margin-top:10px;font-size:clamp(19px,1.45vw,22px);font-weight:700;line-height:1.34;letter-spacing:-.025em;word-break:keep-all;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}'
-            + '.tp-why{margin-top:14px;padding-top:14px;border-top:1px solid rgba(255,255,255,.2);font-size:15px;font-weight:600;line-height:1.5;color:rgba(255,255,255,.9);word-break:keep-all;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}'
+            + '.tp-pr{display:flex;flex-direction:column;gap:10px;margin-top:14px;padding-top:14px;border-top:1px solid rgba(255,255,255,.2)}'
+            + '.tp-why{font-size:14px;font-weight:500;line-height:1.5;color:rgba(255,255,255,.72);word-break:keep-all;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}'
+            // 결과: 숫자 크게 + 이름(작게) · 최대 2개를 한 줄에(두 번째는 자리 있을 때만)
+            + '.tp-res{display:flex;flex-wrap:wrap;gap:0 16px;height:30px;overflow:hidden}.tp-res span{display:inline-flex;align-items:baseline;gap:6px;min-width:0;line-height:30px;white-space:nowrap;font-size:13px;font-weight:500;color:rgba(255,255,255,.72);font-variant-numeric:tabular-nums}.tp-res b{font-size:22px;font-weight:700;letter-spacing:-.02em;color:#fff}'
             + '.tp-fr{position:relative;flex:1;min-height:110px;margin:20px 24px 0;border-radius:14px 14px 0 0;overflow:hidden;pointer-events:none;background:rgba(255,255,255,.08)}'
             + '.tp-fr.img::before,.tp-fr.yt::before{content:"";position:absolute;inset:-24px;background:var(--img) center/cover no-repeat;filter:blur(20px) saturate(1.1);opacity:.5}'
             + '.tp-fr>*{position:absolute;inset:14px;margin:auto}'
@@ -2434,6 +2486,7 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
             // 화면 폭별: 1000 이하 = 묶음 이름이 카드 위로 · 760 이하 = 카드 가로 넘김(스냅)
             + '@media(max-width:1000px){.tp-shelf{grid-template-columns:1fr;gap:16px;padding:24px 0 36px}.tp-sl{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 12px}.tp-sl span{margin-top:0}}'
             + '@media(max-width:760px){body.tp{--tw:calc(100vw - 32px);--tw2:calc(100vw - 32px)}.tp-gh{margin-bottom:24px}'
+            + '.tp-pfs{grid-template-columns:1fr;gap:22px}.tp-pf{display:grid;grid-template-columns:112px minmax(0,1fr);column-gap:12px;align-items:baseline}.tp-pf b{grid-row:span 2;font-size:34px}.tp-pf span{margin-top:0}.tp-pf i{margin-top:2px}.tp-path ol{grid-auto-flow:row;grid-template-columns:1fr}.tp-path li{padding:0 0 22px 22px;border-top:0;border-left:2px solid var(--g2)}.tp-path li::before{left:-6px;top:3px}.tp-path li.now{border-left-color:var(--bl)}.tp-path b{margin-top:2px}'
             + '.tp-row{display:flex;gap:12px;margin:0 -16px;padding:0 16px 6px;overflow-x:auto;scroll-snap-type:x mandatory;scroll-padding:0 16px;scrollbar-width:none}.tp-row::-webkit-scrollbar{display:none}'
             + '.tp-card{flex:0 0 min(76vw,320px);scroll-snap-align:start}.tp-ct{padding:22px 22px 0}.tp-fr{margin:18px 22px 0}'
             + '.tp-hero{clip-path:inset(calc(var(--hs,0) * 3%) calc(var(--hs,0) * 3%) round calc(var(--hs,0) * 28px))}.tp-ctas-in{flex-direction:column-reverse;align-items:flex-start}}'
@@ -2441,7 +2494,7 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
           return '<!doctype html><html lang="ko"><head><script>document.documentElement.classList.add("js")<\/script><meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>'
             + '<title>' + esc(nameKo || nameEn || "포트폴리오") + ' — Projects (test)</title><link rel="icon" href="data:,"/>' + fontHead
             + '<style>' + PSCSS + fontVars + TCSS + '</style></head><body class="tp ft-' + FKEY + '"' + (d.hostStudio ? ' data-host="studio"' : '') + '>'
-            + nav + '<main>' + hero + bentoS + cta + '</main>' + foot
+            + nav + '<main>' + hero + glance + bentoS + cta + '</main>' + foot
             + '<button class="ps-top-b" type="button" data-goto="*" aria-label="맨 위로">↑</button><div class="pd" role="dialog" aria-modal="true" aria-label="프로젝트 상세" aria-hidden="true"><div class="pd-prog" aria-hidden="true"><i></i></div><div class="pd-top"><span class="pd-ttl">' + esc(txt("ppEyebrow", "Selected Projects")) + '</span><span><span class="pd-no"></span><button class="pd-x" type="button" data-close>← 목록으로</button></span></div><div class="pd-in"></div></div>'
             + pdT
             + '<script>(' + psRuntime.toString() + ')();(' + tpRuntime.toString() + ')();<\/script></body></html>';
