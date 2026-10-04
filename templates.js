@@ -2343,20 +2343,21 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
               return m.yt ? '<a class="pj-sh yt" href="' + ea(m.url || "https://youtu.be/" + m.yt) + '" target="_blank" rel="noopener" aria-label="영상 보기">' + im + '<i class="tp-play" aria-hidden="true"></i></a>' : '<a class="pj-sh" href="' + ea(m.src) + '" target="_blank" rel="noopener" aria-label="그림 크게 보기">' + im + '</a>';
             }).join("") + '</div>';
           };
-          var card = function (it, g, ct, no, tot, id) {
+          var card = function (it, k, id, nx) {
             var co = it.co, mets = it.mets.slice(0, 3), cb = CONTRIB[it.w.id], sum = String(it.w.summary || "").trim();
             var prob = String(it.w.problem || "").trim().split(/\n+/).map(function (x) { return x.trim(); }).filter(Boolean).join(" · ") || whyOf(it);
             var act = String(it.w.action || it.w.detail || "").trim(), res = String(it.w.result || "").trim();
             var CL = it.w.cols || [], cols = col(CL[0] || "담당업무", act) + col(CL[1] || "성과", res);
-            return '<article class="tp-sd pj" id="' + id + '" data-m="' + ea(g.id) + '" data-pi="' + it.i + '">'
-              + '<div class="pj-top"><span class="pj-ey">' + esc(String(g.id === "t-recent" ? "Now" : g.en || g.ko).toUpperCase()) + (g.id === "t-recent" ? '' : ' · ' + esc(ct)) + '</span><span class="pj-no">' + pad2(no) + ' / ' + pad2(tot) + '</span></div>'
+            return '<article class="pj' + (k ? '' : ' in') + '" id="' + id + '" data-pi="' + it.i + '" data-k="' + k + '"' + (k ? ' hidden' : '') + '>'
               + '<h3 class="pj-t">' + esc(it.title) + '</h3>'
               + '<div class="pj-meta">' + (co && co.logo ? '<img class="pj-lg" src="' + ea(co.logo) + '" alt="">' : '') + '<b>' + esc(co ? dispName(co) : "") + '</b><span>' + esc(when(it)) + '</span>' + (cb ? '<em>기여도 ' + cb + '%</em>' : '') + '</div>'
               + (sum ? '<p class="pj-s">' + esc(sum) + '</p>' : '')
               + (prob ? '<p class="pj-q"><b>과제</b>' + esc(prob) + '</p>' : '')
               + (mets.length ? '<div class="pj-ms" style="--n:' + mets.length + '">' + mets.map(function (m) { return '<span><b>' + esc(m.value) + '</b><i>' + esc(m.label || "") + '</i></span>'; }).join("") + '</div>' : '')
               + (cols ? '<div class="pj-cols">' + cols + '</div>' : '')
-              + shots(it) + '</article>';
+              + shots(it)
+              + (nx ? '<div class="pj-next"><button type="button" ' + nx.a + '><small>' + nx.k + '</small><b>' + esc(nx.t) + '</b><i aria-hidden="true">→</i></button></div>' : '')
+              + '</article>';
           };
           // ── 묶음(일의 종류) = 분류 안의 한 줄: 왼쪽 묶음 이름·개수·기간 | 오른쪽 세로 카드들
           //    규칙 순서대로 묶고(1개여도 그 이름으로), 규칙에 안 걸린 건 마지막 줄('AX / 퍼포먼스'는 회사 이름, 나머지는 '그 외')
@@ -2393,17 +2394,35 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
             return from && to && from !== to ? from + " – " + to : (from || to);
           };
           // ── 분류마다 번호 머리글(메인 '02 Experience'처럼: 번호 · 시기 → 분류 이름 → 개수 · 묶음들) → 프로젝트마다 한 장(카드, PDF처럼) · 회색 바탕 위에 쭉
-          //    분류 머리글 id = tp-{분류}(상단 탭 이동) · 카드 data-m = 분류(탭 표시) · slideOf[프로젝트] = 카드 id('한눈에' 숫자 누르면 그 장으로)
+          //    분류 머리글 id = tp-{분류}(상단 탭 이동) → 묶음 박스(.cl, data-m = 분류: 탭 표시) = 위 묶음 이름·개수 | 1 / N ‹ › → 프로젝트 탭(이런 게 있구나) → 한 번에 한 장
+          //    넘기기: ‹ › · 탭 · 카드 아래 '다음 · 제목 →'(마지막은 '다음 묶음') · 스와이프 · ←/→ · slideOf[프로젝트] = 카드 id('한눈에' 숫자 → 그 묶음에서 그 장 열고 이동)
           //    제목 덮어쓰기: klio.text.tpH_{recent|perf|data|camp}
           var headOf = function (s) { return txt("tpH_" + s.g.id.slice(2), s.g.id === "t-recent" ? "AX / 퍼포먼스" : s.g.ko); };
           var spanG = function (s) { return yrsOf(s.items, s.g.id === "t-recent"); };
-          var slideOf = {}, NO = 0, TOT = TS.reduce(function (a, x) { return a + x.items.length; }, 0);
+          var slideOf = {};
+          var tabTitle = function (it) { return String(it.title || "").split(/\s+[—–]\s+/)[0]; };
+          var CLS = []; TS.forEach(function (s) { clustersOf(s).forEach(function (c, ci) { CLS.push({ s: s, c: c, id: "tp-c-" + s.g.id + "-" + ci }); }); });
+          var clBox = function (x, xi) {
+            var g = x.s.g, c = x.c, n = c.its.length, now = g.id === "t-recent", nxC = CLS[xi + 1];
+            var tabsH = c.its.map(function (it, k) { return '<button class="cl-tab' + (k ? '' : ' on') + '" type="button" data-cl-go="' + k + '" title="' + ea(it.title) + '"><i>' + (k + 1) + '</i>' + esc(tabTitle(it)) + '</button>'; }).join("");
+            var cards = c.its.map(function (it, k) {
+              var id = "tp-p" + it.i; slideOf[it.i] = id;
+              var nx = k < n - 1 ? { a: 'data-cl-step="1"', k: "다음", t: tabTitle(c.its[k + 1]) } : nxC ? { a: 'data-tgo="' + nxC.id + '"', k: "다음 묶음", t: nxC.s.g.id === "t-recent" ? "NOW" : nxC.c.t } : null;
+              return card(it, k, id, nx);
+            }).join("");
+            return '<section class="tp-sd cl" id="' + x.id + '" data-m="' + ea(g.id) + '" data-n="' + n + '">'
+              + '<div class="cl-hd"><div><span class="cl-ey">' + esc(String(now ? "Now" : g.en || g.ko).toUpperCase()) + '</span><h3>' + esc(now ? nowCoName + (nowCo && nowCo.nameEn ? ' (' + nowCo.nameEn + ')' : '') : c.t) + '</h3>'
+              + '<p>' + (now ? esc(txt("tpNowDesc", "숙박·주거 플랫폼")) + ' · ' : '') + n + '개 프로젝트 · ' + esc(yrsOf(c.its, false)) + '</p></div>'
+              + (n > 1 ? '<div class="cl-nav"><span class="cl-cnt"><b>1</b> / ' + n + '</span><button type="button" data-cl-step="-1" aria-label="이전 프로젝트">‹</button><button type="button" data-cl-step="1" aria-label="다음 프로젝트">›</button></div>' : '') + '</div>'
+              + (n > 1 ? '<div class="cl-tabs" role="tablist">' + tabsH + '</div>' : '')
+              + '<div class="cl-body">' + cards + '</div></section>';
+          };
           var slides = TS.map(function (s, si) {
             var g = s.g, now = g.id === "t-recent", cl = clustersOf(s);
             return '<header class="pj-cat" id="tp-' + ea(g.id) + '" data-m="' + ea(g.id) + '"><span class="pj-cn">' + pad2(si + 1) + '</span><div>'
               + '<h2>' + esc(headOf(s)) + '</h2><span class="tp-ey">' + (now ? 'NOW · ' + esc(nowCoName) + ' · ' : '') + esc(spanG(s)) + '</span>'
-              + '<p>' + s.items.length + '개 프로젝트' + (now ? '' : ' · ' + cl.map(function (c) { return esc(c.t); }).join(' · ')) + '</p></div></header>'
-              + cl.map(function (c) { return c.its.map(function (it) { NO++; var id = "tp-p" + it.i; slideOf[it.i] = id; return card(it, g, c.t, NO, TOT, id); }).join(""); }).join("");
+              + '<p>' + s.items.length + '개 프로젝트' + (now ? '' : ' · 묶음 ' + cl.length + '개') + '</p></div></header>'
+              + CLS.map(function (x, xi) { return x.s === s ? clBox(x, xi) : ""; }).join("");
           }).join("");
           // ── 한눈에(첫 화면 바로 다음) — 5분 안에 판단: 지금(AX · 퍼포먼스 + 지금 회사 숫자) → 해온 일(시간순 회사 줄 · 맡은 일 · 대표 숫자)
           //    숫자는 누르면 그 프로젝트가 있는 장으로 이동 · 문구 덮어쓰기: klio.text.tpNowT(지금 하는 일) · tpNowS(아래 한 줄)
@@ -2518,9 +2537,14 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
             + '.pj-cat{display:flex;align-items:baseline;gap:12px;width:var(--tw3);margin:64px auto 16px;scroll-margin-top:76px}.pj-cn{flex:none;font-size:14px;font-weight:600;color:var(--g5);font-variant-numeric:tabular-nums}.pj-cat .tp-ey{display:inline;font-size:13px}'
             + '.pj-cat h2{display:inline;margin-right:10px;font-size:22px;font-weight:700;letter-spacing:-.025em;color:var(--g9)}.pj-cat p{margin-top:6px;font-size:13.5px;color:var(--g6);word-break:keep-all}'
             // 프로젝트 한 장: 메인 카드처럼 흰 바탕 · 얇은 테두리 · 둥근 20 · 작은 글씨 / 숫자는 회색 칸 · 담당업무 | 성과 2칸 · 그림 줄
-            + '.tp-sd.pj{padding:28px 32px 28px;scroll-margin-top:76px;transition:box-shadow .4s var(--te)}.tp-sd.pj.hl{box-shadow:0 0 0 2px var(--bl)}'
-            + '.pj-top{display:flex;justify-content:space-between;gap:12px}.pj-ey{font-size:11px;font-weight:600;letter-spacing:.08em;color:var(--g5);word-break:keep-all}.pj-no{flex:none;font-size:11.5px;font-weight:600;color:var(--g4);font-variant-numeric:tabular-nums}'
-            + '.pj-t{margin-top:8px;font-size:21px;font-weight:700;line-height:1.35;letter-spacing:-.025em;color:var(--g9);word-break:keep-all}'
+            + '.tp-sd.cl{scroll-margin-top:76px;transition:box-shadow .4s var(--te)}.tp-sd.cl.hl{box-shadow:0 0 0 2px var(--bl)}'
+            + '.cl-hd{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;padding:24px 28px 0}.cl-ey{font-size:11px;font-weight:600;letter-spacing:.08em;color:var(--g5)}.cl-hd h3{margin-top:6px;font-size:19px;font-weight:700;letter-spacing:-.02em;color:var(--g9);word-break:keep-all}.cl-hd p{margin-top:4px;font-size:13px;color:var(--g6);font-variant-numeric:tabular-nums}'
+            + '.cl-nav{flex:none;display:flex;align-items:center;gap:6px}.cl-cnt{margin-right:6px;font-size:13px;color:var(--g5);font-variant-numeric:tabular-nums}.cl-cnt b{font-weight:700;color:var(--g9)}.cl-nav button{display:grid;place-items:center;width:34px;height:34px;padding:0 0 2px;border:1px solid var(--g2);border-radius:10px;background:#fff;font-size:18px;line-height:1;color:var(--g7);transition:background .2s}.cl-nav button:hover{background:var(--g1)}'
+            + '.cl-tabs{display:flex;gap:6px;padding:16px 28px 0;overflow-x:auto;scrollbar-width:none}.cl-tabs::-webkit-scrollbar{display:none}.cl-tab{flex:none;display:inline-flex;align-items:center;gap:8px;max-width:280px;height:36px;padding:0 12px;border-radius:10px;background:#f5f6f8;font-size:13px;font-weight:600;color:var(--g6);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;transition:background .2s,color .2s}.cl-tab:hover{color:var(--g9)}'
+            + '.cl-tab i{font-style:normal;font-size:11.5px;color:var(--g4);font-variant-numeric:tabular-nums}.cl-tab.on{background:var(--g9);color:#fff}.cl-tab.on i{color:rgba(255,255,255,.6)}'
+            + '.cl-body{margin-top:16px;border-top:1px solid var(--g2)}.pj{padding:24px 28px 26px}.pj[hidden]{display:none}.pj.in{animation:clIn .35s var(--te)}@keyframes clIn{from{opacity:0;transform:translateX(14px)}}'
+            + '.pj-next{display:flex;justify-content:flex-end;margin-top:22px}.pj-next button{display:inline-flex;align-items:center;gap:8px;max-width:100%;height:42px;padding:0 16px;border-radius:12px;background:var(--g1);font-size:13.5px;color:var(--g7);transition:background .2s}.pj-next button:hover{background:var(--g2)}.pj-next small{flex:none;font-size:12.5px;color:var(--g5)}.pj-next b{overflow:hidden;font-weight:600;color:var(--g9);white-space:nowrap;text-overflow:ellipsis}.pj-next i{flex:none;font-style:normal}'
+            + '.pj-t{font-size:21px;font-weight:700;line-height:1.35;letter-spacing:-.025em;color:var(--g9);word-break:keep-all}'
             + '.pj-meta{display:flex;flex-wrap:wrap;align-items:center;gap:4px 8px;margin-top:10px;font-size:13px;color:var(--g6);font-variant-numeric:tabular-nums}.pj-lg{flex:none;width:22px;height:22px;border-radius:6px;border:1px solid var(--g2);background:#fff;object-fit:contain}.pj-meta b{font-weight:600;color:var(--g8)}.pj-meta span::before{content:"·";margin-right:8px;color:var(--g4)}'
             + '.pj-meta em{margin-left:2px;padding:2px 7px;border-radius:6px;background:var(--bl1);font-style:normal;font-size:11.5px;font-weight:600;color:var(--bl)}'
             + '.pj-s{margin-top:14px;font-size:14.5px;line-height:1.6;color:var(--g8);word-break:keep-all}.pj-q{margin-top:6px;font-size:13px;line-height:1.6;color:var(--g6);word-break:keep-all}.pj-q b{margin-right:8px;font-weight:600;color:var(--g7)}'
@@ -2542,10 +2566,10 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
             + '@media(max-width:1100px){.tp-tab{padding:0 9px;font-size:14px}}'
             + '@media(max-width:900px){.tp-ntabs{display:none}}'
             + '@media(max-width:760px){body.tp{--tw:calc(100vw - 32px);--tw2:calc(100vw - 32px);--tw3:calc(100vw - 32px)}'
-            + '.tp-deck{padding:72px 0 32px}.tp-sd{margin-bottom:14px;border-radius:20px}.tp-sd-in{padding:28px 20px}.tp-sd.pj{padding:24px 20px}.pj-ms{gap:6px}.pj-ms span{padding:10px 12px}.pj-ms b{font-size:19px}.pj-shots{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none}.pj-shots::-webkit-scrollbar{display:none}.pj-sh,.pj-shots[style*="--n:1"] .pj-sh{flex:0 0 78%;height:150px;scroll-snap-align:start}.pj-shots[style*="--n:1"] .pj-sh{flex-basis:100%}.pj-cat{margin-top:48px;flex-wrap:wrap}'
+            + '.tp-deck{padding:72px 0 32px}.tp-sd{margin-bottom:14px;border-radius:20px}.tp-sd-in{padding:28px 20px}.cl-hd{padding:20px 20px 0}.cl-tabs{padding:14px 20px 0}.pj{padding:20px 20px 22px}.pj-ms{gap:6px}.pj-ms span{padding:10px 12px}.pj-ms b{font-size:19px}.pj-shots{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none}.pj-shots::-webkit-scrollbar{display:none}.pj-sh,.pj-shots[style*="--n:1"] .pj-sh{flex:0 0 78%;height:150px;scroll-snap-align:start}.pj-shots[style*="--n:1"] .pj-sh{flex-basis:100%}.pj-cat{margin-top:48px;flex-wrap:wrap}'
             + '.tp-pfs{grid-template-columns:1fr;gap:22px}.tp-pf{display:grid;grid-template-columns:112px minmax(0,1fr);column-gap:12px;align-items:baseline}.tp-pf b{grid-row:span 2;font-size:34px}.tp-pf span{margin-top:0}.tp-pf i{margin-top:2px}.tp-path ol{grid-auto-flow:row;grid-template-columns:1fr}.tp-path li{padding:0 0 22px 22px;border-top:0;border-left:2px solid var(--g2)}.tp-path li::before{left:-6px;top:3px}.tp-path li.now{border-left-color:var(--bl)}.tp-path li>b{margin-top:2px}'
             + '.tp-ctas-in{flex-direction:column-reverse;align-items:flex-start}}'
-            + '@media(prefers-reduced-motion:reduce){.tp-wrow,.tp-cue,.js .tp-hc,.js .tp-aw,.js .tp-al2{animation:none}.tp-wall,.tp-hb{transition:none}.tp-hb{opacity:1;transform:none}}';
+            + '.pj.in{}@media(prefers-reduced-motion:reduce){.pj.in{animation:none}.tp-wrow,.tp-cue,.js .tp-hc,.js .tp-aw,.js .tp-al2{animation:none}.tp-wall,.tp-hb{transition:none}.tp-hb{opacity:1;transform:none}}';
           return '<!doctype html><html lang="ko"><head><script>document.documentElement.classList.add("js")<\/script><meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>'
             + '<title>' + esc(nameKo || nameEn || "포트폴리오") + ' — Projects (test)</title><link rel="icon" href="data:,"/>' + fontHead
             + '<style>' + PSCSS + fontVars + TCSS + '</style></head><body class="tp ft-' + FKEY + '"' + (d.hostStudio ? ' data-host="studio"' : '') + '>'
@@ -2589,16 +2613,35 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
           };
           var onSc = function () { if (nav) nav.classList.toggle("solid", scrollY > 8); spy(); };
           addEventListener("scroll", onSc, { passive: true }); addEventListener("resize", onSc); onSc();
+          // 묶음 박스 안 넘기기: 한 번에 한 장(hidden) · 탭·숫자 표시 · 박스 위가 화면 위로 지나 있으면 박스 머리로 올려 새 장을 처음부터
+          var clSet = function (cl, k, keep) {
+            var cards = $$(".pj", cl), n = cards.length; if (!n) return; k = ((k % n) + n) % n;
+            cards.forEach(function (c, j) { var on = j === k; c.hidden = !on; c.classList.toggle("in", on && !reduce); });
+            $$(".cl-tab", cl).forEach(function (t, j) { t.classList.toggle("on", j === k); if (j === k && t.parentNode.scrollWidth > t.parentNode.clientWidth) t.parentNode.scrollTo({ left: t.offsetLeft - 28, behavior: reduce ? "auto" : "smooth" }); });
+            var cnt = cl.querySelector(".cl-cnt b"); if (cnt) cnt.textContent = k + 1;
+            cl.setAttribute("data-k", k);
+            if (!keep && cl.getBoundingClientRect().top < 60) scrollTo({ top: Math.round(cl.getBoundingClientRect().top + scrollY - 76), behavior: "auto" });
+          };
+          var clStep = function (cl, d) { clSet(cl, (+cl.getAttribute("data-k") || 0) + d); };
+          $$(".cl").forEach(function (cl) {
+            var x0 = null, y0 = null, body = cl.querySelector(".cl-body"); if (!body || +cl.getAttribute("data-n") < 2) return;
+            body.addEventListener("touchstart", function (e) { var p = e.touches[0]; x0 = p.clientX; y0 = p.clientY; }, { passive: true });
+            body.addEventListener("touchend", function (e) { if (x0 == null) return; var p = e.changedTouches[0], dx = p.clientX - x0, dy = p.clientY - y0; x0 = null; if (Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(dy) * 1.5 && !(e.target.closest && e.target.closest(".pj-shots"))) clStep(cl, dx < 0 ? 1 : -1); }, { passive: true });
+            cl.addEventListener("keydown", function (e) { if (e.key === "ArrowRight" || e.key === "ArrowLeft") { e.preventDefault(); clStep(cl, e.key === "ArrowRight" ? 1 : -1); } });
+          });
           var go = function (id) {
             var el = id === "tp-top" ? null : document.getElementById(id === "tp-next" ? "tp-bento" : id);
+            if (el && el.classList.contains("pj")) { var cl = el.closest(".cl"); if (cl) { clSet(cl, +el.getAttribute("data-k") || 0, true); el = cl; } }
             scrollTo({ top: el ? Math.round(el.getBoundingClientRect().top + scrollY - (el.id === "tp-bento" ? 0 : 76)) : 0, behavior: reduce ? "auto" : "smooth" });
           };
           document.addEventListener("click", function (e) {
             var t = e.target, b;
             if (!t.closest) return;
             if ((b = t.closest("[data-tgo]"))) { e.preventDefault(); go(b.getAttribute("data-tgo")); return; }
-            if ((b = t.closest("[data-go]"))) { e.preventDefault(); go(b.getAttribute("data-go")); var pi = b.getAttribute("data-pi"), pe = pi != null && $('.pj[data-pi="' + pi + '"]'); if (pe) { pe.classList.remove("hl"); later(function () { pe.classList.add("hl"); }, reduce ? 0 : 700); later(function () { pe.classList.remove("hl"); }, 2600); } return; }
+            if ((b = t.closest("[data-go]"))) { e.preventDefault(); go(b.getAttribute("data-go")); var pi = b.getAttribute("data-pi"), pe = pi != null && $('.pj[data-pi="' + pi + '"]'), pe = pe && pe.closest(".cl"); if (pe) { pe.classList.remove("hl"); later(function () { pe.classList.add("hl"); }, reduce ? 0 : 700); later(function () { pe.classList.remove("hl"); }, 2600); } return; }
             if ((b = t.closest(".tp-tab"))) { go("tp-" + b.getAttribute("data-sec")); return; }
+            if ((b = t.closest("[data-cl-go]"))) { clSet(b.closest(".cl"), +b.getAttribute("data-cl-go")); return; }
+            if ((b = t.closest("[data-cl-step]"))) { clStep(b.closest(".cl"), +b.getAttribute("data-cl-step")); return; }
           });
         };
         if (d.page === "projects-test") return tossPage();
