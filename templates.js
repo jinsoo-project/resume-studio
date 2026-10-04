@@ -2200,7 +2200,7 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
         };
         pdT = pdT.replace(/<template id="pd-(\d+)">/g, function (_, n) { var it = items.filter(function (q) { return String(q.i) === n; })[0]; return '<template id="pd-' + n + '" data-i="' + n + '" data-id="' + esc(it ? (it.w.id || String(it.i)) : n) + '">'; });
         // ── 테스트 페이지(/{slug}/projects-test · /{slug}/projects/test) — 토스플레이스식 구성 실험 (기존 /projects는 그대로)
-        //    첫 화면(움직이는 썸네일 벽 · 문장) → 덱: '한눈에' 장 → 분류 4장(한 화면 한 장, 스크롤하면 다음 장이 덮음) → 연락
+        //    첫 화면(움직이는 썸네일 벽 · 문장) → 덱: '한눈에' 장 → 묶음마다 한 장(PPT 장처럼 둥근 카드, 보통 스크롤) → 연락
         //    카드 상세는 위 스크롤형의 전체 화면 상세(pdT · psRuntime) 그대로
         var tossPage = function () {
           var ea = function (s) { return esc(s).replace(/"/g, "&quot;"); };
@@ -2363,7 +2363,7 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
             return from && to && from !== to ? from + " – " + to : (from || to);
           };
           // ── 묶음마다 한 화면 한 장(PPT처럼, 묶음 = 최대 3개): 분류 색 바탕 · 위 = 분류 · 시기 → 묶음 이름 · 개수 | 아래 = 프로젝트 칸 2~3개를 나란히(세부 페이지 없이 다 보임)
-          //    스크롤하면 다음 장이 아래에서 올라와 덮음(장은 sticky, 덮이는 장은 살짝 작아지고 어두워짐 — tpRuntime) · 한 화면에 안 들어가면 그 장만 보통 스크롤(.tall)
+          //    장 = PPT 한 장처럼 둥근 카드, 회색 바탕 위에 쭉 이어짐(보통 스크롤)
           //    분류의 첫 장 id = tp-{분류} (상단 탭 이동) · 모든 장 data-m = 분류(탭 표시) · slideOf[프로젝트] = 장 id ('한눈에' 숫자 누르면 그 장으로)
           //    제목 덮어쓰기: klio.text.tpH_{recent|perf|data|camp}(지금 장 제목)
           var headOf = function (s) { return txt("tpH_" + s.g.id.slice(2), s.g.id === "t-recent" ? "AX / 퍼포먼스" : s.g.ko); };
@@ -2451,8 +2451,7 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
           var foot = '<footer class="tp-foot"><div class="tp-foot-in"><span><b>' + esc(nameKo || nameEn) + '</b>' + (P.email ? ' · ' + esc(P.email) : '') + '</span></div></footer>';
           var TCSS = 'body.tp{--g9:#191f28;--g8:#333d4b;--g7:#4e5968;--g6:#6b7684;--g5:#8b95a1;--g4:#b0b8c1;--g2:#e5e8eb;--g1:#f2f4f6;--bl:#3182f6;--bl1:#e8f3ff;--te:cubic-bezier(.2,.8,.2,1);--tw:min(1080px,calc(100vw - 48px));--tw2:min(1200px,calc(100vw - 48px));--tw3:min(1320px,calc(100vw - 64px));background:#fff;color:var(--g9);font-family:' + SANS_KR + ';letter-spacing:-.01em}'
             + '.tp :focus-visible{outline:2px solid var(--bl);outline-offset:3px}'
-            + '.js .tp-rv{opacity:0;transform:translateY(40px);transition:opacity .8s var(--te),transform .9s var(--te);transition-delay:var(--dl,0ms)}.js .tp-rv.in{opacity:1;transform:none}'
-            // 상단 바(첫 화면 위 투명 → 지나면 흰 바탕)
+                        // 상단 바(첫 화면 위 투명 → 지나면 흰 바탕)
             + '.tp-nav{position:fixed;left:0;right:0;top:0;z-index:50;height:60px;transition:background .3s,box-shadow .3s}.tp-nav-in{width:var(--tw3);height:100%;margin:0 auto;display:flex;align-items:center;gap:20px}'
             + '.tp-logo{display:inline-flex;align-items:center;font-size:18px;font-weight:800;letter-spacing:-.03em;color:#fff;white-space:nowrap}.tp-logo small{margin-left:10px;padding-left:10px;border-left:1px solid currentColor;font-size:11px;font-weight:600;opacity:.7}'
             + '.tp-nback{display:inline-flex;align-items:center;height:40px;padding:0 12px;border-radius:8px;font-size:15px;font-weight:600;color:rgba(255,255,255,.85);transition:background .2s}.tp-nback:hover{background:rgba(255,255,255,.12)}.tp-nr{margin-left:auto;display:flex;align-items:center;gap:6px}'
@@ -2473,19 +2472,14 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
             + '.tp-hb{display:flex;flex-wrap:wrap;justify-content:center;gap:12px;opacity:0;transform:translateY(12px);transition:opacity .8s var(--te) .2s,transform .9s var(--te) .2s}.tp-hero.ld .tp-hb{opacity:1;transform:none}'
             + '.tp-b{display:inline-flex;align-items:center;justify-content:center;height:56px;padding:0 26px;border-radius:16px;font-size:18px;font-weight:600;transition:transform .2s var(--te),filter .2s}.tp-b:active{transform:scale(.96)}.tp-b.pri{background:var(--bl);color:#fff}.tp-b.pri:hover{filter:brightness(1.08)}'
             + '.tp-cue{position:absolute;left:50%;bottom:28px;z-index:2;width:44px;height:44px;margin-left:-22px;border-radius:50%;background:rgba(255,255,255,.14);display:grid;place-items:center;animation:tpBob 2.2s ease-in-out infinite}.tp-cue:hover{background:rgba(255,255,255,.24)}@keyframes tpBob{50%{transform:translateY(6px)}}'
-            // 스크롤하면 첫 화면이 액자처럼 안쪽으로 줄어들며(--hs) 글자가 올라가 사라짐
-            + '.tp-hero{clip-path:inset(calc(var(--hs,0) * 5%) calc(var(--hs,0) * 3.5%) round calc(var(--hs,0) * 48px))}'
-            + '.tp-hc{transform:translateY(calc(var(--hs,0) * -90px)) scale(calc(1 - var(--hs,0) * .08));opacity:calc(1 - var(--hs,0) * 1.6)}.tp-cue{opacity:calc(1 - var(--hs,0) * 3)}'
             // 상단 바 안 분류 탭(첫 화면 지나면 보임) · 지금 보고 있는 장 = 진하게 + 밑줄
             + '.tp-ntabs{display:flex;gap:2px;margin:0 auto;opacity:0;pointer-events:none;transition:opacity .3s}.tp-nav.solid .tp-ntabs{opacity:1;pointer-events:auto}'
             + '.tp-tab{position:relative;flex:none;height:60px;padding:0 12px;font-size:15px;font-weight:600;color:var(--g5);white-space:nowrap;transition:color .2s}.tp-tab:hover{color:var(--g8)}.tp-tab.on{color:var(--g9)}'
             + '.tp-tab::after{content:"";position:absolute;left:12px;right:12px;bottom:0;height:2px;border-radius:2px;background:var(--g9);transform:scaleX(0);transition:transform .35s var(--te)}.tp-tab.on::after{transform:none}'
-            // 장(슬라이드): 한 화면 꽉 · sticky로 쌓여 다음 장이 덮음 · 덮이는 장은 --cv(0→1)만큼 작아지고 어두워짐 · 한 화면을 넘으면 .tall = 보통 스크롤
-            + '.tp-sd{position:sticky;top:0;height:100vh;height:100svh;overflow:hidden;background:#fff;box-shadow:0 -30px 60px -30px rgba(0,0,0,.28)}.tp-sd:first-child{box-shadow:none}'
-            + '.tp-sd::after{content:"";position:absolute;inset:0;z-index:3;background:#0b0d10;opacity:calc(var(--cv,0) * .45);pointer-events:none}'
-            + '.tp-sd-in{display:flex;flex-direction:column;justify-content:center;width:var(--tw3);height:100%;margin:0 auto;padding:calc(60px + clamp(24px,5vh,56px)) 0 clamp(24px,5vh,56px);transform:scale(calc(1 - var(--cv,0) * .05));transform-origin:50% 20%}'
-            + '.tp-sd.tall{position:relative;height:auto;min-height:100vh;min-height:100svh}.tp-sd.tall .tp-sd-in{height:auto;min-height:inherit;transform:none}.tp-sd.tall::after{display:none}'
-            + '.tp-sd .ri{opacity:0;transform:translateY(28px);transition:opacity .7s var(--te),transform .8s var(--te);transition-delay:calc(var(--j,0) * 55ms)}.tp-sd.on .ri{opacity:1;transform:none}'
+            // 장(슬라이드) = PPT 한 장처럼 둥근 카드 · 회색 바탕 위에 간격을 두고 쭉 이어짐 (보통 스크롤 · 겹침·움직임 없음)
+            + '.tp-deck{padding:clamp(76px,9vh,100px) 0 clamp(40px,6vh,64px);background:var(--g1)}'
+            + '.tp-sd{position:relative;width:var(--tw3);margin:0 auto clamp(20px,3vh,32px);border-radius:28px;overflow:hidden;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.05)}'
+            + '.tp-sd-in{display:flex;flex-direction:column;padding:clamp(32px,4.4vw,64px)}'
             // 한눈에 장: 지금(큰 제목) → 지금 숫자 3칸(누르면 그 프로젝트) → 해온 일(가로 경력 줄 · 회사별 대표 숫자, 지금 = 파랑)
             + '.tp-ey{display:block;font-size:16px;font-weight:600;color:var(--bl);font-variant-numeric:tabular-nums}'
             + '.tp-now h2{margin-top:12px;font-size:clamp(30px,3.2vw,46px);font-weight:700;line-height:1.3;letter-spacing:-.03em;color:var(--g9);word-break:keep-all}.tp-now p{margin-top:12px;font-size:18px;color:var(--g6);font-variant-numeric:tabular-nums}'
@@ -2520,15 +2514,15 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
             + '.tp-sb{display:inline-flex;align-items:center;height:48px;padding:0 18px;border-radius:12px;font-size:17px;font-weight:600}.tp-sb.l{background:rgba(100,168,255,.15);color:var(--bl)!important}.tp-sb.p{background:var(--bl);color:#fff!important}'
             + '.tp-me{flex:none;width:clamp(140px,15vw,210px);aspect-ratio:1;border-radius:40px;object-fit:cover}'
             + '.tp-foot{position:relative;z-index:1;padding:44px 0 90px;background:var(--g8);color:#d1d6db;font-size:14px}.tp-foot-in{display:flex;flex-wrap:wrap;justify-content:space-between;gap:12px 32px;width:var(--tw);max-width:1000px;margin:0 auto}.tp-foot b{margin-right:4px;font-size:16px;color:#fff}'
-            + '@supports (corner-shape:squircle){.sd-p,.tp-me{corner-shape:squircle}.sd-p{border-radius:30px}.tp-me{border-radius:64px}}'
-            // 화면 폭별: 1100 이하 = 칸 최대 2개 · 900 이하 = 상단 탭 숨김 · 760 이하 = 장 쌓기 끄고 보통 흐름(칸 한 줄씩)
+            + '@supports (corner-shape:squircle){.tp-sd,.sd-p,.tp-me{corner-shape:squircle}.tp-sd{border-radius:48px}.sd-p{border-radius:30px}.tp-me{border-radius:64px}}'
+            // 화면 폭별: 1100 이하 = 칸 최대 2개 · 900 이하 = 상단 탭 숨김 · 760 이하 = 장 여백 줄이고 칸 한 줄씩
             + '@media(max-width:1100px){.sd-ps{grid-template-columns:repeat(min(var(--cols,3),2),minmax(0,1fr))}.tp-tab{padding:0 9px;font-size:14px}}'
             + '@media(max-width:900px){.tp-ntabs{display:none}}'
             + '@media(max-width:760px){body.tp{--tw:calc(100vw - 32px);--tw2:calc(100vw - 32px);--tw3:calc(100vw - 32px)}'
-            + '.tp-sd{position:relative;height:auto;min-height:0;box-shadow:none}.tp-sd::after{display:none}.tp-sd-in{height:auto;padding:56px 0;transform:none}.tp-gl .tp-sd-in{padding-top:72px}.sd-ps{grid-template-columns:1fr}.sd-m{height:200px}'
+            + '.tp-deck{padding:72px 0 32px}.tp-sd{margin-bottom:14px;border-radius:20px}.tp-sd-in{padding:28px 20px}.sd-ps{grid-template-columns:1fr}.sd-m{height:200px}'
             + '.tp-pfs{grid-template-columns:1fr;gap:22px}.tp-pf{display:grid;grid-template-columns:112px minmax(0,1fr);column-gap:12px;align-items:baseline}.tp-pf b{grid-row:span 2;font-size:34px}.tp-pf span{margin-top:0}.tp-pf i{margin-top:2px}.tp-path ol{grid-auto-flow:row;grid-template-columns:1fr}.tp-path li{padding:0 0 22px 22px;border-top:0;border-left:2px solid var(--g2)}.tp-path li::before{left:-6px;top:3px}.tp-path li.now{border-left-color:var(--bl)}.tp-path li>b{margin-top:2px}'
-            + '.tp-hero{clip-path:inset(calc(var(--hs,0) * 3%) calc(var(--hs,0) * 3%) round calc(var(--hs,0) * 28px))}.tp-ctas-in{flex-direction:column-reverse;align-items:flex-start}}'
-            + '@media(prefers-reduced-motion:reduce){.tp-wrow,.tp-cue,.js .tp-hc,.js .tp-aw,.js .tp-al2{animation:none}.tp-wall,.tp-hb{transition:none}.tp-hero{clip-path:none}.tp-hc{transform:none;opacity:1}.tp-hb{opacity:1;transform:none}.js .tp-rv,.tp-sd .ri{opacity:1;transform:none;transition:none}.tp-sd-in{transform:none}.tp-sd::after{display:none}}';
+            + '.tp-ctas-in{flex-direction:column-reverse;align-items:flex-start}}'
+            + '@media(prefers-reduced-motion:reduce){.tp-wrow,.tp-cue,.js .tp-hc,.js .tp-aw,.js .tp-al2{animation:none}.tp-wall,.tp-hb{transition:none}.tp-hb{opacity:1;transform:none}}';
           return '<!doctype html><html lang="ko"><head><script>document.documentElement.classList.add("js")<\/script><meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>'
             + '<title>' + esc(nameKo || nameEn || "포트폴리오") + ' — Projects (test)</title><link rel="icon" href="data:,"/>' + fontHead
             + '<style>' + PSCSS + fontVars + TCSS + '</style></head><body class="tp ft-' + FKEY + '"' + (d.hostStudio ? ' data-host="studio"' : '') + '>'
@@ -2537,7 +2531,7 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
             + pdT
             + '<script>(' + psRuntime.toString() + ')();(' + tpRuntime.toString() + ')();<\/script></body></html>';
         };
-        // 테스트 페이지 동작: 등장 · 상단 바 · 첫 화면 문장 전환(단어 슬롯) · 첫 화면 ↔ 프로젝트 스냅 · 장(슬라이드) 쌓기 · 상단 분류 탭 (숨은 탭에서도 돌게 타이머 기반)
+        // 테스트 페이지 동작: 상단 바 · 첫 화면 문장 전환(단어 슬롯) · 상단 분류 탭 표시·이동 · 작은 그림 전환 (숨은 탭에서도 돌게 타이머 기반)
         var tpRuntime = function () {
           "use strict";
           var body = document.body, reduce = matchMedia("(prefers-reduced-motion: reduce)").matches, still = body.hasAttribute("data-still");
@@ -2563,60 +2557,18 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
           // 로딩: 벽(배경)이 크게에서 제자리로 나타나고 버튼이 올라옴
           var hero = $(".tp-hero"), ld = function () { if (hero) hero.classList.add("ld"); };
           if (reduce || still) ld(); else later(ld, 2300);
-          // 스크롤: 상단 바(조금만 내려도 흰 바탕) · 첫 화면이 액자처럼 줄어듦(--hs) · 장(슬라이드) 쌓기
-          //   장 = sticky로 화면에 붙고 다음 장이 아래에서 올라와 덮음 → 덮이는 장에 --cv(0→1: 작아지고 어두워짐) · 장이 화면 45%까지 오면 .on(내용이 차례로 떠오름, 한 번만)
-          //   한 화면에 안 들어가는 장은 .tall(보통 스크롤) · 장 위치(tops)는 쌓이기 전 자리 = 덱 시작 + 앞 장들 높이 합
-          var nav = $(".tp-nav"), tabs = $$(".tp-tab"), deck = $(".tp-deck"), sds = $$(".tp-sd"), tops = [];
-          var stuck = function (sd) { return getComputedStyle(sd).position === "sticky"; };
-          var measure = function () {
-            sds.forEach(function (sd) { sd.classList.remove("tall"); var inn = sd.firstElementChild; if (inn && stuck(sd) && inn.scrollHeight > inn.clientHeight + 2) sd.classList.add("tall"); });
-            var y = deck ? Math.round(deck.getBoundingClientRect().top + scrollY) : 0;
-            tops = sds.map(function (sd) { var t = y; y += sd.offsetHeight; return t; });
-          };
+          // 스크롤: 상단 바(조금만 내려도 흰 바탕) · 지금 보고 있는 장의 분류 탭 표시 · 탭·버튼 누르면 그 장으로 (움직임·스크롤 가로채기 없음)
+          var nav = $(".tp-nav"), tabs = $$(".tp-tab"), sds = $$(".tp-sd");
           var spy = function () {
-            var y = scrollY, H = innerHeight, k = -1;
-            tops.forEach(function (t, i) { if (t <= y + H * .45) k = i; });
-            sds.forEach(function (sd, i) {
-              if (i <= k && !sd.classList.contains("on")) sd.classList.add("on");
-              var nt = tops[i + 1], cv = nt != null && !reduce && !sd.classList.contains("tall") && stuck(sd) ? Math.max(0, Math.min(1, (y - (nt - H)) / H)) : 0;
-              sd.style.setProperty("--cv", cv.toFixed(3));
-            });
-            var m = k >= 0 ? sds[k].getAttribute("data-m") : "";
+            var lim = innerHeight * .4, m = "";
+            sds.forEach(function (sd) { if (sd.getBoundingClientRect().top <= lim) m = sd.getAttribute("data-m"); });
             tabs.forEach(function (t) { t.classList.toggle("on", t.getAttribute("data-sec") === m); });
           };
-          if (reduce || still) sds.forEach(function (sd) { sd.classList.add("on"); });
-          var onSc = function () {
-            var y = scrollY, H = hero ? hero.offsetHeight : 1;
-            if (nav) nav.classList.toggle("solid", y > 8);
-            if (hero && !reduce) hero.style.setProperty("--hs", Math.max(0, Math.min(1, y / H)).toFixed(3));
-            spy();
-          };
-          var onRs = function () { measure(); onSc(); };
-          addEventListener("scroll", onSc, { passive: true }); addEventListener("resize", onRs); onRs();
-          if (document.fonts && document.fonts.ready) document.fonts.ready.then(onRs);
-          addEventListener("load", onRs);
-          // 첫 화면 ↔ 프로젝트(토스처럼): 살짝만 스크롤해도(휠·스와이프·↓·PageDown·Space) 프로젝트 첫 화면까지 부드럽게 미끄러져 내려가고, 거기서 위로 올리면 첫 화면으로
-          var tgt = function () { return tops.length ? tops[0] : 0; }; // 첫 장(한눈에) = 덱 시작
-          var busy = false, ease = function (t) { return t < .5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2; };
-          var glide = function (y) {
-            if (reduce) { scrollTo({ top: y, behavior: "auto" }); return; }
-            busy = true; var y0 = scrollY, t0 = Date.now(), dur = 1000, done = false;
-            var fin = function () { if (done) return; done = true; setTimeout(function () { busy = false; }, 220); };
-            (function st() { var k = Math.min(1, (Date.now() - t0) / dur); scrollTo({ top: y0 + (y - y0) * ease(k), behavior: "instant" }); if (k < 1) requestAnimationFrame(st); else fin(); })();
-            setTimeout(function () { if (!done) { scrollTo({ top: y, behavior: "instant" }); fin(); } }, dur + 400);
-          };
-          var blocked = function () { return still || body.classList.contains("pd-open"); };
-          var snapDir = function (dir) { var y = scrollY, T = tgt(); if (dir > 0 && y < T - 2) { glide(T); return true; } if (dir < 0 && y > 0 && y <= T + 2) { glide(0); return true; } return false; };
-          addEventListener("wheel", function (e) { if (blocked()) return; if (busy) { e.preventDefault(); return; } if (Math.abs(e.deltaY) < 3) return; if (snapDir(e.deltaY > 0 ? 1 : -1)) e.preventDefault(); }, { passive: false });
-          addEventListener("keydown", function (e) { if (blocked() || /input|textarea|select/i.test((e.target || {}).tagName || "")) return; var k = e.key, dir = (k === "ArrowDown" || k === "PageDown" || k === " ") ? 1 : (k === "ArrowUp" || k === "PageUp") ? -1 : 0; if (!dir) return; if (busy || snapDir(dir)) e.preventDefault(); });
-          var ty = null, tx = null;
-          addEventListener("touchstart", function (e) { var p = e.touches && e.touches[0]; ty = p ? p.clientY : null; tx = p ? p.clientX : null; }, { passive: true });
-          addEventListener("touchmove", function (e) { if (blocked()) return; if (busy) { e.preventDefault(); return; } if (ty == null || !e.touches[0]) return; var dy = ty - e.touches[0].clientY, dx = tx - e.touches[0].clientX; if (Math.abs(dy) < 14 || Math.abs(dx) > Math.abs(dy)) return; ty = null; if (snapDir(dy > 0 ? 1 : -1)) e.preventDefault(); }, { passive: false });
+          var onSc = function () { if (nav) nav.classList.toggle("solid", scrollY > 8); spy(); };
+          addEventListener("scroll", onSc, { passive: true }); addEventListener("resize", onSc); onSc();
           var go = function (id) {
-            if (id === "tp-top") { glide(0); return; }
-            if (id === "tp-next" || id === "tp-bento") { glide(tgt()); return; }
-            var el = document.getElementById(id), i = sds.indexOf(el); if (!el) return;
-            scrollTo({ top: i >= 0 ? tops[i] : el.getBoundingClientRect().top + scrollY - 60, behavior: reduce ? "auto" : "smooth" });
+            var el = id === "tp-top" ? null : document.getElementById(id === "tp-next" ? "tp-bento" : id);
+            scrollTo({ top: el ? Math.round(el.getBoundingClientRect().top + scrollY - (el.classList.contains("tp-sd") ? 76 : 0)) : 0, behavior: reduce ? "auto" : "smooth" });
           };
           document.addEventListener("click", function (e) {
             var t = e.target, b;
