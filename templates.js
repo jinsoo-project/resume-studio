@@ -2255,18 +2255,33 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
             if (b.y === a.y && b.m === a.m) return s;
             return s + " – " + (b.y === a.y ? b.m : b.y + "." + b.m);
           };
-          // Problem이 비어 있는 작업의 기본 '왜'(DB에 Problem을 쓰면 그게 우선)
+          // 카드의 '왜' = 핵심 한 줄(긴 설명은 누르면 열리는 상세의 Problem에) · 우선순위: klio.cards[id].why → 아래 핵심 문구 → 작업의 Problem
           var WHY = {
-            "731ea8fe-9bb7-41ce-8cc1-687f77f9c49c": "팀마다 보는 숫자가 달라 예산과 성과를 같은 기준으로 판단하기 어려웠어요.",
-            "8fe4e187-9052-4737-9d1b-d0a158d9e156": "외부 툴 데이터를 손으로 모아 집계하느라 리포트가 늦었어요.",
-            "199815d6-356c-4959-8219-6c9ea7615102": "이벤트 기준이 없어 어떤 채널이 구매로 이어졌는지 나눠 보기 어려웠어요.",
-            "0a3aea35-ccc9-4018-a7a6-e383c303f928": "호텔·여행처럼 단기 프로모션이 많은 커머스라 매체 예산을 빠르게 옮겨야 했어요.",
-            "c90c1643-f38b-4f2d-a668-9e0f3c87094a": "퍼포먼스 효율을 끌어올릴 영상·이미지 소재가 계속 필요했어요.",
-            "2c1ddb7a-e1a3-4adb-a18e-e1b43ad8f731": "제휴로 기존 고객의 교차·추가 구매를 만들어야 했어요.",
-            "4d333686-6daa-4c8e-9cd7-3e8309ef9900": "상품명·카테고리 클린 위반으로 네이버쇼핑 노출이 불안정했어요.",
-            "944ff76c-037e-4c72-92ac-81f4dcabb366": "소재·채널 성과를 같은 기준으로 보려면 지표부터 정해야 했어요."
+            "77afd48a-668b-4ab1-b385-32fa41400211": "요청→개발 대기→수기 취합 병목",
+            "dff32975-e504-47e3-8ee1-744f2267ac91": "ROAS 0.3~0.8 만성 저효율",
+            "60f3fcee-e8b2-4499-b7d1-71e4f91ad2f5": "측정·채널이 전무한 신사업",
+            "0a3aea35-ccc9-4018-a7a6-e383c303f928": "프로모션마다 바뀌는 예산",
+            "b0aa1d32-82d9-44bc-897d-b558a425c98c": "커진 예산에서 CPI 방어",
+            "4b05d1fb-1cae-47af-a252-5b3d46902125": "이탈 유저 재활성화",
+            "c54a836e-546c-4355-b2ac-213c3d444be2": "UAC 채널 맞춤 소재 필요",
+            "aab659e9-be16-46dc-9730-18d845c1dc64": "MAU 성장을 이끌 소재",
+            "574f26d3-1fff-49fb-a302-b8c12253df61": "설치·인지 두 목표 동시 공략",
+            "731ea8fe-9bb7-41ce-8cc1-687f77f9c49c": "팀마다 다른 숫자",
+            "944ff76c-037e-4c72-92ac-81f4dcabb366": "성과를 볼 기준 지표 부재",
+            "8fe4e187-9052-4737-9d1b-d0a158d9e156": "손으로 모으던 외부 데이터",
+            "199815d6-356c-4959-8219-6c9ea7615102": "채널 기여를 나눌 기준 부재",
+            "c90c1643-f38b-4f2d-a668-9e0f3c87094a": "퍼포먼스 소재 상시 필요",
+            "ea1d35c1-b9f4-4420-8d35-b26ec4709a10": "뷰티 리뷰 채널 성장",
+            "e68c8938-fbb0-4a88-a9a1-dbb3d8c71243": "퀄리티로 재계약·신규 확보",
+            "2c1ddb7a-e1a3-4adb-a18e-e1b43ad8f731": "제휴로 교차·추가 구매",
+            "53845c2b-3618-4e8d-968c-1edfabdf4912": "CSR로 브랜드 강화",
+            "43ab6811-42cf-4a1f-afca-62bfd67b17f9": "부작용 경각심 · 앱 신뢰",
+            "fd404ac5-7f46-420b-97dc-a2b8e89bc445": "경쟁사 대비 인지도 파악",
+            "4d333686-6daa-4c8e-9cd7-3e8309ef9900": "클린 위반으로 노출 불안정",
+            "2380b3b4-8dba-4b9d-9f96-38568a79936b": "혜택 콘텐츠로 유입 확대",
+            "5afefe01-835b-48eb-9568-e6f51f6650ce": "재고 3,000개 소진"
           };
-          var whyOf = function (it) { return it.why || String(it.w.problem || "").trim() || WHY[it.w.id] || ""; };
+          var whyOf = function (it) { return it.why || WHY[it.w.id] || String(it.w.problem || "").trim() || ""; };
           var card = function (it, j) {
             return '<button class="tp-card tp-rv" type="button" data-open="' + it.i + '" style="--bg:' + deep(it) + ';--c:' + it.cm.c + ';--dl:' + (j * 70) + 'ms" aria-label="' + ea(it.title) + ' 자세히 보기">'
               + '<span class="tp-ct"><span class="tp-when">' + esc(when(it)) + (it.co ? '<i>' + esc(dispName(it.co)) + '</i>' : '') + '</span>'
@@ -2397,7 +2412,7 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
             + '.tp-ct{flex:none;display:flex;flex-direction:column;padding:24px 24px 0}'
             + '.tp-when{display:flex;flex-wrap:wrap;gap:2px 8px;font-size:13px;font-weight:600;color:rgba(255,255,255,.72);font-variant-numeric:tabular-nums;letter-spacing:0}.tp-when i{font-style:normal;font-weight:500;color:rgba(255,255,255,.55)}'
             + '.tp-ttl{margin-top:10px;font-size:clamp(19px,1.45vw,22px);font-weight:700;line-height:1.34;letter-spacing:-.025em;word-break:keep-all;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}'
-            + '.tp-why{margin-top:14px;padding-top:14px;border-top:1px solid rgba(255,255,255,.2);font-size:14.5px;font-weight:500;line-height:1.6;color:rgba(255,255,255,.82);word-break:keep-all;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}'
+            + '.tp-why{margin-top:14px;padding-top:14px;border-top:1px solid rgba(255,255,255,.2);font-size:15px;font-weight:600;line-height:1.5;color:rgba(255,255,255,.9);word-break:keep-all;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}'
             + '.tp-fr{position:relative;flex:1;min-height:110px;margin:20px 24px 0;border-radius:14px 14px 0 0;overflow:hidden;pointer-events:none;background:rgba(255,255,255,.08)}'
             + '.tp-fr.img::before,.tp-fr.yt::before{content:"";position:absolute;inset:-24px;background:var(--img) center/cover no-repeat;filter:blur(20px) saturate(1.1);opacity:.5}'
             + '.tp-fr>*{position:absolute;inset:14px;margin:auto}'
