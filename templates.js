@@ -2240,7 +2240,8 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
             { id: "t-recent", bg: "#2d3038", ko: "NOW", en: "Now" },
             { id: "t-perf", bg: "#2f5f99", ko: "퍼포먼스 / CRM", en: "Performance & CRM" },
             { id: "t-data", bg: "#2b6a5f", ko: "데이터 / 택소노미", en: "Data & Taxonomy" },
-            { id: "t-camp", bg: "#93503c", ko: "콘텐츠 / 캠페인", en: "Content & Campaign" }
+            { id: "t-camp", bg: "#93503c", ko: "브랜드 · 세일즈 캠페인", en: "Brand & Sales Campaign" },
+            { id: "t-cont", bg: "#6a4c93", ko: "콘텐츠 · 영상", en: "Content & Video" }
           ];
           // 프로젝트 배치(2026-10-04 사용자 확정 · 예전 PDF 포트폴리오 기준): id → [분류, 묶음] · 여기 없는 프로젝트는 아래 규칙(지금 회사 = NOW)
           var PLACE = {
@@ -2260,8 +2261,8 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
             "2c1ddb7a-e1a3-4adb-a18e-e1b43ad8f731": ["t-camp", "세일즈 캠페인 · 커머스"], // USJ
             "2380b3b4-8dba-4b9d-9f96-38568a79936b": ["t-camp", "세일즈 캠페인 · 커머스"], // 화장품 특가
             "5afefe01-835b-48eb-9568-e6f51f6650ce": ["t-camp", "세일즈 캠페인 · 커머스"], // 갈바닉
-            "ea1d35c1-b9f4-4420-8d35-b26ec4709a10": ["t-camp", "영상 · 채널"], // 쎄뷰리
-            "e68c8938-fbb0-4a88-a9a1-dbb3d8c71243": ["t-camp", "영상 · 채널"] // 영상 PD
+            "e68c8938-fbb0-4a88-a9a1-dbb3d8c71243": ["t-cont", "영상 · 채널"], // 영상 PD
+            "ea1d35c1-b9f4-4420-8d35-b26ec4709a10": ["t-cont", "영상 · 채널"] // 쎄뷰리
           };
           // NOW(지금 회사) 순서: AX → 어반스테이(D2C) → 플라트라이프 → 그 밖(웨이브 등 새 프로젝트는 뒤에 자동으로)
           var NOWORDER = ["77afd48a-668b-4ab1-b385-32fa41400211", "dff32975-e504-47e3-8ee1-744f2267ac91", "60f3fcee-e8b2-4499-b7d1-71e4f91ad2f5"];
@@ -2271,7 +2272,8 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
             if (PLACE[it.w.id]) return PLACE[it.w.id][0];
             if (c === "성과") return "t-data";
             if (/소재/.test(t) || c === "퍼포먼스" || c === "그로스" || c === "CRM") return "t-perf";
-            if (c === "콘텐츠" || c === "영상" || c === "브랜딩" || c === "커머스" || c === "제휴") return "t-camp";
+            if (c === "영상" || (c === "콘텐츠" && /영상|유튜브|채널/.test(t))) return "t-cont";
+            if (c === "콘텐츠" || c === "브랜딩" || c === "커머스" || c === "제휴") return "t-camp";
             return "t-perf";
           };
           // 카드 순서: 모든 분류 최신 회사순(재직 중 → 최근 퇴사) → 같은 회사 안에서 최근 프로젝트 먼저 · 이 페이지에서 빼는 프로젝트(소비자 조사)
@@ -2414,12 +2416,11 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
               { t: "데이터 파이프라인 · 어트리뷰션", m: function (it) { return /파이프라인|어트리뷰션|택소노미|Amplitude|Airbridge/i.test(String(it.w.title || "")); } }
             ],
             "t-camp": [
-              { t: "영상 · 채널 콘텐츠", m: function (it) { var c = it.w.category; return c === "영상" || (c === "콘텐츠" && /영상|유튜브|채널/.test(String(it.w.title || ""))); } },
               { t: "브랜드 · 제휴 캠페인", m: function (it) { var c = it.w.category; return c === "브랜딩" || c === "제휴"; } },
               { t: "특가 · 핫딜 커머스", m: function (it) { return it.w.category === "커머스"; } }
             ]
           };
-          var CLORDER = { "t-perf": ["매체 · 캠페인 운영", "소재 · CRM"], "t-data": ["지표 · 리포팅 자동화", "네이버쇼핑 · SEO"], "t-camp": ["브랜드 캠페인", "세일즈 캠페인 · 커머스", "영상 · 채널"] };
+          var CLORDER = { "t-perf": ["매체 · 캠페인 운영", "소재 · CRM"], "t-data": ["지표 · 리포팅 자동화", "네이버쇼핑 · SEO"], "t-camp": ["브랜드 캠페인", "세일즈 캠페인 · 커머스"], "t-cont": ["영상 · 채널"] };
           var clustersOf = function (s) {
             if (s.g.id === "t-recent") { var oi = function (it) { var k = NOWORDER.indexOf(it.w.id); return k < 0 ? 99 : k; }; return [{ t: nowCoName || "지금", its: s.items.slice().sort(function (a, b) { return oi(a) - oi(b); }) }]; }
             var rest = s.items.slice(), out = [];
@@ -2445,7 +2446,9 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
           var slideOf = {};
           // ── 분류 = 챕터: 표지 한 장(어두운 장 · 번호 · 제목 · 한 줄 · 대표 숫자 3 · 이 챕터 프로젝트 목록(묶음별, 누르면 그 장)) → 프로젝트 장들
           //    표지 id = tp-{분류}(상단 탭 이동) · 한 줄 덮어쓰기 klio.text.tpD_{recent|perf|data|camp}
-          var CDESC = { "t-recent": "숙박·주거 플랫폼에서 AX · 퍼포먼스 · 그로스", "t-perf": "매체 운영 · 캠페인 최적화 · 광고 소재 · CRM", "t-data": "지표 체계 · 리포팅 자동화 · 어트리뷰션 · 검색 노출", "t-camp": "브랜드 캠페인 · 세일즈 프로모션 · 영상 제작" };
+          var CDESC = { "t-recent": "숙박·주거 플랫폼에서 AX · 퍼포먼스 · 그로스", "t-perf": "매체 운영 · 캠페인 최적화 · 광고 소재 · CRM", "t-data": "지표 체계 · 리포팅 자동화 · 어트리뷰션 · 검색 노출", "t-camp": "브랜드 캠페인 · 세일즈 프로모션 · 커머스", "t-cont": "영상 기획 · 촬영 · 편집 · 유튜브 채널 운영" };
+          // 챕터 표지 운영 사이클(PPT 9쪽 '퍼포먼스 마케팅 운영 사이클') — [단계, 설명]
+          var CYCLE = { "t-perf": [["KPI · 타겟 정의", "세그먼트 분류"], ["미디어 믹스", "예산 & 매체"], ["캠페인 구조", "웹&앱 · UA & 리타게팅"], ["소재 제작", "이미지 · 영상 · 텍스트"], ["세팅 · 운영", "A/B 테스트"], ["성과 모니터링", "자동화 대시보드"], ["분석", "인사이트 도출"], ["개선", "매체·캠페인 구조 · 소재"]] };
           var thumbOf = function (it) { var bs = PPT_BOARDS_OF[it.w.id] || [], b = bs.length && PPT_BOARD[bs[0]]; return b && b.i.length ? PPT_IMG + b.i[0][0] + ".jpg" : it.main ? it.main.src : (it.co && it.co.logo) || ""; }; // 판 첫 그림 → 대표 그림 → 회사 로고
           var NO = 0, TOT = TS.reduce(function (a, x) { return a + x.items.length; }, 0);
           var slides = TS.map(function (s, si) {
@@ -2463,6 +2466,7 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
               + '<div class="cv-top"><span>CHAPTER ' + pad2(si + 1) + ' · ' + esc(String(now ? "Now" : g.en || g.ko).toUpperCase()) + '</span><span>' + s.items.length + '개 프로젝트 · ' + esc(spanG(s)) + '</span></div>'
               + (now ? '<span class="cv-ey">NOW · ' + esc(nowCoName) + '</span>' : '') + '<h2 class="cv-h">' + esc(headOf(s)) + '</h2>'
               + '<p class="cv-d">' + esc(txt("tpD_" + g.id.slice(2), now ? txt("tpNowDesc", CDESC[g.id]) : CDESC[g.id] || "")) + '</p>'
+              + (CYCLE[g.id] ? '<div class="cv-cy"><h4>운영 사이클</h4><ol>' + CYCLE[g.id].map(function (c, k) { return '<li><i>' + pad2(k + 1) + '</i><b>' + esc(c[0]) + '</b><span>' + esc(c[1]) + '</span></li>'; }).join("") + '</ol></div>' : '')
               + (kf.length ? '<div class="cv-ks">' + kf.map(function (it) { var m = it.mets[0]; return '<span><b>' + esc(m.value) + '</b><i>' + esc(m.label || "") + '</i><em>' + esc(String(it.title).split(/\s+[—–]\s+/)[0]) + '</em></span>'; }).join("") + '</div>' : '')
               + '<div class="cv-ix" style="--c:' + cl.length + '">' + idx + '</div></section>';
             return cover + cl.map(function (c) { return c.its.map(function (it) { NO++; var id = "tp-p" + it.i; slideOf[it.i] = id; return slide(it, g, c.t, NO, TOT, id); }).join(""); }).join("");
@@ -2581,7 +2585,11 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
             + '.cv-top{display:flex;justify-content:space-between;gap:16px;font-size:13px;font-weight:600;letter-spacing:.08em;color:rgba(255,255,255,.5);font-variant-numeric:tabular-nums}.cv-ey{display:block;margin-top:28px;font-size:15px;font-weight:700;color:#7db7ff}'
             + '.cv-h{margin-top:28px;font-size:clamp(38px,3.8vw,58px);font-weight:700;line-height:1.15;letter-spacing:-.035em}.cv-ey+.cv-h{margin-top:8px}.cv-d{margin-top:14px;font-size:19px;line-height:1.5;color:rgba(255,255,255,.7);word-break:keep-all}'
             + '.cv-ks{display:flex;flex-wrap:wrap;gap:20px 56px;margin-top:34px}.cv-ks span{display:flex;flex-direction:column}.cv-ks b{font-size:clamp(34px,3vw,46px);font-weight:700;line-height:1.1;letter-spacing:-.035em;font-variant-numeric:tabular-nums}.cv-ks i{margin-top:6px;font-style:normal;font-size:14.5px;color:rgba(255,255,255,.7)}.cv-ks em{margin-top:2px;font-style:normal;font-size:13px;color:rgba(255,255,255,.42)}'
+            + '.cv-cy{margin-top:34px}.cv-cy h4{font-size:13px;font-weight:600;letter-spacing:.04em;color:rgba(255,255,255,.5)}.cv-cy ol{display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:8px;margin:12px 0 0;padding:0;list-style:none}'
+            + '.cv-cy li{position:relative;display:flex;flex-direction:column;padding:14px 14px 16px;border-radius:14px;background:rgba(255,255,255,.07)}.cv-cy li:not(:last-child)::after{content:"›";position:absolute;right:-8px;top:50%;z-index:1;width:16px;margin-top:-11px;font-size:18px;line-height:22px;text-align:center;color:rgba(255,255,255,.4)}.cv-cy li:last-child{background:rgba(125,183,255,.16)}.cv-cy li:last-child::before{content:"↻";position:absolute;right:12px;top:10px;font-size:15px;color:#7db7ff}'
+            + '.cv-cy i{font-style:normal;font-size:12px;font-weight:700;color:#7db7ff;font-variant-numeric:tabular-nums}.cv-cy b{margin-top:8px;font-size:15px;font-weight:700;line-height:1.3;word-break:keep-all}.cv-cy span{margin-top:4px;font-size:12.5px;line-height:1.4;color:rgba(255,255,255,.55);word-break:keep-all}'
             + '.cv-ix{display:grid;grid-template-columns:repeat(min(var(--c,1),3),minmax(0,1fr));gap:20px 28px;margin-top:40px;padding-top:28px;border-top:1px solid rgba(255,255,255,.14)}.cv-cl h4{margin:0 0 8px 10px;font-size:13px;font-weight:600;letter-spacing:.04em;color:rgba(255,255,255,.5)}'
+            + '.cv-ix[style*="--c:1"] .cv-cl{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:4px 28px}'
             + '.cv-r{display:grid;grid-template-columns:24px 68px minmax(0,1fr) auto;align-items:center;gap:14px;width:100%;padding:10px;border-radius:14px;color:#fff;text-align:left;transition:background .2s}.cv-r:hover{background:rgba(255,255,255,.07)}.cv-n{font-size:13px;font-weight:600;color:rgba(255,255,255,.4);font-variant-numeric:tabular-nums}'
             + '.cv-th{display:grid;place-items:center;width:68px;height:48px;border-radius:9px;background:rgba(255,255,255,.92);overflow:hidden}.cv-th img{max-width:100%;max-height:100%;object-fit:contain}'
             + '.cv-t{min-width:0}.cv-t b{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;font-size:16px;font-weight:600;line-height:1.35;word-break:keep-all}.cv-t span{display:block;margin-top:3px;font-size:13px;color:rgba(255,255,255,.5);font-variant-numeric:tabular-nums}'
@@ -2630,10 +2638,10 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
             + '.tp-foot{position:relative;z-index:1;padding:44px 0 90px;background:var(--g8);color:#d1d6db;font-size:14px}.tp-foot-in{display:flex;flex-wrap:wrap;justify-content:space-between;gap:12px 32px;width:var(--tw);max-width:1000px;margin:0 auto}.tp-foot b{margin-right:4px;font-size:16px;color:#fff}'
             + '@supports (corner-shape:squircle){.tp-sd,.tp-me{corner-shape:squircle}.tp-sd{border-radius:32px}.tp-me{border-radius:64px}}'
             // 화면 폭별: 1100 이하 = 탭 좁게 · 900 이하 = 상단 탭 숨김 · 760 이하 = 장 여백 줄이고 위아래로
-            + '@media(max-width:1100px){.tp-tab{padding:0 9px;font-size:14px}}@media(max-width:960px){.sl-top{grid-template-columns:1fr}.pj-ms.sl-kpi{flex-wrap:wrap}.pj-cols.two{grid-template-columns:1fr}.sl-bds,.sl-vis.bdv{overflow-x:auto}.bd{min-width:680px}.sl-grid{grid-template-columns:1fr;gap:28px}.tp-sd.sl{min-height:0}.sl-vis{position:static;height:auto}.sl-main{flex:none;height:320px}.sl-kb{flex:none}}'
+            + '@media(max-width:1100px){.tp-tab{padding:0 9px;font-size:14px}}@media(max-width:960px){.cv-cy ol{grid-template-columns:repeat(4,minmax(0,1fr))}.cv-cy li:nth-child(4)::after{display:none}.sl-top{grid-template-columns:1fr}.pj-ms.sl-kpi{flex-wrap:wrap}.pj-cols.two{grid-template-columns:1fr}.sl-bds,.sl-vis.bdv{overflow-x:auto}.bd{min-width:680px}.sl-grid{grid-template-columns:1fr;gap:28px}.tp-sd.sl{min-height:0}.sl-vis{position:static;height:auto}.sl-main{flex:none;height:320px}.sl-kb{flex:none}}'
             + '@media(max-width:900px){.tp-ntabs{display:none}}'
             + '@media(max-width:760px){body.tp{--tw:calc(100vw - 32px);--tw2:calc(100vw - 32px);--tw3:calc(100vw - 32px);--tws:calc(100vw - 24px)}'
-            + '.tp-deck{padding:72px 0 32px}.tp-sd{margin-bottom:16px;border-radius:20px}.tp-sd-in{padding:28px 20px}.tp-sd.sl{padding:20px 20px 24px}.sl-grid{padding-top:22px}.sl-main{height:240px}.sl-kb{gap:18px}.tp-sd.cv{margin-top:28px;padding:28px 20px}.cv-ix{grid-template-columns:1fr}.cv-r{grid-template-columns:20px 56px minmax(0,1fr)}.cv-th{width:56px;height:40px}.cv-m{display:none}.cv-ks{gap:16px 28px}.pj-ms{gap:6px}.pj-ms span{padding:10px 12px}.pj-ms b{font-size:19px}.pj-shots{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none}.pj-shots::-webkit-scrollbar{display:none}.pj-sh,.pj-shots[style*="--n:1"] .pj-sh{flex:0 0 78%;height:150px;scroll-snap-align:start}.pj-shots[style*="--n:1"] .pj-sh{flex-basis:100%}'
+            + '.tp-deck{padding:72px 0 32px}.tp-sd{margin-bottom:16px;border-radius:20px}.tp-sd-in{padding:28px 20px}.tp-sd.sl{padding:20px 20px 24px}.sl-grid{padding-top:22px}.sl-main{height:240px}.sl-kb{gap:18px}.tp-sd.cv{margin-top:28px;padding:28px 20px}.cv-ix[style*="--c:1"] .cv-cl{grid-template-columns:1fr}.cv-cy ol{grid-template-columns:repeat(2,minmax(0,1fr))}.cv-cy li::after{display:none}.cv-ix{grid-template-columns:1fr}.cv-r{grid-template-columns:20px 56px minmax(0,1fr)}.cv-th{width:56px;height:40px}.cv-m{display:none}.cv-ks{gap:16px 28px}.pj-ms{gap:6px}.pj-ms span{padding:10px 12px}.pj-ms b{font-size:19px}.pj-shots{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none}.pj-shots::-webkit-scrollbar{display:none}.pj-sh,.pj-shots[style*="--n:1"] .pj-sh{flex:0 0 78%;height:150px;scroll-snap-align:start}.pj-shots[style*="--n:1"] .pj-sh{flex-basis:100%}'
             + '.tp-pfs{grid-template-columns:1fr;gap:22px}.tp-pf{display:grid;grid-template-columns:112px minmax(0,1fr);column-gap:12px;align-items:baseline}.tp-pf b{grid-row:span 2;font-size:34px}.tp-pf span{margin-top:0}.tp-pf i{margin-top:2px}.tp-path ol{grid-auto-flow:row;grid-template-columns:1fr}.tp-path li{padding:0 0 22px 22px;border-top:0;border-left:2px solid var(--g2)}.tp-path li::before{left:-6px;top:3px}.tp-path li.now{border-left-color:var(--bl)}.tp-path li>b{margin-top:2px}'
             + '.tp-ctas-in{flex-direction:column-reverse;align-items:flex-start}}'
             + '.tp-sd{}@media(prefers-reduced-motion:reduce){.tp-wrow,.tp-cue,.js .tp-hc,.js .tp-aw,.js .tp-al2{animation:none}.tp-wall,.tp-hb{transition:none}.tp-hb{opacity:1;transform:none}}';
