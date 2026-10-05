@@ -1008,7 +1008,7 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
       var th = md
         ? '<span class="pc-th img" style="--img:url(\'' + esc(md.src) + '\')">' + thumbImg(md.src, fitOf(w)) + (md.yt ? '<i class="t-play" aria-hidden="true"></i>' : '') + '</span>'
         : '<span class="pc-th art">' + coverArt(w, m0) + '</span>'; // 이미지 없으면 자동 일러스트
-      return '<a class="tile pc' + span + (cm.dark ? ' dk' : '') + '" href="' + pjUrl + '#p-' + esc(w.id || "") + '" target="_top" data-ext style="' + (j != null ? '--j:' + j + ';' : '') + '--c:' + cm.c + '">' + th
+      return '<a class="tile pc' + span + (cm.dark ? ' dk' : '') + '" href="' + tpUrl + '#p-' + esc(w.id || "") + '" target="_top" data-ext style="' + (j != null ? '--j:' + j + ';' : '') + '--c:' + cm.c + '">' + th
         + '<span class="pc-bd"><em class="pc-cat">' + esc(cm.en) + '</em><b class="pc-t">' + esc(v.title) + '</b><span class="pc-m">' + esc(dispName(co)) + (yr ? ' · ' + esc(yr) : '') + '</span>'
         + (m0 ? '<span class="pc-p"><b>' + esc(m0.value) + '</b>' + (m0.label ? ' ' + esc(m0.label) : '') + '</span>' : '') + '</span><span class="t-go" aria-hidden="true">→</span></a>';
     };
@@ -1016,13 +1016,13 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
       var span = i === 1 ? " tall" : i === 3 ? " wide" : "";
       return tileHtml(x, span, i);
     }).join("");
-    // 전체 보기 버튼: 썸네일 4개 겹침 + 제목/부제 + 화살표 (문구는 KILO 대시보드에서)
+    // 전체 보기 버튼(→ 슬라이드 프로젝트 페이지 /projects-test, 타일도 그 페이지의 해당 장으로): 썸네일 4개 겹침 + 제목/부제 + 화살표 (문구는 KILO 대시보드에서)
     var stackSrc = works.filter(function (x) { return pick.indexOf(x) < 0; }).concat(pick).map(function (x) { return { m: mediaOf(x.w)[0], cm: catMeta(x.w.category), cat: x.w.category }; });
     stackSrc.sort(function (a, b) { return (b.m ? 1 : 0) - (a.m ? 1 : 0); });
     var FAN = [[-10, 7], [-4, 2], [3, 1], [9, 6]]; // 카드 덱 부채꼴(회전°, 내림px) — 호버 시 펼쳐짐
     var stack = stackSrc.slice(0, 4).map(function (s, i) { return '<i style="--r:' + FAN[i][0] + 'deg;--y:' + FAN[i][1] + 'px;' + (s.m ? "background-image:url('" + esc(s.m.src) + "')" : "background:" + s.cm.c) + '">' + (s.m ? '' : catIcon(s.cat)) + '</i>'; }).join("");
-    var allCta = '<a class="pj-all rv" href="' + pjUrl + '" target="_top" data-ext><span class="pj-num">' + works.length + '</span>'
-      + '<span class="pj-all-t"><b>' + esc(txt("pjAllTitle", "전체 프로젝트 보기")) + '</b><small>' + esc(txt("pjAllSub", "원형 휠로 한눈에 돌려보기")) + '</small></span>'
+    var allCta = '<a class="pj-all rv" href="' + tpUrl + '" target="_top" data-ext><span class="pj-num">' + works.length + '</span>'
+      + '<span class="pj-all-t"><b>' + esc(txt("pjAllTitle", "전체 프로젝트 보기")) + '</b><small>' + esc(txt("pjAllSub", "챕터별 슬라이드로 한눈에 보기")) + '</small></span>'
       + '<span class="pj-deck" aria-hidden="true">' + stack + '</span><span class="pj-all-a" aria-hidden="true">→</span></a>';
     var projectsInner = '<div class="cnt pj-cnt">'
       + '<div class="mosaic rv rv-g">' + mosaic + '</div>'
@@ -2414,7 +2414,7 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
                 + '<div class="sl-vis' + (b0 || vidVis ? ' bdv' : '') + '">' + vis + '</div></div>';
             }
             var more = b0 && b0.x >= 40 ? bs.slice(1) : [];
-            return '<section class="tp-sd sl" id="' + id + '" data-m="' + ea(g.id) + '" data-pi="' + it.i + '"><div class="sl-in">' + top + body + '</div></section>'
+            return '<section class="tp-sd sl" id="' + id + '" data-m="' + ea(g.id) + '" data-pi="' + it.i + '" data-wid="' + ea(it.w.id || "") + '"><div class="sl-in">' + top + body + '</div></section>'
               + more.map(function (n, k) {
                 return '<section class="tp-sd sl cont" data-m="' + ea(g.id) + '"><div class="sl-in">' + top.replace('</i></span></div>', ' · ' + (k + 2) + '/' + (more.length + 1) + '</i></span></div>')
                   + '<div class="sl-ct"><h3 class="pj-t">' + esc(it.title) + '</h3><span>이어서</span></div><div class="sl-bds">' + board(n) + '</div></div></section>';
@@ -2671,7 +2671,6 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
             + nav + '<main>' + hero + bentoS + cta + '</main>' + foot
             + '<div class="tp-md" hidden role="dialog" aria-modal="true" aria-label="크게 보기"><div class="tp-md-bg" data-md-x></div><div class="tp-md-in"></div><button class="tp-md-nav prev" type="button" aria-label="이전 그림">‹</button><button class="tp-md-nav next" type="button" aria-label="다음 그림">›</button><button class="tp-md-x" type="button" data-md-x aria-label="닫기">✕</button><span class="tp-md-cnt"></span></div>'
             + '<button class="ps-top-b" type="button" data-goto="*" aria-label="맨 위로">↑</button><div class="pd" role="dialog" aria-modal="true" aria-label="프로젝트 상세" aria-hidden="true"><div class="pd-prog" aria-hidden="true"><i></i></div><div class="pd-top"><span class="pd-ttl">' + esc(txt("ppEyebrow", "Selected Projects")) + '</span><span><span class="pd-no"></span><button class="pd-x" type="button" data-close>← 목록으로</button></span></div><div class="pd-in"></div></div>'
-            + pdT
             + '<script>(' + psRuntime.toString() + ')();(' + tpRuntime.toString() + ')();<\/script></body></html>';
         };
         // 테스트 페이지 동작: 상단 바 · 첫 화면 문장 전환(단어 슬롯) · 상단 분류 탭 표시·이동 · '한눈에' 숫자 → 그 프로젝트 장 (숨은 탭에서도 돌게 타이머 기반)
@@ -2732,6 +2731,7 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
           var zoomImg = function (el) { var sc = el.closest(".sl") || el.closest(".tp-sd") || document; mdG = $$("[data-zoom]", sc).map(function (x) { return x.getAttribute("data-zoom"); }); md.className = "tp-md img"; mdShow(Math.max(0, mdG.indexOf(el.getAttribute("data-zoom")))); mdOpen(); };
           var playVid = function (u) { var id = ytId(u); if (!id || !md) return false; md.className = "tp-md vid"; mdIn.innerHTML = '<div class="tp-md-v' + (/\/shorts\//.test(u) ? ' sh' : '') + '"><iframe src="https://www.youtube-nocookie.com/embed/' + id + '?autoplay=1&rel=0&playsinline=1" title="영상" referrerpolicy="strict-origin-when-cross-origin" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen></iframe></div>'; mdCnt.textContent = ""; mdOpen(); return true; };
           addEventListener("keydown", function (e) { if (!md || md.hidden) return; if (e.key === "Escape") { mdClose(); e.stopPropagation(); } else if (md.classList.contains("multi") && (e.key === "ArrowRight" || e.key === "ArrowLeft")) { e.preventDefault(); mdShow(mdK + (e.key === "ArrowRight" ? 1 : -1)); } }, true);
+          addEventListener("message", function (e) { var m = e.data; if (!m || m.klio !== "goto-card" || typeof m.id !== "string") return; var sl = $$(".sl[data-wid]").filter(function (x) { return x.getAttribute("data-wid") === m.id; })[0]; if (!sl) return; later(function () { fit(); go(sl.id); sl.classList.add("hl"); later(function () { sl.classList.remove("hl"); }, 2200); }, 120); });
           document.addEventListener("click", function (e) {
             var t = e.target, b;
             if (!t.closest) return;
