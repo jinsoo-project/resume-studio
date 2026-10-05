@@ -939,9 +939,9 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
     // 메인 ↔ 전체 프로젝트 페이지 경로: 라이브(view.html)가 지금 연 주소 기준으로 넘겨줌(/portfolio, /p/x, /mkt/portfolio…), 없으면 슬러그 기준
     var K0 = d.klio || {};
     var pSlug = d.slug || "portfolio", homeUrl = d.homePath || "/" + encodeURIComponent(pSlug), pjUrl = d.pjPath || homeUrl + "/projects";
-    // 상단 큰 메뉴(메인·프로젝트 페이지 공통 헤더): 이력서 = 메인 · 프로젝트 = 슬라이드 프로젝트 페이지 · AX = AX-MKT 콘솔 · data-gx(스튜디오 미리보기에선 이동 대신 전환/새 탭)
+    // 상단 큰 메뉴(메인·프로젝트 페이지 공통 헤더, 순서 이력서 · AX · 프로젝트): 이력서 = 메인 · AX = AX-MKT 콘솔 · 프로젝트 = 슬라이드 프로젝트 페이지 · data-gx(스튜디오 미리보기에선 이동 대신 전환/새 탭)
     var tpUrl = d.tpPath || homeUrl + "/projects-test", axUrl = (K0.text || {}).axLink || "https://kimjinsoo-mkt-ax.vercel.app/ax";
-    var gtabs = function (cur, dd) { return '<nav class="gtabs" aria-label="메뉴">' + [["resume", "이력서", homeUrl], ["projects", "프로젝트", tpUrl], ["ax", "AX", axUrl]].map(function (x) { var a = '<a class="gt' + (x[0] === cur ? ' on" aria-current="page' : '') + '" href="' + esc(x[2]) + '" target="_top" data-gx="' + x[0] + '">' + x[1] + '</a>'; return x[0] === "resume" && dd ? '<div class="gt-w">' + a + '<div class="gdd">' + dd + '</div></div>' : a; }).join("") + '</nav>'; };
+    var gtabs = function (cur, dd) { return '<nav class="gtabs" aria-label="메뉴">' + [["resume", "이력서", homeUrl], ["ax", "AX", axUrl], ["projects", "프로젝트", tpUrl]].map(function (x) { var a = '<a class="gt' + (x[0] === cur ? ' on" aria-current="page' : '') + '" href="' + esc(x[2]) + '" target="_top" data-gx="' + x[0] + '">' + x[1] + '</a>'; return x[0] === "resume" && dd ? '<div class="gt-w">' + a + '<div class="gdd">' + dd + '</div></div>' : a; }).join("") + '</nav>'; };
     // 이력서 섹션 목록(헤더 '이력서' 아래) — 메인 밖(프로젝트 페이지)에선 메인 주소#섹션으로
     var secLinks = function (outside) { return (typeof visibleSec !== "undefined" ? visibleSec : []).filter(function (s) { return s.key !== "projects" && s.key !== "ax"; }).map(function (s) { return '<a href="' + (outside ? esc(homeUrl) : '') + '#' + s.key + '"' + (outside ? ' target="_top"' : '') + ' data-sec="' + s.key + '">' + esc(s.label) + '</a>'; }).join(""); };
     // 이미지 없는 프로젝트의 썸네일 일러스트(SVG): 분야별 미니 화면(상승 차트 · 막대+쿠폰 · 앱 자동화 흐름 · 미디어) + 대표 지표
