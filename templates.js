@@ -755,7 +755,7 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
   }
 
   function renderKlio(d) {
-    if (d.page === "projects-test" && !((d.klio || {}).migr || {}).pdf1) d = pptPatch(d); // PPT 내용 바로 보이게(DB 반영 전)
+    if ((d.page === "projects-test" || d.page === "projects-airbridge") && !((d.klio || {}).migr || {}).pdf1) d = pptPatch(d); // PPT 내용 바로 보이게(DB 반영 전)
     var P = d.profile || {};
     var fmt = function (s) { return s ? String(s).slice(0, 7).replace("-", ".") : ""; };
     var wPeriod = function (w) { var a = fmt(w.startDate), b = w.endDate ? fmt(w.endDate) : "현재"; return a ? (a + " – " + b) : (w.endDate ? b : ""); };
@@ -1752,7 +1752,7 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
       var eyebrow = esc(txt("ppEyebrow", "Selected Projects")) + (yrTxt ? ' · ' + esc(yrTxt) : '');
       // ── 스크롤형 전체 프로젝트(기본 · KILO 대시보드 '전체 프로젝트 → 페이지 모양' = klio.ui.ppLayout, wheel = 원형 휠)
       // 머리 문장 → 묶음마다 [소개 문장 줄 → 대표 프로젝트 큰 패널 → 나머지 3열 카드] 반복 → 누르면 전체 화면 상세(왼쪽 고정 정보 + 오른쪽 큰 이미지 흐름 + 다음 프로젝트)
-      if ((K.ui || {}).ppLayout !== "wheel" || d.page === "projects-test") {
+      if ((K.ui || {}).ppLayout !== "wheel" || d.page === "projects-test" || d.page === "projects-airbridge") {
         // 썸네일: 이미지를 자르지 않고 원래 비율 그대로 띄움(둥근 모서리·그림자) · 유튜브는 16:9 틀(위아래 검은 띠 제거) · 대시보드에서 '꽉 채우기'로 둔 카드는 채움
         var pImg = function (m, alt, cover, f) {
           return m.yt ? '<span class="ytf"><img src="' + esc(m.src) + '" alt="' + esc(alt || "") + '" decoding="async"><i class="ps-play" aria-hidden="true"></i></span>'
@@ -2507,13 +2507,14 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
             if (it.main) return '<img src="' + ea(it.main.src) + '" alt="" loading="lazy" decoding="async">';
             return '<i class="cd-art" style="--c:' + it.cm.c + '">' + coverArt(it.w, it.m0) + '</i>';
           };
-          var NO = 0, TOT = TS.reduce(function (a, x) { return a + x.items.length; }, 0), vwPages = [];
+          var NO = 0, TOT = TS.reduce(function (a, x) { return a + x.items.length; }, 0), vwPages = [], abItems = [];
           var slides = TS.map(function (s, si) {
             var g = s.g, now = g.id === "t-recent", cl = clustersOf(s), chL = (now ? "NOW · " + nowCoName : g.ko);
             var cards = cl.map(function (c) {
               return c.its.map(function (it) {
                 NO++; var id = "tp-p" + it.i, k = vwPages.length, m0 = it.mets[0]; slideOf[it.i] = id;
                 vwPages.push('<div class="vw-pg" data-k="' + k + '" data-wid="' + ea(it.w.id || "") + '" data-t="' + ea(it.title) + '" hidden>' + slide(it, g, c.t, NO, TOT, id) + '</div>');
+                abItems.push({ k: k, it: it, g: g, ct: c.t });
                 return '<button class="cd" type="button" data-vw="' + k + '" aria-label="' + ea(it.title) + ' 크게 보기"><span class="cd-th">' + cardThumb(it) + '</span>'
                   + '<span class="cd-b">' + (cl.length > 1 ? '<span class="cd-ey">' + esc(c.t) + '</span>' : '') + '<b class="cd-t">' + esc(it.title) + '</b><span class="cd-m">' + esc(it.co ? dispName(it.co) : "") + ' · ' + esc(when(it)) + '</span>'
                   + (m0 ? '<span class="cd-k"><b>' + esc(m0.value) + '</b>' + esc(m0.label || "") + '</span>' : '') + '</span></button>';
@@ -2709,6 +2710,67 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
             + '.tp-pfs{grid-template-columns:1fr;gap:22px}.tp-pf{display:grid;grid-template-columns:112px minmax(0,1fr);column-gap:12px;align-items:baseline}.tp-pf b{grid-row:span 2;font-size:34px}.tp-pf span{margin-top:0}.tp-pf i{margin-top:2px}.tp-path ol{grid-auto-flow:row;grid-template-columns:1fr}.tp-path li{padding:0 0 22px 22px;border-top:0;border-left:2px solid var(--g2)}.tp-path li::before{left:-6px;top:3px}.tp-path li.now{border-left-color:var(--bl)}.tp-path li>b{margin-top:2px}'
             + '.tp-ctas-in{flex-direction:column-reverse;align-items:flex-start}}'
             + '.tp-sd{}@media(prefers-reduced-motion:reduce){.tp-wrow,.tp-cue,.js .tp-hc,.js .tp-aw,.js .tp-al2{animation:none}.tp-wall,.tp-hb{transition:none}.tp-hb{opacity:1;transform:none}}';
+          // ── /projects-airbridge (2026-10-05 사용자 요청: airbridge.io/ko/case-studies 그대로 — 상품 카드 · 필터 라벨) · 카드 누르면 같은 보기 창
+          //    히어로(큰 제목 · 한 줄) → 필터 두 줄(분야 = 챕터 · 회사, 개수 · 로고) → 카드 3열(16:10 브랜드 색 커버 = 로고·회사 | 소재 이미지 · 제목 22 · 성과 숫자 2 · 자세히 보기 →) → 문의 블록
+          if (d.page === "projects-airbridge") {
+            var ABRAND = { "880f2595-41db-43f8-8fc4-d7b2b7a82ed9": ["#141a26", "#fff"], "df04e065-83b0-4fe3-9d89-c08103b1f3fc": ["#ffe4ec", "#191f28"], "9a240366-d8d0-47b3-a1fd-3259532182b3": ["#e8edf6", "#191f28"], "64000e6d-362f-4ed7-a9e6-e64be85cd95a": ["#6f4cf6", "#fff"], "6add97f4-49f2-44fe-b6bb-a70f6a0ee024": ["#fbeae3", "#191f28"] };
+            // 카드 커버 색(Airbridge처럼 카드마다 다르게 · 진한 색과 파스텔 섞어서) — [바탕, 글자]
+            var ACOVER = { "77afd48a-668b-4ab1-b385-32fa41400211": ["#141a26", "#fff"], "dff32975-e504-47e3-8ee1-744f2267ac91": ["#e6f3ee", "#191f28"], "60f3fcee-e8b2-4499-b7d1-71e4f91ad2f5": ["#fff0de", "#191f28"],
+              "0a3aea35-ccc9-4018-a7a6-e383c303f928": ["#ffe4ec", "#191f28"], "3080bc75-d773-490f-9a02-35d83886b418": ["#e6edfc", "#191f28"], "b0aa1d32-82d9-44bc-897d-b558a425c98c": ["#111214", "#fff"],
+              "731ea8fe-9bb7-41ce-8cc1-687f77f9c49c": ["#eef1f5", "#191f28"], "8fe4e187-9052-4737-9d1b-d0a158d9e156": ["#1d2030", "#fff"], "199815d6-356c-4959-8219-6c9ea7615102": ["#efe9ff", "#191f28"],
+              "4d333686-6daa-4c8e-9cd7-3e8309ef9900": ["#e2f6e9", "#191f28"], "e5bb7edf-a48d-4752-a0b4-c05df7903051": ["#fff6d8", "#191f28"], "43ab6811-42cf-4a1f-afca-62bfd67b17f9": ["#f3efff", "#191f28"],
+              "53845c2b-3618-4e8d-968c-1edfabdf4912": ["#6f4cf6", "#fff"], "574f26d3-1fff-49fb-a302-b8c12253df61": ["#e9e1ff", "#191f28"], "2c1ddb7a-e1a3-4adb-a18e-e1b43ad8f731": ["#0d4fd6", "#fff"],
+              "2380b3b4-8dba-4b9d-9f96-38568a79936b": ["#2b1d22", "#fff"], "5afefe01-835b-48eb-9568-e6f51f6650ce": ["#fdeaf0", "#191f28"], "ea1d35c1-b9f4-4420-8d35-b26ec4709a10": ["#ffe8de", "#191f28"], "e68c8938-fbb0-4a88-a9a1-dbb3d8c71243": ["#17171a", "#fff"] };
+            var abCos = []; abItems.forEach(function (a) { if (a.it.co && abCos.indexOf(a.it.co) < 0) abCos.push(a.it.co); });
+            var cntBy = function (key, v) { return abItems.filter(function (a) { return key === "ch" ? a.g.id === v : a.it.co === v; }).length; };
+            var chip = function (k, v, label, n, lg) { return '<button class="ab-chip' + (v === "*" ? ' on' : '') + '" type="button" data-k="' + k + '" data-v="' + ea(v) + '">' + (lg ? '<img src="' + ea(lg) + '" alt="">' : '') + '<span>' + esc(label) + '</span><i>' + n + '</i></button>'; };
+            var filters = '<div class="ab-fl"><div class="ab-row"><span class="ab-rl">분야</span>' + chip("ch", "*", "전체", abItems.length) + TS.map(function (x) { return chip("ch", x.g.id, x.g.id === "t-recent" ? "NOW · " + nowCoName : x.g.ko, cntBy("ch", x.g.id)); }).join("") + '</div>'
+              + '<div class="ab-row"><span class="ab-rl">회사</span>' + chip("co", "*", "전체", abItems.length) + abCos.map(function (co) { return chip("co", co.id, dispName(co), cntBy("co", co), co.logo); }).join("") + '</div></div>';
+            var abCard = function (a) {
+              var it = a.it, co = it.co || {}, br = ACOVER[it.w.id] || ABRAND[co.id] || ["#f2f4f6", "#191f28"], mets = it.mets.slice(0, 2);
+              var bs = PPT_BOARDS_OF[it.w.id] || [], b = bs.length && PPT_BOARD[bs[0]], f = CARD_TH[it.w.id] || (b && b.i.length ? b.i[0][0] : ""), src = f ? PPT_IMG + f + ".jpg" : (it.main ? it.main.src : "");
+              var shot = src ? '<span class="ab-shot"><img src="' + ea(src) + '" alt="" loading="lazy" decoding="async"></span>' : (it.m0 ? '<span class="ab-big"><b>' + esc(it.m0.value) + '</b>' + esc(it.m0.label || "") + '</span>' : '');
+              return '<button class="ab-card" type="button" data-vw="' + a.k + '" data-ch="' + ea(a.g.id) + '" data-co="' + ea(co.id || "") + '" aria-label="' + ea(it.title) + ' 자세히 보기">'
+                + '<span class="ab-cv" style="--bg:' + br[0] + ';--fg:' + br[1] + '"><span class="ab-br">' + (co.logo ? '<img src="' + ea(co.logo) + '" alt="">' : '') + '<b>' + esc(dispName(co)) + '</b><small>' + esc(a.g.id === "t-recent" ? "NOW" : a.g.ko) + '</small></span>' + shot + '</span>'
+                + '<span class="ab-bd"><b class="ab-t">' + esc(it.title) + '</b>'
+                + '<span class="ab-ms">' + mets.map(function (m) { return '<span><b>' + esc(m.value) + '</b>' + esc(m.label || "") + '</span>'; }).join("") + '</span>'
+                + '<span class="ab-go">자세히 보기<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M12 5l7 7-7 7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span></span></button>';
+            };
+            var abNav = '<header class="tp-nav ab-nav"><div class="tp-nav-in"><button class="tp-logo" type="button" data-tgo="tp-top">' + esc(nameEn || nameKo || "Portfolio") + '</button>' + gtabs("projects", secLinks(true)) + '</div></header>';
+            var abMain = '<section class="ab-hero" id="tp-top"><h1>' + esc(txt("abTitle", "프로젝트")) + '</h1><p>' + esc(txt("abSub", abCos.length + "개 회사 · " + abItems.length + "개 프로젝트의 성과")) + '</p></section>'
+              + '<section class="ab-wrap">' + filters + '<div class="ab-cnt-r"><span class="ab-cnt">' + abItems.length + '개 프로젝트</span></div>'
+              + '<div class="ab-grid">' + abItems.map(abCard).join("") + '</div><p class="ab-empty" hidden>조건에 맞는 프로젝트가 없어요.</p></section>'
+              + '<section class="ab-cta"><div><h2>' + esc(txt("abCtaT", "함께 성과를 만들어 볼까요?")) + '</h2><p>' + esc(txt("abCtaS", "퍼포먼스 · CRM · 데이터 · AX까지, 편하게 연락 주세요.")) + '</p><div class="ab-cta-b"><a class="ab-btn pri" href="' + ea(mail) + '" target="_top">연락하기 →</a><a class="ab-btn" href="' + ea(homeUrl) + '" target="_top">이력서 보기</a></div></div></section>';
+            var ABCSS = 'body.ab{background:#fff}.ab .tp-nav{background:rgba(255,255,255,.96);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);box-shadow:0 1px 0 var(--g2)}.ab .tp-logo{color:var(--g9)}.ab .tp-nav .gt{color:var(--g5)}.ab .tp-nav .gt:hover,.ab .tp-nav .gt.on{color:var(--g9)}'
+              + '.ab-hero{padding:clamp(150px,18vh,190px) 24px clamp(64px,9vh,100px);text-align:center}.ab-hero h1{font-size:clamp(40px,4.4vw,60px);font-weight:700;line-height:1.2;letter-spacing:-.035em;color:#171716}.ab-hero p{margin-top:16px;font-size:clamp(17px,1.4vw,20px);color:#4b4b4a}'
+              + '.ab-wrap{width:min(1216px,calc(100vw - 48px));margin:0 auto}'
+              // 필터: 줄 이름(분야 · 회사) + 둥근 칩(개수 · 회사 로고) · 선택 = 진한 칩 / 회사 줄 선택 = 연한 파랑
+              + '.ab-fl{display:flex;flex-direction:column;gap:10px}.ab-row{display:flex;flex-wrap:wrap;align-items:center;gap:8px}.ab-rl{width:44px;font-size:13px;font-weight:600;color:var(--g5)}'
+              + '.ab-chip{display:inline-flex;align-items:center;gap:7px;height:38px;padding:0 14px 0 16px;border:1px solid #ececec;border-radius:999px;background:rgba(0,0,0,.03);font-size:14px;font-weight:500;color:#171716;transition:background .2s,border-color .2s,color .2s,box-shadow .2s}.ab-chip:hover{background:rgba(0,0,0,.06)}'
+              + '.ab-chip img{width:20px;height:20px;margin-left:-6px;border-radius:6px;background:#fff;object-fit:contain;box-shadow:0 0 0 1px rgba(0,0,0,.06)}.ab-chip i{min-width:20px;height:20px;padding:0 6px;border-radius:999px;background:rgba(0,0,0,.06);font-style:normal;font-size:11.5px;font-weight:600;line-height:20px;text-align:center;color:var(--g6);font-variant-numeric:tabular-nums}'
+              + '.ab-chip[data-k="ch"].on{border-color:transparent;background:#191f28;color:#fff;box-shadow:0 6px 16px -8px rgba(25,31,40,.6)}.ab-chip[data-k="ch"].on i{background:rgba(255,255,255,.18);color:#fff}'
+              + '.ab-chip[data-k="co"].on{border-color:rgba(49,130,246,.35);background:var(--bl1);color:var(--bl)}.ab-chip[data-k="co"].on i{background:rgba(49,130,246,.14);color:var(--bl)}'
+              + '.ab-cnt-r{display:flex;justify-content:flex-end;margin:28px 0 14px}.ab-cnt{font-size:14px;font-weight:500;color:var(--g5);font-variant-numeric:tabular-nums}'
+              // 카드: 테두리 · 둥근 18 · 연회색 바탕 · 16:10 커버(브랜드 색 · 왼쪽 로고·회사 | 오른쪽 소재) · 제목 22 · 숫자 2 · 자세히 보기 →
+              + '.ab-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:32px}.ab-card{display:flex;flex-direction:column;min-width:0;border:1px solid #e8e8e8;border-radius:18px;overflow:hidden;background:#f7f7f7;text-align:left;transition:box-shadow .3s}.ab-card:hover{box-shadow:0 10px 15px -3px rgba(0,0,0,.1),0 4px 6px -4px rgba(0,0,0,.1)}.ab-card[hidden]{display:none}'
+              + '.ab-cv{position:relative;display:block;aspect-ratio:16/10;overflow:hidden;background:var(--bg);color:var(--fg)}.ab-cv>*{transition:transform .3s}.ab-card:hover .ab-cv>*{transform:scale(1.05)}'
+              + '.ab-br{position:absolute;left:8%;top:50%;z-index:1;display:flex;flex-direction:column;align-items:flex-start;gap:10px;max-width:44%;transform:translateY(-50%)}.ab-card:hover .ab-br{transform:translateY(-50%) scale(1.05)}.ab-br img{width:44px;height:44px;border-radius:12px;background:#fff;object-fit:contain;box-shadow:0 6px 16px -8px rgba(0,0,0,.35)}.ab-br b{font-size:22px;font-weight:800;line-height:1.2;letter-spacing:-.03em;word-break:keep-all}.ab-br small{font-size:12.5px;font-weight:600;opacity:.62;word-break:keep-all}'
+              + '.ab-shot{position:absolute;right:6%;top:9%;bottom:9%;display:flex;align-items:center;justify-content:flex-end;width:48%}.ab-shot img{max-width:100%;max-height:100%;width:auto;height:auto;border-radius:10px;background:#fff;box-shadow:0 18px 36px -14px rgba(0,0,0,.45)}'
+              + '.ab-big{position:absolute;right:8%;top:50%;display:flex;flex-direction:column;align-items:flex-end;max-width:46%;font-size:13px;font-weight:600;text-align:right;opacity:.8;transform:translateY(-50%)}.ab-card:hover .ab-big{transform:translateY(-50%) scale(1.05)}.ab-big b{font-size:clamp(40px,3.6vw,56px);font-weight:800;line-height:1;letter-spacing:-.04em}'
+              + '.ab-bd{flex:1;display:flex;flex-direction:column;padding:24px}.ab-t{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;font-size:22px;font-weight:700;line-height:1.5;letter-spacing:-.02em;color:#171716;text-wrap:balance;word-break:keep-all}'
+              + '.ab-ms{display:flex;flex-wrap:wrap;gap:8px 24px;min-height:3.5rem;margin-top:12px}.ab-ms span{display:flex;flex-direction:column;max-width:46%;font-size:13px;line-height:1.35;color:#5f5f5e;word-break:keep-all}.ab-ms b{font-size:18px;font-weight:600;line-height:1.4;color:#171716;font-variant-numeric:tabular-nums}'
+              + '.ab-go{display:inline-flex;align-items:center;gap:6px;margin-top:auto;padding-top:20px;font-size:14px;font-weight:500;color:var(--bl)}.ab-go svg{width:16px;height:16px;transition:transform .3s}.ab-card:hover .ab-go svg{transform:translateX(4px)}'
+              + '.ab-empty{padding:80px 0;text-align:center;font-size:16px;color:var(--g5)}'
+              + '.ab-cta{width:min(1216px,calc(100vw - 48px));margin:clamp(80px,12vh,128px) auto clamp(64px,8vh,96px);padding:clamp(56px,8vw,96px) 24px;border-radius:24px;background:linear-gradient(135deg,#f3f6fb,#eef1f6);text-align:center}.ab-cta h2{font-size:clamp(28px,3vw,44px);font-weight:700;letter-spacing:-.03em;color:#171716}.ab-cta p{margin-top:14px;font-size:18px;color:#4b4b4a}'
+              + '.ab-cta-b{display:flex;flex-wrap:wrap;justify-content:center;gap:10px;margin-top:32px}.ab-btn{display:inline-flex;align-items:center;height:48px;padding:0 22px;border-radius:12px;background:#fff;font-size:16px;font-weight:600;color:var(--g8);box-shadow:inset 0 0 0 1px var(--g2)}.ab-btn.pri{background:var(--bl);color:#fff;box-shadow:none}'
+              + '@media(max-width:1100px){.ab-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:24px}}@media(max-width:680px){.ab-wrap,.ab-cta{width:calc(100vw - 32px)}.ab-grid{grid-template-columns:1fr;gap:18px}.ab-row{flex-wrap:nowrap;overflow-x:auto;margin:0 -16px;padding:0 16px;scrollbar-width:none}.ab-row::-webkit-scrollbar{display:none}.ab-chip{flex:none}.ab-rl{flex:none}.ab-hero{padding-top:120px}.ab-br b{font-size:20px}}';
+            return '<!doctype html><html lang="ko"><head><script>document.documentElement.classList.add("js")<\/script><meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>'
+              + '<title>' + esc(nameKo || nameEn || "포트폴리오") + ' — Projects</title><link rel="icon" href="data:,"/>' + fontHead
+              + '<style>' + PSCSS + fontVars + TCSS + ABCSS + '</style></head><body class="tp ab ft-' + FKEY + '"' + (d.hostStudio ? ' data-host="studio"' : '') + '>'
+              + abNav + '<main>' + abMain + '</main>' + foot + viewer
+              + '<div class="tp-md" hidden role="dialog" aria-modal="true" aria-label="크게 보기"><div class="tp-md-bg" data-md-x></div><div class="tp-md-in"></div><button class="tp-md-nav prev" type="button" aria-label="이전 그림">‹</button><button class="tp-md-nav next" type="button" aria-label="다음 그림">›</button><button class="tp-md-x" type="button" data-md-x aria-label="닫기">✕</button><span class="tp-md-cnt"></span></div>'
+              + '<script>(' + tpRuntime.toString() + ')();<\/script></body></html>';
+          }
           return '<!doctype html><html lang="ko"><head><script>document.documentElement.classList.add("js")<\/script><meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>'
             + '<title>' + esc(nameKo || nameEn || "포트폴리오") + ' — Projects (test)</title><link rel="icon" href="data:,"/>' + fontHead
             + '<style>' + PSCSS + fontVars + TCSS + '</style></head><body class="tp ft-' + FKEY + '"' + (d.hostStudio ? ' data-host="studio"' : '') + '>'
@@ -2794,9 +2856,16 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
           var playVid = function (u) { var id = ytId(u); if (!id || !md) return false; md.className = "tp-md vid"; mdIn.innerHTML = '<div class="tp-md-v' + (/\/shorts\//.test(u) ? ' sh' : '') + '"><iframe src="https://www.youtube-nocookie.com/embed/' + id + '?autoplay=1&rel=0&playsinline=1" title="영상" referrerpolicy="strict-origin-when-cross-origin" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen></iframe></div>'; mdCnt.textContent = ""; mdOpen(); return true; };
           addEventListener("keydown", function (e) { if (!md || md.hidden) return; if (e.key === "Escape") { mdClose(); e.stopPropagation(); } else if (md.classList.contains("multi") && (e.key === "ArrowRight" || e.key === "ArrowLeft")) { e.preventDefault(); mdShow(mdK + (e.key === "ArrowRight" ? 1 : -1)); } }, true);
           addEventListener("message", function (e) { var m = e.data; if (!m || m.klio !== "goto-card" || typeof m.id !== "string") return; var pg = pgs.filter(function (x) { return x.getAttribute("data-wid") === m.id; })[0]; if (pg) later(function () { vwOpen(+pg.getAttribute("data-k")); }, 120); });
+          // /projects-airbridge 필터: 분야(챕터) · 회사 칩 — 둘 다 맞는 카드만 · 개수 · 없으면 안내
+          var abF = { ch: "*", co: "*" }, abApply = function () {
+            var n = 0; $$(".ab-card").forEach(function (c) { var ok = (abF.ch === "*" || c.getAttribute("data-ch") === abF.ch) && (abF.co === "*" || c.getAttribute("data-co") === abF.co); c.hidden = !ok; if (ok) n++; });
+            var cn = $(".ab-cnt"); if (cn) cn.textContent = n + "개 프로젝트"; var em = $(".ab-empty"); if (em) em.hidden = n > 0;
+            $$(".ab-chip").forEach(function (x) { x.classList.toggle("on", abF[x.getAttribute("data-k")] === x.getAttribute("data-v")); });
+          };
           document.addEventListener("click", function (e) {
             var t = e.target, b;
             if (!t.closest) return;
+            if ((b = t.closest(".ab-chip"))) { abF[b.getAttribute("data-k")] = b.getAttribute("data-v"); abApply(); return; }
             if (md && !md.hidden) {
               if (t.closest("[data-md-x]")) { mdClose(); return; }
               if ((b = t.closest(".tp-md-nav"))) { mdShow(mdK + (b.classList.contains("next") ? 1 : -1)); return; }
@@ -2816,7 +2885,7 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
             if ((b = t.closest(".sl-tb[data-src]"))) { var g = b.closest(".sl-g"), mn = g && g.querySelector(".sl-main"), src = b.getAttribute("data-src"); if (mn) { mn.classList.remove("yt"); mn.href = src; var pl = mn.querySelector(".tp-play"); if (pl) pl.remove(); mn.querySelector("img").src = src; $$(".sl-tb", g).forEach(function (x) { x.classList.toggle("on", x === b); }); } return; }
           });
         };
-        if (d.page === "projects-test") return tossPage();
+        if (d.page === "projects-test" || d.page === "projects-airbridge") return tossPage();
         return '<!doctype html><html lang="ko"><head><script>document.documentElement.classList.add("js")<\/script><meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>'
           + '<title>' + esc(nameKo || nameEn || "포트폴리오") + ' — Projects</title><link rel="icon" href="data:,"/>' + fontHead
           + '<style>' + PSCSS + fontVars + '</style></head><body' + (d.hostStudio ? ' data-host="studio"' : '') + ' class="ft-' + FKEY + '">'
@@ -2926,7 +2995,7 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
         + tpls
         + '<script>(' + whRuntime.toString() + ')();<\/script></body></html>';
     }
-    if (d.page === "projects" || d.page === "projects-test") return projectsPage();
+    if (d.page === "projects" || d.page === "projects-test" || d.page === "projects-airbridge") return projectsPage();
 
     return '<!doctype html><html lang="ko"><head><script>document.documentElement.classList.add("js")<\/script>'
       + '<meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/>'
