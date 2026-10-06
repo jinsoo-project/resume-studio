@@ -220,3 +220,21 @@ button[disabled]{cursor:not-allowed}
 .gl-h{display:flex;justify-content:space-between;align-items:baseline;font-size:12.5px}.gl-h span{color:var(--subtle)}.gl-h b{font-weight:700}.gl-h em{font-style:normal;font-weight:400;color:var(--faint)}
 .gl-b{height:8px;border-radius:4px;background:var(--surface2);overflow:hidden}.gl-b i{display:block;height:100%;border-radius:4px;transition:width .8s cubic-bezier(.16,1,.3,1)}
 .gl-n{display:flex;justify-content:space-between;font-size:11px;color:var(--faint)}
+
+/* 개요 맨 위 무대 — 포트폴리오 프로젝트 페이지 첫 화면과 같은 구성(흐르는 이미지 벽 · 문장 A → B) */
+.ovs{position:relative;display:grid;place-items:center;height:clamp(460px,calc(100vh - 120px),720px);margin:0 0 40px;border-radius:28px;overflow:hidden;background:#0b0d10;color:#fff;text-align:center;scroll-margin-top:72px}
+.ovs-wall{position:absolute;inset:-14% -12%;display:flex;flex-direction:column;justify-content:center;gap:16px;opacity:0;transform:rotate(-8deg) scale(1.16);transition:opacity 1.6s cubic-bezier(.2,.8,.2,1),transform 2.6s cubic-bezier(.2,.8,.2,1)}.ovs.ld .ovs-wall{opacity:.5;transform:rotate(-8deg) scale(1)}
+.ovs-row{display:flex;gap:16px;width:max-content;animation:ovsMq var(--dur,90s) linear infinite}.ovs-row.rev{animation-direction:reverse}@keyframes ovsMq{to{transform:translateX(-50%)}}
+.ovs-t{flex:none;width:clamp(180px,17vw,300px);aspect-ratio:4/3;border-radius:16px;overflow:hidden;background:#1b1f27}.ovs-t img{width:100%;height:100%;object-fit:cover}
+.ovs::after{content:"";position:absolute;inset:0;z-index:1;background:radial-gradient(ellipse 62% 55% at 50% 50%,rgba(8,10,14,.74),rgba(8,10,14,.9)),linear-gradient(180deg,rgba(8,10,14,.55),transparent 30%,transparent 70%,rgba(8,10,14,.8))}
+.ovs-c{position:relative;z-index:2;display:flex;flex-direction:column;align-items:center;gap:36px;padding:0 24px}
+.ovs-h{display:grid;margin:0;font-size:clamp(30px,3.6vw,58px);font-weight:700;line-height:1.3;letter-spacing:-.03em;text-wrap:balance;word-break:keep-all}
+.ovs-p{grid-area:1/1;align-self:center;transition:opacity .7s cubic-bezier(.2,.8,.2,1),transform .9s cubic-bezier(.2,.8,.2,1)}.ovs-p.b{opacity:0;transform:translateY(34px)}.ovs.sw .ovs-p.a{opacity:0;transform:translateY(-34px)}.ovs.sw .ovs-p.b{opacity:1;transform:none}
+.ovs-p.a{display:flex;flex-direction:column;align-items:center;gap:.16em}.ovs-l1{font-size:.5em;font-weight:600;line-height:1.5;letter-spacing:-.02em;color:rgba(255,255,255,.6)}.ovs-l1 b{font-weight:700;color:#fff}.ovs-w{display:inline-block;animation:ovsW .8s cubic-bezier(.2,.8,.2,1) backwards;animation-delay:calc(.35s + var(--i) * .18s)}
+.ovs-l2{display:block;animation:ovsW2 1s cubic-bezier(.2,.8,.2,1) backwards;animation-delay:calc(.6s + var(--i) * .18s)}.ovs-l2 em{font-style:normal;color:#7db7ff}
+@keyframes ovsW{from{opacity:0;transform:translateY(70%)}}@keyframes ovsW2{from{opacity:0;transform:translateY(26px) scale(.97)}}
+.ovs-b{display:flex;flex-wrap:wrap;justify-content:center;gap:12px;opacity:0;transform:translateY(12px);transition:opacity .8s .2s,transform .9s cubic-bezier(.2,.8,.2,1) .2s}.ovs.ld .ovs-b{opacity:1;transform:none}
+.ovs-btn{display:inline-flex;align-items:center;height:52px;padding:0 24px;border:0;border-radius:14px;background:rgba(255,255,255,.14);font:inherit;font-size:16.5px;font-weight:600;color:#fff;text-decoration:none;cursor:pointer;transition:background .2s,filter .2s}.ovs-btn:hover{background:rgba(255,255,255,.22)}.ovs-btn.pri{background:#3182f6}.ovs-btn.pri:hover{background:#3182f6;filter:brightness(1.08)}
+.ovs-cue{position:absolute;left:50%;bottom:22px;z-index:2;display:grid;place-items:center;width:42px;height:42px;margin-left:-21px;border:0;border-radius:50%;background:rgba(255,255,255,.14);cursor:pointer;animation:ovsBob 2.2s ease-in-out infinite}.ovs-cue:hover{background:rgba(255,255,255,.24)}@keyframes ovsBob{50%{transform:translateY(6px)}}
+@media(max-width:760px){.ovs{height:clamp(420px,72vh,560px);margin-bottom:28px;border-radius:20px}.ovs-c{gap:28px}.ovs-btn{height:48px;padding:0 18px;font-size:15px}}
+@media(prefers-reduced-motion:reduce){.ovs-row,.ovs-w,.ovs-l2,.ovs-cue{animation:none}.ovs-wall,.ovs-b,.ovs-p{transition:none}}
