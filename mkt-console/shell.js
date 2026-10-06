@@ -1,4 +1,4 @@
-/* 앱 셸 — 상단 탭(구조·개요 | 데모 콘솔) · 사이드바 · 라우터 · 히어로 편집 · 새로고침 · 다크 모드
+/* 앱 셸 — 공통 헤더(포트폴리오와 같은 '이력서 · AX · 프로젝트') · 콘솔 상단 바(개요 | 데모 콘솔) · 사이드바 · 라우터 · 히어로 편집 · 새로고침 · 다크 모드
    /ax 한 주소에서 #/overview = 구조·개요, 그 밖의 #/… = 데모 콘솔 화면이에요.
    데모에서 쓰는 메뉴만 열려 있고, 나머지는 회색(비활성)으로 원래 자리에 남겨 둬요. */
 (function (NW) {
@@ -52,9 +52,16 @@
       + '<div class="sb-user"><span class="sb-av">DM</span><span class="sb-foot-t" style="flex:1;min-width:0"><b style="display:block;font-size:12.5px">데모 사용자</b><small style="color:var(--muted-foreground);font-size:11px">편집 내용은 이 브라우저에만 저장</small></span></div></div>'
       + '<div class="sb-live"><span class="pulse"></span><span class="sb-foot-t">7명 에이전트 활동 중</span></div></aside>';
   }
+  /* 공통 헤더 — /portfolio · /portfolio/projects 와 같은 모양(이름 | 이력서(▾ 섹션) · AX · 프로젝트, 밑줄 탭 · 폭 832) */
+  var SECS = [["about", "About"], ["experience", "Experience"], ["techstack", "Stack &amp; Skills"], ["contact", "Contact"]];
+  function siteHeader() {
+    return '<header class="gh2"><div class="gh2-in"><a class="gh2-nm" href="/portfolio">Kim Jinsoo</a><nav class="gtabs" aria-label="메뉴">'
+      + '<div class="gt-w"><a class="gt" href="/portfolio" data-gt-dd>이력서</a><div class="gdd">' + SECS.map(function (x) { return '<a href="/portfolio#' + x[0] + '">' + x[1] + '</a>'; }).join("") + '</div></div>'
+      + '<a class="gt on" aria-current="page" href="#/overview" data-ax-top>AX</a><a class="gt" href="/portfolio/projects">프로젝트</a></nav></div></header>';
+  }
   function topbar() {
     var r = route(), onOv = r === OV, dark = document.documentElement.classList.contains("dark");
-    return '<header class="tb"><a class="tb-back" href="/portfolio" title="포트폴리오로 돌아가기">' + ic("left") + '<span>포트폴리오</span></a><span class="tb-div"></span>'
+    return '<header class="tb">'
       + (onOv ? '' : '<button class="xb tb-menu" data-mnav aria-label="메뉴 열기">' + ic("menu") + '</button>')
       + '<a class="tb-brand" href="#/overview"><span class="sb-mark">' + ic("base") + '</span><b>AX-MKT 콘솔</b></a>'
       + '<nav class="tb-tabs" role="tablist"><a role="tab" class="' + (onOv ? 'on' : '') + '" href="#/overview">개요</a><a role="tab" class="' + (onOv ? '' : 'on') + '" href="#/' + (store.get("last", DEF)) + '">데모 콘솔</a></nav>'
@@ -71,12 +78,12 @@
   function layout() {
     var onOv = route() === OV;
     if (NW.EMBED) { $("#app").innerHTML = '<main id="main"></main>'; return; }
-    $("#app").innerHTML = topbar() + '<div class="body">' + (onOv ? NW.OVERVIEW.toc() : sidebar("desktop")) + '<main id="main"></main></div>'
+    $("#app").innerHTML = siteHeader() + (onOv ? '' : topbar()) + '<div class="body">' + (onOv ? '' : sidebar("desktop")) + '<main id="main"></main></div>'
       + (onOv ? '' : '<div class="mdrawer" id="mdrawer"><div class="bd" data-mclose></div>' + sidebar("drawer") + '</div>');
     document.documentElement.classList.toggle("is-ov", onOv);
   }
   function paintNav() {
-    var d = $(".body > .sb:not(.ov-toc)"); if (d) d.outerHTML = sidebar("desktop");
+    var d = $(".body > .sb"); if (d) d.outerHTML = sidebar("desktop");
     var m = $("#mdrawer .sb"); if (m) m.outerHTML = sidebar("drawer");
     var t = $(".tb"), k = $(".tk"); if (k) k.remove(); if (t) t.outerHTML = topbar();
   }
@@ -93,6 +100,7 @@
     if (!NW.EMBED && h !== r) history.replaceState(null, "", "#/" + r);
     NW.OVERVIEW.unmount(); closeM(); NW.closeLayer();
     var mode = r === OV ? "ov" : "con";
+    document.documentElement.classList.toggle("dark", mode === "con" && !!store.get("dark", false)); // 개요 = 포트폴리오처럼 밝게 · 다크 모드는 데모 콘솔에서만
     if (mode !== lastMode || !$("#main")) { layout(); lastMode = mode; } else paintNav();
     if (r !== OV) store.set("last", r);
     NW.rerender(false); window.scrollTo(0, 0);
@@ -123,6 +131,9 @@
   document.addEventListener("click", function (e) {
     var b, t = e.target;
     if (t.closest("[aria-disabled]")) { e.preventDefault(); return; }
+    if (t.closest("[data-ax-top]") && route() === OV) { e.preventDefault(); window.scrollTo({ top: 0, behavior: "smooth" }); return; } // 지금 페이지 메뉴 = 맨 위로
+    if ((b = t.closest("[data-gt-dd]")) && matchMedia("(hover: none)").matches) { var w = b.parentNode; if (!w.classList.contains("open")) { e.preventDefault(); w.classList.add("open"); return; } } // 터치: '이력서' 한 번 = 섹션 메뉴
+    if (!t.closest(".gt-w")) NW.$$(".gt-w.open").forEach(function (x) { x.classList.remove("open"); });
     if ((b = t.closest("[data-sb-g]"))) {
       if (b.closest(".sb.col")) { location.hash = "#/" + b.getAttribute("data-first"); return; }
       var g = b.getAttribute("data-sb-g"); OPEN[g] = b.getAttribute("aria-expanded") === "true" ? 0 : 1; store.set("sb-open2", OPEN); paintNav(); return;
