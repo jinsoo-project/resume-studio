@@ -1,0 +1,273 @@
+<!doctype html>
+<html lang="ko" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Urbanstay × Wavve 프로젝트 카드</title>
+<style>
+  :root {
+    color-scheme: light;
+    --page:#f9f9f7; --surface:#fcfcfb; --ink:#0b0b0b; --ink-2:#52514e; --muted:#898781;
+    --grid:#e1e0d9; --border:rgba(11,11,11,.10);
+    --s1:#2a78d6; --s2:#eb6834; --good:#006300;
+    --warn-bg:#fff6e0; --warn-ink:#7a4d00; --tag-bg:#eef3fb;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      color-scheme: dark;
+      --page:#0d0d0d; --surface:#1a1a19; --ink:#fff; --ink-2:#c3c2b7; --muted:#898781;
+      --grid:#2c2c2a; --border:rgba(255,255,255,.10); --s1:#3987e5; --s2:#d95926; --good:#0ca30c;
+      --warn-bg:#2b2310; --warn-ink:#f2c66d; --tag-bg:#1f2a3b;
+    }
+  }
+  :root[data-theme="dark"] {
+    color-scheme: dark;
+    --page:#0d0d0d; --surface:#1a1a19; --ink:#fff; --ink-2:#c3c2b7; --muted:#898781;
+    --grid:#2c2c2a; --border:rgba(255,255,255,.10); --s1:#3987e5; --s2:#d95926; --good:#0ca30c;
+    --warn-bg:#2b2310; --warn-ink:#f2c66d; --tag-bg:#1f2a3b;
+  }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--page); color:var(--ink); font-family:system-ui,-apple-system,"Apple SD Gothic Neo","Pretendard",sans-serif; font-size:15px; line-height:1.6; -webkit-font-smoothing:antialiased; word-break:keep-all; }
+  main { max-width:960px; margin:0 auto; padding:48px 16px 80px; }
+  .eyebrow { font-size:12px; font-weight:700; letter-spacing:.04em; color:var(--muted); text-transform:uppercase; }
+  h1 { font-size:30px; line-height:1.25; margin:6px 0 10px; letter-spacing:-.02em; }
+  .sub { color:var(--ink-2); margin:0; }
+  h2 { font-size:18px; margin:44px 0 14px; letter-spacing:-.01em; }
+  h2 small { font-weight:400; color:var(--muted); font-size:13px; margin-left:8px; }
+  .card { background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:20px 22px; }
+  .grid { display:grid; gap:12px; }
+  .kpi { grid-template-columns:repeat(auto-fit,minmax(170px,1fr)); }
+  .kpi .card { padding:16px 18px; }
+  .kpi .label { font-size:12px; color:var(--muted); font-weight:600; }
+  .kpi .value { font-size:30px; font-weight:700; letter-spacing:-.02em; line-height:1.1; margin:6px 0 4px; font-variant-numeric:tabular-nums; }
+  .kpi .value span { font-size:15px; font-weight:600; color:var(--ink-2); margin-left:3px; }
+  .kpi .note { font-size:12px; color:var(--ink-2); }
+  p { margin:0 0 10px; }
+  ul { margin:0; padding-left:18px; } li { margin:4px 0; } li b { font-weight:600; }
+  table { width:100%; border-collapse:collapse; font-size:14px; }
+  th,td { text-align:left; padding:9px 10px; border-bottom:1px solid var(--grid); vertical-align:top; }
+  th { color:var(--muted); font-weight:600; font-size:12px; }
+  td.num,th.num { text-align:right; font-variant-numeric:tabular-nums; white-space:nowrap; }
+  tr.sum td { font-weight:700; border-top:2px solid var(--grid); }
+  .tag { display:inline-block; font-size:11px; font-weight:700; padding:1px 8px; border-radius:999px; background:var(--tag-bg); color:var(--ink-2); white-space:nowrap; }
+  .callout { background:var(--warn-bg); color:var(--warn-ink); border-radius:10px; padding:12px 16px; font-size:14px; }
+  .two { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+  .desc { font-size:16px; line-height:1.7; }
+  .desc b { font-weight:700; }
+  /* 월별 2시리즈 가로막대 */
+  .chart { display:grid; grid-template-columns:84px 1fr; gap:10px 12px; align-items:center; font-size:13px; }
+  .chart .m { color:var(--ink-2); }
+  .bars { display:flex; flex-direction:column; gap:3px; }
+  .bar { display:flex; align-items:center; gap:8px; height:13px; }
+  .bar i { display:block; height:100%; border-radius:3px; }
+  .bar i.a { background:var(--s1); } .bar i.b { background:var(--s2); }
+  .bar span { font-size:11px; color:var(--ink-2); font-variant-numeric:tabular-nums; white-space:nowrap; }
+  .legend { display:flex; gap:16px; font-size:12px; color:var(--ink-2); margin-top:12px; }
+  .legend i { display:inline-block; width:10px; height:10px; border-radius:2px; margin-right:6px; vertical-align:-1px; }
+  /* 썸네일 */
+  .thumbs { display:grid; grid-template-columns:repeat(auto-fill,minmax(150px,1fr)); gap:12px; }
+  figure { margin:0; }
+  figure img { width:100%; aspect-ratio:1/1; object-fit:cover; object-position:top; border-radius:10px; border:1px solid var(--border); background:var(--surface); display:block; }
+  figure.wide img { aspect-ratio:16/9; }
+  figcaption { font-size:11px; color:var(--ink-2); margin-top:6px; line-height:1.4; }
+
+  .story { display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px; }
+  .story .card h3 { margin:0 0 6px; font-size:13px; color:var(--muted); font-weight:700; letter-spacing:.02em; }
+  .story .card p { margin:0; font-size:13.5px; line-height:1.6; }
+  .lede { font-size:17px; line-height:1.65; }
+  .lede b { font-weight:700; }
+  .ps { width:100%; border-collapse:collapse; font-size:13px; }
+  .ps th { color:var(--muted); font-weight:600; font-size:11px; text-align:left; padding:6px 8px; border-bottom:1px solid var(--grid); }
+  .ps td { padding:8px 8px; border-bottom:1px solid var(--grid); vertical-align:top; line-height:1.5; }
+  .ps td:first-child { font-weight:600; white-space:nowrap; }
+  .ps tr:last-child td { border-bottom:0; }
+  .money { display:grid; grid-template-columns:repeat(4,1fr); gap:10px; }
+  .money .card { padding:12px 14px; }
+  .money .label { font-size:11px; color:var(--muted); font-weight:600; }
+  .money .value { font-size:22px; font-weight:700; letter-spacing:-.02em; line-height:1.1; margin:4px 0 2px; font-variant-numeric:tabular-nums; }
+  .money .value span { font-size:12px; font-weight:600; color:var(--ink-2); margin-left:2px; }
+  .money .note { font-size:11px; color:var(--ink-2); }
+  @media (max-width:860px) { .story { grid-template-columns:1fr; } .money { grid-template-columns:1fr 1fr; } }
+  footer { margin-top:48px; font-size:12px; color:var(--muted); border-top:1px solid var(--grid); padding-top:14px; }
+  @media (max-width:720px) { .two { grid-template-columns:1fr; } .chart { grid-template-columns:64px 1fr; } }
+  @media print { body { background:#fff; } main { padding:0; } .card { break-inside:avoid; } }
+</style>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<style>
+  /* 포트폴리오(kimjinsoo-mkt-ax.vercel.app/portfolio/projects) 톤 맞춤: 라이트 고정 · Pretendard · 흰 카드 */
+  :root { --page:#f7f8fa; --surface:#fff; --border:rgba(0,0,0,.07); --s1:#3182f6; --tag-bg:#eef4ff; }
+  body { font-family:"Pretendard Variable",Pretendard,-apple-system,BlinkMacSystemFont,system-ui,"Apple SD Gothic Neo",sans-serif; letter-spacing:-.01em; }
+  .card { border-radius:16px; }
+  /* 프로젝트 페이지 보기 창 안(iframe)에서: 제목은 보기 창이 보여 주므로 숨김 · 바탕 투명 · 여백 없음 */
+  html.embed, html.embed body { background:transparent; }
+  html.embed main { max-width:none; padding:0 0 8px; }
+  html.embed main > header { display:none; }
+  html.embed main > section:first-of-type, html.embed main > header + section { margin-top:0; }
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <div class="eyebrow">Project 02 · Urbanstay × Wavve · 2026-04 → 운영 중 · 2026-10-05 기준</div>
+    <h1>Urbanstay × Wavve<br>객실 OTT 무료 시청 · 쿠폰 발급 제휴</h1>
+    <p class="sub">전국 어반스테이 객실에서 Wavve를 무료로 보고, 예약번호로 Wavve 무료 이용권까지 받아 가는 제휴 이벤트. 2026-04-21 페이지 착수 · 05-13 캠페인 시작 · 운영 중. 기획·구축·카피 운영 : Julian (Life Planning).</p>
+  </header>
+
+  <!-- 결론 (두괄식) -->
+  <section>
+    <div class="card lede">
+      <b>결론.</b> 웨이브와의 바터 제휴로 "국내 최초 전 객실 OTT 무료 시청" USP를 만들고, 랜딩 페이지 · 쿠폰 발급 · 멀티채널 캠페인 · 성과 측정을 혼자 기획하고 구축해 운영했다. 5개월간 노출 503만 회, 가이드 페이지 유입 5.8만 건, 쿠폰 7,880장을 5,413개 예약에 발급했다. 미디어 실집행은 Meta ₩250만 수준(에어브릿지 연동 기준)이고, 쿠폰 2만 장은 웨이브가 무상 제공했다. 광고비를 거의 쓰지 않고 투숙 경험에 혜택을 붙인 프로젝트다.
+    </div>
+  </section>
+
+  <section>
+    <h2>왜 · 무엇을 · 어떻게</h2>
+    <div class="story">
+      <div class="card"><h3>왜 했나</h3><p>2026년 3월 어반스테이 광고 예산이 축소된 상황에서 비용 없이 투숙 경험을 차별화할 USP가 필요했다. 웨이브는 신규 구독 유입 채널이 필요했다. 두 니즈를 바터로 묶어 투숙객에게는 객실 OTT 무료 시청과 이용권을, 웨이브에게는 체크아웃 이후 구독 전환 채널을 제공하는 구조로 설계했다.</p></div>
+      <div class="card"><h3>무엇을 했나</h3><p>① 투숙객 전용 랜딩 <code>/wavve-guide</code>를 0→1로 구축 ② 쿠폰 발급 API · DB 요구사항 설계(race-safe 발급, 1예약 4쿠폰) ③ ₩2,000만 미디어믹스 품의(Meta · Google · Naver + CRM 3채널, ROAS 300% 운영 원칙) ④ Airbridge 트래킹 체계 설계(채널 wavve_qr · 링크 11개) ⑤ BigQuery 쿠폰 현황 슬랙 자동 리포트 ⑥ 16주 협업 성과 리포트 작성.</p></div>
+      <div class="card"><h3>어떻게 플레이했나</h3><p>유료는 최소, 자사 접점은 최대. 체크인 알림톡과 객실 TV QR이 유입의 85%(49,902 / 58,484)를 만들었고, 유료는 네이버 브랜드검색 소재 교체(정액 범위 안)와 Meta 트래픽 캠페인 소액으로 받쳤다. 체험단 콘텐츠를 광고 소재로 재활용해 제작비를 아꼈고, 모든 진입 링크에 트래킹을 걸어 채널별 유입을 숫자로 남겼다.</p></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>총 투입 · 효율 <small>계산값은 표기</small></h2>
+    <div class="money">
+      <div class="card"><div class="label">품의 예산</div><div class="value">₩2,000<span>만</span></div><div class="note">2026-06 → 12 · 7개월 · 퍼포먼스 74% + CRM 26%</div></div>
+      <div class="card"><div class="label">Meta 실집행</div><div class="value">₩250<span>만</span></div><div class="note">₩2,502,510 · 05-18 → 10-05 · Airbridge 연동 기준</div></div>
+      <div class="card"><div class="label">쿠폰 1장당 광고비</div><div class="value">₩318</div><div class="note">Meta 집행 ÷ 발급 7,880장 · 계산값</div></div>
+      <div class="card"><div class="label">유입 1건당 광고비</div><div class="value">₩43</div><div class="note">Meta 집행 ÷ 가이드 유입 58,484 · 계산값</div></div>
+    </div>
+    <p style="font-size:12px;color:var(--muted);margin-top:8px">브랜드검색 정액비와 알림톡 · 카카오 발송비는 품의 항목이지만 연동 집계가 없어 위 수치에 빠져 있다. 쿠폰 2만 장은 웨이브 무상 제공분이라 비용으로 잡지 않았다.</p>
+  </section>
+
+  <section>
+    <h2>문제 해결</h2>
+    <div class="card" style="padding:0 0 4px">
+      <table class="ps">
+        <thead><tr><th>문제</th><th>조치</th><th>결과</th></tr></thead>
+        <tbody>
+          <tr><td>쿠폰 1차 풀 유효기간이 07-31로 짧아 여름 성수기 발급분이 만료될 위험</td><td>06-24에 30일권 2차 풀 1만 장(유효 12-31)으로 교체하고 1차 잔여 8,878장을 회수 처리</td><td>월 발급 1,038(6월) → 2,226(7월) → 2,595(8월)로 성수기 발급 손실 없음</td></tr>
+          <tr><td>서버에 사용자 식별이 없어 1인 1회 제한과 중복 발급 방지가 어려움</td><td>클라이언트 localStorage 복원 + 예약번호 기준 1예약 4쿠폰 정책, 발급 쿼리는 FOR UPDATE SKIP LOCKED로 원자적 처리하도록 백엔드 요구사항 작성</td><td>발급 코드 7,880장 전부 예약번호에 귀속 · 5,413개 예약 분포 추적 가능</td></tr>
+          <tr><td>예약번호 기반 발급의 부정사용 · 개인정보 리스크</td><td>유의사항을 3차에 걸쳐 개정(부정사용 금지 · 개인정보 수집 고지 · 웨이브 약관 준용 13항목)</td><td>제휴팀 합의 카피를 코드에 고정, 법무 이슈 0건</td></tr>
+          <tr><td>발급 현황을 볼 수 있는 화면이 없어 소진 페이스 · 잔여를 수동 확인</td><td>BigQuery 쿠폰 테이블 기준 일일 종합 · 4시간 스냅샷 슬랙 리포트를 스킬로 자동화(잔여 1/3 · 유효기간 30일 경고 포함)</td><td>잔여 3,227장 · 페이스 진단이 매일 채널에 쌓임</td></tr>
+          <tr><td>정주행 콘텐츠 영역이 통이미지 1장(PNG 9.4MB)이라 작품 교체마다 디자인 의뢰</td><td>데이터 배열 + 카드 컴포넌트와 webp 포스터 6장(132KB)으로 코드화</td><td>작품 교체가 코드 한 줄, 용량 1/70, 텍스트 접근성 확보</td></tr>
+          <tr><td>매체 · 자사 로그가 흩어져 캠페인 성과를 한 숫자로 말할 수 없음</td><td>Airbridge 채널 · 링크 체계를 먼저 깔고, 16주 협업 리포트(노출 · 클릭 · 유입 · 쿠폰)를 작성</td><td>이 카드의 유입 경로 표가 그 결과물</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+
+  <!-- 핵심 숫자 -->
+  <section>
+    <h2>핵심 숫자</h2>
+    <div class="grid kpi">
+      <div class="card"><div class="label">쿠폰 발급</div><div class="value">7,880<span>장</span></div><div class="note">5,413개 예약 · 05-14 → 10-05 누적</div></div>
+      <div class="card"><div class="label">2차 풀 소진율</div><div class="value">67.7<span>%</span></div><div class="note">30일권 10,000장 중 6,773 발급 · 잔여 3,227</div></div>
+      <div class="card"><div class="label">가이드 페이지 유입</div><div class="value">5.8<span>만</span></div><div class="note">58,484 터치포인트 · Airbridge wavve_qr</div></div>
+      <div class="card"><div class="label">유입 → 발급 예약</div><div class="value">10.8<span>%</span></div><div class="note">5,413 ÷ 50,288 (CTA 아웃바운드 제외) · 계산값</div></div>
+      <div class="card"><div class="label">캠페인 총 노출</div><div class="value">503<span>만</span></div><div class="note">5,030,006 · 광고·콘텐츠·자사·메시지 (5/13–8/31)</div></div>
+      <div class="card"><div class="label">Meta 광고비</div><div class="value">250<span>만원</span></div><div class="note">₩2,502,510 · Airbridge 채널 연동 집계</div></div>
+    </div>
+  </section>
+
+  <!-- 유입 경로 (Airbridge) -->
+  <section>
+    <h2>유입 경로 <small>Airbridge · 2026-04-21 → 10-05 · 트래킹 링크·연동 채널 기준</small></h2>
+    <div class="card" style="padding:0 0 4px">
+      <table>
+        <thead><tr><th>채널</th><th>소재 · 그룹</th><th class="num">노출(매체)</th><th class="num">클릭(매체)</th><th class="num">터치포인트</th><th class="num">비용</th></tr></thead>
+        <tbody>
+          <tr><td><span class="tag">알림톡</span></td><td>체크인 알림톡 링크 → /wavve-guide</td><td class="num">–</td><td class="num">–</td><td class="num">38,665</td><td class="num">–</td></tr>
+          <tr><td><span class="tag">객실 TV QR</span></td><td>TV 화면 QR → /wavve-guide</td><td class="num">–</td><td class="num">–</td><td class="num">11,237</td><td class="num">–</td></tr>
+          <tr><td><span class="tag">네이버 브랜드검색</span></td><td>어반스테이 · 르컬렉티브 「웨이브 무료시청」 소재</td><td class="num">198,302</td><td class="num">41,641</td><td class="num">53,318</td><td class="num">정액(미연동)</td></tr>
+          <tr><td><span class="tag">Meta</span></td><td>제휴_웨이브무료시청 트래픽 캠페인 · 소재 18종</td><td class="num">608,162</td><td class="num">16,706</td><td class="num">45,343</td><td class="num">₩2,502,510</td></tr>
+          <tr><td><span class="tag">카카오</span></td><td>플친 캐러셀 「웨이브 즐기기」 · 「선물받으러가기」 등</td><td class="num">–</td><td class="num">–</td><td class="num">496</td><td class="num">–</td></tr>
+          <tr><td><span class="tag">체험단 · 인스타</span></td><td>네이버 리뷰 링크 5지점 · 인포크 링크</td><td class="num">–</td><td class="num">–</td><td class="num">693</td><td class="num">–</td></tr>
+          <tr><td><span class="tag">가이드 CTA</span></td><td>페이지 CTA → wavve.com 쿠폰 등록 (아웃바운드)</td><td class="num">–</td><td class="num">–</td><td class="num">8,196</td><td class="num">–</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p style="font-size:12px;color:var(--muted);margin-top:8px">터치포인트는 Airbridge가 잡은 링크 클릭·랜딩 수. 매체 노출·클릭은 Airbridge에 연동된 네이버 검색광고·Meta 계정 집계라 매체 관리자 리포트(아래 협업 리포트)와 다르다. 트래킹 링크를 안 쓴 카카오 발송·알림톡 발송량은 여기 안 잡힌다.</p>
+  </section>
+
+  <!-- 월별 추이 -->
+  <section class="two">
+    <div class="card">
+      <h2 style="margin-top:0">월별 추이</h2>
+      <div class="chart"><div class="m">5월</div><div class="bars"><div class="bar"><i class="a" style="width:31.4%"></i><span>5,463</span></div><div class="bar"><i class="b" style="width:2.5%"></i><span>430</span></div></div><div class="m">6월</div><div class="bars"><div class="bar"><i class="a" style="width:56.8%"></i><span>9,875</span></div><div class="bar"><i class="b" style="width:6.0%"></i><span>1,038</span></div></div><div class="m">7월</div><div class="bars"><div class="bar"><i class="a" style="width:86.4%"></i><span>15,028</span></div><div class="bar"><i class="b" style="width:12.8%"></i><span>2,226</span></div></div><div class="m">8월</div><div class="bars"><div class="bar"><i class="a" style="width:100.0%"></i><span>17,397</span></div><div class="bar"><i class="b" style="width:14.9%"></i><span>2,595</span></div></div><div class="m">9월</div><div class="bars"><div class="bar"><i class="a" style="width:49.2%"></i><span>8,560</span></div><div class="bar"><i class="b" style="width:7.5%"></i><span>1,297</span></div></div><div class="m">10월(~5일)</div><div class="bars"><div class="bar"><i class="a" style="width:12.2%"></i><span>2,126</span></div><div class="bar"><i class="b" style="width:1.7%"></i><span>294</span></div></div></div>
+      <div class="legend"><span><i style="background:var(--s1)"></i>가이드 페이지 유입 (Airbridge)</span><span><i style="background:var(--s2)"></i>쿠폰 발급 (BigQuery)</span></div>
+      <p style="font-size:12px;color:var(--muted);margin-top:10px">7–8월 성수기에 유입·발급 모두 피크. 6-24 쿠폰 2차 풀(30일권) 전환 뒤 발급이 월 1천 → 2천 장대로 올라섰다.</p>
+    </div>
+    <div class="card">
+      <h2 style="margin-top:0">쿠폰 운영</h2>
+      <table>
+        <tbody>
+          <tr><td>1차 풀</td><td>1개월권 10,000장 · 05-06~07-31 유효 · 1,107 발급 후 06-24 잔여 8,878 회수</td></tr>
+          <tr><td>2차 풀</td><td>30일권 10,000장 · 06-22~12-31 유효 · 6,773 발급 · 3,227 잔여</td></tr>
+          <tr><td>1예약당</td><td>1장 4,156 · 2장 540 · 3장 224 · 4장 493 (최대 4장 정책)</td></tr>
+          <tr><td>게스트</td><td>일반 4,686 · 단체 262 · 비즈니스 147 · 오너·초대·멤버 318</td></tr>
+          <tr><td>방문 이력</td><td>첫 방문 3,161 (58%) · 2–3회 1,338 · 4–9회 562 · 10회+ 352</td></tr>
+          <tr><td>다음</td><td>1주일권 전환 (클라이언트 완료, 10-13경 PR · 서버 풀 교체 대기)</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- 협업 리포트 요약 -->
+  <section>
+    <h2>마케팅 협업 리포트 요약 <small>2026-05-13 → 08-31 · 16주 · 매체·자사 로그 기준</small></h2>
+    <div class="card" style="padding:0 0 4px">
+      <table>
+        <thead><tr><th>구분</th><th>채널</th><th class="num">노출 · 발송</th><th class="num">클릭 · 유입</th><th class="num">비율</th></tr></thead>
+        <tbody>
+          <tr><td>Paid</td><td>Meta 광고 (인스타 · 페이스북)</td><td class="num">3,341,556</td><td class="num">134,424</td><td class="num">CTR 4.0%</td></tr>
+          <tr><td>Paid</td><td>네이버 브랜드검색</td><td class="num">269,153</td><td class="num">50,674</td><td class="num">CTR 18.8%</td></tr>
+          <tr><td>Paid</td><td>카카오 플러스친구 메시지</td><td class="num">263,214</td><td class="num">20,848</td><td class="num">열람 65% · 클릭 7.9%</td></tr>
+          <tr><td>Organic</td><td>체험단 인스타 4건 · 블로그 5건</td><td class="num">166,217</td><td class="num">도달 95,196 · 조회 67,347</td><td class="num">인게이지 6,755</td></tr>
+          <tr><td>Organic</td><td>어반스테이 공식 인스타</td><td class="num">조회 6,228</td><td class="num">유저 2,188</td><td class="num">인게이지 879</td></tr>
+          <tr><td>CRM</td><td>예약 고객 알림톡</td><td class="num">156,346</td><td class="num">27,986</td><td class="num">CTR 17.9%</td></tr>
+          <tr><td>Onsite</td><td>앱·웹 배너 · 객실 QR · 쿠폰 안내 페이지</td><td class="num">833,520</td><td class="num">80,747</td><td class="num">유입율 9.7%</td></tr>
+          <tr class="sum"><td>합계</td><td>노출 규모 : 30개 지점 · 약 4,000객실 · 투숙객 약 31.3만 명</td><td class="num">5,030,006</td><td class="num">233,932</td><td class="num">쿠폰 6,271 (8/31)</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="callout" style="margin-top:12px">
+      <b>숫자 기준이 두 가지다.</b> 위 표는 매체 관리자·자사 로그 집계(협업 리포트, 중복 노출 미제거)이고, 「유입 경로」 표는 Airbridge 트래킹 집계다. Meta는 매체 334만 노출 vs Airbridge 61만 노출로 차이가 큰데, Airbridge에는 「웨이브무료시청」 캠페인 1개만 잡히고 매체 리포트는 광고계정 전체 기간 집계일 가능성이 있다. 카드에 한 숫자만 쓸 거면 출처를 같이 적는다.
+    </div>
+  </section>
+
+  <!-- 썸네일: 페이지 -->
+  <section>
+    <h2>썸네일 · 페이지 자산 <small>/wavve-guide hero · OG · 정주행 콘텐츠 포스터 (1주일판)</small></h2>
+    <div class="thumbs">
+      <figure><img src="wavve/01.jpg" alt="가이드 페이지 hero" loading="lazy"><figcaption>/wavve-guide hero</figcaption></figure><figure><img src="wavve/02.jpg" alt="OG 이미지" loading="lazy"><figcaption>OG · 알림톡 미리보기</figcaption></figure><figure><img src="wavve/03.jpg" alt="정주행 포스터 피의 게임2" loading="lazy"><figcaption>정주행 콘텐츠 · 피의 게임2</figcaption></figure><figure><img src="wavve/04.jpg" alt="정주행 포스터 피의 게임3" loading="lazy"><figcaption>정주행 콘텐츠 · 피의 게임3</figcaption></figure><figure><img src="wavve/05.jpg" alt="정주행 포스터 피의 게임X" loading="lazy"><figcaption>정주행 콘텐츠 · 피의 게임X</figcaption></figure><figure><img src="wavve/06.jpg" alt="정주행 포스터 커뮤니티2" loading="lazy"><figcaption>정주행 콘텐츠 · 커뮤니티2</figcaption></figure><figure><img src="wavve/07.jpg" alt="정주행 포스터" loading="lazy"><figcaption>정주행 콘텐츠 · 이혼숙려캠프</figcaption></figure><figure><img src="wavve/08.jpg" alt="정주행 포스터" loading="lazy"><figcaption>정주행 콘텐츠 · 넌 아니야</figcaption></figure>
+    </div>
+  </section>
+
+  <!-- 썸네일: 소재 -->
+  <section>
+    <h2>썸네일 · 캠페인 소재 <small>Meta 7 · 네이버 2 · 카카오 3 · 인스타 2 · 알림톡 2 · 배너 1 · TV QR 2</small></h2>
+    <div class="thumbs">
+      <figure><img src="wavve/09.jpg" alt="Meta 광고 소재 1" loading="lazy"><figcaption>Meta 01 · 객실 웨이브 무료</figcaption></figure><figure><img src="wavve/10.jpg" alt="Meta 광고 소재 2" loading="lazy"><figcaption>Meta 02 · 피의게임 정주행</figcaption></figure><figure><img src="wavve/11.jpg" alt="Meta 광고 소재 3" loading="lazy"><figcaption>Meta 03 · Wavve Pick 호캉스</figcaption></figure><figure><img src="wavve/12.jpg" alt="Meta 광고 소재 4" loading="lazy"><figcaption>Meta 04 · 웨이브 무제한</figcaption></figure><figure><img src="wavve/13.jpg" alt="Meta 광고 소재 5" loading="lazy"><figcaption>Meta 05 · 여행의 완성은 정주행</figcaption></figure><figure><img src="wavve/14.jpg" alt="Meta 광고 소재 6" loading="lazy"><figcaption>Meta 06 · Wavve original 콜라보</figcaption></figure><figure><img src="wavve/15.jpg" alt="Meta 광고 소재 7" loading="lazy"><figcaption>Meta 07 · 전객실 웨이브 무료</figcaption></figure><figure><img src="wavve/16.jpg" alt="네이버 브랜드검색 지면 르컬렉티브" loading="lazy"><figcaption>네이버 브랜드검색 · 르컬렉티브</figcaption></figure><figure><img src="wavve/17.jpg" alt="네이버 브랜드검색 지면 어반스테이" loading="lazy"><figcaption>네이버 브랜드검색 · 어반스테이</figcaption></figure><figure><img src="wavve/18.jpg" alt="카카오 플러스친구 메시지 1" loading="lazy"><figcaption>카카오 플친 · 여름 캐러셀</figcaption></figure><figure><img src="wavve/19.jpg" alt="카카오 플러스친구 메시지 2" loading="lazy"><figcaption>카카오 플친 · 1개월 무료 쿠폰</figcaption></figure><figure><img src="wavve/20.jpg" alt="카카오 플러스친구 메시지 3" loading="lazy"><figcaption>카카오 플친 · 지점별 오퍼</figcaption></figure><figure><img src="wavve/21.jpg" alt="인스타그램 온드미디어 1" loading="lazy"><figcaption>인스타 온드 · 여름 캐러셀</figcaption></figure><figure><img src="wavve/22.jpg" alt="인스타그램 온드미디어 2" loading="lazy"><figcaption>인스타 온드 · 콜라보 안내</figcaption></figure><figure><img src="wavve/23.jpg" alt="알림톡 수신 목록" loading="lazy"><figcaption>알림톡 · 수신 목록</figcaption></figure><figure><img src="wavve/24.jpg" alt="알림톡 메시지 전문" loading="lazy"><figcaption>알림톡 · 메시지 전문</figcaption></figure><figure><img src="wavve/25.jpg" alt="앱 홈 배너" loading="lazy"><figcaption>앱 · 웹 홈 배너</figcaption></figure><figure><img src="wavve/26.jpg" alt="객실 TV QR 1" loading="lazy"><figcaption>객실 TV · 안내 QR</figcaption></figure><figure><img src="wavve/27.jpg" alt="객실 TV QR 2" loading="lazy"><figcaption>객실 TV · 안내 QR</figcaption></figure>
+    </div>
+  </section>
+
+  <footer>
+    출처 : 쿠폰 = BigQuery 쿠폰 발급 · 예약 테이블 (발급 시각 KST, 2026-10-05 21:30 조회) · 유입 = Airbridge 앱 handys Actuals 리포트 (keyword wavve · 웨이브, 웨이브파크 지점 항목 제외) · 협업 리포트 = 「웨이브-어반스테이 마케팅 협업 리포트」(2026-09-04, 어반스테이 마케팅) · 이미지 = 캠페인 집행 소재 · 가이드 페이지. 「계산값」 표기 외 모든 숫자는 원천 그대로. 생성 : 2026-10-05.
+  </footer>
+</main>
+<script>
+  // 보기 창(iframe) 안이면 embed 모드 + 높이를 부모에 알림(부모가 iframe 높이를 맞춤 → 스크롤 하나로)
+  (function () {
+    var inFrame = false; try { inFrame = window.self !== window.top; } catch (e) { inFrame = true; }
+    if (!inFrame) return;
+    document.documentElement.classList.add("embed");
+    var last = 0, send = function () { var h = Math.ceil(document.documentElement.getBoundingClientRect().height); if (h && h !== last) { last = h; parent.postMessage({ klio: "doc-h", h: h }, "*"); } };
+    if (window.ResizeObserver) new ResizeObserver(send).observe(document.documentElement);
+    addEventListener("message", function (e) { if (e.data && e.data.klio === "doc-ask") { last = 0; send(); } }); // 보기 창이 열릴 때 다시 물어봄
+    addEventListener("load", send); setTimeout(send, 50);
+  })();
+</script>
+</body>
+</html>

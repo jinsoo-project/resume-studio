@@ -735,7 +735,9 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
   //    hide = 숨길 프로젝트 · companies = 회사 날짜 · works = 프로젝트별 PPT 원문(links = 영상·링크 정리본: 공개 영상만 · 실제 유튜브 제목 · 같은 영상 한 번 · 제목·요약·과제(problem)·담당(action)·성과(result), 줄바꿈 = 글머리표 · cols = 칸 이름 · metrics [값, 이름] · media = /pf-img/ppt/ 이미지)
   //    add = PPT에만 있는 프로젝트(카탈로그 · SEO) · 실험 페이지는 DB에 아직 반영 전(klio.migr.pdf1 없음)이면 그릴 때 pptPatch로 적용, 스튜디오 'PDF 내용 반영' 버튼은 같은 데이터를 DB에 씀
   var PPT_IMG = "https://kimjinsoo-mkt-ax.vercel.app/pf-img/ppt/";
-  var PPT_PATCH = {"hide": ["944ff76c-037e-4c72-92ac-81f4dcabb366", "c54a836e-546c-4355-b2ac-213c3d444be2", "fd404ac5-7f46-420b-97dc-a2b8e89bc445", "c90c1643-f38b-4f2d-a668-9e0f3c87094a"], "companies": {"9a240366-d8d0-47b3-a1fd-3259532182b3": {"endDate": "2022-04"}}, "works": {"0a3aea35-ccc9-4018-a7a6-e383c303f928": {"title": "UA & 리타게팅 캠페인 최적화", "startDate": "2023-01", "summary": "웹&앱 트래킹을 MMP로 옮기고, 신규 쿠폰팩·리타게팅으로 UA 캠페인 최적화", "problem": "WEB 지면 트래킹의 부재\n매체 & 캠페인별 플래닝의 부재\n성과 & 효율 체크의 많은 리소스 투입", "action": "웹&앱 트래킹 MMP 이관 (Airbridge)\n퍼포먼스 마케팅 현황 파악 및 미디어 믹스 & 플래닝 수립\n웹&앱 회원가입 유도를 위한 신규회원 전용 쿠폰팩 도입\n메타 & 구글애즈 CAC 최적화 캠페인 집행 — 메타 A+A / 수동 리타게팅, 구글애즈 AC\n설치 및 방문 후 이탈 유저 대상 타겟 확장\n서비스 & 매체별 실시간 성과 대시보드 세팅", "result": "평균 CPC 24% 및 신규 CAC 19% 감소\n구매 전환율 17% 증가 및 평균 주문건 수 0.6회 증가\n타캠페인 대비 D+3 평균 리텐션 5% 증가", "metrics": [["−24%", "평균 CPC"], ["−19%", "신규 CAC"], ["+17%", "구매 전환율"]], "media": ["s10_02", "s10_03", "s10_04", "s10_00", "s10_01", "s10_06", "s10_05"]}, "b0aa1d32-82d9-44bc-897d-b558a425c98c": {"title": "CPI 캠페인 운영", "endDate": "2022-04", "summary": "앱 설치 – 전환 목표의 서비스별 CPI 캠페인 최적화 (바비톡 · 멜리즈 · 와그)", "problem": "서비스 및 캠페인별 최적의 CPI를 찾자\niOS 단가의 기준을 찾자\n분석은 쉽고 명확하게 하자", "action": "앱설치 및 인앱 액션 최대화를 위한 전략 수립, KPI 설정\n최대 월 예산 5억 수준의 CPI 캠페인 집행 — Meta, Google, GFA 등 셀프 서브 매체 위주\nUSP에 따른 소재 다양화 > 단가 확인 > 운영 > 최적화 (최근 대체로 숏폼 소재가 성과 우수)\nAndroid / 오가닉 / SKAN 등의 데이터를 조합해 캠페인 효율에 대한 근거 마련\nMMP를 통한 일단위, 매체별 데이터 분석으로 미디어 운영 최적화 및 고도화\n기준에 따라 변하는 수치의 해석을 명확하게 하도록 매체 통합 대시보드 운영", "result": "평균 CPM 3% · CPC 4% · CPI 10% 감소\n서비스별 평균 신규/재방문 관련 주요지표 효율화 및 최적화\n예산의 효율적 활용 워크플로우 기여\n모니터링 및 분석의 효율화 구축", "metrics": [["월 5억", "최대 매체 예산"], ["−10%", "평균 CPI"], ["−4%", "평균 CPC"]], "media": ["s14_00", "s14_01", "s14_04", "s14_08", "s14_02", "s14_05", "s14_06", "s14_03", "s14_07"]}, "574f26d3-1fff-49fb-a302-b8c12253df61": {"title": "대리수술 안심존 캠페인", "category": "브랜딩", "startDate": "2019-08", "endDate": "2019-11", "summary": "바비톡 서비스 인지 및 앱설치 목적으로 기획 & 박나래 맨파워를 활용한 효과 극대화 전략", "problem": "'성형'을 한다고 했을 때 우리를 이용하는 '포인트'를 찾자\n맨파워를 활용해 서비스 인지도와 신뢰감을 주자", "action": "서비스 목표 설정, 캠페인 기획 – 워크플로우 고민 및 세팅\n캠페인 소재 기획 및 촬영\n소재 제작 및 운영을 통한 추가 소재 발굴 & 베리에이션", "result": "타 광고소재 대비 CPI 40% 감소\n'대리수술 안심존' 마크 여부 관련 내부 키워드 증가, 병원별 '안심존' 마크 발급률 상승\n서비스 USP 소구점 발굴 및 소재 베리에이션 및 광고운영 최적화에 기여", "metrics": [["−40%", "CPI (타 소재 대비)"]], "media": ["s20_00", "s20_01", "s20_02", "s20_03"], "links": [{"label": "대리수술 안심존 — 박나래", "url": "https://youtu.be/iPHT8Q3zGqs"}, {"label": "안심존 베리에이션 (쇼츠)", "url": "https://youtube.com/shorts/rt0umjN9M9I"}, {"label": "슬롯머신 영상", "url": "https://youtu.be/--SENDU3YhQ"}, {"label": "1분닥터 + 박나래", "url": "https://youtu.be/LXljX4gaSYQ"}, {"label": "1분닥터 (내레이션)", "url": "https://youtu.be/DrcYWciILec"}]}, "43ab6811-42cf-4a1f-afca-62bfd67b17f9": {"title": "성형 부작용 알리기 캠페인", "startDate": "2021-09", "endDate": "2021-12", "summary": "성형 부작용에 대한 위험성을 알리면서, 바비톡 브랜드 인지도 향상을 위한 캠페인 기획 및 실행", "problem": "성형에 대한 근본적인 부분인 '부작용'에 대해 알리자\n실제 유저를 대상으로 하여 신뢰도를 높이자", "action": "성형 서비스 긍정적 인지도 향상을 위한 브랜딩 캠페인 기획/진행\n서비스, 유저, 오가닉 분석 등을 통한 캠페인 전략 기획\n서비스 이용에 가장 근본적인 부분을 키포인트로 한 컨셉&메시지 도출 — 성형 부작용, ‘나’에게도 일어날 수 있는 일\n브랜드 인지도를 극대화할 수 있는 콘텐츠 및 소재 기획 제작", "result": "내부 '성형 부작용' 관련 키워드 30% 상승\n타캠페인 대비 CPI 30% 감소, 인앱액션 30% 증가\n서비스 내&외부 브랜딩 캠페인 소재로 발전 및 워크플로우 구축\n오가닉 조회수 23만뷰 집계", "metrics": [["−30%", "CPI (타 캠페인 대비)"], ["+30%", "인앱액션"], ["23만", "오가닉 조회"]], "media": ["s19_00", "s19_01", "s19_02", "s19_03", "s19_04"], "links": [{"label": "코 성형 부작용 사연 — 캠페인 영상", "url": "https://youtu.be/rJv83UTiYvw"}]}, "53845c2b-3618-4e8d-968c-1edfabdf4912": {"title": "기부런 '퍼플라이' 캠페인", "startDate": "2021-04", "endDate": "2021-08", "summary": "바비톡 주최, 마라톤 굿즈 수익금을 암환우에게 기부하는 기부런 프로젝트", "problem": "매스한 프로젝트로 '필요할 때' 바비톡을 떠오르게 하자\n맨파워를 활용해 후킹을 하고 직접 참여를 유도하자", "action": "굿즈 및 판매 페이지 기획&세팅\n바비톡 및 캠페인 홍보 목적의 광고 소재 촬영 및 제작\n캠페인 운영 – 굿즈 제작사 협업 & 스토어 세팅 & 배송 및 재고 관리", "result": "굿즈 페이지 오픈 이후 동시접속자 최대 2만 명\n선주문 완판 및 총 1,000개의 재고소진까지 3분 소요\n캠페인 재개 요청 및 바비톡 키워드 30% 증가", "metrics": [["3분", "굿즈 1,000개 완판"], ["2만", "동시접속 최대"], ["+30%", "바비톡 키워드"]], "media": ["s21_00", "s21_01", "s21_02", "s21_03", "s21_04", "s21_05", "s21_06"], "links": [{"label": "퍼플라이 첫 번째 주자 소개", "url": "https://youtu.be/x_hQDxX6DXo"}, {"label": "김민경님 홍보영상", "url": "https://youtu.be/yPTSQnWt-PA"}, {"label": "인사이트 기사", "url": "https://www.insight.co.kr/news/361050"}]}, "2c1ddb7a-e1a3-4adb-a18e-e1b43ad8f731": {"title": "유니버셜 스튜디오 재팬 협업 캠페인", "startDate": "2024-06", "endDate": "2024-12", "summary": "일본 오사카 지역 유니버셜 스튜디오 재팬 세일즈 부스트업을 위한 마케팅 캠페인 집행", "problem": "프로모션 특성상 리소스 대비 일회성으로 소모되는 부분이 많음\n실제 혜택의 대상이 되는 유저의 ARPPU 및 LTV에 대한 고민", "action": "전환 최대화를 위한 전략 수립, KPI 설정\n총 예산 3억 규모의 미디어믹스 작성, 캠페인 집행, 미디어리포트 작성 — Meta, Google AC, NAVER SA 등\n프로모션 기획 — 타겟에 적합한 혜택, 참여하기 쉬운 구조 (혜택과 콘텐츠는 쉽게)\n인플루언서 릴스 콘텐츠 협업, 이벤트 페이지 / 배너 / 소재 제작 및 카피라이팅\n연계상품 혜택으로 자연스러운 업셀링 & 크로스셀링 유도\nMMP를 통한 일단위, 매체별 데이터 분석으로 미디어 운영 최적화", "result": "예상 판매기간 대비 약 2주 빠르게 KPI 달성 (선착순 1,000장 소진 목표)\n평균 CPC, CPM의 200% 효율 달성\n웹 랜딩 캠페인임에도 CPI 캠페인보다 낮은 단가\n캠페인 영상 KPI(유입) 대비 34% 초과 달성 — Imp. 830만 / Click 28만 / CTR 3.45%\nMeta CTR 5% ▲ · Google UAC CPI 15% ▼ · NAVER SA CPC 5% ▼ · KAKAO PF CTR 3% ▲", "metrics": [["2주", "KPI 조기 달성"], ["830만", "영상 노출"], ["3.45%", "영상 CTR"]], "media": ["s16_01", "s16_02", "s16_03", "s18_07", "s18_08", "s18_09", "s18_05", "s18_06", "s18_01", "s18_02", "s18_03", "s18_00", "s18_04", "s18_10", "s18_12", "s18_11"]}, "4d333686-6daa-4c8e-9cd7-3e8309ef9900": {"title": "네이버 쇼핑 운영 최적화", "startDate": "2024-01", "summary": "네이버 쇼핑 영역 상품 노출 및 운영을 위한 세팅 및 피드 최적화 프로젝트", "problem": "상품별 커스텀 노출이 불가능함에 따른 클린위반 케이스 존재\n피드 송수신 시각에 따른 상품 정보의 늦은 업데이트 주기\n피드 생성 시간이 오래 걸려 100% 상품 노출의 어려움", "action": "네이버 쇼핑 지면 상품 노출을 위한 피드 로직 설정 및 연동\n네이버 쇼핑 전용 세팅 페이지 기획, 칼럼값 로직 세팅\n피드 송수신 시간 단축 조정, 내부 상품 정보 업데이트 시간 개선\n피드 생성&완료 시각 리포팅을 통한 원인 파악 및 생성 시간 단축\n상품별 노출 & 클릭 모니터링 지표 세팅, 신규 & 주요 상품별 네이버 쇼핑 영역 활용 마케팅", "result": "주단위 평균 노출상품수 2배 상승\n주단위 평균 Imp 30만 달성, CTR 25% 기록\n네이버 쇼핑 클린위반 건 수 및 대응기간 최소화", "metrics": [["2배", "노출 상품수"], ["30만", "주 평균 Imp"], ["25%", "CTR"]], "media": ["s23_00", "s23_01", "s23_02", "s23_03"]}, "731ea8fe-9bb7-41ce-8cc1-687f77f9c49c": {"title": "전사 지표 정립 및 대시보드 세팅", "startDate": "2022-11", "summary": "사내 데이터 모니터링이 가능한 통합 '자동화 대시보드' 구성 프로젝트", "problem": "추정 매출 & 추정 이익 기준 마련 및 소진 비용에 따른 데일리 분석 필요", "action": "전사 지표 확립 및 모니터링 효율화를 위한 대시보드 구축\n서비스 & 비즈니스 & 마케팅 지표의 구분 및 통일화\n일 단위 / 주 단위 / 월 단위의 성과 관리\n실 DB연동 작업 및 광고데이터 작업 연동 진행 (3rd 파티 분석 툴 연동 포함)", "result": "사내 전사 기준 마련 및 가치 판단 리소스 효율화\n효율적인 전사 지표 통합 관리 가능\n팀 내부 및 타 부서간의 공통의 목표 및 상호 공유", "media": ["s26_00", "s26_01"]}, "8fe4e187-9052-4737-9d1b-d0a158d9e156": {"title": "업무 지표 리포팅 프로젝트", "startDate": "2023-06", "summary": "주요 지표 웹훅 슬랙 자동화 / 대시보드 자동화 연동", "problem": "부서 간 협업에 필요한 주요 지표를 매번 수기로 확인·공유", "action": "내부 업무 효율성 증진을 위한 주요 지표 웹훅 리포팅 구성\n비즈니스 부서 & 마케팅팀 협업 과정에서 필요한 주요 지표 관련 자동화 리포팅\n실DB 데이터를 기반으로 한 스프레드시트 – 앱스크립트 구성", "result": "사내 커뮤니케이션 및 업무 효율화 추진\n효율적인 성과 추이 모니터링 가능 및 가치 판단 효율화\n특이사항 및 이슈 대응 시간 단축", "media": ["s27_01", "s27_03", "s27_00", "s27_02"]}, "199815d6-356c-4959-8219-6c9ea7615102": {"title": "데이터 어트리뷰션 Taxonomy", "startDate": "2023-06", "endDate": "2023-08", "summary": "사내 MMP툴 및 데이터 분석 툴 활용을 위한 텍소노미 및 QA 작업 (Amplitude · Airbridge)", "problem": "부서마다 데이터 이해도와 기준이 달라 커뮤니케이션 리소스가 큼", "action": "내부 마케팅 업무 효율성 증진을 위한 어트리뷰션 툴 텍소노미 작업\n전사 유관 부서 핵심 지표 및 목표 설정 취합을 위한 커뮤니케이션\n부서별 리포트 및 주요 지표 환경 구축\n텍소노미 이슈 확인 및 QA 진행", "result": "부서별 데이터 이해도 및 간극을 최소화\n부서별 연관 데이터 프로세스 구축을 통한 상호 간 커뮤니케이션 리소스 최소화", "media": ["s28_05", "s28_03", "s28_02", "s28_04"]}, "e68c8938-fbb0-4a88-a9a1-dbb3d8c71243": {"title": "VIDEO | 영상촬영 & 편집", "summary": "영상 광고를 위한 자체 영상 촬영 및 편집 스킬 역량 보유", "action": "고객사 요청에 따른 영상 제작에 관련된 모든 업무\n고객사의 니즈에 맞는 시놉시스 및 스토리보드 구상 – 기획\n스케치 / 인플루언서 / 연예인 등 광고 콘텐츠 관련 직접 촬영\n프리미어 & 에프터이펙트를 활용한 기획에 맞는 영상편집", "result": "영상 콘텐츠 관련 리소스 효율화\n자체 제작 및 분석으로 인한 최적화 사이클 단축\n관련 이해도에 따른 타부서 및 대행사 관련 커뮤니케이션 원활", "media": ["s29_00", "s29_01", "s29_02"], "links": [{"label": "LGD Technical Talk 스케치", "url": "https://youtu.be/ezo3h7MCh0Q"}, {"label": "식약처 생리대 위해평가 MCN", "url": "https://youtu.be/WnwBU7E0XcM"}, {"label": "본도시락 홍보영상", "url": "https://youtu.be/gjPHdd-u144"}, {"label": "다이소 할로윈 DIY", "url": "https://youtu.be/gGRnh8f_Sa8"}, {"label": "솜피 광고 A", "url": "https://youtu.be/e3dWRs9S_38"}, {"label": "메디피움 비전선포식", "url": "https://youtu.be/zZipEQqG4nc"}]}, "dff32975-e504-47e3-8ee1-744f2267ac91": {"cols": ["담당 · 전략", "성과"], "action": "상시 매스 캠페인 만성 저효율(ROAS<1) 진단 → 시즌·리타게팅으로 예산 구조 재편\n블랙프라이데이 페이드(Meta·Google) 대조군 운용 — 오퍼·소재·타겟 설계로 승부\n광고 축소 자연실험으로 증분(Incrementality) 규명", "result": "ROAS 0.8 → 1.7 (2배) · 구매당 비용(CPA) 60% 절감\n블프 동기간 대조: ROAS 1.9배 · CPA 55%↓ — 6주에 평시 3개월치 구매 확보\n페이드 실질 기여 ≈ last-touch 측정치의 약 3배 → 증분 기반 재투자 로직 수립"}, "60f3fcee-e8b2-4499-b7d1-71e4f91ad2f5": {"cols": ["담당 · 전략", "성과"], "action": "양면시장 AS-IS 정량 규명 (BigQuery로 실계약·리텐션·경쟁사 실측)\n구글·네이버·메타 전환 스크립트 자체 구현 (GA4/GTM · 네이버 CTS · Meta 픽셀)\n레퍼럴·이벤트·대학교 제휴 페이지 직접 제작·배포\n파트너 파이프라인 (40여 곳 · 상태 8단계 · 제안서 5종)", "result": "측정 인프라를 마케터가 직접 구축 — \"측정 없이 성장 없다\"\n호스트·게스트 획득 채널 실험 설계 (검색광고 2트랙 · 카탈로그 · 플친 A/B)\n네이버 키워드 실측 시뮬레이터로 추정→실측 대체\n브랜드 검색수요 월간 우상향 견인"}, "77afd48a-668b-4ab1-b385-32fa41400211": {"title": "AX — 마케팅 플랫폼 자체 구축 + 프로덕트 협업 개발", "cols": ["자체 구축", "협업 · 자동화"], "action": "AI 협업으로 팀 마케팅 플랫폼 단독 구축 (4개월 · 577커밋 · 534PR · 20+탭)\n스택: Next.js · Supabase · BigQuery · Vercel\n주요 기능(요약): 전사 거래 대시보드 · Paid 성과(CAC·ROAS) · 카탈로그 피드 · 뉴스레터 자동화 · 경쟁사 광고 모니터링 등", "result": "프로덕트 서비스 프론트 PR 개발 (56커밋 · 10티켓 — 네이버 CTS · 랜딩 · GA4)\nMCP·AI 에이전트로 반복 분석 자동화 (Airbridge · Metabase · BigQuery)\n데이터 파이프라인 자동화 — 수기 리포팅 제로화\n일하는 방식 전환: 요청·대기 → 직접 구축·즉시 분석"}}, "add": [{"company": "df04e065-83b0-4fe3-9d89-c08103b1f3fc", "w": {"id": "3080bc75-d773-490f-9a02-35d83886b418", "title": "카탈로그 캠페인 최적화", "category": "퍼포먼스", "startDate": "2023-01", "endDate": "2024-12", "summary": "주요 상품단위 전환 극대화 및 리소스 효율화를 위한 카탈로그 캠페인 운영 (멜리즈 · 와그)", "problem": "많은 상품 개수에 따른 개별 운영에 대한 리소스 부족\n콘텐츠 제작에 대한 리소스 부족\n잦은 상품 정보 변경으로 인한 개별 광고의 어려움", "action": "카탈로그 캠페인을 활용한 광고 상품 수 증가\nA/B테스트를 통한 소재 템플릿화\n구글 시트 연동으로 실시간 상품 정보 업데이트 광고 반영 — 칼럼값 업데이트 자동화 시트 세팅\n카탈로그 상품 리스팅 – 카테고리별 세트 지정\n일단위, 매체별 데이터 분석으로 미디어 운영 최적화 및 고도화", "result": "타캠페인 대비 평균 CPC 15% 감소\n주요 상품에 대한 트래픽 및 구매전환 리소스 최소화로 유지\n카탈로그 캠페인 > 연계상품군으로 확장하여 트래픽 및 전환 집중 프로세스 구축"}, "metrics": [["−15%", "평균 CPC (타 캠페인 대비)"]], "media": ["s12_00", "s12_01", "s12_02", "s12_05", "s12_03", "s12_04"]}, {"company": "df04e065-83b0-4fe3-9d89-c08103b1f3fc", "w": {"id": "e5bb7edf-a48d-4752-a0b4-c05df7903051", "title": "사이트 SEO 최적화 프로젝트", "category": "성과", "startDate": "2024-09", "endDate": "2024-10", "summary": "외부 소비자 탐색 ~ 내부 상품 서칭 단계까지 노출 커버리지 확대를 위한 SEO 최적화 프로젝트", "problem": "외부 포털 탐색부터 내부 상품 서칭까지 노출 커버리지 부족", "action": "소비자 검색 노출 모수 증가를 위한 콘텐츠 SEO & 테크니컬 SEO 개선\n외부 포털 SEO — 콘텐츠·검색 노출 현황 분석, 페이지 디스크립션·키워드 중요도·사이트맵 업데이트 주기 점검\n내부 사이트 SEO — 서칭 키워드별 트렌드 파악, 키워드별 노출 순위 및 중요도 조정\n프로세스 구축 — 상품 어드민 내 SEO 요소(타이틀·디스크립션·키워드)가 실시간 반영되도록 로직 체크\n모니터링 — 주요 상품 노출 순위 체크 대시보드 구축 / 내부 어트리뷰션 툴 리포트 세팅", "result": "구글 포털 4개월 기간 총 노출 수 약 250만 건 증가\n평균 게재 노출 순위 1단계 상승\n평균 CTR 1% 상승"}, "metrics": [["+250만", "구글 노출 (4개월)"], ["1단계↑", "평균 게재 순위"], ["+1%p", "평균 CTR"]], "media": ["s24_00", "s24_01", "s24_02", "s24_03", "s24_04"]}]};
+  // 프로젝트 상세 문서(원페이저 HTML) · 그 이미지 = 저장소 pf-doc/ (같은 사이트 경로 — 보기 창 안 iframe으로, 문서가 높이를 알려 줌)
+  var PF_DOC = "/pf-doc/";
+  var PPT_PATCH = {"hide": ["944ff76c-037e-4c72-92ac-81f4dcabb366", "c54a836e-546c-4355-b2ac-213c3d444be2", "fd404ac5-7f46-420b-97dc-a2b8e89bc445", "c90c1643-f38b-4f2d-a668-9e0f3c87094a"], "companies": {"9a240366-d8d0-47b3-a1fd-3259532182b3": {"endDate": "2022-04"}}, "works": {"0a3aea35-ccc9-4018-a7a6-e383c303f928": {"title": "UA & 리타게팅 캠페인 최적화", "startDate": "2023-01", "summary": "웹&앱 트래킹을 MMP로 옮기고, 신규 쿠폰팩·리타게팅으로 UA 캠페인 최적화", "problem": "WEB 지면 트래킹의 부재\n매체 & 캠페인별 플래닝의 부재\n성과 & 효율 체크의 많은 리소스 투입", "action": "웹&앱 트래킹 MMP 이관 (Airbridge)\n퍼포먼스 마케팅 현황 파악 및 미디어 믹스 & 플래닝 수립\n웹&앱 회원가입 유도를 위한 신규회원 전용 쿠폰팩 도입\n메타 & 구글애즈 CAC 최적화 캠페인 집행 — 메타 A+A / 수동 리타게팅, 구글애즈 AC\n설치 및 방문 후 이탈 유저 대상 타겟 확장\n서비스 & 매체별 실시간 성과 대시보드 세팅", "result": "평균 CPC 24% 및 신규 CAC 19% 감소\n구매 전환율 17% 증가 및 평균 주문건 수 0.6회 증가\n타캠페인 대비 D+3 평균 리텐션 5% 증가", "metrics": [["−24%", "평균 CPC"], ["−19%", "신규 CAC"], ["+17%", "구매 전환율"]], "media": ["s10_02", "s10_03", "s10_04", "s10_00", "s10_01", "s10_06", "s10_05"]}, "b0aa1d32-82d9-44bc-897d-b558a425c98c": {"title": "CPI 캠페인 운영", "endDate": "2022-04", "summary": "앱 설치 – 전환 목표의 서비스별 CPI 캠페인 최적화 (바비톡 · 멜리즈 · 와그)", "problem": "서비스 및 캠페인별 최적의 CPI를 찾자\niOS 단가의 기준을 찾자\n분석은 쉽고 명확하게 하자", "action": "앱설치 및 인앱 액션 최대화를 위한 전략 수립, KPI 설정\n최대 월 예산 5억 수준의 CPI 캠페인 집행 — Meta, Google, GFA 등 셀프 서브 매체 위주\nUSP에 따른 소재 다양화 > 단가 확인 > 운영 > 최적화 (최근 대체로 숏폼 소재가 성과 우수)\nAndroid / 오가닉 / SKAN 등의 데이터를 조합해 캠페인 효율에 대한 근거 마련\nMMP를 통한 일단위, 매체별 데이터 분석으로 미디어 운영 최적화 및 고도화\n기준에 따라 변하는 수치의 해석을 명확하게 하도록 매체 통합 대시보드 운영", "result": "평균 CPM 3% · CPC 4% · CPI 10% 감소\n서비스별 평균 신규/재방문 관련 주요지표 효율화 및 최적화\n예산의 효율적 활용 워크플로우 기여\n모니터링 및 분석의 효율화 구축", "metrics": [["월 5억", "최대 매체 예산"], ["−10%", "평균 CPI"], ["−4%", "평균 CPC"]], "media": ["s14_00", "s14_01", "s14_04", "s14_08", "s14_02", "s14_05", "s14_06", "s14_03", "s14_07"]}, "574f26d3-1fff-49fb-a302-b8c12253df61": {"title": "대리수술 안심존 캠페인", "category": "브랜딩", "startDate": "2019-08", "endDate": "2019-11", "summary": "바비톡 서비스 인지 및 앱설치 목적으로 기획 & 박나래 맨파워를 활용한 효과 극대화 전략", "problem": "'성형'을 한다고 했을 때 우리를 이용하는 '포인트'를 찾자\n맨파워를 활용해 서비스 인지도와 신뢰감을 주자", "action": "서비스 목표 설정, 캠페인 기획 – 워크플로우 고민 및 세팅\n캠페인 소재 기획 및 촬영\n소재 제작 및 운영을 통한 추가 소재 발굴 & 베리에이션", "result": "타 광고소재 대비 CPI 40% 감소\n'대리수술 안심존' 마크 여부 관련 내부 키워드 증가, 병원별 '안심존' 마크 발급률 상승\n서비스 USP 소구점 발굴 및 소재 베리에이션 및 광고운영 최적화에 기여", "metrics": [["−40%", "CPI (타 소재 대비)"]], "media": ["s20_00", "s20_01", "s20_02", "s20_03"], "links": [{"label": "대리수술 안심존 — 박나래", "url": "https://youtu.be/iPHT8Q3zGqs"}, {"label": "안심존 베리에이션 (쇼츠)", "url": "https://youtube.com/shorts/rt0umjN9M9I"}, {"label": "슬롯머신 영상", "url": "https://youtu.be/--SENDU3YhQ"}, {"label": "1분닥터 + 박나래", "url": "https://youtu.be/LXljX4gaSYQ"}, {"label": "1분닥터 (내레이션)", "url": "https://youtu.be/DrcYWciILec"}]}, "43ab6811-42cf-4a1f-afca-62bfd67b17f9": {"title": "성형 부작용 알리기 캠페인", "startDate": "2021-09", "endDate": "2021-12", "summary": "성형 부작용에 대한 위험성을 알리면서, 바비톡 브랜드 인지도 향상을 위한 캠페인 기획 및 실행", "problem": "성형에 대한 근본적인 부분인 '부작용'에 대해 알리자\n실제 유저를 대상으로 하여 신뢰도를 높이자", "action": "성형 서비스 긍정적 인지도 향상을 위한 브랜딩 캠페인 기획/진행\n서비스, 유저, 오가닉 분석 등을 통한 캠페인 전략 기획\n서비스 이용에 가장 근본적인 부분을 키포인트로 한 컨셉&메시지 도출 — 성형 부작용, ‘나’에게도 일어날 수 있는 일\n브랜드 인지도를 극대화할 수 있는 콘텐츠 및 소재 기획 제작", "result": "내부 '성형 부작용' 관련 키워드 30% 상승\n타캠페인 대비 CPI 30% 감소, 인앱액션 30% 증가\n서비스 내&외부 브랜딩 캠페인 소재로 발전 및 워크플로우 구축\n오가닉 조회수 23만뷰 집계", "metrics": [["−30%", "CPI (타 캠페인 대비)"], ["+30%", "인앱액션"], ["23만", "오가닉 조회"]], "media": ["s19_00", "s19_01", "s19_02", "s19_03", "s19_04"], "links": [{"label": "코 성형 부작용 사연 — 캠페인 영상", "url": "https://youtu.be/rJv83UTiYvw"}]}, "53845c2b-3618-4e8d-968c-1edfabdf4912": {"title": "기부런 '퍼플라이' 캠페인", "startDate": "2021-04", "endDate": "2021-08", "summary": "바비톡 주최, 마라톤 굿즈 수익금을 암환우에게 기부하는 기부런 프로젝트", "problem": "매스한 프로젝트로 '필요할 때' 바비톡을 떠오르게 하자\n맨파워를 활용해 후킹을 하고 직접 참여를 유도하자", "action": "굿즈 및 판매 페이지 기획&세팅\n바비톡 및 캠페인 홍보 목적의 광고 소재 촬영 및 제작\n캠페인 운영 – 굿즈 제작사 협업 & 스토어 세팅 & 배송 및 재고 관리", "result": "굿즈 페이지 오픈 이후 동시접속자 최대 2만 명\n선주문 완판 및 총 1,000개의 재고소진까지 3분 소요\n캠페인 재개 요청 및 바비톡 키워드 30% 증가", "metrics": [["3분", "굿즈 1,000개 완판"], ["2만", "동시접속 최대"], ["+30%", "바비톡 키워드"]], "media": ["s21_00", "s21_01", "s21_02", "s21_03", "s21_04", "s21_05", "s21_06"], "links": [{"label": "퍼플라이 첫 번째 주자 소개", "url": "https://youtu.be/x_hQDxX6DXo"}, {"label": "김민경님 홍보영상", "url": "https://youtu.be/yPTSQnWt-PA"}, {"label": "인사이트 기사", "url": "https://www.insight.co.kr/news/361050"}]}, "2c1ddb7a-e1a3-4adb-a18e-e1b43ad8f731": {"title": "유니버셜 스튜디오 재팬 협업 캠페인", "startDate": "2024-06", "endDate": "2024-12", "summary": "일본 오사카 지역 유니버셜 스튜디오 재팬 세일즈 부스트업을 위한 마케팅 캠페인 집행", "problem": "프로모션 특성상 리소스 대비 일회성으로 소모되는 부분이 많음\n실제 혜택의 대상이 되는 유저의 ARPPU 및 LTV에 대한 고민", "action": "전환 최대화를 위한 전략 수립, KPI 설정\n총 예산 3억 규모의 미디어믹스 작성, 캠페인 집행, 미디어리포트 작성 — Meta, Google AC, NAVER SA 등\n프로모션 기획 — 타겟에 적합한 혜택, 참여하기 쉬운 구조 (혜택과 콘텐츠는 쉽게)\n인플루언서 릴스 콘텐츠 협업, 이벤트 페이지 / 배너 / 소재 제작 및 카피라이팅\n연계상품 혜택으로 자연스러운 업셀링 & 크로스셀링 유도\nMMP를 통한 일단위, 매체별 데이터 분석으로 미디어 운영 최적화", "result": "예상 판매기간 대비 약 2주 빠르게 KPI 달성 (선착순 1,000장 소진 목표)\n평균 CPC, CPM의 200% 효율 달성\n웹 랜딩 캠페인임에도 CPI 캠페인보다 낮은 단가\n캠페인 영상 KPI(유입) 대비 34% 초과 달성 — Imp. 830만 / Click 28만 / CTR 3.45%\nMeta CTR 5% ▲ · Google UAC CPI 15% ▼ · NAVER SA CPC 5% ▼ · KAKAO PF CTR 3% ▲", "metrics": [["2주", "KPI 조기 달성"], ["830만", "영상 노출"], ["3.45%", "영상 CTR"]], "media": ["s16_01", "s16_02", "s16_03", "s18_07", "s18_08", "s18_09", "s18_05", "s18_06", "s18_01", "s18_02", "s18_03", "s18_00", "s18_04", "s18_10", "s18_12", "s18_11"]}, "4d333686-6daa-4c8e-9cd7-3e8309ef9900": {"title": "네이버 쇼핑 운영 최적화", "startDate": "2024-01", "summary": "네이버 쇼핑 영역 상품 노출 및 운영을 위한 세팅 및 피드 최적화 프로젝트", "problem": "상품별 커스텀 노출이 불가능함에 따른 클린위반 케이스 존재\n피드 송수신 시각에 따른 상품 정보의 늦은 업데이트 주기\n피드 생성 시간이 오래 걸려 100% 상품 노출의 어려움", "action": "네이버 쇼핑 지면 상품 노출을 위한 피드 로직 설정 및 연동\n네이버 쇼핑 전용 세팅 페이지 기획, 칼럼값 로직 세팅\n피드 송수신 시간 단축 조정, 내부 상품 정보 업데이트 시간 개선\n피드 생성&완료 시각 리포팅을 통한 원인 파악 및 생성 시간 단축\n상품별 노출 & 클릭 모니터링 지표 세팅, 신규 & 주요 상품별 네이버 쇼핑 영역 활용 마케팅", "result": "주단위 평균 노출상품수 2배 상승\n주단위 평균 Imp 30만 달성, CTR 25% 기록\n네이버 쇼핑 클린위반 건 수 및 대응기간 최소화", "metrics": [["2배", "노출 상품수"], ["30만", "주 평균 Imp"], ["25%", "CTR"]], "media": ["s23_00", "s23_01", "s23_02", "s23_03"]}, "731ea8fe-9bb7-41ce-8cc1-687f77f9c49c": {"title": "전사 지표 정립 및 대시보드 세팅", "startDate": "2022-11", "summary": "사내 데이터 모니터링이 가능한 통합 '자동화 대시보드' 구성 프로젝트", "problem": "추정 매출 & 추정 이익 기준 마련 및 소진 비용에 따른 데일리 분석 필요", "action": "전사 지표 확립 및 모니터링 효율화를 위한 대시보드 구축\n서비스 & 비즈니스 & 마케팅 지표의 구분 및 통일화\n일 단위 / 주 단위 / 월 단위의 성과 관리\n실 DB연동 작업 및 광고데이터 작업 연동 진행 (3rd 파티 분석 툴 연동 포함)", "result": "사내 전사 기준 마련 및 가치 판단 리소스 효율화\n효율적인 전사 지표 통합 관리 가능\n팀 내부 및 타 부서간의 공통의 목표 및 상호 공유", "media": ["s26_00", "s26_01"]}, "8fe4e187-9052-4737-9d1b-d0a158d9e156": {"title": "업무 지표 리포팅 프로젝트", "startDate": "2023-06", "summary": "주요 지표 웹훅 슬랙 자동화 / 대시보드 자동화 연동", "problem": "부서 간 협업에 필요한 주요 지표를 매번 수기로 확인·공유", "action": "내부 업무 효율성 증진을 위한 주요 지표 웹훅 리포팅 구성\n비즈니스 부서 & 마케팅팀 협업 과정에서 필요한 주요 지표 관련 자동화 리포팅\n실DB 데이터를 기반으로 한 스프레드시트 – 앱스크립트 구성", "result": "사내 커뮤니케이션 및 업무 효율화 추진\n효율적인 성과 추이 모니터링 가능 및 가치 판단 효율화\n특이사항 및 이슈 대응 시간 단축", "media": ["s27_01", "s27_03", "s27_00", "s27_02"]}, "199815d6-356c-4959-8219-6c9ea7615102": {"title": "데이터 어트리뷰션 Taxonomy", "startDate": "2023-06", "endDate": "2023-08", "summary": "사내 MMP툴 및 데이터 분석 툴 활용을 위한 텍소노미 및 QA 작업 (Amplitude · Airbridge)", "problem": "부서마다 데이터 이해도와 기준이 달라 커뮤니케이션 리소스가 큼", "action": "내부 마케팅 업무 효율성 증진을 위한 어트리뷰션 툴 텍소노미 작업\n전사 유관 부서 핵심 지표 및 목표 설정 취합을 위한 커뮤니케이션\n부서별 리포트 및 주요 지표 환경 구축\n텍소노미 이슈 확인 및 QA 진행", "result": "부서별 데이터 이해도 및 간극을 최소화\n부서별 연관 데이터 프로세스 구축을 통한 상호 간 커뮤니케이션 리소스 최소화", "media": ["s28_05", "s28_03", "s28_02", "s28_04"]}, "e68c8938-fbb0-4a88-a9a1-dbb3d8c71243": {"title": "VIDEO | 영상촬영 & 편집", "summary": "영상 광고를 위한 자체 영상 촬영 및 편집 스킬 역량 보유", "action": "고객사 요청에 따른 영상 제작에 관련된 모든 업무\n고객사의 니즈에 맞는 시놉시스 및 스토리보드 구상 – 기획\n스케치 / 인플루언서 / 연예인 등 광고 콘텐츠 관련 직접 촬영\n프리미어 & 에프터이펙트를 활용한 기획에 맞는 영상편집", "result": "영상 콘텐츠 관련 리소스 효율화\n자체 제작 및 분석으로 인한 최적화 사이클 단축\n관련 이해도에 따른 타부서 및 대행사 관련 커뮤니케이션 원활", "media": ["s29_00", "s29_01", "s29_02"], "links": [{"label": "LGD Technical Talk 스케치", "url": "https://youtu.be/ezo3h7MCh0Q"}, {"label": "식약처 생리대 위해평가 MCN", "url": "https://youtu.be/WnwBU7E0XcM"}, {"label": "본도시락 홍보영상", "url": "https://youtu.be/gjPHdd-u144"}, {"label": "다이소 할로윈 DIY", "url": "https://youtu.be/gGRnh8f_Sa8"}, {"label": "솜피 광고 A", "url": "https://youtu.be/e3dWRs9S_38"}, {"label": "메디피움 비전선포식", "url": "https://youtu.be/zZipEQqG4nc"}]}, "dff32975-e504-47e3-8ee1-744f2267ac91": {"title": "어반스테이 — 퍼포먼스 마케팅 · CRM", "startDate": "2025-06", "endDate": "2026-03", "category": "퍼포먼스", "summary": "Meta · 네이버 · 구글 · 카카오 · 노티플라이를 혼자 운영하며 월 광고비를 7천만 원 규모로 키우고, 월 매출 5.2억 → 9.7억(+86%)을 만든 10개월", "problem": "직전 6개월 광고비 2.0억 · 월 매출 5.2억 수준\n성수기·연말 수요를 유료 채널로 끌어올리고, 신규 회원·앱 설치로 CRM 모수를 키워야 함\n광고비를 키우되 매출이 그 이상 따라오게", "cols": ["담당 · 전략", "성과"], "action": "유료 4채널(Meta · 네이버 검색광고/브랜드검색 · 구글 UAC · 네이버 DA) + CRM 3채널(카카오채널 · 노티플라이 · 알림톡) 단독 운영\n시즌 캠페인 7개 기획 · 광고 3,961개 운영 (상반기결산 · 상시혜택 · 5주년 · 얼리버드 · 블랙프라이데이 · 메리홀리데이)\n09-16 캠페인 구조 개편 — 신규 웹구매전환 + 리타게팅 상시 2축으로 학습 집중\n네이버 브랜드검색 소재를 프로모션마다 교체 · 지점·룸타입 키워드 정비\n12-30 OS × 소구 5종 앱설치 캠페인 + 구글 UAC 신설\nCRM 발송을 타겟·오퍼 중심으로 줄이고 노티플라이 시나리오 발송 도입", "result": "월평균 매출 5.2억 → 9.7억(+86%) · 주문 3,414 → 5,130(+50%) · 가입 1.0만 → 1.3만(+31%)\n10개월 광고비 7.22억 → Airbridge 전환 매출 97.0억(13.4배) · 전년 동월(12–3월) 매출 +61%\n7월 15.5억 · 11월 15.2억 역대 최고 매출 월 · 블프 단일 캠페인 매출 1.34억\n네이버 귀속 매출 4.1억 → 16.2억(4배) · 카카오 귀속 주문 2,403 → 4,760(2배)", "metrics": [["+86%", "월 매출 5.2억 → 9.7억"], ["13.4x", "매출 ÷ 광고비"], ["+61%", "전년 동월 매출"]], "doc": "urbanstay.html"}, "60f3fcee-e8b2-4499-b7d1-71e4f91ad2f5": {"cols": ["담당 · 전략", "성과"], "action": "양면시장 AS-IS 정량 규명 (BigQuery로 실계약·리텐션·경쟁사 실측)\n구글·네이버·메타 전환 스크립트 자체 구현 (GA4/GTM · 네이버 CTS · Meta 픽셀)\n레퍼럴·이벤트·대학교 제휴 페이지 직접 제작·배포\n파트너 파이프라인 (40여 곳 · 상태 8단계 · 제안서 5종)", "result": "측정 인프라를 마케터가 직접 구축 — \"측정 없이 성장 없다\"\n호스트·게스트 획득 채널 실험 설계 (검색광고 2트랙 · 카탈로그 · 플친 A/B)\n네이버 키워드 실측 시뮬레이터로 추정→실측 대체\n브랜드 검색수요 월간 우상향 견인"}, "77afd48a-668b-4ab1-b385-32fa41400211": {"title": "AX — 마케팅 플랫폼 자체 구축 + 프로덕트 협업 개발", "cols": ["자체 구축", "협업 · 자동화"], "action": "AI 협업으로 팀 마케팅 플랫폼 단독 구축 (4개월 · 577커밋 · 534PR · 20+탭)\n스택: Next.js · Supabase · BigQuery · Vercel\n주요 기능(요약): 전사 거래 대시보드 · Paid 성과(CAC·ROAS) · 카탈로그 피드 · 뉴스레터 자동화 · 경쟁사 광고 모니터링 등", "result": "프로덕트 서비스 프론트 PR 개발 (56커밋 · 10티켓 — 네이버 CTS · 랜딩 · GA4)\nMCP·AI 에이전트로 반복 분석 자동화 (Airbridge · Metabase · BigQuery)\n데이터 파이프라인 자동화 — 수기 리포팅 제로화\n일하는 방식 전환: 요청·대기 → 직접 구축·즉시 분석"}}, "add": [{"company": "df04e065-83b0-4fe3-9d89-c08103b1f3fc", "w": {"id": "3080bc75-d773-490f-9a02-35d83886b418", "title": "카탈로그 캠페인 최적화", "category": "퍼포먼스", "startDate": "2023-01", "endDate": "2024-12", "summary": "주요 상품단위 전환 극대화 및 리소스 효율화를 위한 카탈로그 캠페인 운영 (멜리즈 · 와그)", "problem": "많은 상품 개수에 따른 개별 운영에 대한 리소스 부족\n콘텐츠 제작에 대한 리소스 부족\n잦은 상품 정보 변경으로 인한 개별 광고의 어려움", "action": "카탈로그 캠페인을 활용한 광고 상품 수 증가\nA/B테스트를 통한 소재 템플릿화\n구글 시트 연동으로 실시간 상품 정보 업데이트 광고 반영 — 칼럼값 업데이트 자동화 시트 세팅\n카탈로그 상품 리스팅 – 카테고리별 세트 지정\n일단위, 매체별 데이터 분석으로 미디어 운영 최적화 및 고도화", "result": "타캠페인 대비 평균 CPC 15% 감소\n주요 상품에 대한 트래픽 및 구매전환 리소스 최소화로 유지\n카탈로그 캠페인 > 연계상품군으로 확장하여 트래픽 및 전환 집중 프로세스 구축"}, "metrics": [["−15%", "평균 CPC (타 캠페인 대비)"]], "media": ["s12_00", "s12_01", "s12_02", "s12_05", "s12_03", "s12_04"]}, {"company": "df04e065-83b0-4fe3-9d89-c08103b1f3fc", "w": {"id": "e5bb7edf-a48d-4752-a0b4-c05df7903051", "title": "사이트 SEO 최적화 프로젝트", "category": "성과", "startDate": "2024-09", "endDate": "2024-10", "summary": "외부 소비자 탐색 ~ 내부 상품 서칭 단계까지 노출 커버리지 확대를 위한 SEO 최적화 프로젝트", "problem": "외부 포털 탐색부터 내부 상품 서칭까지 노출 커버리지 부족", "action": "소비자 검색 노출 모수 증가를 위한 콘텐츠 SEO & 테크니컬 SEO 개선\n외부 포털 SEO — 콘텐츠·검색 노출 현황 분석, 페이지 디스크립션·키워드 중요도·사이트맵 업데이트 주기 점검\n내부 사이트 SEO — 서칭 키워드별 트렌드 파악, 키워드별 노출 순위 및 중요도 조정\n프로세스 구축 — 상품 어드민 내 SEO 요소(타이틀·디스크립션·키워드)가 실시간 반영되도록 로직 체크\n모니터링 — 주요 상품 노출 순위 체크 대시보드 구축 / 내부 어트리뷰션 툴 리포트 세팅", "result": "구글 포털 4개월 기간 총 노출 수 약 250만 건 증가\n평균 게재 노출 순위 1단계 상승\n평균 CTR 1% 상승"}, "metrics": [["+250만", "구글 노출 (4개월)"], ["1단계↑", "평균 게재 순위"], ["+1%p", "평균 CTR"]], "media": ["s24_00", "s24_01", "s24_02", "s24_03", "s24_04"]}, {"company": "880f2595-41db-43f8-8fc4-d7b2b7a82ed9", "w": {"id": "5c1e8a52-7b4d-4f0e-9a63-2d8f1b7c4e90", "title": "어반스테이 × 웨이브 — 객실 OTT 무료 시청 · 쿠폰 제휴", "category": "제휴", "startDate": "2026-04", "summary": "웨이브와 바터 제휴로 '전 객실 OTT 무료 시청' USP를 만들고, 랜딩 · 쿠폰 발급 · 멀티채널 캠페인 · 성과 측정까지 혼자 기획·구축·운영", "problem": "2026년 3월 광고 예산 축소 — 비용 없이 투숙 경험을 차별화할 USP가 필요\n웨이브는 신규 구독 유입 채널이 필요 → 두 니즈를 바터로 묶음", "cols": ["담당 · 구축", "성과"], "action": "투숙객 전용 랜딩 /wavve-guide 0→1 구축 · 정주행 콘텐츠 영역 코드화(용량 1/70)\n쿠폰 발급 API · DB 요구사항 설계 (중복 없는 원자적 발급, 1예약 4쿠폰)\n₩2,000만 미디어믹스 품의 (Meta · Google · Naver + CRM 3채널)\nAirbridge 트래킹 체계 설계 (채널 wavve_qr · 링크 11개)\nBigQuery 쿠폰 현황 슬랙 자동 리포트 · 16주 협업 성과 리포트", "result": "5개월간 캠페인 노출 503만 · 가이드 페이지 유입 5.8만\n쿠폰 7,880장을 5,413개 예약에 발급 (유입 → 발급 10.8%)\n유입의 85%를 체크인 알림톡 · 객실 TV QR(자사 접점)로 — Meta 실집행 ₩250만\n유입 1건당 광고비 ₩43 · 쿠폰 1장당 ₩318", "doc": "wavve.html"}, "metrics": [["503만", "캠페인 총 노출"], ["7,880장", "쿠폰 발급 (5,413 예약)"], ["5.8만", "가이드 페이지 유입"]], "media": ["wavve/01.jpg", "wavve/11.jpg", "wavve/24.jpg", "wavve/26.jpg"]}]};
   // PPT 장의 이미지 배치 = 판(쪽 번호별): x·bw = 장에서 판의 왼쪽·폭(%) · ar = 판 가로세로비 · p = 패널(둥근 상자) [x,y,w,h] · i = 이미지 [파일,x,y,w,h,(영상 링크)] · c = 캡션 [x,y,w,h,글] · h = 머리(파랑) (판 기준 %)
   //    영상 링크는 PPT 이미지와 유튜브 썸네일을 대조해 확인한 공개 영상만(부작용 보라 타이틀 = 비공개라 없음 · 영상 PD 모음 이미지 = 영상 2편씩이라 없음, 아래 영상 목록으로)
   //    python-pptx로 그룹 좌표를 풀어 실제 위치로 뽑음 · 폴더 아이콘·로고·장식 문구('뒷장과 연결되는 페이지', '(Click)')는 뺌
@@ -746,7 +748,7 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
   function pptPatch(d) {
     var P = PPT_PATCH, x = JSON.parse(JSON.stringify(d)), byId = {}, n = 0;
     var mets = function (L) { return L.map(function (a) { return { id: "ppt" + (n++), value: a[0], label: a[1] }; }); };
-    var media = function (w, names) { w.media = (names || []).map(function (k) { return { id: "ppt-" + k, type: "image", url: PPT_IMG + k + ".jpg" }; }).concat((w.media || []).filter(function (m) { return !/\/pf-img\//.test(m.url || ""); })); };
+    var media = function (w, names) { w.media = (names || []).map(function (k) { return { id: "ppt-" + k, type: "image", url: /\//.test(k) ? PF_DOC + k : PPT_IMG + k + ".jpg" }; }).concat((w.media || []).filter(function (m) { return !/\/pf-img\//.test(m.url || ""); })); };
     (x.companies || []).forEach(function (c) { if (P.companies[c.id]) Object.keys(P.companies[c.id]).forEach(function (k) { c[k] = P.companies[c.id][k]; }); (c.works || []).forEach(function (w) { byId[w.id] = w; }); });
     Object.keys(P.works).forEach(function (id) { var w = byId[id], v = P.works[id]; if (!w) return; Object.keys(v).forEach(function (k) { if (k === "metrics") w.metrics = mets(v.metrics); else if (k === "media") media(w, v.media); else w[k] = v[k]; }); });
     P.add.forEach(function (a) { if (byId[a.w.id]) return; var c = (x.companies || []).filter(function (cc) { return cc.id === a.company; })[0]; if (!c) return; var w = JSON.parse(JSON.stringify(a.w)); w.tags = []; w.links = []; w.stack = []; w.metrics = mets(a.metrics); media(w, a.media); (c.works = c.works || []).push(w); });
@@ -755,7 +757,8 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
   }
 
   function renderKlio(d) {
-    if ((d.page === "projects-test" || d.page === "projects-airbridge") && !((d.klio || {}).migr || {}).pdf1) d = pptPatch(d); // PPT 내용 바로 보이게(DB 반영 전)
+    if (d.page === "projects-airbridge") d = Object.assign({}, d, { page: "projects" }); // 옛 주소(/projects-airbridge) = /projects
+    if ((d.page === "projects-test" || d.page === "projects") && !((d.klio || {}).migr || {}).pdf1) d = pptPatch(d); // PPT 내용 바로 보이게(DB 반영 전)
     var P = d.profile || {};
     var fmt = function (s) { return s ? String(s).slice(0, 7).replace("-", ".") : ""; };
     var wPeriod = function (w) { var a = fmt(w.startDate), b = w.endDate ? fmt(w.endDate) : "현재"; return a ? (a + " – " + b) : (w.endDate ? b : ""); };
@@ -939,8 +942,8 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
     // 메인 ↔ 전체 프로젝트 페이지 경로: 라이브(view.html)가 지금 연 주소 기준으로 넘겨줌(/portfolio, /p/x, /mkt/portfolio…), 없으면 슬러그 기준
     var K0 = d.klio || {};
     var pSlug = d.slug || "portfolio", homeUrl = d.homePath || "/" + encodeURIComponent(pSlug), pjUrl = d.pjPath || homeUrl + "/projects";
-    // 상단 큰 메뉴(메인·프로젝트 페이지 공통 헤더, 순서 이력서 · AX · 프로젝트): 이력서 = 메인 · AX = AX-MKT 콘솔 · 프로젝트 = /projects-airbridge(2026-10-06 랜딩 변경) · data-gx(스튜디오 미리보기에선 이동 대신 전환/새 탭)
-    var tpUrl = d.tpPath || homeUrl + "/projects-airbridge", axUrl = (K0.text || {}).axLink || "https://kimjinsoo-mkt-ax.vercel.app/ax";
+    // 상단 큰 메뉴(메인·프로젝트 페이지 공통 헤더, 순서 이력서 · AX · 프로젝트): 이력서 = 메인 · AX = AX-MKT 콘솔 · 프로젝트 = /projects(2026-10-06 projects-airbridge 내용으로 교체) · data-gx(스튜디오 미리보기에선 이동 대신 전환/새 탭)
+    var tpUrl = d.tpPath || homeUrl + "/projects", axUrl = (K0.text || {}).axLink || "https://kimjinsoo-mkt-ax.vercel.app/ax";
     var gtabs = function (cur, dd) { return '<nav class="gtabs" aria-label="메뉴">' + [["resume", "이력서", homeUrl], ["ax", "AX", axUrl], ["projects", "프로젝트", tpUrl]].map(function (x) { var a = '<a class="gt' + (x[0] === cur ? ' on" aria-current="page' : '') + '" href="' + esc(x[2]) + '" target="_top" data-gx="' + x[0] + '">' + x[1] + '</a>'; return x[0] === "resume" && dd ? '<div class="gt-w">' + a + '<div class="gdd">' + dd + '</div></div>' : a; }).join("") + '</nav>'; };
     // 이력서 섹션 목록(헤더 '이력서' 아래) — 메인 밖(프로젝트 페이지)에선 메인 주소#섹션으로
     var secLinks = function (outside) { return (typeof visibleSec !== "undefined" ? visibleSec : []).filter(function (s) { return s.key !== "projects" && s.key !== "ax"; }).map(function (s) { return '<a href="' + (outside ? esc(homeUrl) : '') + '#' + s.key + '"' + (outside ? ' target="_top"' : '') + ' data-sec="' + s.key + '">' + esc(s.label) + '</a>'; }).join(""); };
@@ -1016,7 +1019,7 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
       var span = i === 1 ? " tall" : i === 3 ? " wide" : "";
       return tileHtml(x, span, i);
     }).join("");
-    // 전체 보기 버튼(→ /projects-airbridge, 타일도 그 페이지에서 해당 프로젝트 보기 창으로): 썸네일 4개 겹침 + 제목/부제 + 화살표 (문구는 KILO 대시보드에서)
+    // 전체 보기 버튼(→ /projects, 타일도 그 페이지에서 해당 프로젝트 보기 창으로): 썸네일 4개 겹침 + 제목/부제 + 화살표 (문구는 KILO 대시보드에서)
     var stackSrc = works.filter(function (x) { return pick.indexOf(x) < 0; }).concat(pick).map(function (x) { return { m: mediaOf(x.w)[0], cm: catMeta(x.w.category), cat: x.w.category }; });
     stackSrc.sort(function (a, b) { return (b.m ? 1 : 0) - (a.m ? 1 : 0); });
     var FAN = [[-10, 7], [-4, 2], [3, 1], [9, 6]]; // 카드 덱 부채꼴(회전°, 내림px) — 호버 시 펼쳐짐
@@ -1455,230 +1458,6 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
       + 'document.addEventListener("click",function(e){var a=e.target.closest("a[data-ext]");if(!a||document.body.getAttribute("data-host")!=="studio")return;e.preventDefault();var m=(a.getAttribute("href")||"").match(/#p-(.+)$/);try{parent.postMessage({klio:"pp",id:m?decodeURIComponent(m[1]):""},"*");}catch(_){}});'
       + '})();';
 
-    // ── 전체 프로젝트 페이지 (/{slug}/projects) — 원형 휠 캐러셀 ─────────────────────
-    // 숨은 큰 원 둘레에 카드가 부채꼴로 펼쳐짐 → 드래그·휠·←/→로 회전, 가만두면 한 장씩 흘러감.
-    // 꼭대기 카드 = 선택 → 아치 안쪽에 정보, '자세히 보기' = 상세 시트. 런타임은 실제 함수를 문자열화해 넣음
-    var whRuntime = function () {
-      "use strict";
-      var body = document.body, stage = document.querySelector(".wh"), ring = document.querySelector(".wh-ring");
-      var all = [].slice.call(document.querySelectorAll(".wh-card"));
-      if (!stage || !ring || !all.length) return;
-      var reduce = matchMedia("(prefers-reduced-motion: reduce)").matches, still = body.hasAttribute("data-still");
-      var dyn = document.querySelector(".wh-dyn"), curEl = document.querySelector("[data-cur]"), totEl = document.querySelector("[data-tot]");
-      var sheet = document.querySelector(".wh-sheet"), sbody = document.querySelector(".wh-sbody"), sno = document.querySelector(".wh-sno");
-      var cards = all.slice(), N = cards.length, DEG = 180 / Math.PI;
-      var W = 0, H = 0, mob = false, R = 800, S = 15, loop = true;
-      var rot = 0, vel = 0, target = null, spread = (still || reduce) ? 1 : 0, active = -1, raf = 0;
-      var dragging = false, moved = false, px0 = 0, rot0 = 0, samples = [];
-      var lastInput = still ? Date.now() : 0, hover = false, sheetOpen = false, ready = false, kbd = false;
-      var pad = function (n) { return (n < 10 ? "0" : "") + n; };
-      var clamp = function (v, a, b) { return Math.max(a, Math.min(b, v)); };
-
-      // 배치: 카드 크기 · 원 반지름 · 원 중심(화면 아래) · 카드 간 각도
-      function layout() {
-        W = innerWidth; H = innerHeight; mob = W < 760;
-        var cw, top, lift = mob ? 10 : 18;
-        if (mob) { cw = clamp(Math.min(W * 0.38, H * 0.18), 112, 160); R = Math.max(W * 1.6, 560); var hb = document.querySelector(".wh-chips"); top = (hb ? hb.getBoundingClientRect().bottom : 180) + 34; }
-        else { // 카드 크기 = 화면 폭·높이에 비례(큰 모니터 최대 300px) · 휠 꼭대기는 가운데 머리 문장 바로 아래
-          cw = clamp(Math.min(W * 0.15, (H * 0.44 - 17) / 1.32), 160, 320); R = Math.max(W * 0.9, 900);
-          var hd = document.querySelector(".wh-head"); top = (hd ? hd.getBoundingClientRect().bottom : H * 0.16) + 26;
-        }
-        var ch = Math.round(cw * (mob ? 1.4 : 1.32)), hw = cw / 2, hh = ch / 2;
-        var apex = top + hh * 1.12 + lift; // 꼭대기 카드는 떠오르고(lift) 커지므로(1.07) 그만큼 아래로
-        ring.style.top = Math.round(apex + R) + "px";
-        stage.style.setProperty("--cw", Math.round(cw) + "px");
-        stage.style.setProperty("--ch", ch + "px");
-        S = (cw + (mob ? 14 : 28)) / R * DEG;
-        // 정보 패널: 꼭대기 카드 아래 끝과, 패널 폭 안으로 들어오는 옆 카드(±1)의 아래 모서리 중 더 낮은 곳 바로 아래
-        var s = S / DEG, cs = Math.cos(s), sn = Math.sin(s), cx = W / 2 + R * sn, cy = apex + R * (1 - cs);
-        var n1 = 0.96, blx = cx - hw * n1, bly = cy + hh * n1, brx = cx + hw * n1, bry = bly; // 옆 카드도 똑바로 서 있음(아래 모서리 수평)
-        var infoEl = document.querySelector(".wh-info"), xr = W / 2 + ((infoEl && infoEl.offsetWidth) || Math.min(mob ? W - 32 : 560, W - 40)) / 2, edge = 0;
-        if (xr > blx) edge = xr >= brx ? bry : bly + (xr - blx) / (brx - blx) * (bry - bly);
-        stage.style.setProperty("--info", Math.round(Math.max(apex - lift + hh * 1.12, edge) + (mob ? 22 : 18)) + "px");
-        loop = N * S >= 200;
-      }
-      function wrapA(a) { if (!loop) return a; var T = N * S; return ((a + T / 2) % T + T) % T - T / 2; }
-      function limit() { if (loop) return; var mn = -(N - 1) * S; if (rot > 0) { rot = 0; vel = 0; } else if (rot < mn) { rot = mn; vel = 0; } }
-      function snapTarget(r) { var t = -Math.round(-r / S) * S; return loop ? t : clamp(t, -(N - 1) * S, 0); }
-
-      function render() {
-        var best = -1, bestA = 1e9, lift = mob ? 10 : 18;
-        for (var i = 0; i < N; i++) {
-          var c = cards[i], a = wrapA(i * S + rot) * spread, aa = Math.abs(a);
-          if (aa < bestA) { bestA = aa; best = i; }
-          if (aa > 96) { c.style.visibility = "hidden"; continue; }
-          var k = Math.max(0, 1 - aa / S); // 꼭대기에 가까울수록 1 → 살짝 떠오르고 커짐
-          c.style.visibility = "";
-          // 카드는 원 둘레를 따라가되 똑바로 선 채(역회전) — 글씨가 기울지 않아 잘 읽힘 · 가운데에서 멀수록 작고 옅게
-          var dn = aa / S, sc = 1 + 0.12 * k - Math.min(dn, 4) * 0.06;
-          c.style.transform = "rotate(" + a.toFixed(3) + "deg) translate3d(0," + (-R - lift * k).toFixed(1) + "px,0) rotate(" + (-a).toFixed(3) + "deg) scale(" + sc.toFixed(3) + ")";
-          c.style.zIndex = String(300 - Math.round(aa * 2));
-          var op = Math.max(0.22, 1 - Math.max(0, dn - 0.5) * 0.26);
-          if (aa > 66) op = Math.min(op, Math.max(0, 1 - (aa - 66) / 30));
-          c.style.opacity = op < 0.999 ? op.toFixed(3) : "";
-        }
-        if (best >= 0 && best !== active) setActive(best);
-      }
-      function setActive(i) {
-        active = i; var c = cards[i];
-        all.forEach(function (x) { x.classList.toggle("on", x === c); });
-        if (curEl) curEl.textContent = pad(i + 1);
-        if (totEl) totEl.textContent = pad(N);
-        var t = document.getElementById("whi-" + c.getAttribute("data-i"));
-        if (dyn && t) { dyn.innerHTML = t.innerHTML; dyn.classList.remove("swap"); void dyn.offsetWidth; dyn.classList.add("swap"); }
-        try { // 배경을 선택 카드의 분야 색(--c)으로 아주 옅게
-          var hx = getComputedStyle(c).getPropertyValue("--c").trim().match(/^#([0-9a-f]{6})$/i);
-          if (hx) { var n = parseInt(hx[1], 16), bg = [n >> 16 & 255, n >> 8 & 255, n & 255], base = [239, 238, 234], mx = function (j) { return Math.round(base[j] + (bg[j] - base[j]) * 0.12); }; body.style.backgroundColor = "rgb(" + mx(0) + "," + mx(1) + "," + mx(2) + ")"; }
-        } catch (e) {}
-        if (sheetOpen) fillSheet();
-        if (ready) { try { if (window.parent && window.parent !== window) window.parent.postMessage({ klio: "card", id: c.getAttribute("data-id") }, "*"); } catch (e) {} }
-      }
-
-      // 움직임: 목표 각도로 부드럽게 · 놓으면 관성 → 가장 가까운 카드에 착 붙음
-      function kick() { if (!raf) raf = requestAnimationFrame(tick); }
-      function tick() {
-        raf = 0; var busy = false;
-        if (!dragging) {
-          if (target != null) { var d = target - rot; if (Math.abs(d) < 0.01) { rot = target; target = null; } else { rot += d * 0.12; busy = true; } }
-          else if (vel) { rot += vel; vel *= 0.94; limit(); if (Math.abs(vel) < 0.25) { vel = 0; target = snapTarget(rot); } busy = true; }
-        }
-        render(); if (busy) kick();
-      }
-      function go(i, instant) {
-        if (i < 0 || i >= N) return;
-        var base = -i * S, t = base;
-        if (loop) { var T = N * S; t = base + T * Math.round((rot - base) / T); }
-        vel = 0;
-        if (instant || reduce) { target = null; rot = t; render(); } else { target = t; kick(); }
-      }
-      function step(dir) {
-        var base = target != null ? target : snapTarget(rot), t = base - dir * S;
-        if (!loop) t = clamp(t, -(N - 1) * S, 0);
-        vel = 0;
-        if (reduce) { target = null; rot = t; render(); } else { target = t; kick(); }
-      }
-      function fan() { // 첫 등장·필터 변경: 한 점에 모인 카드가 부채처럼 펼쳐짐
-        var from = spread, t0 = 0, done = false;
-        function st(t) { if (done) return; if (!t0) t0 = t; var k = Math.min(1, (t - t0) / 1400); k = 1 - Math.pow(1 - k, 4); spread = from + (1 - from) * k; render(); if (k < 1) requestAnimationFrame(st); else done = true; }
-        requestAnimationFrame(st);
-        setTimeout(function () { if (!done) { done = true; spread = 1; render(); } }, 1800); // 화면이 멈춘 환경 대비
-      }
-
-      // 상세 시트
-      function fillSheet() {
-        var c = cards[active]; if (!c || !sbody) return;
-        var t = document.getElementById("whd-" + c.getAttribute("data-i"));
-        sbody.innerHTML = t ? t.innerHTML : ""; sbody.scrollTop = 0;
-        if (sno) sno.textContent = pad(active + 1) + " / " + pad(N);
-      }
-      function openSheet() { if (active < 0 || !sheet) return; fillSheet(); sheetOpen = true; body.classList.add("sheet-open"); sheet.setAttribute("aria-hidden", "false"); try { sheet.focus({ preventScroll: true }); } catch (_) {} }
-      function closeSheet() { if (!sheetOpen) return; sheetOpen = false; body.classList.remove("sheet-open"); sheet.setAttribute("aria-hidden", "true"); lastInput = Date.now(); setTimeout(function () { if (!sheetOpen && sbody) sbody.innerHTML = ""; }, 600); }
-
-      function filter(chip) {
-        var f = chip.getAttribute("data-f");
-        [].forEach.call(document.querySelectorAll(".wh-chip"), function (c) { c.classList.toggle("on", c === chip); });
-        cards = all.filter(function (c) { var on = f === "*" || c.getAttribute("data-grp") === f; c.hidden = !on; return on; });
-        N = cards.length; active = -1; rot = 0; target = null; vel = 0; lastInput = Date.now();
-        layout();
-        if (!reduce && !still) { spread = 0.15; fan(); } else render();
-      }
-
-      // 드래그(마우스·터치)
-      stage.addEventListener("pointerdown", function (e) {
-        kbd = false; moved = false;
-        if (e.pointerType === "mouse" && e.button !== 0) return;
-        if (e.target.closest(".wh-top,.wh-chips,.wh-info")) return;
-        dragging = true; px0 = e.clientX; rot0 = rot; target = null; vel = 0;
-        samples = [[performance.now(), rot]]; lastInput = Date.now(); stage.classList.add("grab");
-      });
-      window.addEventListener("pointermove", function (e) {
-        if (!dragging) return;
-        var dx = e.clientX - px0; if (Math.abs(dx) > 5) moved = true;
-        rot = rot0 + dx / R * DEG * (mob ? 1.2 : 1); limit();
-        samples.push([performance.now(), rot]); if (samples.length > 6) samples.shift();
-        render();
-      }, { passive: true });
-      function endDrag() {
-        if (!dragging) return; dragging = false; stage.classList.remove("grab"); lastInput = Date.now();
-        var a = samples[0], b = samples[samples.length - 1], dt = b[0] - a[0], idle = performance.now() - b[0];
-        vel = moved && dt > 0 && idle < 90 ? clamp((b[1] - a[1]) / dt * 16.7, -7, 7) : 0;
-        if (Math.abs(vel) < 0.25) { vel = 0; target = snapTarget(rot); }
-        kick();
-      }
-      window.addEventListener("pointerup", endDrag);
-      window.addEventListener("pointercancel", endDrag);
-      // 휠(마우스·트랙패드) → 회전, 멈추면 가까운 카드로
-      var wT = 0;
-      stage.addEventListener("wheel", function (e) {
-        if (sheetOpen || e.target.closest(".wh-chips")) return;
-        var d = Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY; if (!d) return;
-        e.preventDefault(); if (e.deltaMode === 1) d *= 30;
-        target = null; vel = 0; rot -= clamp(d, -160, 160) * 0.11; limit(); lastInput = Date.now(); render();
-        clearTimeout(wT); wT = setTimeout(function () { target = snapTarget(rot); kick(); }, 150);
-      }, { passive: false });
-
-      document.addEventListener("click", function (e) {
-        var t = e.target, b;
-        if ((b = t.closest("[data-step]"))) { lastInput = Date.now(); step(+b.getAttribute("data-step")); return; }
-        if ((b = t.closest(".wh-card"))) {
-          if (moved) { moved = false; return; }
-          var i = cards.indexOf(b); if (i < 0) return;
-          lastInput = Date.now();
-          if (i === active && spread >= 1 && (target == null || Math.abs(target - rot) < S / 2)) openSheet(); else go(i);
-          return;
-        }
-        if (t.closest("[data-open]")) { openSheet(); return; }
-        if (t.closest("[data-close]")) { closeSheet(); return; }
-        if ((b = t.closest("[data-snav]"))) { lastInput = Date.now(); step(+b.getAttribute("data-snav")); return; }
-        if ((b = t.closest(".wh-chip"))) { filter(b); return; }
-        if ((b = t.closest(".wd-th"))) { // 상세: 미디어 전환
-          var box = b.closest(".wd-media"), main = box && box.querySelector(".wd-main"); if (!main) return;
-          [].forEach.call(box.querySelectorAll(".wd-th"), function (x) { x.classList.toggle("on", x === b); });
-          var yt = b.getAttribute("data-yt");
-          main.innerHTML = yt ? '<span class="wd-play" aria-hidden="true"></span>' : "";
-          main.style.backgroundImage = "url('" + b.getAttribute("data-src") + "')";
-          main.classList.toggle("img", !yt); // 사진은 잘리지 않게 전체(contain), 영상 썸네일은 꽉 채움
-          if (yt) { main.classList.add("yt"); main.setAttribute("data-yt", yt); } else { main.classList.remove("yt"); main.removeAttribute("data-yt"); }
-          return;
-        }
-        if ((b = t.closest(".wd-main.yt"))) { // 상세: 영상은 시트 안에서 재생
-          b.innerHTML = '<iframe src="https://www.youtube-nocookie.com/embed/' + b.getAttribute("data-yt") + '?autoplay=1&rel=0" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen></iframe>';
-          b.classList.remove("yt"); return;
-        }
-        var a = t.closest("a[data-ext]");
-        if (a && body.getAttribute("data-host") === "studio") { // 스튜디오 미리보기: 돌아가기 = 미리보기를 메인으로
-          e.preventDefault();
-          if (a.classList.contains("wh-back")) { try { parent.postMessage({ klio: "pp-back" }, "*"); } catch (_) {} } else window.open(a.href, "_blank", "noopener");
-        }
-      });
-      document.addEventListener("keydown", function (e) {
-        kbd = true; moved = false;
-        if (sheetOpen) { if (e.key === "Escape") closeSheet(); else if (e.key === "ArrowRight") step(1); else if (e.key === "ArrowLeft") step(-1); return; }
-        if (e.key === "ArrowRight") { e.preventDefault(); lastInput = Date.now(); step(1); }
-        else if (e.key === "ArrowLeft") { e.preventDefault(); lastInput = Date.now(); step(-1); }
-      });
-      stage.addEventListener("focusin", function (e) { var b = e.target.closest && e.target.closest(".wh-card"); if (b && kbd) { var i = cards.indexOf(b); if (i >= 0 && i !== active) go(i); } });
-      [ring, document.querySelector(".wh-info")].forEach(function (el) { // 마우스를 올려 보는 중엔 자동 넘김 멈춤
-        if (!el) return;
-        el.addEventListener("pointerenter", function (e) { if (e.pointerType === "mouse") hover = true; });
-        el.addEventListener("pointerleave", function () { hover = false; });
-      });
-      window.addEventListener("message", function (e) { // 메인 타일에서 들어온 카드로 바로
-        var m = e.data; if (!m || m.klio !== "goto-card" || typeof m.id !== "string") return;
-        var c = all.filter(function (x) { return x.getAttribute("data-id") === m.id; })[0]; if (!c) return;
-        if (c.hidden) { var allChip = document.querySelector('.wh-chip[data-f="*"]'); if (allChip) filter(allChip); }
-        lastInput = Date.now(); go(cards.indexOf(c), true);
-      });
-      addEventListener("resize", function () { layout(); render(); });
-      if (!reduce && !still && stage.getAttribute("data-auto") !== "0") setInterval(function () { // 가만두면 한 장씩 흘러감(KILO 대시보드에서 끌 수 있음)
-        if (hover || sheetOpen || dragging || document.hidden || spread < 1 || Date.now() - lastInput < 9000) return;
-        if (!loop && active >= N - 1) go(0); else step(1);
-      }, 3800);
-
-      layout(); render(); ready = true;
-      if (spread < 1) fan();
-      if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { layout(); render(); });
-    };
     function projectsPage() {
       var N = works.length, pad2 = function (n) { return (n < 10 ? "0" : "") + n; };
       var yrs = works.map(function (x) { return yearOf(x.w); }).filter(Boolean).sort();
@@ -1750,9 +1529,7 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
       var headTxt = String(txt("ppTitle", "Projects")).trim();
       var headHtml = esc(headTxt).replace(/\*([^*\n]+)\*/g, "<em>$1</em>").replace(/\r?\n/g, "<br>");
       var eyebrow = esc(txt("ppEyebrow", "Selected Projects")) + (yrTxt ? ' · ' + esc(yrTxt) : '');
-      // ── 스크롤형 전체 프로젝트(기본 · KILO 대시보드 '전체 프로젝트 → 페이지 모양' = klio.ui.ppLayout, wheel = 원형 휠)
-      // 머리 문장 → 묶음마다 [소개 문장 줄 → 대표 프로젝트 큰 패널 → 나머지 3열 카드] 반복 → 누르면 전체 화면 상세(왼쪽 고정 정보 + 오른쪽 큰 이미지 흐름 + 다음 프로젝트)
-      if ((K.ui || {}).ppLayout !== "wheel" || d.page === "projects-test" || d.page === "projects-airbridge") {
+      { // (2026-10-06) 옛 /projects(스크롤형 · 원형 휠)는 삭제 — /projects = 분야별 카드 슬라이드(옛 projects-airbridge) · projects-test는 그대로
         // 썸네일: 이미지를 자르지 않고 원래 비율 그대로 띄움(둥근 모서리·그림자) · 유튜브는 16:9 틀(위아래 검은 띠 제거) · 대시보드에서 '꽉 채우기'로 둔 카드는 채움
         var pImg = function (m, alt, cover, f) {
           return m.yt ? '<span class="ytf"><img src="' + esc(m.src) + '" alt="' + esc(alt || "") + '" decoding="async"><i class="ps-play" aria-hidden="true"></i></span>'
@@ -2280,8 +2057,8 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
             "e68c8938-fbb0-4a88-a9a1-dbb3d8c71243": ["t-cont", "영상 · 채널"], // 영상 PD
             "ea1d35c1-b9f4-4420-8d35-b26ec4709a10": ["t-cont", "영상 · 채널"] // 쎄뷰리
           };
-          // NOW(지금 회사) 순서: AX → 어반스테이(D2C) → 플라트라이프 → 그 밖(웨이브 등 새 프로젝트는 뒤에 자동으로)
-          var NOWORDER = ["77afd48a-668b-4ab1-b385-32fa41400211", "dff32975-e504-47e3-8ee1-744f2267ac91", "60f3fcee-e8b2-4499-b7d1-71e4f91ad2f5"];
+          // NOW(지금 회사) 순서: AX → 어반스테이 퍼포먼스(Project 01) → 어반스테이 × 웨이브(Project 02) → 플라트라이프 → 그 밖(새 프로젝트는 뒤에 자동으로)
+          var NOWORDER = ["77afd48a-668b-4ab1-b385-32fa41400211", "dff32975-e504-47e3-8ee1-744f2267ac91", "5c1e8a52-7b4d-4f0e-9a63-2d8f1b7c4e90", "60f3fcee-e8b2-4499-b7d1-71e4f91ad2f5"];
           var taxOf = function (it) {
             var c = it.w.category || "", t = String(it.w.title || "") + " " + String(it.title || "");
             if ((nowCo && it.co === nowCo) || c === "AX") return "t-recent";
@@ -2344,7 +2121,8 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
           // 카드의 '왜' = 핵심 한 줄(긴 설명은 누르면 열리는 상세의 Problem에) · 우선순위: klio.cards[id].why → 아래 핵심 문구 → 작업의 Problem
           var WHY = {
             "77afd48a-668b-4ab1-b385-32fa41400211": "요청→개발 대기→수기 취합 병목",
-            "dff32975-e504-47e3-8ee1-744f2267ac91": "ROAS 0.3~0.8 만성 저효율",
+            "dff32975-e504-47e3-8ee1-744f2267ac91": "광고비 2배로 키우며 매출 더 키우기",
+            "5c1e8a52-7b4d-4f0e-9a63-2d8f1b7c4e90": "예산 축소 속 비용 없는 USP",
             "60f3fcee-e8b2-4499-b7d1-71e4f91ad2f5": "측정·채널이 전무한 신사업",
             "0a3aea35-ccc9-4018-a7a6-e383c303f928": "웹 트래킹·매체 플래닝 부재",
             "b0aa1d32-82d9-44bc-897d-b558a425c98c": "서비스별 CPI·iOS 단가 기준 부재",
@@ -2415,6 +2193,7 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
           //   판 없음 = 왼쪽 글 | 오른쪽 DB 이미지 판(없으면 성과 숫자 크게)
           var slide = function (it, g, ct, no, tot, id) {
             var co = it.co, mets = it.mets.slice(0, 3), cb = CONTRIB[it.w.id], sum = String(it.w.summary || "").trim();
+            var doc = /^[\w-]+\.html$/.test(String(it.w.doc || "")) ? PF_DOC + it.w.doc : ""; // 상세 성과 리포트(원페이저 HTML, pf-doc/) — 장 아래에 문서 그대로
             var prob = String(it.w.problem || "").trim().split(/\n+/).map(function (x) { return x.trim(); }).filter(Boolean).join(" · ") || whyOf(it);
             var act = String(it.w.action || it.w.detail || "").trim(), res = String(it.w.result || "").trim();
             var CL = it.w.cols || [], cols = col(CL[0] || "담당업무", act) + col(CL[1] || "성과", res);
@@ -2431,7 +2210,8 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
             if (lks.length) cols += '<div class="pj-lks"><b>링크</b>' + lks.map(function (l) { return '<a class="pj-lk" href="' + ea(l.url) + '" target="_blank" rel="noopener">' + esc(l.label || "링크") + ' ↗</a>'; }).join("") + '</div>';
             var head = '<h3 class="pj-t">' + esc(it.title) + '</h3>'
               + '<div class="pj-meta">' + (co && co.logo ? '<img class="pj-lg" src="' + ea(co.logo) + '" alt="">' : '') + '<b>' + esc(co ? dispName(co) : "") + '</b><span>' + esc(when(it)) + '</span>' + (cb ? '<em>기여도 ' + cb + '%</em>' : '') + '</div>'
-              + (sum ? '<p class="pj-s">' + esc(sum) + '</p>' : '') + (prob ? '<p class="pj-q"><b>과제</b>' + esc(prob) + '</p>' : '');
+              + (sum ? '<p class="pj-s">' + esc(sum) + '</p>' : '') + (prob ? '<p class="pj-q"><b>과제</b>' + esc(prob) + '</p>' : '')
+              + (doc ? '<button class="pj-dgo" type="button" data-docgo="' + id + '-doc">성과 리포트 전체 보기<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12l7 7 7-7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>' : '');
             var top = '<div class="sl-hd"><span class="sl-ey">' + esc(String(g.id === "t-recent" ? "Now · " + nowCoName : g.en || g.ko).toUpperCase()) + (g.id === "t-recent" ? '' : ' · ' + esc(ct)) + '</span><span class="sl-no">' + pad2(no) + '<i> / ' + pad2(tot) + '</i></span></div>';
             var body;
             if (b0 && b0.x < 40) {
@@ -2446,6 +2226,8 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
             }
             var more = b0 && b0.x >= 40 ? bs.slice(1) : [];
             return '<section class="tp-sd sl" id="' + id + '" data-m="' + ea(g.id) + '" data-pi="' + it.i + '" data-wid="' + ea(it.w.id || "") + '"><div class="sl-in">' + top + body + '</div></section>'
+              + (doc ? '<section class="tp-sd sl-doc" id="' + id + '-doc" data-m="' + ea(g.id) + '"><div class="sd-dh"><div><span class="sl-ey">REPORT</span><h4>성과 리포트</h4><p>' + esc(it.title) + ' · 원본 자료 그대로</p></div>'
+                + '<a class="pj-lk" href="' + ea(doc) + '" target="_blank" rel="noopener">새 창으로 보기 ↗</a></div><iframe class="sd-if" src="' + ea(doc) + '" title="' + ea(it.title) + ' 성과 리포트" loading="lazy" scrolling="no"></iframe></section>' : '')
               + more.map(function (n, k) {
                 return '<section class="tp-sd sl cont" data-m="' + ea(g.id) + '"><div class="sl-in">' + top.replace('</i></span></div>', ' · ' + (k + 2) + '/' + (more.length + 1) + '</i></span></div>')
                   + '<div class="sl-ct"><h3 class="pj-t">' + esc(it.title) + '</h3><span>이어서</span></div><div class="sl-bds">' + board(n) + '</div></div></section>';
@@ -2500,10 +2282,11 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
           // 카드 썸네일 = 고른 PPT 그림(CARD_TH) → 판 첫 그림 → 대표 그림(영상은 썸네일) → 분야 일러스트
           var CARD_TH = { "0a3aea35-ccc9-4018-a7a6-e383c303f928": "s10_02", "3080bc75-d773-490f-9a02-35d83886b418": "s12_01", "b0aa1d32-82d9-44bc-897d-b558a425c98c": "s14_00", "2c1ddb7a-e1a3-4adb-a18e-e1b43ad8f731": "s16_01",
             "43ab6811-42cf-4a1f-afca-62bfd67b17f9": "s19_00", "574f26d3-1fff-49fb-a302-b8c12253df61": "s20_00", "53845c2b-3618-4e8d-968c-1edfabdf4912": "s21_00", "4d333686-6daa-4c8e-9cd7-3e8309ef9900": "s23_00", "e5bb7edf-a48d-4752-a0b4-c05df7903051": "s24_00",
-            "731ea8fe-9bb7-41ce-8cc1-687f77f9c49c": "s26_01", "8fe4e187-9052-4737-9d1b-d0a158d9e156": "s27_01", "199815d6-356c-4959-8219-6c9ea7615102": "s28_02" }; // 카드 썸네일로 잘 보이는 PPT 그림(소재·배너 위주)
+            "731ea8fe-9bb7-41ce-8cc1-687f77f9c49c": "s26_01", "8fe4e187-9052-4737-9d1b-d0a158d9e156": "s27_01", "199815d6-356c-4959-8219-6c9ea7615102": "s28_02",
+            "dff32975-e504-47e3-8ee1-744f2267ac91": "urbanstay-cover.jpg", "5c1e8a52-7b4d-4f0e-9a63-2d8f1b7c4e90": "wavve/01.jpg" }; // 카드 썸네일로 잘 보이는 PPT 그림(소재·배너 위주) · 확장자 있으면 pf-doc 파일(성과 리포트 캡처 · 웨이브 가이드 이미지)
           var cardThumb = function (it) {
             var bs = PPT_BOARDS_OF[it.w.id] || [], b = bs.length && PPT_BOARD[bs[0]], f = CARD_TH[it.w.id] || (b && b.i.length ? b.i[0][0] : "");
-            if (f) return '<img src="' + PPT_IMG + f + '.jpg" alt="" loading="lazy" decoding="async">';
+            if (f) return '<img src="' + (/\.(jpe?g|png|webp)$/i.test(f) ? PF_DOC + f : PPT_IMG + f + '.jpg') + '" alt="" loading="lazy" decoding="async">';
             if (it.main) return '<img src="' + ea(it.main.src) + '" alt="" loading="lazy" decoding="async">';
             return '<i class="cd-art" style="--c:' + it.cm.c + '">' + coverArt(it.w, it.m0) + '</i>';
           };
@@ -2654,6 +2437,11 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
             + '.cd-m{margin-top:6px;font-size:13.5px;color:var(--g6);font-variant-numeric:tabular-nums}.cd-k{display:flex;align-items:baseline;gap:8px;margin-top:auto;padding-top:16px;font-size:13px;color:var(--g6)}.cd-k b{font-size:24px;font-weight:700;letter-spacing:-.03em;color:var(--bl);font-variant-numeric:tabular-nums}'
             // 보기 창: 회색 바탕 전체 화면 · 장 하나 · 아래 가운데 조작 막대(이전 · 번호 · 다음 · 닫기)
             + '.vw{position:fixed;inset:0;z-index:150;background:var(--g1);opacity:0;transition:opacity .2s}.vw[hidden]{display:none}.vw.on{opacity:1}.vw-sc{position:absolute;inset:0;overflow-y:auto;padding:24px 0 112px;overscroll-behavior:contain}.vw .tp-sd.sl{min-height:calc(100vh - 140px);margin-bottom:20px}'
+            // 성과 리포트(원페이저 HTML iframe — 문서가 알려 주는 높이로 늘어남, 스크롤은 보기 창 하나) · 장 안 '성과 리포트 전체 보기 ↓'
+            + '.sl-doc{padding:clamp(22px,2.6vw,40px) clamp(20px,3vw,44px) clamp(18px,2vw,28px);margin-bottom:20px;scroll-margin-top:24px}.sd-dh{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;padding-bottom:20px;margin-bottom:22px;border-bottom:1px solid var(--g2)}'
+            + '.sd-dh h4{margin-top:6px;font-size:clamp(22px,1.9vw,28px);font-weight:800;letter-spacing:-.03em;color:var(--g9)}.sd-dh p{margin-top:4px;font-size:14.5px;color:var(--g5)}.sd-if{display:block;width:100%;height:1400px;border:0;background:transparent}'
+            + '.pj-dgo{display:inline-flex;align-items:center;gap:6px;margin-top:16px;height:40px;padding:0 14px 0 16px;border-radius:11px;background:#eef4ff;font-size:14.5px;font-weight:700;color:var(--bl);transition:background .2s}.pj-dgo:hover{background:#e1ecff}.pj-dgo svg{width:16px;height:16px}'
+            + '@media(max-width:760px){.sd-dh{flex-direction:column;align-items:flex-start}}'
             + '.vw-bar{position:fixed;left:50%;bottom:20px;z-index:3;display:flex;align-items:center;gap:4px;max-width:calc(100vw - 24px);padding:6px;border-radius:16px;background:rgba(25,31,40,.94);color:#fff;transform:translateX(-50%);box-shadow:0 18px 40px -16px rgba(0,0,0,.55)}'
             + '.vw-nav{display:inline-flex;align-items:center;gap:10px;min-width:0;max-width:300px;height:44px;padding:0 16px;border-radius:12px;font-size:18px;color:#fff;transition:background .2s}.vw-nav:hover,.vw-x:hover{background:rgba(255,255,255,.12)}.vw-nav span{overflow:hidden;font-size:14px;font-weight:600;white-space:nowrap;text-overflow:ellipsis}'
             + '.vw-cnt{flex:none;padding:0 8px;font-size:14px;font-weight:600;color:rgba(255,255,255,.6);font-variant-numeric:tabular-nums}.vw-x{flex:none;width:44px;height:44px;margin-left:4px;border-left:1px solid rgba(255,255,255,.14);border-radius:0 12px 12px 0;font-size:16px;color:#fff}'
@@ -2710,28 +2498,28 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
             + '.tp-pfs{grid-template-columns:1fr;gap:22px}.tp-pf{display:grid;grid-template-columns:112px minmax(0,1fr);column-gap:12px;align-items:baseline}.tp-pf b{grid-row:span 2;font-size:34px}.tp-pf span{margin-top:0}.tp-pf i{margin-top:2px}.tp-path ol{grid-auto-flow:row;grid-template-columns:1fr}.tp-path li{padding:0 0 22px 22px;border-top:0;border-left:2px solid var(--g2)}.tp-path li::before{left:-6px;top:3px}.tp-path li.now{border-left-color:var(--bl)}.tp-path li>b{margin-top:2px}'
             + '.tp-ctas-in{flex-direction:column-reverse;align-items:flex-start}}'
             + '.tp-sd{}@media(prefers-reduced-motion:reduce){.tp-wrow,.tp-cue,.js .tp-hc,.js .tp-aw,.js .tp-al2{animation:none}.tp-wall,.tp-hb{transition:none}.tp-hb{opacity:1;transform:none}}';
-          // ── /projects-airbridge (2026-10-05 사용자 요청: airbridge.io/ko/case-studies 그대로 — 상품 카드 · 필터 라벨) · 카드 누르면 같은 보기 창
+          // ── /projects (옛 /projects-airbridge, 2026-10-05 사용자 요청: airbridge.io/ko/case-studies 그대로 — 상품 카드 · 필터 라벨) · 카드 누르면 같은 보기 창
           //    히어로(큰 제목 · 한 줄) → 필터 두 줄(분야 = 챕터 · 회사, 개수 · 로고) → 카드 3열(16:10 브랜드 색 커버 = 로고·회사 | 소재 이미지 · 제목 22 · 성과 숫자 2 · 자세히 보기 →) → 문의 블록
-          if (d.page === "projects-airbridge") {
-            var ABRAND = { "880f2595-41db-43f8-8fc4-d7b2b7a82ed9": ["#141a26", "#fff"], "df04e065-83b0-4fe3-9d89-c08103b1f3fc": ["#ffe4ec", "#191f28"], "9a240366-d8d0-47b3-a1fd-3259532182b3": ["#e8edf6", "#191f28"], "64000e6d-362f-4ed7-a9e6-e64be85cd95a": ["#6f4cf6", "#fff"], "6add97f4-49f2-44fe-b6bb-a70f6a0ee024": ["#fbeae3", "#191f28"] };
-            // 카드 커버 색(Airbridge처럼 카드마다 다르게 · 진한 색과 파스텔 섞어서) — [바탕, 글자]
-            var ACOVER = { "77afd48a-668b-4ab1-b385-32fa41400211": ["#141a26", "#fff"], "dff32975-e504-47e3-8ee1-744f2267ac91": ["#e6f3ee", "#191f28"], "60f3fcee-e8b2-4499-b7d1-71e4f91ad2f5": ["#fff0de", "#191f28"],
-              "0a3aea35-ccc9-4018-a7a6-e383c303f928": ["#ffe4ec", "#191f28"], "3080bc75-d773-490f-9a02-35d83886b418": ["#e6edfc", "#191f28"], "b0aa1d32-82d9-44bc-897d-b558a425c98c": ["#111214", "#fff"],
-              "731ea8fe-9bb7-41ce-8cc1-687f77f9c49c": ["#eef1f5", "#191f28"], "8fe4e187-9052-4737-9d1b-d0a158d9e156": ["#1d2030", "#fff"], "199815d6-356c-4959-8219-6c9ea7615102": ["#efe9ff", "#191f28"],
-              "4d333686-6daa-4c8e-9cd7-3e8309ef9900": ["#e2f6e9", "#191f28"], "e5bb7edf-a48d-4752-a0b4-c05df7903051": ["#fff6d8", "#191f28"], "43ab6811-42cf-4a1f-afca-62bfd67b17f9": ["#f3efff", "#191f28"],
-              "53845c2b-3618-4e8d-968c-1edfabdf4912": ["#6f4cf6", "#fff"], "574f26d3-1fff-49fb-a302-b8c12253df61": ["#e9e1ff", "#191f28"], "2c1ddb7a-e1a3-4adb-a18e-e1b43ad8f731": ["#0d4fd6", "#fff"],
-              "2380b3b4-8dba-4b9d-9f96-38568a79936b": ["#2b1d22", "#fff"], "5afefe01-835b-48eb-9568-e6f51f6650ce": ["#fdeaf0", "#191f28"], "ea1d35c1-b9f4-4420-8d35-b26ec4709a10": ["#ffe8de", "#191f28"], "e68c8938-fbb0-4a88-a9a1-dbb3d8c71243": ["#17171a", "#fff"] };
+          if (d.page === "projects") {
             var abCos = []; abItems.forEach(function (a) { if (a.it.co && abCos.indexOf(a.it.co) < 0) abCos.push(a.it.co); });
             // 분야(챕터)마다 한 줄 카드 슬라이드(2026-10-06 사용자: 회사 필터 없애고 분야별로 구분 · 한 줄로 슬라이딩 · 모바일은 카드 하나씩 옆으로)
-            var BG = ["#eef2ff", "#fff1f2", "#ecfdf5", "#fff7ed", "#f5f3ff"];
+            // 카드 썸네일 통일(2026-10-06 사용자 '깔끔하고 명확하게 · 썸네일·이미지 통일'): 분야 색을 옅게 깐 같은 바탕 + 같은 자리 · 같은 크기 프레임
+            //   가로 그림 = 브라우저 창(위 막대 · 점 3개) · 세로 그림 = 휴대폰(런타임이 그림 비율 보고 .pt) · 그림은 자르지 않고(contain) 흰 바탕 · 그림 없으면 분야 일러스트
+            //   왼쪽 위 = 회사 칩(로고 · 이름) / 아래 = 묶음(NOW는 분야) · 기간 → 제목 2줄 → 숫자 2칸(없으면 한 줄 요약) → 자세히 보기
+            var ABTINT = { "t-recent": "#3182f6", "t-perf": "#2f5f99", "t-data": "#2b6a5f", "t-camp": "#93503c", "t-cont": "#6a4c93" };
+            var thSrc = function (f) { return /\.(jpe?g|png|webp)$/i.test(f) ? PF_DOC + f : PPT_IMG + f + ".jpg"; }; // CARD_TH: PPT 그림 이름 또는 pf-doc 파일
             var abCard = function (a) {
-              var it = a.it, co = it.co || {}, br = ACOVER[it.w.id] || ABRAND[co.id] || ["#f2f4f6", "#191f28"], mets = it.mets.slice(0, 2);
-              var bs = PPT_BOARDS_OF[it.w.id] || [], b = bs.length && PPT_BOARD[bs[0]], f = CARD_TH[it.w.id] || (b && b.i.length ? b.i[0][0] : ""), src = f ? PPT_IMG + f + ".jpg" : (it.main ? it.main.src : "");
-              var shot = src ? '<span class="ab-shot"><img src="' + ea(src) + '" alt="" loading="lazy" decoding="async"></span>' : (it.m0 ? '<span class="ab-big"><b>' + esc(it.m0.value) + '</b>' + esc(it.m0.label || "") + '</span>' : '');
-              return '<button class="ab-card" type="button" data-vw="' + a.k + '" aria-label="' + ea(it.title) + ' 자세히 보기">'
-                + '<span class="ab-cv" style="--bg:' + br[0] + ';--fg:' + br[1] + '"><span class="ab-br">' + (co.logo ? '<img src="' + ea(co.logo) + '" alt="">' : '') + '<b>' + esc(dispName(co)) + '</b><small>' + esc(when(it)) + '</small></span>' + shot + '</span>'
-                + '<span class="ab-bd">' + (a.ct && a.g.id !== "t-recent" ? '<span class="ab-ey">' + esc(a.ct) + '</span>' : '') + '<b class="ab-t">' + esc(it.title) + '</b>'
-                + '<span class="ab-ms">' + mets.map(function (m) { return '<span><b>' + esc(m.value) + '</b>' + esc(m.label || "") + '</span>'; }).join("") + '</span>'
+              var it = a.it, co = it.co || {}, mets = it.mets.slice(0, 2), cc = ABTINT[a.g.id] || "#4e5968";
+              var bs = PPT_BOARDS_OF[it.w.id] || [], b = bs.length && PPT_BOARD[bs[0]], f = CARD_TH[it.w.id] || (b && b.i.length ? b.i[0][0] : ""), src = f ? thSrc(f) : (it.main ? it.main.src : "");
+              var shot = src ? '<span class="ab-im" style="--img:url(&quot;' + ea(src) + '&quot;)"><img src="' + ea(src) + '" alt="" loading="lazy" decoding="async"></span>' : '<span class="ab-im art" style="--c:' + it.cm.c + '">' + coverArt(it.w, it.m0) + '</span>';
+              var ey = (a.g.id === "t-recent" ? (it.w.category || "") : a.ct) || "";
+              var sum = String(it.w.summary || whyOf(it) || "").trim();
+              return '<button class="ab-card" type="button" data-vw="' + a.k + '" style="--cc:' + cc + '" aria-label="' + ea(it.title) + ' 자세히 보기">'
+                + '<span class="ab-cv"><span class="ab-co">' + (co.logo ? '<img src="' + ea(co.logo) + '" alt="">' : '') + '<b>' + esc(dispName(co)) + '</b></span>'
+                + '<span class="ab-fr"><i class="ab-bar" aria-hidden="true"><i></i><i></i><i></i></i>' + shot + '</span></span>'
+                + '<span class="ab-bd"><span class="ab-ey">' + (ey ? '<b>' + esc(ey) + '</b>' : '') + '<span>' + esc(when(it)) + '</span></span><b class="ab-t">' + esc(it.title) + '</b>'
+                + (mets.length ? '<span class="ab-ms" style="--n:' + mets.length + '">' + mets.map(function (m) { return '<span><b>' + esc(m.value) + '</b><i>' + esc(m.label || "") + '</i></span>'; }).join("") + '</span>'
+                  : '<span class="ab-ms sum"><span>' + esc(sum) + '</span></span>')
                 + '<span class="ab-go">자세히 보기<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M12 5l7 7-7 7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span></span></button>';
             };
             var arw = function (dir) { return '<button class="abs-arw" type="button" data-dir="' + dir + '" aria-label="' + (dir < 0 ? '이전' : '다음') + '"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="' + (dir < 0 ? 'M15 18l-6-6 6-6' : 'M9 18l6-6-6-6') + '" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>'; };
@@ -2760,20 +2548,32 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
               + '.abs-ctl{flex:none;display:flex;gap:8px}.abs-arw{display:grid;place-items:center;width:44px;height:44px;border:1px solid #e5e8eb;border-radius:50%;background:#fff;color:var(--g8);transition:background .2s,opacity .2s,border-color .2s}.abs-arw:hover:not(:disabled){background:#f2f4f6;border-color:#d1d6db}.abs-arw:disabled{opacity:.3;cursor:default}.abs-arw svg{width:20px;height:20px}.abs.fit .abs-ctl{visibility:hidden}'
               + '.abs-track{display:grid;grid-auto-flow:column;grid-auto-columns:calc((var(--abw) - 48px) / 3);gap:24px;margin-top:24px;padding:4px var(--abg) 28px;overflow-x:auto;scroll-snap-type:x mandatory;scroll-padding:0 var(--abg);overscroll-behavior-x:contain;scrollbar-width:none}.abs-track::-webkit-scrollbar{display:none}'
               + '.abs-dots{display:none;justify-content:center;gap:6px;margin-top:-8px}.abs-dots i{width:6px;height:6px;border-radius:999px;background:#d1d6db;transition:width .3s,background .3s}.abs-dots i.on{width:18px;background:#191f28}'
-              // 카드: 흰 카드 · 얇은 테두리 · 둥근 20 · 16:10 커버(카드마다 색 · 로고·회사·기간 | 소재) · 묶음 · 제목 · 숫자 2 · 자세히 보기
-              + '.ab-card{scroll-snap-align:start;display:flex;flex-direction:column;min-width:0;border:1px solid #eceef1;border-radius:20px;overflow:hidden;background:#fff;text-align:left;transition:transform .3s var(--te),box-shadow .3s var(--te)}.ab-card:hover{transform:translateY(-4px);box-shadow:0 24px 48px -28px rgba(17,24,39,.35)}'
-              + '.ab-cv{position:relative;display:block;aspect-ratio:16/10;overflow:hidden;background:var(--bg);color:var(--fg)}.ab-cv>*{transition:transform .4s var(--te)}'
-              + '.ab-br{position:absolute;left:7%;top:50%;z-index:1;display:flex;flex-direction:column;align-items:flex-start;gap:8px;max-width:44%;transform:translateY(-50%)}.ab-br img{width:42px;height:42px;margin-bottom:4px;border-radius:12px;background:#fff;object-fit:contain;box-shadow:0 6px 16px -8px rgba(0,0,0,.35)}.ab-br b{font-size:21px;font-weight:800;line-height:1.2;letter-spacing:-.03em;word-break:keep-all}.ab-br small{font-size:12px;font-weight:600;opacity:.6;font-variant-numeric:tabular-nums}'
-              + '.ab-shot{position:absolute;right:6%;top:10%;bottom:10%;display:flex;align-items:center;justify-content:flex-end;width:48%}.ab-shot img{max-width:100%;max-height:100%;width:auto;height:auto;border-radius:10px;background:#fff;box-shadow:0 18px 36px -14px rgba(0,0,0,.45)}.ab-card:hover .ab-shot{transform:translateY(-4px) scale(1.03)}'
-              + '.ab-big{position:absolute;right:8%;top:50%;display:flex;flex-direction:column;align-items:flex-end;max-width:46%;font-size:13px;font-weight:600;text-align:right;opacity:.85;transform:translateY(-50%)}.ab-big b{font-size:clamp(40px,3.4vw,54px);font-weight:800;line-height:1;letter-spacing:-.045em}'
-              + '.ab-bd{flex:1;display:flex;flex-direction:column;padding:22px 24px 24px}.ab-ey{font-size:12.5px;font-weight:600;color:var(--g5)}.ab-t{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;margin-top:4px;font-size:20px;font-weight:700;line-height:1.45;letter-spacing:-.025em;text-wrap:balance;word-break:keep-all}'
-              + '.ab-ms{display:flex;gap:8px;margin-top:16px}.ab-ms span{flex:1;display:flex;flex-direction:column;min-width:0;padding:10px 12px;border-radius:12px;background:#f5f6f8;font-size:12.5px;line-height:1.35;color:var(--g6);word-break:keep-all}.ab-ms b{font-size:19px;font-weight:700;line-height:1.3;letter-spacing:-.02em;color:#191f28;font-variant-numeric:tabular-nums}'
+              // 카드(썸네일 통일): 흰 카드 · 얇은 테두리 · 둥근 20 / 커버 16:10 = 분야 색 옅은 바탕 + 회사 칩 + 아래에서 올라온 프레임(창 · 휴대폰)
+              + '.ab-card{scroll-snap-align:start;display:flex;flex-direction:column;min-width:0;border:1px solid #eceef1;border-radius:20px;overflow:hidden;background:#fff;text-align:left;transition:transform .3s var(--te),box-shadow .3s var(--te),border-color .3s}.ab-card:hover{transform:translateY(-4px);border-color:#e1e4e8;box-shadow:0 24px 48px -28px rgba(17,24,39,.35)}'
+              + '.ab-cv{position:relative;display:block;aspect-ratio:16/10;overflow:hidden;background:linear-gradient(165deg,color-mix(in srgb,var(--cc) 5%,#f8f9fb) 0%,color-mix(in srgb,var(--cc) 13%,#eff1f4) 100%)}'
+              + '.ab-cv::before{content:"";position:absolute;inset:0;background:radial-gradient(70% 60% at 50% 100%,rgba(255,255,255,.7),transparent 70%);pointer-events:none}'
+              + '.ab-co{position:absolute;left:16px;top:14px;z-index:2;display:inline-flex;align-items:center;gap:7px;max-width:calc(100% - 32px);height:30px;padding:0 11px 0 4px;border-radius:10px;background:rgba(255,255,255,.88);box-shadow:0 1px 2px rgba(0,0,0,.06);font-size:13px;line-height:1;color:#191f28}'
+              + '.ab-co img{width:22px;height:22px;border-radius:7px;object-fit:contain;background:#fff;box-shadow:inset 0 0 0 1px rgba(0,0,0,.05)}.ab-co b{overflow:hidden;font-weight:700;letter-spacing:-.02em;white-space:nowrap;text-overflow:ellipsis}.ab-co:not(:has(img)){padding-left:11px}'
+              // 프레임: 가로 = 창(위 막대 20 + 점) · 아래 가장자리 밖으로 살짝 넘겨 '올라온' 느낌 / 세로(.pt) = 가운데 휴대폰(검은 테두리)
+              + '.ab-fr{position:absolute;left:10%;right:10%;top:62px;bottom:0;display:flex;flex-direction:column;border-radius:12px 12px 0 0;overflow:hidden;background:#fff;box-shadow:0 0 0 1px rgba(17,24,39,.06),0 22px 40px -18px rgba(17,24,39,.32);transition:transform .45s var(--te)}'
+              + '.ab-bar{flex:none;display:flex;align-items:center;gap:5px;height:20px;padding:0 10px;background:#f5f6f8;border-bottom:1px solid #eceef1}.ab-bar i{width:6px;height:6px;border-radius:50%;background:#d6dae0}'
+              + '.ab-im{position:relative;flex:1;min-height:0;display:flex;align-items:center;justify-content:center;overflow:hidden;background:#fff}.ab-im img{position:relative;display:block;max-width:100%;max-height:100%;width:auto;height:auto;object-fit:contain}'
+              + '.ab-im[style]::before{content:"";position:absolute;inset:-24px;background:var(--img) center/cover no-repeat;filter:blur(20px) saturate(1.15);opacity:.55}' // 그림 옆 빈 곳 = 같은 그림을 흐리게(자르지 않고 채운 느낌)
+              + '.ab-im.art{background:color-mix(in srgb,var(--cc) 7%,#fff)}.ab-im.art svg{width:100%;height:100%}'
+              + '.ab-fr.pt{left:50%;right:auto;top:48px;width:31%;border:5px solid #1b1e24;border-bottom:0;border-radius:22px 22px 0 0;transform:translateX(-50%);box-shadow:0 22px 40px -18px rgba(17,24,39,.4)}.ab-fr.pt .ab-bar{display:none}'
+              + '.ab-card:hover .ab-fr{transform:translateY(-6px)}.ab-card:hover .ab-fr.pt{transform:translate(-50%,-6px)}'
+              // 본문: 묶음 · 기간 → 제목 2줄(높이 고정) → 숫자 2칸(높이 고정, 없으면 한 줄 요약) → 자세히 보기
+              + '.ab-bd{flex:1;display:flex;flex-direction:column;padding:20px 22px 22px}.ab-ey{display:flex;align-items:center;gap:8px;min-width:0;font-size:13px;font-weight:500;color:var(--g5);white-space:nowrap}.ab-ey b{overflow:hidden;font-weight:700;color:color-mix(in srgb,var(--cc) 80%,#191f28);text-overflow:ellipsis}.ab-ey b+span::before{content:"";display:inline-block;width:1px;height:10px;margin-right:8px;background:var(--g3);vertical-align:-1px}'
+              + '.ab-t{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;min-height:2.9em;margin-top:8px;font-size:19px;font-weight:700;line-height:1.45;letter-spacing:-.025em;color:#191f28;word-break:keep-all}'
+              + '.ab-ms{display:grid;grid-template-columns:repeat(var(--n,2),minmax(0,1fr));gap:8px;margin-top:16px}.ab-ms>span{display:flex;flex-direction:column;justify-content:center;min-width:0;height:66px;padding:10px 13px;border-radius:12px;background:#f5f6f8}'
+              + '.ab-ms b{overflow:hidden;font-size:19px;font-weight:700;line-height:1.3;letter-spacing:-.02em;color:#191f28;white-space:nowrap;text-overflow:ellipsis;font-variant-numeric:tabular-nums}.ab-ms i{overflow:hidden;margin-top:2px;font-style:normal;font-size:12.5px;line-height:1.35;color:var(--g6);white-space:nowrap;text-overflow:ellipsis}'
+              + '.ab-ms.sum{grid-template-columns:1fr}.ab-ms.sum span{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;padding:12px 14px;line-clamp:2;font-size:14px;line-height:1.5;color:var(--g7);word-break:keep-all}'
               + '.ab-go{display:inline-flex;align-items:center;gap:6px;margin-top:auto;padding-top:18px;font-size:14px;font-weight:600;color:var(--bl)}.ab-go svg{width:16px;height:16px;transition:transform .3s}.ab-card:hover .ab-go svg{transform:translateX(4px)}'
               + '.ab-cta{width:var(--abw);margin:clamp(88px,12vh,128px) auto clamp(64px,8vh,96px);padding:clamp(56px,8vw,96px) 24px;border-radius:28px;background:linear-gradient(135deg,#f2f6ff,#f7f2ff);text-align:center}.ab-cta h2{font-size:clamp(28px,3vw,42px);font-weight:800;letter-spacing:-.035em}.ab-cta p{margin-top:14px;font-size:18px;color:var(--g6)}'
               + '.ab-cta-b{display:flex;flex-wrap:wrap;justify-content:center;gap:10px;margin-top:32px}.ab-btn{display:inline-flex;align-items:center;height:50px;padding:0 24px;border-radius:14px;background:#fff;font-size:16px;font-weight:600;color:var(--g8);box-shadow:inset 0 0 0 1px var(--g2)}.ab-btn.pri{background:var(--bl);color:#fff;box-shadow:none}'
               // 화면 폭별: 1100 이하 = 2장 보임 · 680 이하 = 카드 한 장씩 옆으로(점 표시) · 바로가기 칩 왼쪽 정렬
               + '@media(max-width:1100px){.abs-track{grid-auto-columns:calc((var(--abw) - 24px) / 2)}}'
-              + '@media(max-width:680px){body.ab{--abw:calc(100vw - 40px);--abg:20px}.ab-hero{padding-top:116px}.ab-jump-in{justify-content:flex-start;width:100%;padding:10px 20px}.abs-ctl{display:none}.abs-track{grid-auto-columns:var(--abw);gap:12px;padding-bottom:20px}.abs-dots{display:flex}.ab-br b{font-size:19px}.ab-t{font-size:18px}}';
+              + '@media(max-width:680px){body.ab{--abw:calc(100vw - 40px);--abg:20px}.ab-hero{padding-top:116px}.ab-jump-in{justify-content:flex-start;width:100%;padding:10px 20px}.abs-ctl{display:none}.abs-track{grid-auto-columns:var(--abw);gap:12px;padding-bottom:20px}.abs-dots{display:flex}.ab-t{font-size:18px}.ab-fr{top:56px}.ab-fr.pt{top:44px}}';
             return '<!doctype html><html lang="ko"><head><script>document.documentElement.classList.add("js")<\/script><meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>'
               + '<title>' + esc(nameKo || nameEn || "포트폴리오") + ' — Projects</title><link rel="icon" href="data:,"/>' + fontHead
               + '<style>' + PSCSS + fontVars + TCSS + ABCSS + '</style></head><body class="tp ab ft-' + FKEY + '"' + (d.hostStudio ? ' data-host="studio"' : '') + '>'
@@ -2850,11 +2650,13 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
             vw.querySelector(".vw-cnt").textContent = (vk < 9 ? "0" : "") + (vk + 1) + " / " + (n < 10 ? "0" : "") + n;
             var nb = vw.querySelectorAll(".vw-nav span"); nb[0].textContent = "이전 · " + tt(vk - 1).split(/\s+[—–]\s+/)[0]; nb[1].textContent = "다음 · " + tt(vk + 1).split(/\s+[—–]\s+/)[0];
             fit(); $$("img", pgs[vk]).forEach(function (im) { if (!im.complete) im.addEventListener("load", function () { clearTimeout(fit.t); fit.t = setTimeout(fit, 120); }); });
+            $$(".sd-if", pgs[vk]).forEach(function (f) { var ask = function () { try { f.contentWindow.postMessage({ klio: "doc-ask" }, "*"); } catch (e) {} }; ask(); if (!f._ask) { f._ask = 1; f.addEventListener("load", ask); } }); // 성과 리포트 높이 다시 받기
             post({ klio: "card", id: pgs[vk].getAttribute("data-wid") || "" });
           };
           var vwOpen = function (k) { if (!vw) return; vw.hidden = false; body.style.overflow = "hidden"; vwShow(k); later(function () { vw.classList.add("on"); }, 10); };
           var vwClose = function () { if (!vw || vw.hidden) return; vw.hidden = true; vw.classList.remove("on"); body.style.overflow = ""; post({ klio: "card", id: "" }); };
           var vwOf = function (el) { var p = el && el.closest && el.closest(".vw-pg"); return p ? +p.getAttribute("data-k") : -1; };
+          addEventListener("message", function (e) { var m = e.data; if (!m || m.klio !== "doc-h" || !(m.h > 0)) return; $$(".sd-if").forEach(function (f) { if (f.contentWindow === e.source) f.style.height = Math.min(m.h, 40000) + "px"; }); }); // 성과 리포트 높이
           addEventListener("keydown", function (e) { if (!vw || vw.hidden || (md && !md.hidden)) return; if (e.key === "Escape") vwClose(); else if (e.key === "ArrowRight" || e.key === "ArrowLeft") { e.preventDefault(); vwShow(vk + (e.key === "ArrowRight" ? 1 : -1)); } });
           if (vsc) { var sx = null, sy = null; vsc.addEventListener("touchstart", function (e) { var p = e.touches[0]; sx = p.clientX; sy = p.clientY; }, { passive: true }); vsc.addEventListener("touchend", function (e) { if (sx == null) return; var p = e.changedTouches[0], dx = p.clientX - sx, dy = p.clientY - sy; sx = null; if (Math.abs(dx) > 70 && Math.abs(dx) > Math.abs(dy) * 1.6 && !(e.target.closest && e.target.closest(".sl-bds,.pj-vg,.bd"))) vwShow(vk + (dx < 0 ? 1 : -1)); }, { passive: true }); }
           var md = $(".tp-md"), mdIn = md && md.querySelector(".tp-md-in"), mdCnt = md && md.querySelector(".tp-md-cnt"), mdG = [], mdK = 0;
@@ -2866,7 +2668,7 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
           var playVid = function (u) { var id = ytId(u); if (!id || !md) return false; md.className = "tp-md vid"; mdIn.innerHTML = '<div class="tp-md-v' + (/\/shorts\//.test(u) ? ' sh' : '') + '"><iframe src="https://www.youtube-nocookie.com/embed/' + id + '?autoplay=1&rel=0&playsinline=1" title="영상" referrerpolicy="strict-origin-when-cross-origin" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen></iframe></div>'; mdCnt.textContent = ""; mdOpen(); return true; };
           addEventListener("keydown", function (e) { if (!md || md.hidden) return; if (e.key === "Escape") { mdClose(); e.stopPropagation(); } else if (md.classList.contains("multi") && (e.key === "ArrowRight" || e.key === "ArrowLeft")) { e.preventDefault(); mdShow(mdK + (e.key === "ArrowRight" ? 1 : -1)); } }, true);
           addEventListener("message", function (e) { var m = e.data; if (!m || m.klio !== "goto-card" || typeof m.id !== "string") return; var pg = pgs.filter(function (x) { return x.getAttribute("data-wid") === m.id; })[0]; if (pg) later(function () { vwOpen(+pg.getAttribute("data-k")); }, 120); });
-          // /projects-airbridge: 분야 줄 슬라이드(‹ › 한 장씩 · 끝에서 비활성 · 다 들어가면 버튼 숨김 · 모바일 점) + 분야 바로가기(이동 · 지금 분야 표시)
+          // /projects: 분야 줄 슬라이드(‹ › 한 장씩 · 끝에서 비활성 · 다 들어가면 버튼 숨김 · 모바일 점) + 분야 바로가기(이동 · 지금 분야 표시)
           $$(".abs").forEach(function (sec) {
             var tr = sec.querySelector(".abs-track"), cards = $$(".ab-card", tr), dots = $$(".abs-dots i", sec), arws = $$(".abs-arw", sec);
             var step = function () { var c = cards[0]; return c ? c.getBoundingClientRect().width + (parseFloat(getComputedStyle(tr).columnGap) || 24) : tr.clientWidth; };
@@ -2879,6 +2681,8 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
             arws.forEach(function (b) { b.addEventListener("click", function () { tr.scrollBy({ left: +b.getAttribute("data-dir") * step(), behavior: reduce ? "auto" : "smooth" }); }); });
             addEventListener("resize", upd); later(upd, 60);
           });
+          // 카드 썸네일 프레임: 세로로 긴 그림(소재·앱 화면)은 휴대폰 모양(.pt), 나머지는 창
+          $$(".ab-im img").forEach(function (im) { var f = function () { if (im.naturalWidth && im.naturalHeight > im.naturalWidth * 1.15) im.closest(".ab-fr").classList.add("pt"); }; if (im.complete) f(); else im.addEventListener("load", f); });
           var jcs = $$(".ab-jc"), abSecs = $$(".abs");
           if (jcs.length) addEventListener("scroll", function () { var m = abSecs.length ? abSecs[0].getAttribute("data-m") : ""; abSecs.forEach(function (x) { if (x.getBoundingClientRect().top < innerHeight * .45) m = x.getAttribute("data-m"); }); jcs.forEach(function (c) { var on = c.getAttribute("data-m") === m; if (on !== c.classList.contains("on")) { c.classList.toggle("on", on); if (on && c.parentNode.scrollWidth > c.parentNode.clientWidth) c.parentNode.scrollTo({ left: c.offsetLeft - 20, behavior: "smooth" }); } }); }, { passive: true });
           document.addEventListener("click", function (e) {
@@ -2894,6 +2698,7 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
             if ((b = t.closest("[data-v]"))) { if (playVid(b.getAttribute("data-v"))) e.preventDefault(); return; }
             if ((b = t.closest("[data-vw]"))) { vwOpen(+b.getAttribute("data-vw")); return; }
             if ((b = t.closest("[data-vw-step]"))) { vwShow(vk + +b.getAttribute("data-vw-step")); return; }
+            if ((b = t.closest("[data-docgo]"))) { var de = document.getElementById(b.getAttribute("data-docgo")); if (de) de.scrollIntoView({ behavior: reduce ? "auto" : "smooth", block: "start" }); return; }
             if (t.closest("[data-vw-x]")) { vwClose(); return; }
             if ((b = t.closest("[data-zoom]"))) { if (md) { e.preventDefault(); zoomImg(b); } return; }
             if ((b = t.closest("a[data-gx='projects']")) && !body.hasAttribute("data-host")) { e.preventDefault(); go("tp-top"); return; }
@@ -2904,117 +2709,10 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
             if ((b = t.closest(".sl-tb[data-src]"))) { var g = b.closest(".sl-g"), mn = g && g.querySelector(".sl-main"), src = b.getAttribute("data-src"); if (mn) { mn.classList.remove("yt"); mn.href = src; var pl = mn.querySelector(".tp-play"); if (pl) pl.remove(); mn.querySelector("img").src = src; $$(".sl-tb", g).forEach(function (x) { x.classList.toggle("on", x === b); }); } return; }
           });
         };
-        if (d.page === "projects-test" || d.page === "projects-airbridge") return tossPage();
-        return '<!doctype html><html lang="ko"><head><script>document.documentElement.classList.add("js")<\/script><meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>'
-          + '<title>' + esc(nameKo || nameEn || "포트폴리오") + ' — Projects</title><link rel="icon" href="data:,"/>' + fontHead
-          + '<style>' + PSCSS + fontVars + '</style></head><body' + (d.hostStudio ? ' data-host="studio"' : '') + ' class="ft-' + FKEY + '">'
-          + '<header class="ps-top"><a class="ps-back" href="' + esc(homeUrl) + '#projects" target="_top" data-ext>← ' + esc(txt("ppBack", "포트폴리오")) + '</a></header>'
-          + '<div class="ps-prog" aria-hidden="true"><i></i></div>'
-          + '<main><section class="ps-hero"><div class="ps-hw"><p class="ps-meta"><span>' + esc(txt("ppEyebrow", "Selected Projects")) + '</span>' + (yrTxt ? '<span>' + esc(yrTxt) + '</span>' : '') + '</p>'
-          + '<div class="ps-hh"><h1 class="ps-h1' + (shortHead ? ' big' : '') + '">' + headHtml + (shortHead ? '<sup>' + N + '</sup>' : '') + '</h1>' + (subTxt.trim() ? '<p class="ps-sub">' + esc(subTxt) + '</p>' : '') + '</div>'
-          + gIndex + '</div>' + marquee + cue + '</section>'
-          + body + idxList
-          + '<div class="ps-end rv"><p>' + esc(txt("ppEnd", "더 궁금한 점이 있다면")) + '</p><a class="ps-go" href="' + esc(homeUrl) + '#contact" target="_top" data-ext>' + esc(txt("ppEndBtn", "연락하기")) + ' <i>→</i></a></div></main>'
-          + (secs.length > 1 ? '<nav class="ps-chips" aria-label="분야로 이동"><span class="ps-pill" aria-hidden="true"></span><button class="ps-chip" type="button" data-goto="*">전체<i>' + N + '</i></button>' + gChipsS + '</nav>' : '')
-          + '<button class="ps-top-b" type="button" data-goto="*" aria-label="맨 위로">↑</button><div class="pd" role="dialog" aria-modal="true" aria-label="프로젝트 상세" aria-hidden="true"><div class="pd-prog" aria-hidden="true"><i></i></div><div class="pd-top"><span class="pd-ttl">' + esc(txt("ppEyebrow", "Selected Projects")) + '</span><span><span class="pd-no"></span><button class="pd-x" type="button" data-close>← 목록으로</button></span></div><div class="pd-in"></div></div>'
-          + pdT
-          + '<script>(' + psRuntime.toString() + ')();<\/script></body></html>';
+        return tossPage();
       }
-      var WCSS = ':root{--ink:#1d1d1f;--ink60:rgba(29,29,31,.6);--gray:#86868b;--bd:rgba(29,29,31,.1);--mint:#abdcd1;--beige:#e6e1d5;--sand:#eae6da;--coral:#dd8e6e;--lav:#c3cde4;--font:"Figtree","Pretendard Variable",Pretendard,-apple-system,system-ui,"Apple SD Gothic Neo",sans-serif;--ez:cubic-bezier(.16,1,.3,1);--rc:20px;--rt:14px;--rs:26px;--rk:14px}'
-        + '*,*::before,*::after{box-sizing:border-box}html,body{height:100%}body{margin:0;font-family:var(--font);color:var(--ink);background:#efeeea;-webkit-font-smoothing:antialiased;letter-spacing:-.015em;word-break:keep-all;overflow-wrap:break-word;overflow:hidden;transition:background-color 1.2s var(--ez)}a{color:inherit;text-decoration:none}button{font-family:inherit;color:inherit}'
-        + '.wh{position:relative;height:100vh;height:100dvh;overflow:hidden;touch-action:none;-webkit-user-select:none;user-select:none;cursor:grab}.wh.grab{cursor:grabbing}'
-        // 좌상단: 돌아가기 · 서명 · 번호 / 우상단: 큰 타이틀
-        + '.wh-top{position:absolute;left:clamp(18px,3vw,44px);top:clamp(16px,3vh,32px);z-index:400;display:flex;flex-direction:column;align-items:flex-start;gap:16px;cursor:auto}'
-        + '.wh-back{display:inline-flex;align-items:center;height:36px;padding:0 15px;border-radius:999px;background:rgba(255,255,255,.66);-webkit-backdrop-filter:blur(14px) saturate(160%);backdrop-filter:blur(14px) saturate(160%);box-shadow:0 0 0 .5px var(--bd),0 1px 2px rgba(0,0,0,.04);font-size:13px;font-weight:600;transition:background .2s}.wh-back:hover{background:#fff}'
-        + '.wh-id{display:flex;align-items:center;gap:14px}.wh-sig{font-family:var(--sgf);font-size:calc(var(--sgfs) * .74);font-weight:var(--sgw);line-height:1;white-space:nowrap}'
-        + '.wh-cnt{display:flex;align-items:center;gap:10px;font-size:12px;font-weight:700;font-variant-numeric:tabular-nums;color:var(--gray)}.wh-cnt b{color:var(--ink)}.wh-cnt i{width:32px;height:1px;background:currentColor}'
-        + '.wh-head{position:absolute;left:50%;top:clamp(18px,3.2vh,40px);transform:translateX(-50%);z-index:350;width:min(760px,calc(100vw - 480px));text-align:center;pointer-events:none}'
-        + '.wh-eye{display:flex;align-items:center;justify-content:center;gap:14px;margin:0;font-size:11px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--gray)}.wh-eye i{width:36px;height:1px;background:currentColor;opacity:.55}'
-        + '.wh-h1{margin:14px 0 0;font-family:var(--disp);font-size:clamp(30px,min(3.3vw,5.6vh),64px);font-weight:var(--dispw);line-height:1.04;letter-spacing:var(--displs);color:var(--ink);text-wrap:balance}.wh-h1 em{font-style:normal;color:var(--gray)}.ft-editorial .wh-h1{font-weight:400;font-variation-settings:"opsz" 72}.ft-editorial .wh-h1 em{font-style:italic;color:inherit}'
-        // 에디토리얼(세리프) 글꼴: 큰 제목은 한 단계 크게 + 마지막 단어 이탤릭, 번호도 세리프
-        + '.ft-editorial .wh-cnt{font-family:var(--disp);font-size:21px;font-weight:400;letter-spacing:0}.ft-editorial .wh-cnt b{font-weight:400}.ft-editorial .wh-cnt i{width:40px}'
-        // 휠 카드
-        + '.wh-ring{position:absolute;left:50%;top:0;width:0;height:0;z-index:2}'
-        + '.wh-card{position:absolute;left:calc(var(--cw) / -2);top:calc(var(--ch) / -2);width:var(--cw);height:var(--ch);padding:0;border:0;background:none;cursor:inherit;will-change:transform;-webkit-tap-highlight-color:transparent;font:inherit;color:inherit;outline:none}.wh-card[hidden]{display:none}'
-        // 휠 카드 = 상품카드: 흰 카드 안에 썸네일(동심 곡률) + 분야·제목·회사·대표 지표
-        + '.wh-face{position:absolute;inset:0;display:flex;flex-direction:column;padding:calc(var(--cw) * .03);border-radius:var(--rc);overflow:hidden;background:#fff;text-align:left;box-shadow:0 0 0 .5px rgba(0,0,0,.07),0 18px 36px -22px rgba(0,0,0,.4),0 2px 6px rgba(0,0,0,.05);transition:box-shadow .5s var(--ez)}'
-        + '.wh-card.on .wh-face{box-shadow:0 0 0 .5px rgba(0,0,0,.06),0 34px 60px -28px rgba(0,0,0,.5),0 6px 16px rgba(0,0,0,.08)}.wh-card:focus-visible .wh-face{box-shadow:0 0 0 3px #fff,0 0 0 5px var(--ink)}'
-        + '.wh-th{position:relative;flex:none;aspect-ratio:4/3;border-radius:var(--rt);overflow:hidden;background:var(--c) center/cover no-repeat}.wh-th.img{background-color:#f1f0ec}.wh-th.img::before{content:"";position:absolute;inset:-14%;background:var(--img) center/cover no-repeat;filter:blur(18px) saturate(1.15);opacity:.5}.wh-th .th-img{position:absolute;inset:0;width:100%;height:100%;display:block;z-index:1}.wh-th .wh-play{z-index:3}.wh-th.img::after{content:"";position:absolute;inset:0;z-index:2;border-radius:inherit;box-shadow:inset 0 0 0 .5px rgba(0,0,0,.08)}.wh-th .cv{position:absolute;inset:4px;width:calc(100% - 8px);height:calc(100% - 8px)}'
-        + '.wh-big{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%)}.wh-big svg{display:block;width:calc(var(--cw) * .24);height:calc(var(--cw) * .24);stroke-width:1.3}'
-        + '.wh-bd{flex:1;min-height:0;display:flex;flex-direction:column;padding:calc(var(--cw) * .05) calc(var(--cw) * .04) calc(var(--cw) * .035)}'
-        + '.wh-cat{font-style:normal;font-size:max(9.5px,calc(var(--cw) * .044));font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--gray);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}'
-        + '.wh-t{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;margin-top:calc(var(--cw) * .018);font-size:max(12.5px,calc(var(--cw) * .07));font-weight:700;line-height:1.3;letter-spacing:-.025em;color:var(--ink)}'
-        + '.wh-m{margin-top:calc(var(--cw) * .016);font-size:max(10.5px,calc(var(--cw) * .05));font-weight:500;color:var(--gray);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}'
-        + '.wh-p{margin-top:auto;padding-top:calc(var(--cw) * .025);font-size:max(10.5px,calc(var(--cw) * .05));font-weight:600;color:var(--ink60);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.wh-p b{margin-right:2px;font-size:max(12px,calc(var(--cw) * .076));font-weight:800;letter-spacing:-.035em;color:var(--ink)}'
-        + '.wh-play{position:absolute;left:50%;top:50%;z-index:1;width:calc(var(--cw) * .17);height:calc(var(--cw) * .17);transform:translate(-50%,-50%);border-radius:50%;background:rgba(0,0,0,.4);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);box-shadow:inset 0 0 0 1.5px rgba(255,255,255,.75)}.wh-play::after{content:"";position:absolute;left:55%;top:50%;transform:translate(-50%,-50%);border-left:calc(var(--cw) * .045) solid #fff;border-top:calc(var(--cw) * .028) solid transparent;border-bottom:calc(var(--cw) * .028) solid transparent}'
-        // 선택 카드 정보 (휠 아치 안쪽)
-        + '.wh-info{position:absolute;left:50%;top:var(--info,62vh);transform:translateX(-50%);z-index:360;width:min(560px,calc(100vw - 40px));text-align:center;cursor:auto;-webkit-user-select:text;user-select:text;touch-action:manipulation}'
-        + '.wh-meta{margin:0;font-size:11.5px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--ink)}.wh-meta span{font-weight:600;letter-spacing:-.005em;text-transform:none;color:var(--gray)}'
-        + '.wh-name{margin:10px 0 0;font-size:clamp(24px,min(2.9vw,4.6vh),42px);font-weight:800;line-height:1.14;letter-spacing:-.045em;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;text-wrap:balance}'
-        + '.wh-kpis{display:flex;justify-content:center;flex-wrap:wrap;gap:8px;margin-top:16px}.wh-kpi{display:inline-flex;align-items:baseline;gap:7px;max-width:100%;padding:8px 14px;border-radius:999px;background:rgba(255,255,255,.7);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);box-shadow:0 0 0 .5px var(--bd);font-size:12px;font-weight:600;color:var(--ink60);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.wh-kpi b{font-size:16px;font-weight:800;letter-spacing:-.03em;color:var(--ink)}'
-        + '.wh-dyn.swap>*{animation:whIn .7s var(--ez) backwards}.wh-dyn.swap>:nth-child(2){animation-delay:.05s}.wh-dyn.swap>:nth-child(3){animation-delay:.1s}@keyframes whIn{from{opacity:0;transform:translateY(12px);filter:blur(5px)}}'
-        + '.wh-acts{display:flex;justify-content:center;align-items:center;gap:16px;margin-top:18px}.wh-more{display:inline-flex;align-items:center;gap:8px;height:44px;padding:0 20px;border:0;border-radius:999px;background:var(--ink);color:#fff;font-size:14px;font-weight:700;cursor:pointer;box-shadow:0 10px 24px -12px rgba(0,0,0,.5);transition:transform .3s var(--ez)}.wh-more:hover{transform:scale(1.04)}.wh-more span{transition:transform .3s var(--ez)}.wh-more:hover span{transform:translateX(3px)}'
-        // 선택 카드 설명 한 줄 · 이전/다음 버튼(무엇을 누르면 넘어가는지 분명하게) · 힌트는 한 줄 아래로
-        + '.wh-sum{max-width:460px;margin:10px auto 0;font-size:14px;line-height:1.65;color:var(--ink60);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}'
-        + '.wh-acts{flex-wrap:wrap;gap:10px}.wh-hint{flex-basis:100%;margin-top:2px}.wh-nav{width:44px;height:44px;border:0;border-radius:50%;background:rgba(255,255,255,.72);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);box-shadow:0 0 0 .5px var(--bd),0 6px 16px -10px rgba(0,0,0,.35);font-size:16px;color:var(--ink);cursor:pointer;transition:background .2s,transform .2s}.wh-nav:hover{background:#fff;transform:translateY(-1px)}.wh-nav:focus-visible{outline:2px solid var(--ink);outline-offset:2px}'
-        + '@media(min-width:760px) and (max-height:860px){.wh-sum{display:none}}@media(max-width:759px){.wh-sum{font-size:13px}.wh-nav{width:40px;height:40px}}@media(min-width:1800px){.wh-sum{font-size:15px;max-width:560px}.wh-nav{width:50px;height:50px}}'
-        + '.wh-hint{font-size:12px;font-weight:600;color:var(--gray)}.wh-hint .m{display:none}'
-        // 카테고리: 하단 가운데 유리 캡슐
-        + '.wh-chips{position:absolute;left:50%;bottom:clamp(14px,2.6vh,28px);transform:translateX(-50%);z-index:370;display:flex;gap:2px;max-width:calc(100vw - 32px);padding:4px;border-radius:999px;overflow-x:auto;scrollbar-width:none;background:rgba(255,255,255,.58);-webkit-backdrop-filter:blur(18px) saturate(170%);backdrop-filter:blur(18px) saturate(170%);box-shadow:inset 0 1px 0 rgba(255,255,255,.7),0 0 0 .5px var(--bd),0 14px 34px -20px rgba(0,0,0,.3);cursor:auto;touch-action:pan-x}.wh-chips::-webkit-scrollbar{display:none}'
-        + '.wh-chip{flex:none;height:32px;padding:0 13px;border:0;border-radius:999px;background:transparent;font-size:12.5px;font-weight:600;color:var(--ink60);cursor:pointer;white-space:nowrap;transition:background .25s,color .25s}.wh-chip:hover{color:var(--ink)}.wh-chip i{font-style:normal;font-weight:500;opacity:.55;margin-left:4px}.wh-chip.on{background:var(--ink);color:#fff}'
-        // 상세 시트
-        + '.wh-scrim{position:fixed;inset:0;z-index:900;background:rgba(18,18,20,.26);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);opacity:0;visibility:hidden;transition:opacity .45s var(--ez),visibility .45s}.sheet-open .wh-scrim{opacity:1;visibility:visible}'
-        + '.wh-sheet{position:fixed;top:12px;right:12px;bottom:12px;z-index:910;width:min(580px,calc(100vw - 24px));display:flex;flex-direction:column;overflow:hidden;border-radius:var(--rs);background:#fff;box-shadow:0 40px 90px -30px rgba(0,0,0,.5);transform:translateX(calc(100% + 30px));visibility:hidden;transition:transform .6s var(--ez),visibility .6s;outline:none}.sheet-open .wh-sheet{transform:none;visibility:visible}'
-        + '.wh-x{position:absolute;top:14px;right:14px;z-index:3;width:36px;height:36px;border:0;border-radius:50%;background:rgba(255,255,255,.82);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);box-shadow:0 0 0 .5px var(--bd),0 4px 12px -6px rgba(0,0,0,.3);font-size:14px;cursor:pointer}'
-        + '.wh-sbody{flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain}.wh-snav{flex:none;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px 14px;border-top:1px solid var(--bd)}'
-        + '.wh-snav button{height:38px;padding:0 16px;border:0;border-radius:999px;background:#f2f2f4;font-size:13px;font-weight:600;cursor:pointer}.wh-snav button:hover{background:#e8e8ec}.wh-sno{font-size:12px;font-weight:700;color:var(--gray);font-variant-numeric:tabular-nums}'
-        + '.wd-media{background:var(--c)}.wd-main{position:relative;aspect-ratio:16/10;background:var(--c) center/cover no-repeat}.wd-main.img{background-color:#f3f3f0;background-size:contain}.wd-main.yt{cursor:pointer}.wd-main iframe{position:absolute;inset:0;width:100%;height:100%;border:0;background:#000}'
-        + '.wd-play{position:absolute;left:50%;top:50%;width:72px;height:72px;margin:-36px 0 0 -36px;border-radius:50%;background:rgba(0,0,0,.4);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);box-shadow:inset 0 0 0 1.5px rgba(255,255,255,.8);transition:transform .35s var(--ez)}.wd-play::after{content:"";position:absolute;left:55%;top:50%;transform:translate(-50%,-50%);border-left:20px solid #fff;border-top:12px solid transparent;border-bottom:12px solid transparent}.wd-main.yt:hover .wd-play{transform:scale(1.08)}'
-        + '.wd-main.art{display:flex;flex-direction:column;justify-content:flex-end;padding:26px 28px}.wd-ic{position:absolute;left:26px;top:24px}.wd-ic svg{width:32px;height:32px}.wd-kv b{display:block;font-size:clamp(48px,9vw,76px);font-weight:800;letter-spacing:-.055em;line-height:.95}.wd-kv span{display:block;margin-top:10px;font-size:14px;font-weight:600;opacity:.62}.wd-media.dk .wd-kv{color:#fff}.wd-big{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%)}.wd-big svg{display:block;width:104px;height:104px;stroke-width:1.2}'
-        + '.wd-ths{display:flex;gap:8px;padding:10px 14px;overflow-x:auto;scrollbar-width:none;background:rgba(0,0,0,.05)}.wd-th{flex:none;width:64px;height:44px;border:2px solid transparent;border-radius:10px;background:center/cover no-repeat;opacity:.6;cursor:pointer;transition:opacity .2s}.wd-th:hover{opacity:.9}.wd-th.on{opacity:1;border-color:#fff;box-shadow:0 0 0 1px rgba(0,0,0,.16)}'
-        + '.wd-body{display:flex;flex-direction:column;gap:14px;padding:22px 24px 28px}.wd-cat{align-self:flex-start;padding:6px 11px;border-radius:999px;background:var(--c);font-size:10.5px;font-weight:700;letter-spacing:.12em;text-transform:uppercase}.wd-cat.dk{color:#fff}'
-        + '.wd-title{margin:0;font-size:clamp(22px,2.2vw,28px);font-weight:800;line-height:1.2;letter-spacing:-.04em}.wd-co{margin:-6px 0 0;font-size:13px;line-height:1.5;color:var(--ink60)}'
-        + '.wd-kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(112px,1fr));gap:8px}.wd-kpi{padding:12px 14px;border-radius:var(--rk);background:#f4f4f1}.wd-kpi b{display:block;font-size:24px;font-weight:800;letter-spacing:-.04em;line-height:1.05}.wd-kpi span{display:block;margin-top:5px;font-size:11.5px;line-height:1.35;color:var(--ink60)}'
-        + '.wd-desc{margin:0;font-size:14.5px;line-height:1.75;color:var(--ink60)}.wd-pars{display:grid;gap:8px}.wd-par{padding:12px 14px;border-radius:var(--rk);background:#f7f7f4}.wd-par em{font-style:normal;font-size:10.5px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--gray)}.wd-par p{margin:4px 0 0;font-size:13.5px;line-height:1.65}'
-        + '.wd-tags{display:flex;flex-wrap:wrap;gap:6px}.wd-tags span{padding:5px 10px;border-radius:999px;background:#f1f0ec;font-size:11.5px;color:var(--ink60)}.wd-links{display:flex;flex-wrap:wrap;gap:8px}.wd-links a{padding:10px 15px;border-radius:999px;background:var(--ink);color:#fff;font-size:12.5px;font-weight:600;transition:opacity .2s}.wd-links a:hover{opacity:.85}'
-        // 애플식 연속 곡률(지원 브라우저) — 같은 인상이 나도록 반경을 키움
-        // 알약 대신 애플식 둥근 사각형(돌아가기·지표·자세히 보기·분류 바·상세 태그/링크/이전·다음)
-        + '.wh-back{border-radius:11px}.wh-kpi{border-radius:10px}.wh-more{border-radius:13px}.wh-chips{border-radius:16px}.wh-chip{border-radius:11px}.wd-cat,.wd-tags span{border-radius:8px}.wd-links a,.wh-snav button{border-radius:11px}'
-        + '@supports (corner-shape:squircle){:root{--rc:34px;--rt:25px;--rs:42px;--rk:22px}.wh-face,.wh-th,.wh-sheet,.wd-kpi,.wd-par,.wd-th,.wh-back,.wh-kpi,.wh-more,.wh-chips,.wh-chip,.wd-cat,.wd-tags span,.wd-links a,.wh-snav button,.wh-th.img::after{corner-shape:squircle}.wd-th{border-radius:15px}'
-        + '.wh-back{border-radius:17px}.wh-kpi{border-radius:15px}.wh-more{border-radius:20px}.wh-chips{border-radius:25px}.wh-chip{border-radius:19px}.wd-cat,.wd-tags span{border-radius:12px}.wd-links a,.wh-snav button{border-radius:17px}}'
-        // 낮은 화면(노트북): 정보 패널 간격을 줄여 아래 분류 버튼과 겹치지 않게
-        // 큰 모니터(QHD 등): 카드에 맞춰 정보 패널·분류 버튼·머리글도 한 단계 크게
-        + '@media(min-width:1800px){.wh-info{width:min(680px,calc(100vw - 40px))}.wh-meta{font-size:12.5px}.wh-name{font-size:clamp(34px,2.1vw,48px)}.wh-kpis{gap:9px;margin-top:18px}.wh-kpi{padding:9px 16px;font-size:13px}.wh-kpi b{font-size:18px}.wh-acts{margin-top:20px;gap:18px}.wh-more{height:50px;padding:0 24px;font-size:15px}.wh-hint{font-size:13px}.wh-h1{font-size:clamp(48px,2.9vw,72px)}'
-        + '.wh-chips{padding:5px}.wh-chip{height:40px;padding:0 17px;font-size:15px}.wh-back{height:42px;padding:0 18px;font-size:14.5px}.wh-sig{font-size:calc(var(--sgfs) * .9)}.ft-editorial .wh-cnt{font-size:26px}.wh-eye{font-size:12.5px}}'
-        // 낮은 화면(노트북): 카드를 크게 쓰는 대신 정보 패널은 제목을 빼고 간단히
-        + '@media(min-width:760px) and (max-height:860px){.wh-name{display:none}.wh-kpis{margin-top:12px}.wh-acts{margin-top:14px}.wh-more{height:40px}}'
-        // 모바일: 위에서부터 차례로(돌아가기·번호 → 타이틀 → 카테고리 → 휠 → 정보), 상세는 아래에서 올라오는 시트
-        + '@media(max-width:759px){.wh-top{position:relative;left:auto;top:auto;flex-direction:row;align-items:center;justify-content:space-between;padding:14px 16px 0}.wh-sig{display:none}'
-        + '.wh-head{position:relative;left:auto;top:auto;transform:none;width:auto;padding:14px 16px 0;text-align:left}.wh-eye{justify-content:flex-start}.wh-eye i:first-child{display:none}.wh-h1{margin-top:8px;font-size:clamp(28px,8.4vw,38px)}'
-        + '.wh-chips{position:relative;left:auto;bottom:auto;transform:none;margin:14px 16px 0;width:fit-content;max-width:calc(100vw - 32px)}'
-        + '.wh-info{width:calc(100vw - 32px)}.wh-name{font-size:clamp(22px,6.4vw,28px)}@media(max-height:720px){.wh-name{display:none}}.wh-kpi{padding:7px 12px}.wh-kpi b{font-size:15px}.wh-kpi:nth-child(n+3){display:none}.wh-hint .d{display:none}.wh-hint .m{display:inline}.wh-m{display:none}'
-        + '.wh-sheet{top:auto;left:8px;right:8px;bottom:8px;width:auto;height:calc(100dvh - 48px);transform:translateY(calc(100% + 20px))}}'
-        + '@media(prefers-reduced-motion:reduce){.wh-dyn.swap>*{animation:none}.wh-sheet,.wh-scrim,body{transition:none}}';
-      return '<!doctype html><html lang="ko"><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>'
-        + '<title>' + esc(nameKo || nameEn || "포트폴리오") + ' — Projects</title><link rel="icon" href="data:,"/>'
-        + fontHead
-        + '<style>' + WCSS + fontVars + '</style></head><body' + (d.hostStudio ? ' data-host="studio"' : '') + ' class="ft-' + FKEY + '">'
-        + '<main class="wh"' + (shown("pp", "autoplay", true) ? '' : ' data-auto="0"') + ' aria-label="프로젝트 휠 — 드래그·휠·←/→로 돌려보기">'
-        + '<header class="wh-top"><a class="wh-back" href="' + esc(homeUrl) + '#projects" target="_top" data-ext>← ' + esc(txt("ppBack", "포트폴리오")) + '</a>'
-        + '<div class="wh-id">' + (sigTxt ? '<span class="wh-sig">' + esc(sigTxt) + '</span>' : '') + '<span class="wh-cnt"><b data-cur>01</b><i></i><span data-tot>' + pad2(N) + '</span></span></div></header>'
-        + '<header class="wh-head"><p class="wh-eye"><i></i>' + eyebrow + '<i></i></p><h1 class="wh-h1">' + headHtml + '</h1></header>'
-        + '<nav class="wh-chips" aria-label="카테고리">' + chips + '</nav>'
-        + '<div class="wh-ring">' + cardsHtml + '</div>'
-        + '<section class="wh-info" aria-live="polite"><div class="wh-dyn"></div><div class="wh-acts"><button class="wh-nav" type="button" data-step="-1" aria-label="이전 프로젝트">←</button><button class="wh-more" type="button" data-open>' + esc(txt("ppMore", "자세히 보기")) + ' <span aria-hidden="true">→</span></button><button class="wh-nav" type="button" data-step="1" aria-label="다음 프로젝트">→</button>'
-        + '<span class="wh-hint"><span class="d">' + esc(txt("ppHint", "드래그 · 휠 · ← →")) + '</span><span class="m">' + esc(txt("ppHintM", "좌우로 밀어서 돌리기")) + '</span></span></div></section>'
-        + '</main>'
-        + '<div class="wh-scrim" data-close></div>'
-        + '<aside class="wh-sheet" role="dialog" aria-modal="true" aria-label="프로젝트 상세" aria-hidden="true" tabindex="-1"><button class="wh-x" type="button" data-close aria-label="닫기">✕</button><div class="wh-sbody"></div>'
-        + '<div class="wh-snav"><button type="button" data-snav="-1">← 이전</button><span class="wh-sno"></span><button type="button" data-snav="1">다음 →</button></div></aside>'
-        + tpls
-        + '<script>(' + whRuntime.toString() + ')();<\/script></body></html>';
     }
-    if (d.page === "projects" || d.page === "projects-test" || d.page === "projects-airbridge") return projectsPage();
+    if (d.page === "projects" || d.page === "projects-test") return projectsPage();
 
     return '<!doctype html><html lang="ko"><head><script>document.documentElement.classList.add("js")<\/script>'
       + '<meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/>'

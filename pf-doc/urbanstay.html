@@ -1,0 +1,222 @@
+<!doctype html>
+<html lang="ko" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>어반스테이 퍼포먼스 마케팅 성과 2025-06 → 2026-03</title>
+<style>
+  :root { color-scheme:light; --page:#f9f9f7; --surface:#fcfcfb; --ink:#0b0b0b; --ink-2:#52514e; --muted:#898781; --grid:#e1e0d9; --border:rgba(11,11,11,.10); --s1:#2a78d6; --s2:#eb6834; --good:#006300; --bad:#a3261a; --warn-bg:#fff6e0; --warn-ink:#7a4d00; --tag-bg:#eef3fb; --mine-bg:rgba(42,120,214,.06); }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { color-scheme:dark; --page:#0d0d0d; --surface:#1a1a19; --ink:#fff; --ink-2:#c3c2b7; --muted:#898781; --grid:#2c2c2a; --border:rgba(255,255,255,.10); --s1:#3987e5; --s2:#d95926; --good:#0ca30c; --bad:#e8604f; --warn-bg:#2b2310; --warn-ink:#f2c66d; --tag-bg:#1f2a3b; --mine-bg:rgba(57,135,229,.12); } }
+  :root[data-theme="dark"] { color-scheme:dark; --page:#0d0d0d; --surface:#1a1a19; --ink:#fff; --ink-2:#c3c2b7; --muted:#898781; --grid:#2c2c2a; --border:rgba(255,255,255,.10); --s1:#3987e5; --s2:#d95926; --good:#0ca30c; --bad:#e8604f; --warn-bg:#2b2310; --warn-ink:#f2c66d; --tag-bg:#1f2a3b; --mine-bg:rgba(57,135,229,.12); }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--page); color:var(--ink); font-family:system-ui,-apple-system,"Apple SD Gothic Neo","Pretendard",sans-serif; font-size:13.5px; line-height:1.5; -webkit-font-smoothing:antialiased; word-break:keep-all; }
+  main { max-width:1040px; margin:0 auto; padding:36px 16px 60px; }
+  .eyebrow { font-size:11px; font-weight:700; letter-spacing:.04em; color:var(--muted); text-transform:uppercase; }
+  h1 { font-size:26px; line-height:1.25; margin:4px 0 8px; letter-spacing:-.02em; }
+  .sub { color:var(--ink-2); margin:0; }
+  h2 { font-size:15px; margin:0 0 10px; letter-spacing:-.01em; }
+  h2 small { font-weight:400; color:var(--muted); font-size:12px; margin-left:6px; }
+  section { margin-top:18px; }
+  .card { background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:16px 18px; }
+  .kpi { display:grid; grid-template-columns:repeat(6,1fr); gap:10px; }
+  .kpi .card { padding:12px 14px; }
+  .kpi .label { font-size:11px; color:var(--muted); font-weight:600; }
+  .kpi .value { font-size:24px; font-weight:700; letter-spacing:-.02em; line-height:1.1; margin:4px 0 2px; font-variant-numeric:tabular-nums; }
+  .kpi .value span { font-size:13px; font-weight:600; color:var(--ink-2); margin-left:2px; }
+  .kpi .note { font-size:11px; color:var(--ink-2); }
+  .up { color:var(--good); font-weight:700; } .down { color:var(--bad); font-weight:700; }
+  table { width:100%; border-collapse:collapse; font-size:12.5px; }
+  th,td { text-align:left; padding:6px 8px; border-bottom:1px solid var(--grid); vertical-align:top; }
+  th { color:var(--muted); font-weight:600; font-size:11px; }
+  td.num,th.num { text-align:right; font-variant-numeric:tabular-nums; white-space:nowrap; }
+  tr.sum td { font-weight:700; border-top:2px solid var(--grid); }
+  .tag { display:inline-block; font-size:10.5px; font-weight:700; padding:0 7px; border-radius:999px; background:var(--tag-bg); color:var(--ink-2); white-space:nowrap; }
+  .two { display:grid; grid-template-columns:1.15fr .85fr; gap:12px; }
+  .callout { background:var(--warn-bg); color:var(--warn-ink); border-radius:10px; padding:10px 14px; font-size:12.5px; }
+  /* 월별 세로막대: 매출(파랑) 위에 광고비(주황) 겹침 */
+  .cols { display:grid; grid-template-columns:repeat(16,1fr); gap:4px; align-items:end; height:170px; margin-top:6px; }
+  .col { display:flex; flex-direction:column; align-items:center; justify-content:flex-end; height:100%; border-radius:6px; padding:4px 1px 2px; }
+  .col.mine { background:var(--mine-bg); }
+  .stack { position:relative; width:70%; flex:1; display:flex; align-items:flex-end; }
+  .stack i { position:absolute; bottom:0; left:0; right:0; display:block; border-radius:3px 3px 0 0; }
+  .stack i.r { background:var(--s1); } .stack i.c { background:var(--s2); opacity:.95; }
+  .col b { font-size:10px; font-weight:600; color:var(--ink-2); margin-top:3px; font-variant-numeric:tabular-nums; }
+  .col span { font-size:9.5px; color:var(--muted); }
+  .legend { display:flex; gap:14px; font-size:11px; color:var(--ink-2); margin-top:8px; flex-wrap:wrap; }
+  .legend i { display:inline-block; width:10px; height:10px; border-radius:2px; margin-right:5px; vertical-align:-1px; }
+  .tl { list-style:none; padding:0; margin:0; }
+  .tl li { display:grid; grid-template-columns:52px 1fr; gap:10px; padding:6px 0; border-bottom:1px solid var(--grid); font-size:12.5px; }
+  .tl li:last-child { border-bottom:0; }
+  .tl .d { color:var(--s1); font-weight:700; font-variant-numeric:tabular-nums; }
+  .tl b { font-weight:600; }
+
+  .story { display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px; }
+  .story .card h3 { margin:0 0 6px; font-size:13px; color:var(--muted); font-weight:700; letter-spacing:.02em; }
+  .story .card p { margin:0; font-size:13.5px; line-height:1.6; }
+  .lede { font-size:17px; line-height:1.65; }
+  .lede b { font-weight:700; }
+  .ps { width:100%; border-collapse:collapse; font-size:13px; }
+  .ps th { color:var(--muted); font-weight:600; font-size:11px; text-align:left; padding:6px 8px; border-bottom:1px solid var(--grid); }
+  .ps td { padding:8px 8px; border-bottom:1px solid var(--grid); vertical-align:top; line-height:1.5; }
+  .ps td:first-child { font-weight:600; white-space:nowrap; }
+  .ps tr:last-child td { border-bottom:0; }
+  .money { display:grid; grid-template-columns:repeat(4,1fr); gap:10px; }
+  .money .card { padding:12px 14px; }
+  .money .label { font-size:11px; color:var(--muted); font-weight:600; }
+  .money .value { font-size:22px; font-weight:700; letter-spacing:-.02em; line-height:1.1; margin:4px 0 2px; font-variant-numeric:tabular-nums; }
+  .money .value span { font-size:12px; font-weight:600; color:var(--ink-2); margin-left:2px; }
+  .money .note { font-size:11px; color:var(--ink-2); }
+  @media (max-width:860px) { .story { grid-template-columns:1fr; } .money { grid-template-columns:1fr 1fr; } }
+  footer { margin-top:22px; font-size:11px; color:var(--muted); border-top:1px solid var(--grid); padding-top:10px; }
+  @media (max-width:860px) { .kpi { grid-template-columns:repeat(3,1fr); } .two { grid-template-columns:1fr; } .cols { height:130px; } .col span { display:none; } }
+  @media print { body { background:#fff; font-size:12px; } main { padding:0; max-width:none; } .card { break-inside:avoid; } section { margin-top:12px; } }
+</style>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<style>
+  /* 포트폴리오(kimjinsoo-mkt-ax.vercel.app/portfolio/projects) 톤 맞춤: 라이트 고정 · Pretendard · 흰 카드 */
+  :root { --page:#f7f8fa; --surface:#fff; --border:rgba(0,0,0,.07); --s1:#3182f6; --tag-bg:#eef4ff; }
+  body { font-family:"Pretendard Variable",Pretendard,-apple-system,BlinkMacSystemFont,system-ui,"Apple SD Gothic Neo",sans-serif; letter-spacing:-.01em; }
+  .card { border-radius:16px; }
+  /* 프로젝트 페이지 보기 창 안(iframe)에서: 제목은 보기 창이 보여 주므로 숨김 · 바탕 투명 · 여백 없음 */
+  html.embed, html.embed body { background:transparent; }
+  html.embed main { max-width:none; padding:0 0 8px; }
+  html.embed main > header { display:none; }
+  html.embed main > section:first-of-type, html.embed main > header + section { margin-top:0; }
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <div class="eyebrow">Project 01 · 어반스테이 퍼포먼스 마케팅 · 2025-06 → 2026-03 · Airbridge 기준 · 2026-10-05 조회</div>
+    <h1>어반스테이 퍼포먼스 마케팅 성과 · 2025-06 → 2026-03</h1>
+    <p class="sub">담당 10개월(2025-06 → 2026-03)과 직전 6개월(2024-12 → 2025-05)의 <b>월평균</b>을 비교. 매출·주문·가입은 Airbridge가 잡은 어반스테이 앱·웹 전환 전체(채널 무관), 광고비는 Meta · 네이버 검색광고 · 구글 · 네이버 DA 연동 계정 합계.</p>
+  </header>
+
+  <!-- 결론 (두괄식) -->
+  <section>
+    <div class="card lede">
+      <b>결론.</b> 2025-06부터 2026-03까지 어반스테이 퍼포먼스 마케팅을 단독 운영하며 월 광고비를 3,336만 원에서 7,222만 원으로 2.2배 키웠고, 그 기간 월 매출은 5.2억 → 9.7억(+86%), 월 주문 3,414 → 5,130(+50%), 월 가입 1.0만 → 1.3만(+31%)이 됐다. 10개월 총 광고비 7.22억 원에 Airbridge 전환 매출 97.0억 원(13.4배), 전년 동월(12–3월) 매출 +61%. 7월과 11월은 어반스테이 역대 최고 매출 월이었다.
+    </div>
+  </section>
+
+  <section>
+    <h2>왜 · 무엇을 · 어떻게</h2>
+    <div class="story">
+      <div class="card"><h3>왜 했나</h3><p>직전 6개월은 광고비 2.0억에 월 매출 5.2억 수준이었다. 여름 성수기와 연말 프로모션 수요를 유료 채널로 끌어올리고, 동시에 신규 회원 · 앱 설치를 늘려 CRM이 돌아갈 모수를 만드는 것이 과제였다. 광고비를 키우되 매출이 그 이상 따라오게 하는 것이 목표였다.</p></div>
+      <div class="card"><h3>무엇을 했나</h3><p>유료 4채널(Meta · 네이버 검색광고/브랜드검색 · 구글 UAC · 네이버 DA)과 CRM 3채널(카카오채널 · 노티플라이 · 알림톡)을 한 사람이 운영했다. 시즌 캠페인 7개(상반기결산 · 상시혜택 · 해피어스데이 · 9월 얼리버드 · 블랙프라이데이 · 메리홀리데이 · 2월 얼리버드)를 기획했고, 기간 중 광고 관리자에 올린 광고는 3,961개다.</p></div>
+      <div class="card"><h3>어떻게 플레이했나</h3><p>Meta로 볼륨을 만들고 네이버 브랜드검색 소재를 프로모션마다 갈아 끼워 효율을 받쳤다. 09-16에 상시 캠페인을 신규 웹구매전환 + 리타게팅 2축으로 고정하고, 프로모션은 신규 · 방문자 · 기구매자 · 라스트미닛으로 타겟을 쪼갰다. 12월 말에는 OS × 소구 5종 앱설치 테스트를 돌려 설치 단가를 낮췄다.</p></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>총 투입 · 효율 <small>Airbridge 기준 · 계산값은 표기</small></h2>
+    <div class="money">
+      <div class="card"><div class="label">총 광고비</div><div class="value">7.22<span>억</span></div><div class="note">10개월 · Meta 6.72 · 네이버 0.33 · 구글 0.15 · 네이버 DA 0.02</div></div>
+      <div class="card"><div class="label">전환 매출</div><div class="value">97.0<span>억</span></div><div class="note">주문 51,303 · 가입 131,233 · 설치 71,734</div></div>
+      <div class="card"><div class="label">매출 ÷ 광고비</div><div class="value">13.4<span>x</span></div><div class="note">전체 전환 기준 · 직전 6개월 15.7x · 계산값</div></div>
+      <div class="card"><div class="label">유료 귀속 ROAS</div><div class="value">3.2<span>x</span></div><div class="note">유료 4채널 귀속 매출 23.0억 ÷ 7.22억 · 계산값</div></div>
+    </div>
+    <p style="font-size:12px;color:var(--muted);margin-top:8px">주문 1건당 광고비 ₩14,077(전체 주문 기준) · 유료 귀속 주문 1건당 ₩65,049 · Meta 귀속 CPA ₩196,570 · 네이버 검색광고 귀속 CPA ₩4,326(브랜드검색 정액비 미포함). 모두 계산값.</p>
+  </section>
+
+  <section>
+    <h2>문제 해결</h2>
+    <div class="card" style="padding:0 0 4px">
+      <table class="ps">
+        <thead><tr><th>문제</th><th>조치</th><th>결과</th></tr></thead>
+        <tbody>
+          <tr><td>가입이 월 1만 명 선에서 정체, 신규와 기존 회원에게 같은 소재가 나감</td><td>07-15 상시혜택 캠페인을 신규회원 / 기존회원으로 분리하고 각각 매스 구매 목표로 운영</td><td>7월 가입 21,857명(5월의 1.9배), 8월 19,487명으로 역대 1 · 2위</td></tr>
+          <tr><td>9–10월 비수기에 광고비 대비 매출이 가장 낮아짐(10월 7,659만 → 7.6억)</td><td>09-16 캠페인 구조 개편: 프로모션별 단발 캠페인을 접고 신규 웹구매전환 + 리타게팅 웹구매전환 상시 2축으로 학습을 모음</td><td>상시 2축만으로 주문 474건 귀속, 이어진 11월 블랙프라이데이에서 주문 9,050 · 매출 15.2억 월 최고</td></tr>
+          <tr><td>Meta 단일 채널 의존, Meta 귀속 ROAS가 1.0 안팎</td><td>네이버 브랜드검색 소재를 프로모션마다 교체하고 지점 · 룸타입 키워드 캠페인을 정비</td><td>네이버 귀속 매출 4.1억 → 16.2억(4배), 주문 2,338 → 7,613</td></tr>
+          <tr><td>앱 설치가 월 13K → 6K대로 감소</td><td>12-30 iOS · Android × 가격 · 레지던스 · 청결 · 건강 · 여행고수 소구 앱설치 캠페인과 구글 UAC 신설</td><td>1월 설치 12,710(12월의 1.9배), 1월 광고비는 2,428만으로 기간 중 두 번째로 낮음</td></tr>
+          <tr><td>프로모션마다 리타게팅이 방문자 한 덩어리로 묶여 기구매자에게 할인이 다시 나감</td><td>2월 얼리버드를 신규 · 리타게팅 · 라스트미닛 · 기구매자 4개로 분리해 메시지와 예산을 따로 운용</td><td>2월 매출 9.1억(1월 대비 +56%) · 주문 5,285</td></tr>
+          <tr><td>CRM 발송량은 많은데 주문으로 이어지지 않음</td><td>카카오채널 발송을 타겟 · 오퍼 중심으로 줄이고 노티플라이 시나리오 발송을 도입</td><td>카카오 터치포인트 97만 → 61만으로 줄었는데 귀속 주문 2,403 → 4,760(2배), 노티플라이 162 → 2,263건</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section>
+    <div class="kpi">
+      <div class="card"><div class="label">월평균 매출</div><div class="value">9.70<span>억</span></div><div class="note">5.23억 → 9.70억 · <span class="up">+86%</span></div></div>
+      <div class="card"><div class="label">월평균 주문</div><div class="value">5,130<span>건</span></div><div class="note">3,414 → 5,130 · <span class="up">+50%</span></div></div>
+      <div class="card"><div class="label">월평균 가입</div><div class="value">13,123<span>명</span></div><div class="note">9,985 → 13,123 · <span class="up">+31%</span></div></div>
+      <div class="card"><div class="label">월평균 광고비</div><div class="value">7,222<span>만</span></div><div class="note">3,336만 → 7,222만 · 2.2배 확대</div></div>
+      <div class="card"><div class="label">매출 ÷ 광고비</div><div class="value">13.4<span>x</span></div><div class="note">15.7x → 13.4x · 스케일 확대 비용</div></div>
+      <div class="card"><div class="label">전년 동월 (12–3월)</div><div class="value">+61<span>%</span></div><div class="note">매출 17.0억 → 27.4억 · 주문 12,261 → 16,830 (+37%)</div></div>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>월별 매출 · 광고비 <small>단위 억원 · 파란 배경 = 담당 기간</small></h2>
+    <div class="cols"><div class="col"><div class="stack"><i class="r" style="height:18.5%"></i><i class="c" style="height:0.2%"></i></div><b>2.9</b><span>24-12</span></div><div class="col"><div class="stack"><i class="r" style="height:31.0%"></i><i class="c" style="height:1.0%"></i></div><b>4.8</b><span>25-01</span></div><div class="col"><div class="stack"><i class="r" style="height:28.6%"></i><i class="c" style="height:2.0%"></i></div><b>4.4</b><span>25-02</span></div><div class="col"><div class="stack"><i class="r" style="height:31.7%"></i><i class="c" style="height:2.5%"></i></div><b>4.9</b><span>25-03</span></div><div class="col"><div class="stack"><i class="r" style="height:40.9%"></i><i class="c" style="height:3.6%"></i></div><b>6.3</b><span>25-04</span></div><div class="col"><div class="stack"><i class="r" style="height:51.4%"></i><i class="c" style="height:3.6%"></i></div><b>8.0</b><span>25-05</span></div><div class="col mine"><div class="stack"><i class="r" style="height:60.3%"></i><i class="c" style="height:4.6%"></i></div><b>9.4</b><span>25-06</span></div><div class="col mine"><div class="stack"><i class="r" style="height:100.0%"></i><i class="c" style="height:6.4%"></i></div><b>15.5</b><span>25-07</span></div><div class="col mine"><div class="stack"><i class="r" style="height:88.7%"></i><i class="c" style="height:7.0%"></i></div><b>13.8</b><span>25-08</span></div><div class="col mine"><div class="stack"><i class="r" style="height:52.5%"></i><i class="c" style="height:4.2%"></i></div><b>8.2</b><span>25-09</span></div><div class="col mine"><div class="stack"><i class="r" style="height:49.0%"></i><i class="c" style="height:4.9%"></i></div><b>7.6</b><span>25-10</span></div><div class="col mine"><div class="stack"><i class="r" style="height:98.2%"></i><i class="c" style="height:7.8%"></i></div><b>15.2</b><span>25-11</span></div><div class="col mine"><div class="stack"><i class="r" style="height:50.8%"></i><i class="c" style="height:4.4%"></i></div><b>7.9</b><span>25-12</span></div><div class="col mine"><div class="stack"><i class="r" style="height:37.5%"></i><i class="c" style="height:1.6%"></i></div><b>5.8</b><span>26-01</span></div><div class="col mine"><div class="stack"><i class="r" style="height:58.5%"></i><i class="c" style="height:4.6%"></i></div><b>9.1</b><span>26-02</span></div><div class="col mine"><div class="stack"><i class="r" style="height:29.5%"></i><i class="c" style="height:1.0%"></i></div><b>4.6</b><span>26-03</span></div></div>
+    <div class="legend"><span><i style="background:var(--s1)"></i>매출 (Airbridge order complete, 억원)</span><span><i style="background:var(--s2)"></i>광고비 (같은 축)</span><span>· 7월 15.5억 · 11월 15.2억이 역대 최고 2개월, 11월 주문 9,050건 최고</span></div>
+  </section>
+
+  <section class="two">
+    <div class="card">
+      <h2>캠페인 → 숫자 변화 <small>Airbridge 캠페인명 기준</small></h2>
+      <ul class="tl">
+        <li><span class="d">06–07월</span><div><b>상반기결산 캠페인</b> 연령별 소재 · 리타게팅 A/B · 기간연장 6종 운영. 6월 매출 9.4억(5월 8.0억 대비 +17%), 7월 15.5억으로 역대 최고.</div></li>
+        <li><span class="d">07-15</span><div><b>상시혜택 신규회원 / 기존회원 분리</b> 매스 구매 캠페인. 7월 가입 21,857명(5월의 1.9배) · 8월 19,487명으로 가입 역대 1·2위.</div></li>
+        <li><span class="d">07-28</span><div><b>5주년 해피어스데이</b> 24시간 스테이 + 07-31 속초 부대시설 기획전. 8월 매출 13.8억, Meta 월 노출 810만.</div></li>
+        <li><span class="d">09-16</span><div><b>캠페인 구조 개편</b> 신규 웹구매전환 + 리타게팅 웹구매전환 상시 2축. 이후 상시 축만으로 주문 474건 · 매출 8,279만 귀속(Meta 1·2위 상시 캠페인).</div></li>
+        <li><span class="d">11-17</span><div><b>블랙프라이데이</b> Meta 8,664만 → 주문 823 · 매출 1.34억(단일 캠페인 최고, ROAS 1.54). 11월 전체 주문 9,050 · 네이버 검색광고 주문 1,550으로 모두 월 최고.</div></li>
+        <li><span class="d">12-30</span><div><b>앱설치 캠페인 신설</b> iOS·Android × 가격 · 레지던스 · 청결 · 건강 · 여행고수 소구 테스트 + 구글 UAC. 1월 설치 12,710(12월의 1.9배), 광고비는 2,428만으로 월 최저 수준.</div></li>
+        <li><span class="d">02-09</span><div><b>얼리버드</b> 신규 · 리타게팅 · 라스트미닛 · 기구매자 4분할. 2월 매출 9.1억(1월 대비 +56%) · 주문 5,285. 3월은 예산 1,499만으로 축소 구간.</div></li>
+      </ul>
+    </div>
+    <div class="card" style="padding:0 0 4px">
+      <h2 style="padding:16px 18px 0">채널별 기여 <small>담당 기간 합계 · 귀속 기준</small></h2>
+      <table>
+        <thead><tr><th>채널</th><th class="num">광고비</th><th class="num">주문</th><th class="num">매출</th><th class="num">직전 6개월 대비</th></tr></thead>
+        <tbody>
+          <tr><td><span class="tag">Paid</span> Meta</td><td class="num">6.72억</td><td class="num">3,418</td><td class="num">6.68억</td><td class="num">주문 1,144 → 3,418</td></tr>
+          <tr><td><span class="tag">Paid</span> 네이버 검색광고</td><td class="num">0.33억</td><td class="num">7,613</td><td class="num">16.17억</td><td class="num">매출 4.08억 → 16.17억</td></tr>
+          <tr><td><span class="tag">Paid</span> 구글 · 네이버 DA</td><td class="num">0.17억</td><td class="num">71</td><td class="num">0.16억</td><td class="num">설치 2,825 (1월 UAC)</td></tr>
+          <tr><td><span class="tag">CRM</span> 카카오채널</td><td class="num">–</td><td class="num">4,760</td><td class="num">8.33억</td><td class="num">매출 3.36억 → 8.33억</td></tr>
+          <tr><td><span class="tag">CRM</span> 노티플라이 · 알림톡</td><td class="num">–</td><td class="num">2,398</td><td class="num">3.76억</td><td class="num">주문 457 → 2,398</td></tr>
+          <tr><td><span class="tag">Organic</span> 네이버 · 인스타</td><td class="num">–</td><td class="num">4,536</td><td class="num">10.15억</td><td class="num">매출 4.45억 → 10.15억</td></tr>
+          <tr class="sum"><td>귀속 합계 / 전체</td><td class="num">7.22억</td><td class="num">22,796 / 51,303</td><td class="num">45.0억 / 97.0억</td><td class="num">전체 주문 20,486 → 51,303</td></tr>
+        </tbody>
+      </table>
+      <p style="font-size:11px;color:var(--muted);margin:8px 18px 6px">네이버 검색광고 광고비는 파워링크만 연동돼 브랜드검색 정액비가 빠져 있다. 귀속은 라스트터치, 나머지 주문은 다이렉트·미귀속.</p>
+    </div>
+  </section>
+
+  <section class="two">
+    <div class="card">
+      <h2>효율 읽기 <small>솔직하게</small></h2>
+      <ul style="margin:0;padding-left:16px;font-size:12.5px">
+        <li><b>스케일은 2.2배, 매출은 1.9배.</b> 광고비 3,336만 → 7,222만/월, 매출 5.2억 → 9.7억/월. 매출÷광고비는 15.7x → 13.4x로 소폭 하락. 성수기(7–8월)와 블프(11월)가 끌어올렸고, 비수기 9–10월은 광고비 대비 매출이 가장 낮았다.</li>
+        <li><b>Meta는 볼륨 축.</b> CPC 675원 → 841원, 귀속 CPA 16.2만 → 19.7만(+22%). 귀속 ROAS는 0.97 → 0.99로 유지. 가입 24,404건 중 상시혜택·블프 캠페인이 절반.</li>
+        <li><b>네이버 검색광고가 효율 축.</b> 귀속 주문 2,338 → 7,613(3.3배), 매출 4.1억 → 16.2억(4배). 브랜드검색 소재를 프로모션마다 갈아 끼운 결과가 11월(주문 1,550)에 가장 크게 나왔다.</li>
+        <li><b>CRM이 두 번째 매출원.</b> 카카오채널 터치포인트는 97만 → 61만으로 줄었는데 귀속 주문은 2,403 → 4,760(2배). 발송량보다 타겟·오퍼를 조인 결과. 노티플라이는 162 → 2,263건으로 자리를 잡았다.</li>
+        <li><b>설치는 감소.</b> 월 13,167 → 7,173. 직전 기간 1–3월 설치 급증(1.5~2.1만)은 광고비 거의 없이 CRM·알림톡 유입으로 생긴 것이라 비교 기준이 높다. 12-30 앱설치 캠페인으로 1월 12,710까지 복구.</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h2>한 줄 정리 <small>카드용</small></h2>
+      <p style="font-size:14px;line-height:1.65"><b>어반스테이 퍼포먼스 마케팅 10개월.</b> Meta · 네이버 · 구글 · 카카오 · 노티플라이를 혼자 운영하며 월 광고비 7천만 원 규모로 키우고, 월 매출 5.2억 → 9.7억(+86%), 월 주문 3,414 → 5,130(+50%), 월 가입 1.0만 → 1.3만(+31%)을 만들었다. 7월 · 11월 역대 최고 매출, 블랙프라이데이 단일 캠페인 매출 1.34억, 전년 동월(12–3월) 매출 +61%.</p>
+      <div class="callout" style="margin-top:10px"><b>숫자 성격.</b> 매출·주문은 Airbridge 전환 이벤트 기준이라 OTA 예약은 빠지고, PMS 정산 매출과 다르다. 성과 보고에 쓸 때는 "Airbridge 기준"을 붙인다. 월평균 비교에는 계절성이 섞여 있어 전년 동월 비교(+61%)를 같이 둔다.</div>
+    </div>
+  </section>
+
+  <footer>
+    출처 : Airbridge Actuals 리포트 (앱 handys · 어반스테이) · 지표 cost_channel · impressions_channel · clicks_channel · app_web_order_complete · app_web_total_revenue · app_web_sign_up · app_installs · 그룹 event_year/month, channel, campaign · 조회 2026-10-05. 월평균·증감률·ROAS·CPA는 위 원천값으로 계산한 값. 생성 : 2026-10-05.
+  </footer>
+</main>
+<script>
+  // 보기 창(iframe) 안이면 embed 모드 + 높이를 부모에 알림(부모가 iframe 높이를 맞춤 → 스크롤 하나로)
+  (function () {
+    var inFrame = false; try { inFrame = window.self !== window.top; } catch (e) { inFrame = true; }
+    if (!inFrame) return;
+    document.documentElement.classList.add("embed");
+    var last = 0, send = function () { var h = Math.ceil(document.documentElement.getBoundingClientRect().height); if (h && h !== last) { last = h; parent.postMessage({ klio: "doc-h", h: h }, "*"); } };
+    if (window.ResizeObserver) new ResizeObserver(send).observe(document.documentElement);
+    addEventListener("message", function (e) { if (e.data && e.data.klio === "doc-ask") { last = 0; send(); } }); // 보기 창이 열릴 때 다시 물어봄
+    addEventListener("load", send); setTimeout(send, 50);
+  })();
+</script>
+</body>
+</html>

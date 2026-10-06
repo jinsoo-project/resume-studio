@@ -3,7 +3,9 @@
   "cleanUrls": true,
   "trailingSlash": false,
   "redirects": [
-    { "source": "/", "destination": "/studio.html", "permanent": false }
+    { "source": "/", "destination": "/studio.html", "permanent": false },
+    { "source": "/:slug/projects-airbridge", "destination": "/:slug/projects", "permanent": false },
+    { "source": "/p/:slug/projects-airbridge", "destination": "/p/:slug/projects", "permanent": false }
   ],
   "rewrites": [
     { "source": "/r/:slug", "destination": "/view?slug=:slug" },
@@ -17,8 +19,6 @@
     { "source": "/p/:slug/projects-test", "destination": "/view" },
     { "source": "/mkt/portfolio/projects-test", "destination": "/view" },
     { "source": "/:slug/projects-test", "destination": "/view" },
-    { "source": "/:slug/projects-airbridge", "destination": "/view" },
-    { "source": "/p/:slug/projects-airbridge", "destination": "/view" },
     { "source": "/:slug/projects/test", "destination": "/view" }
   ],
   "headers": [

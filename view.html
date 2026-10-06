@@ -37,7 +37,7 @@ function cardOf(h){try{return CARD_RE.test(h)?decodeURIComponent(h.slice(2)):'';
 function gotoSec(id,instant){var f=document.getElementById('frame');try{if(f&&f.contentWindow)f.contentWindow.postMessage({klio:'goto',id:id,instant:!!instant},'*');}catch(e){}}
 function gotoCard(id){var f=document.getElementById('frame');try{if(f&&f.contentWindow)f.contentWindow.postMessage({klio:'goto-card',id:id},'*');}catch(e){}}
 // 전체 프로젝트 페이지 계열: projects(기존) · projects-test(토스식 레이아웃 실험, /{slug}/projects-test 또는 /{slug}/projects/test)
-function isPP(){return PAGE==='projects'||PAGE==='projects-test'||PAGE==='projects-airbridge';}
+function isPP(){return PAGE==='projects'||PAGE==='projects-test';}
 function render(doc,sec,card){
   var f=document.getElementById('frame');
   if(isPP()) doc.page=PAGE;
@@ -82,10 +82,10 @@ window.addEventListener('hashchange',function(){var h=location.hash.slice(1),c=i
   var segs=location.pathname.split('/').filter(Boolean);
   if(params.get('page')==='projects') PAGE='projects';
   if(params.get('page')==='projects-test') PAGE='projects-test';
-  if(params.get('page')==='projects-airbridge') PAGE='projects-airbridge';
+  if(params.get('page')==='projects-airbridge') PAGE='projects'; // 옛 주소 = /projects
   if(segs.length>1&&segs[segs.length-1]==='projects'&&!(segs.length===2&&/^[rp]$/.test(segs[0]))){ PAGE='projects'; segs.pop(); }
   else if(segs.length>1&&segs[segs.length-1]==='projects-test'){ PAGE='projects-test'; segs.pop(); }
-  else if(segs.length>1&&segs[segs.length-1]==='projects-airbridge'){ PAGE='projects-airbridge'; segs.pop(); }
+  else if(segs.length>1&&segs[segs.length-1]==='projects-airbridge'){ PAGE='projects'; segs.pop(); }
   else if(segs.length>2&&segs[segs.length-1]==='test'&&segs[segs.length-2]==='projects'){ PAGE='projects-test'; segs.splice(-2,2); }
   var slug=params.get('slug');
   if(!slug){var m=location.pathname.match(/\/[rp]\/([^/?#]+)/);if(m)slug=decodeURIComponent(m[1]);}
