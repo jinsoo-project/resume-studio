@@ -17,6 +17,8 @@
     { "source": "/p/:slug/projects-test", "destination": "/view" },
     { "source": "/mkt/portfolio/projects-test", "destination": "/view" },
     { "source": "/:slug/projects-test", "destination": "/view" },
+    { "source": "/:slug/projects-airbridge", "destination": "/view" },
+    { "source": "/p/:slug/projects-airbridge", "destination": "/view" },
     { "source": "/:slug/projects/test", "destination": "/view" }
   ],
   "headers": [
