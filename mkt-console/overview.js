@@ -54,10 +54,23 @@
     ["SEO · 콘텐츠", "콘텐츠 자동화", [["keyword-trend", "Keyword Trend", "검색 상대지수 · 연관어"], ["blog-journey", "블로그 파이프라인", "01 키워드 → 09 자동화, 한 사이클 실행"]]]
   ];
 
+  /* 맨 위 무대 — 포트폴리오 프로젝트 페이지 첫 화면과 같은 구성: 흐르는 프로젝트 이미지 벽 + 문장 A → 문장 B(진단 · 설계 · 실행) */
+  var WALL = ["s16_01", "s19_00", "s20_00", "s21_00", "s10_02", "s12_01", "s14_00", "s23_00", "s24_00", "s26_01", "s27_01", "s28_02", "s18_01", "s18_02", "s19_03", "s20_03", "s21_05", "s14_06", "s29_00", "s12_02", "s10_00", "s18_11"];
+  function stage() {
+    var img = function (k) { return '<span class="ovs-t"><img src="/pf-img/ppt/' + WALL[k % WALL.length] + '.jpg" alt="" loading="lazy" decoding="async"></span>'; };
+    var row = function (off) { var h = ""; for (var q = 0; q < 8; q++) h += img(off + q * 3); return h + h; };
+    var A1 = [["콘텐츠·영상,", 1], ["퍼포먼스", 1], ["부터", 0], ["CRM·데이터", 1], ["까지", 0]];
+    return '<section class="ovs" id="ov-top" aria-label="진단하고, 설계하고, 실행합니다"><div class="ovs-wall" aria-hidden="true">' + [0, 1, 2].map(function (x) { return '<div class="ovs-row' + (x % 2 ? ' rev' : '') + '" style="--dur:' + [90, 110, 80][x] + 's">' + row(x) + '</div>'; }).join("") + '</div>'
+      + '<div class="ovs-c"><h1 class="ovs-h"><span class="ovs-p a" aria-hidden="true"><span class="ovs-l1">' + A1.map(function (w, k) { return '<span class="ovs-w" style="--i:' + k + '">' + (w[1] ? '<b>' + w[0] + '</b>' : w[0]) + '</span>'; }).join(" ") + '</span><span class="ovs-l2" style="--i:' + A1.length + '"><em>AX</em>로 자동화합니다</span></span>'
+      + '<span class="ovs-p b">진단하고, 설계하고, 실행합니다</span></h1>'
+      + '<div class="ovs-b"><a class="ovs-btn pri" href="#/total-dashboard">데모 콘솔 열기 →</a><button class="ovs-btn" type="button" data-ov-to="ov-intro">구조부터 보기 ↓</button></div></div>'
+      + '<button class="ovs-cue" type="button" data-ov-to="ov-intro" aria-label="아래로"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M6 9l6 6 6-6" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button></section>';
+  }
+
   function render() {
     var embed = NW.EMBED;
-    return '<div class="ovw">'
-      + '<section class="ov-hero" id="ov-top"><div class="eyebrow">AX PROJECT · MARKETING CONSOLE <span class="demo-pill"><i></i>모든 수치는 예시 · 가상 데이터</span></div>'
+    return '<div class="ovw">' + stage()
+      + '<section class="ov-hero" id="ov-intro"><div class="eyebrow">AX PROJECT · MARKETING CONSOLE <span class="demo-pill"><i></i>모든 수치는 예시 · 가상 데이터</span></div>'
       + '<h1>흩어진 도구와 지표를,<br><em>하나의 마케팅 콘솔</em>로</h1>'
       + '<p class="ov-lede">지표가 흩어지면 판단이 느려지고, 반복되는 세팅은 실행을 늦춥니다.<br>그 사이를 구조로 메워 — 콘텐츠 기획부터 광고 집행·측정·협업까지 직접 만들어 운영합니다.<br><span class="faint">이 페이지는 구조와 목적을, 위 <b>데모 콘솔</b> 탭은 실제 화면을 가상 데이터로 보여 줘요.</span></p>'
       + '<div class="ov-cta"><a class="btn btn-p lg" href="#/total-dashboard">데모 콘솔 열기 →</a><button class="btn lg" data-ov-to="ov-loop">구조부터 보기 ↓</button><span class="ov-rot">현재 운영 중 — <b id="ovRot">전환 대시보드</b></span></div>'
@@ -129,6 +142,8 @@
   }
   function mount() {
     unmount();
+    var st = document.querySelector(".ovs"), reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (st) { if (reduce) st.classList.add("ld", "sw"); else { later(function () { st.classList.add("ld"); }, 500); later(function () { st.classList.add("sw"); }, 4200); } }
     if (NW.EMBED) NW.$$('.ovw a[href^="#/"]').forEach(function (a) { a.href = "/ax" + a.getAttribute("href"); a.target = "_blank"; a.rel = "noopener"; });
     var words = ["전환 대시보드", "LTV·CAC 트래커", "캠페인 빌더", "콘텐츠 파이프라인", "퍼포먼스 자동화", "키워드 트래커", "경쟁사 소재 아카이브", "상품 카탈로그 피드"], wi = 0, rot = document.getElementById("ovRot");
     every(function () { if (!rot) return; rot.classList.add("out"); later(function () { wi = (wi + 1) % words.length; rot.textContent = words[wi]; rot.classList.remove("out"); }, 250); }, 2600);
