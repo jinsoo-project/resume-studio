@@ -21,7 +21,7 @@
   function workSec(w, i) {
     return '<section class="ed-sec" id="' + w.id + '">' + rule + '<div class="ed-row"><div class="ed-lab"><span>(' + n2(i) + ')</span>' + w.t + '</div>'
       + '<div class="ed-main">' + hd(w.h) + '<p data-rv style="--d:.12s">' + w.p + '</p><div class="ed-links" data-rv style="--d:.2s">' + lnk(w.demo) + (w.demo2 ? lnk(w.demo2) : '') + '</div></div></div>'
-      + '<figure class="ed-fig"><a class="ed-stage" data-rv data-cur="열어 보기" href="#/' + w.demo[0] + '" style="--bg:' + w.bg + '" aria-label="' + w.cap + ' 데모 열기"><img src="/pf-img/ax/' + w.img + '.jpg" alt="' + w.cap + ' 화면" loading="lazy" decoding="async"></a>'
+      + '<figure class="ed-fig"><a class="ed-stage" data-rv href="#/' + w.demo[0] + '" style="--bg:' + w.bg + '" aria-label="' + w.cap + ' 데모 열기"><img src="/pf-img/ax/' + w.img + '.jpg" alt="' + w.cap + ' 화면" loading="lazy" decoding="async"></a>'
       + '<figcaption><span>그림 ' + (i + 1) + ' · ' + w.cap + '</span><span>데모 콘솔 실제 화면 · 가상 데이터</span></figcaption></figure></section>';
   }
 
@@ -71,12 +71,11 @@
     return '<div class="ovw ed">' + stage() + (embed ? '' : jump())
       + '<section class="ed-sec ed-intro" id="ov-intro"><div class="ed-row"><div class="ed-lab"><span>AX-MKT 콘솔</span>2026 · 설계 · 개발 · 운영</div>'
       + '<div class="ed-main"><p class="ed-state" id="edState"><strong>마케터가 매일 하는 일을 한 화면에서.</strong> ' + "성과 확인, 광고 집행, 콘텐츠 발행, 시장 조사, 협업 기록까지 — 흩어진 도구 대신 직접 만든 콘솔로 운영했어요.".split(" ").map(function (w) { return '<span class="w">' + w + '</span>'; }).join(" ") + '</p>'
-      + '<ol class="ed-index">' + WORK.map(function (w, i) { return '<li data-rv style="--d:' + (i * 0.06) + 's"><button type="button" data-ov-to="' + w.id + '" data-peek="/pf-img/ax/' + w.img + '.jpg"><i>' + n2(i) + '</i><b>' + w.t + '</b><span>' + w.s + '</span><em aria-hidden="true">↓</em></button></li>'; }).join("")
+      + '<ol class="ed-index">' + WORK.map(function (w, i) { return '<li data-rv style="--d:' + (i * 0.06) + 's"><button type="button" data-ov-to="' + w.id + '"><i>' + n2(i) + '</i><b>' + w.t + '</b><span>' + w.s + '</span><em aria-hidden="true">↓</em></button></li>'; }).join("")
       + '<li data-rv style="--d:.3s"><button type="button" data-ov-to="ov-how"><i>06</i><b>AX 방식</b><span>AI와 함께 만들고 배포한 방법</span><em aria-hidden="true">↓</em></button></li></ol></div></div></section>'
       + WORK.map(workSec).join("")
       + axSec()
       + '<section class="ed-sec ed-end">' + rule + '<div class="ed-row"><div class="ed-lab"><span>(07)</span>데모</div><div class="ed-main">' + hd("직접 *눌러 보세요*") + '<p data-rv style="--d:.12s">숫자를 누르면 목록이 열리고, 광고 빌더와 콘텐츠 자동화도 실제로 돌아가요. 데이터는 전부 가상이고 이 브라우저에만 저장돼요.</p><a class="ed-btn" data-rv style="--d:.2s" href="#/total-dashboard">데모 콘솔 열기 <span aria-hidden="true">→</span></a></div></div></section>'
-      + '<div class="ed-peek" aria-hidden="true"><img alt=""></div><div class="ed-cur" aria-hidden="true"><span></span></div>'
       + '<footer class="ov-foot ed-foot"><span>김진수 · Marketing &amp; AX</span><span>화면 속 수치는 모두 가상 데이터예요</span></footer></div>';
   }
 
@@ -89,16 +88,15 @@
   var topOff = function () { var j = document.querySelector(".ov-jump"), h = document.querySelector(".gh2"); return (h ? h.offsetHeight : 0) + (j ? j.offsetHeight : 0) + 12; }; // 고정 헤더 + 바로가기 줄 아래로
 
   /* 모션: 등장(위치 검사 — 숨은 창에서도 확실히) · 소개 문장 단어 진해짐 · 그림 시차 · 숫자 카운트업 · 세션 타이핑
-     목차 미리보기 · '열어 보기' 커서. 탭을 떠나면 모두 정리 */
-  var timers = [], onScroll = null, offs = [];
+     탭을 떠나면 모두 정리 */
+  var timers = [], onScroll = null;
   var later = function (fn, ms) { timers.push(setTimeout(fn, ms)); }, every = function (fn, ms) { timers.push(setInterval(fn, ms)); };
-  var on = function (el, ev, fn, o) { el.addEventListener(ev, fn, o); offs.push(function () { el.removeEventListener(ev, fn, o); }); };
-  function unmount() { timers.forEach(function (t) { clearTimeout(t); clearInterval(t); }); timers = []; if (onScroll) { removeEventListener("scroll", onScroll); onScroll = null; } offs.forEach(function (f) { f(); }); offs = []; document.documentElement.classList.remove("ed-js"); }
+  function unmount() { timers.forEach(function (t) { clearTimeout(t); clearInterval(t); }); timers = []; if (onScroll) { removeEventListener("scroll", onScroll); onScroll = null; } document.documentElement.classList.remove("ed-js"); }
   function countUp(el) { var n = +el.getAttribute("data-cnt"), t0 = performance.now(); (function tick() { var p = Math.min(1, (performance.now() - t0) / 1500); el.textContent = Math.round(n * (1 - Math.pow(1 - p, 4))); if (p < 1) later(tick, 16); })(); }
   function typeTerm(el) { NW.$$("div", el).forEach(function (l, i) { later(function () { l.classList.add("on"); }, 250 + i * 260); }); }
   function mount() {
     unmount();
-    var st = document.querySelector(".ovs"), reduce = matchMedia("(prefers-reduced-motion: reduce)").matches, fine = matchMedia("(hover: hover) and (pointer: fine)").matches;
+    var st = document.querySelector(".ovs"), reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
     if (st) { if (reduce) st.classList.add("ld", "sw"); else { later(function () { st.classList.add("ld"); }, 500); later(function () { st.classList.add("sw"); }, 4200); } }
     if (NW.EMBED) NW.$$('.ovw a[href^="#/"]').forEach(function (a) { a.href = "/ax" + a.getAttribute("href"); a.target = "_blank"; a.rel = "noopener"; });
     if (!reduce) document.documentElement.classList.add("ed-js");
@@ -120,21 +118,6 @@
       links.forEach(function (l) { var on = l.getAttribute("data-ov-to") === cur; l.classList.toggle("on", on); if (on && l.parentNode.scrollWidth > l.parentNode.clientWidth) l.parentNode.scrollTo({ left: l.offsetLeft - 24, behavior: "smooth" }); });
     };
     addEventListener("scroll", onScroll, { passive: true });
-    /* 마우스 따라다니는 목차 미리보기 · '열어 보기' 커서 (마우스 환경에서만) */
-    if (!fine || reduce) return;
-    var peek = document.querySelector(".ed-peek"), pimg = peek && peek.querySelector("img"), cur = document.querySelector(".ed-cur"), clab = cur && cur.querySelector("span");
-    var mx = 0, my = 0, px = 0, py = 0, cx = 0, cy = 0, run = false;
-    var loop = function () { px += (mx - px) * 0.16; py += (my - py) * 0.16; cx += (mx - cx) * 0.3; cy += (my - cy) * 0.3; if (peek) peek.style.transform = "translate(" + px.toFixed(1) + "px," + py.toFixed(1) + "px)"; if (cur) cur.style.transform = "translate(" + cx.toFixed(1) + "px," + cy.toFixed(1) + "px)"; if (run) requestAnimationFrame(loop); };
-    var start = function () { if (!run) { run = true; requestAnimationFrame(loop); } }, stop = function () { if (!peek.classList.contains("on") && !cur.classList.contains("on")) run = false; };
-    on(window, "pointermove", function (e) { mx = e.clientX; my = e.clientY; });
-    NW.$$(".ed-index [data-peek]").forEach(function (b) {
-      on(b, "pointerenter", function (e) { pimg.src = b.getAttribute("data-peek"); if (!run) { px = mx = e.clientX; py = my = e.clientY; } peek.classList.add("on"); start(); });
-      on(b, "pointerleave", function () { peek.classList.remove("on"); later(stop, 400); });
-    });
-    NW.$$(".ed [data-cur]").forEach(function (a) {
-      on(a, "pointerenter", function (e) { clab.textContent = a.getAttribute("data-cur"); if (!run) { cx = mx = e.clientX; cy = my = e.clientY; } cur.classList.add("on"); start(); });
-      on(a, "pointerleave", function () { cur.classList.remove("on"); later(stop, 400); });
-    });
   }
   document.addEventListener("click", function (e) {
     var b;
