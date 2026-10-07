@@ -2283,7 +2283,7 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
           var CARD_TH = { "0a3aea35-ccc9-4018-a7a6-e383c303f928": "s10_02", "3080bc75-d773-490f-9a02-35d83886b418": "s12_01", "b0aa1d32-82d9-44bc-897d-b558a425c98c": "s14_00", "2c1ddb7a-e1a3-4adb-a18e-e1b43ad8f731": "s16_01",
             "43ab6811-42cf-4a1f-afca-62bfd67b17f9": "s19_00", "574f26d3-1fff-49fb-a302-b8c12253df61": "s20_00", "53845c2b-3618-4e8d-968c-1edfabdf4912": "s21_00", "4d333686-6daa-4c8e-9cd7-3e8309ef9900": "s23_00", "e5bb7edf-a48d-4752-a0b4-c05df7903051": "s24_00",
             "731ea8fe-9bb7-41ce-8cc1-687f77f9c49c": "s26_01", "8fe4e187-9052-4737-9d1b-d0a158d9e156": "s27_01", "199815d6-356c-4959-8219-6c9ea7615102": "s28_02",
-            "dff32975-e504-47e3-8ee1-744f2267ac91": "urbanstay-cover.jpg", "5c1e8a52-7b4d-4f0e-9a63-2d8f1b7c4e90": "wavve/01.jpg" }; // 카드 썸네일로 잘 보이는 PPT 그림(소재·배너 위주) · 확장자 있으면 pf-doc 파일(성과 리포트 캡처 · 웨이브 가이드 이미지)
+            "dff32975-e504-47e3-8ee1-744f2267ac91": "urbanstay-cover.jpg", "60f3fcee-e8b2-4499-b7d1-71e4f91ad2f5": "platt/university.jpg", "5c1e8a52-7b4d-4f0e-9a63-2d8f1b7c4e90": "wavve/01.jpg" }; // 카드 썸네일로 잘 보이는 PPT 그림(소재·배너 위주) · 확장자 있으면 pf-doc 파일(성과 리포트 캡처 · 웨이브 가이드 이미지)
           var cardThumb = function (it) {
             var bs = PPT_BOARDS_OF[it.w.id] || [], b = bs.length && PPT_BOARD[bs[0]], f = CARD_TH[it.w.id] || (b && b.i.length ? b.i[0][0] : "");
             if (f) return '<img src="' + (/\.(jpe?g|png|webp)$/i.test(f) ? PF_DOC + f : PPT_IMG + f + '.jpg') + '" alt="" loading="lazy" decoding="async">';
@@ -2515,7 +2515,7 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
               "77afd48a-668b-4ab1-b385-32fa41400211": ["577", "커밋 · 마케팅 플랫폼 1인 구축", "4개월 · PR 534 · 운영 탭 20+"],
               "dff32975-e504-47e3-8ee1-744f2267ac91": ["+86%", "월 매출 상승", "5.2억 → 9.7억 · 광고비 대비 13.4x"],
               "5c1e8a52-7b4d-4f0e-9a63-2d8f1b7c4e90": ["7,880장", "제휴 쿠폰 발급", "노출 503만 · 광고비 ₩250만"],
-              "60f3fcee-e8b2-4499-b7d1-71e4f91ad2f5": ["40+", "파트너 파이프라인 구축", "전환 스크립트 3사 자체 구현"],
+              "60f3fcee-e8b2-4499-b7d1-71e4f91ad2f5": ["1.8배", "홈 카드 클릭률 증가", "4.1% → 7.5% · 섹션 재구성 2주 실측"],
               "0a3aea35-ccc9-4018-a7a6-e383c303f928": ["−24%", "평균 CPC 절감", "신규 CAC −19% · 구매 전환율 +17%"],
               "3080bc75-d773-490f-9a02-35d83886b418": ["−15%", "평균 CPC 절감", "타 캠페인 대비"],
               "b0aa1d32-82d9-44bc-897d-b558a425c98c": ["+110%", "MAU 상승", "12~3월 · 월 최대 5억 매체 운영"],
@@ -2593,6 +2593,27 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
                 final: [["광고비를 키워도 효율은 지켰어요", "월 광고비를 2.2배로 키우는 동안 광고비 1원당 전환 매출 13.4원을 유지했어요. 성수기(7–8월)와 블랙프라이데이(11월)에 예산을 모아 역대 최고 매출 두 달을 만들었어요."],
                   ["볼륨은 Meta, 효율은 네이버", "Meta로 신규 수요를 넓게 만들고, 네이버 검색광고가 귀속 주문 3.3배 · 매출 4배로 효율을 받쳤어요. 채널마다 역할을 나눈 게 스케일의 바탕이었어요."],
                   ["상시 축 + 시즌 프로모션", "상시 2축으로 매체 학습을 모아 두고, 시즌 프로모션은 타겟을 쪼개 얹었어요. 그래서 프로모션이 끝나도 성과가 꺼지지 않았어요."]]
+              },
+              "60f3fcee-e8b2-4499-b7d1-71e4f91ad2f5": {
+                head: "시장이 없던 신사업에서, 측정부터 제휴 · 콘텐츠까지 그로스 기반을 직접 깔았어요",
+                kpis: [["1.8배", "홈 카드 클릭률", "4.1% → 7.5% · 2주 실측"], ["7개", "매체 전환 직접 구현", "네이버 CTS 게스트 5 · 호스트 2"], ["4곳", "제휴 혜택 랜딩 오픈", "런드리고 · 청연 · 커버링 · 빼기"]],
+                lead: "단기임대 마켓플레이스 플라트라이프는 아직 시장이 만들어지지 않은 신사업이었어요. 개발을 기다리지 않고 전환 추적 · 제휴 랜딩 · 콘텐츠 · 홈 구성까지 마케터가 직접 만들고, 바꾼 것은 숫자로 확인했어요.",
+                side: [["역할", "그로스 · 퍼포먼스 마케팅 (기획 · 구현)"], ["범위", "계측 · 전환 추적 · 제휴 · 콘텐츠 · SEO"], ["도구", "GA4 · GTM · 네이버 CTS · Meta 픽셀 · Airbridge · BigQuery"]],
+                overview: ["호스트(매물)와 게스트(입주자)를 함께 모아야 하는 양면시장에서, 2026년 4월부터 그로스 기반을 하나씩 만들었어요. BigQuery로 실계약 · 리텐션을 먼저 정량화하고, **측정 → 랜딩 · 제휴 → 콘텐츠 → 획득 채널** 순서로 깔았어요.",
+                  "직접 커밋한 코드만 **114건**이에요. 홈 섹션은 실판매 기준으로 다시 짜고 2주 동안 실측해 카드 클릭률을 **4.1%에서 7.5%(1.8배)**로 끌어올렸어요."],
+                challenge: [["측정 없이 시작한 신사업", "측정 인프라 · 랜딩 · 파트너 · 획득 채널이 전부 비어 있었어요. 어떤 채널이 가입과 계약을 만드는지 알 수 없는 상태였어요."],
+                  ["양쪽을 동시에 모아야 하는 시장", "매물과 입주자가 함께 늘어야 거래가 생겨요. 한쪽만 키워서는 성장이 돌지 않아서, 호스트 · 게스트 양쪽의 획득 경로를 같이 만들어야 했어요."]],
+                steps: [["전환 추적 → 매체 3사 직접 구현", "매체가 가입 · 계약 전환을 제대로 받지 못해 광고가 학습할 수 없었어요.", "네이버 CTS로 게스트 5개 · 호스트 2개 전환을 직접 심고 발화 지점을 서버 응답 직후로 옮겼어요. 메타 픽셀과 구글애즈 전환 태그도 전수 점검했어요.", "네이버 전환 추적 운영 반영 · 메타 픽셀 329개 대조 → 과발사 · 누락 수정 · 구글애즈 전환 태그 6개 GA4와 일치"],
+                  ["이벤트 기준 → GA4 택소노미 워크스페이스", "화면마다 GA4 이벤트가 제각각이라 어디서 무엇을 재는지 알기 어려웠어요.", "웹 · 호스트 GA4 이벤트 전체를 출처별로 매핑하고, ON/OFF와 수집 화면까지 한눈에 보는 워크스페이스를 만들었어요.", "팀 전체가 같은 이벤트 기준을 공유 · 홈 퀵메뉴 클릭 이벤트 추가"],
+                  ["생활 제휴 → 혜택 랜딩 구조", "입주 전후 생활 서비스를 묶어 줄 제휴 채널이 없었어요.", "/event/[slug] 랜딩 구조를 만들고 런드리고 · 청연 · 커버링 · 빼기 4개 제휴사를 라운지 쿠폰과 함께 열었어요.", "제휴 혜택 랜딩 4곳 오픈 → 신규 제휴는 같은 절차로 반복"],
+                  ["유학생 수요 → 대학 제휴 페이지", "유학생 주거 수요를 대학과 함께 모을 접점이 없었어요.", "대학 국제처용 소개서 신청 페이지를 만들고 SEO 메타 · 동의 문구까지 정리했어요.", "/university/partnership 운영 반영"],
+                  ["검색 유입 → 블로그 CMS · 다국어 SEO", "검색 유입을 만들 콘텐츠를 올릴 도구가 없었어요.", "어드민 블로그 에디터(이미지 · 그리드)와 웹 블로그 상세를 만들어 홈 블로그 섹션과 연동했어요. SEO 키워드를 언어별로 확장하고 구조화 데이터(매물 · FAQ · 브레드크럼)를 붙였어요.", "블로그 CMS · 다국어 SEO · Schema.org 마크업 운영 반영"],
+                  ["홈 구성 → 섹션 재배치 실측", "홈 섹션이 실제 판매와 무관하게 배치돼 있었어요.", "실판매 기반 5개 섹션 안을 만들고 GA4로 섹션 순서별 클릭률을 재도록 설계해 2주 동안 실측했어요.", "카드 클릭률 4.1% → 7.5% (1.8배)"]],
+                results: [["7.5%", "홈 카드 클릭률", "4.1% → 7.5% · 1.8배"], ["7개", "네이버 CTS 전환", "게스트 5 · 호스트 2"], ["329개", "메타 픽셀 이벤트 점검", "전수 대조 → 과발사 · 누락 수정"], ["6개", "구글애즈 전환 태그", "GA4 대조 일치"], ["4곳", "제휴 혜택 랜딩", "런드리고 · 청연 · 커버링 · 빼기"], ["40+", "파트너 파이프라인", "상태 8단계 · 제안서 5종"]],
+                gallery: [["platt/laundrygo.jpg", "제휴 혜택 랜딩 · 런드리고"], ["platt/university.jpg", "대학 제휴 신청 페이지"]],
+                final: [["측정이 먼저", "전환이 매체에 제대로 들어가야 광고가 학습해요. 그래서 계측과 전환 추적부터 깔고 그 위에 채널을 얹었어요."],
+                  ["한 번 만들면 반복되는 구조로", "제휴 랜딩 · 블로그 CMS처럼 구조를 먼저 만들어, 다음 제휴와 콘텐츠는 같은 틀에 바로 얹을 수 있게 했어요."],
+                  ["바꾼 것은 숫자로", "홈 재구성처럼 손댄 것은 GA4 · BigQuery로 실측해 결과를 남겼어요."]]
               },
               "5c1e8a52-7b4d-4f0e-9a63-2d8f1b7c4e90": {
                 head: "광고비 250만 원으로 쿠폰 7,880장, 비용 없이 투숙 경험에 혜택을 붙였어요",
@@ -2911,7 +2932,7 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
           var cntUp = function (el) {
             if (reduce || !el || el._cnt || /^(19|20)\d\d$/.test(el.textContent.trim())) return; var t = el.textContent, m = t.match(/^([^\d]*?)(\d[\d,]*(?:\.\d+)?)(.*)$/); if (!m) return; el._cnt = 1;
             var raw = m[2].replace(/,/g, ""), dec = (raw.split(".")[1] || "").length, to = parseFloat(raw), cm = /,/.test(m[2]), t0 = performance.now(), D = 1100;
-            (function st(now) { var p = Math.min(1, (now - t0) / D), e = 1 - Math.pow(1 - p, 3), v = to * e, sv = cm ? v.toLocaleString("en-US", { minimumFractionDigits: dec, maximumFractionDigits: dec }) : v.toFixed(dec); el.textContent = m[1] + sv + m[3]; if (p < 1) requestAnimationFrame(st); else { el.textContent = t; el._cnt = 0; } })(t0);
+            (function st(now) { var p = Math.max(0, Math.min(1, (now - t0) / D)), e = 1 - Math.pow(1 - p, 3), v = to * e, sv = cm ? v.toLocaleString("en-US", { minimumFractionDigits: dec, maximumFractionDigits: dec }) : v.toFixed(dec); el.textContent = m[1] + sv + m[3]; if (p < 1) requestAnimationFrame(st); else { el.textContent = t; el._cnt = 0; } })(t0);
           };
           var IO = !reduce && "IntersectionObserver" in window;
           if (IO && document.body.classList.contains("ab")) {
