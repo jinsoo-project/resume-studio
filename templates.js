@@ -2871,7 +2871,7 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
             post({ klio: "card", id: pgs[vk].getAttribute("data-wid") || "" });
           };
           var vwOpen = function (k) { if (!vw) return; vw.hidden = false; body.style.overflow = "hidden"; vwShow(k); later(function () { vw.classList.add("on"); }, 10); };
-          var vwClose = function () { if (!vw || vw.hidden) return; vw.hidden = true; vw.classList.remove("on"); body.style.overflow = ""; post({ klio: "card", id: "" }); };
+          var vwClose = function () { if (!vw || vw.hidden) return; vw.hidden = true; vw.classList.remove("on"); body.style.overflow = ""; post({ klio: "card-close" }); }; // 닫으면 주소의 #p-… 지움(새로고침해도 목록)
           // 사례 읽기: 목차 표시(보기 창 스크롤) · 원본 리포트 펼치면 높이 다시 받기
           if (vsc) vsc.addEventListener("scroll", function () { var pg = pgs[vk]; if (!pg) return; var ss = 52273(".cs-sec", pg), top = vsc.getBoundingClientRect().top + 140, cur = ss.length ? ss[0].id : ""; ss.forEach(function (x) { if (x.getBoundingClientRect().top < top) cur = x.id; }); 52273(".cs-toc a", pg).forEach(function (a) { a.classList.toggle("on", a.getAttribute("data-cs-to") === cur); }); }, { passive: true });
           document.addEventListener("toggle", function (e) { var dd = e.target; if (!dd.classList || !dd.classList.contains("cs-doc") || !dd.open) return; 52273(".sd-if", dd).forEach(function (f) { try { f.contentWindow.postMessage({ klio: "doc-ask" }, "*"); } catch (er) {} }); }, true);
