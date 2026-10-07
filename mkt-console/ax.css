@@ -356,7 +356,7 @@ html.is-ov body{background:#f7f7f5}
 .ed-facts>div{padding-top:18px}
 .ed-facts dt{font-size:14px;font-weight:500;color:var(--ink2)}
 .ed-facts dd{margin:0}.ed-facts b{display:block;margin-top:28px;font-size:clamp(40px,4.4vw,60px);font-weight:500;line-height:1.05;letter-spacing:-.045em;color:var(--ink)}
-.ed-facts dd span{display:block;margin-top:10px;font-size:13px;font-weight:500;color:var(--ink3)}
+.ed-facts dd>span{display:block;margin-top:10px;font-size:13px;font-weight:500;color:var(--ink3)}
 .ed-sub{margin-top:80px}
 .ed-list{margin:0;padding:0;list-style:none;border-bottom:1px solid var(--hr)}
 .ed-flow li{display:grid;grid-template-columns:56px minmax(140px,220px) 1fr;align-items:baseline;padding:18px 0;border-top:1px solid var(--hr);font-size:15.5px;line-height:1.6}
@@ -381,3 +381,46 @@ html.embed .ed-end{display:none}
   .ed-tools>div{grid-template-columns:36px 1fr;row-gap:2px}.ed-tools dd{grid-column:2}.ed-fig{margin-top:36px}.ed-stage{aspect-ratio:4/3;padding:24px 0 0 20px;border-radius:16px}.ed-stage img{width:190%;max-width:none;border-radius:10px 0 0 0}.ed-fig figcaption span:last-child{display:none}
   .ed-main>p{font-size:16px}.ed-term{padding:18px;font-size:12px}
 }
+/* 2026-10-07 개요 v4.1 — 강조 · 모션: 굵기 대비 제목, 줄 단위 등장, 구분선 그리기, 단어 진해짐, 그림 프레임 펼침 · 시차, 카운트업, 타이핑, 목차 미리보기 · '열어 보기' 커서 */
+.ed h2{font-weight:500}.ed h2 strong{font-weight:700}
+.ed-state{font-weight:500}.ed-state strong{font-weight:700;color:var(--ink)}
+.ed-state .w{color:var(--ink3);transition:color .45s ease}.ed-state .w.on{color:var(--ink)}
+.ed-facts b{font-weight:600}.ed-facts b small{margin-left:2px;font-size:.5em;font-weight:500;letter-spacing:-.02em;color:var(--ink2)}
+.ed-sec{position:relative}
+.ed-rule{display:block;height:1px;margin:0 0 clamp(40px,5vw,64px);background:var(--hr);transform-origin:left}
+.ed-intro .ed-rule{display:none}
+/* 왼쪽 라벨은 섹션 안에서 따라오게 */
+@media(min-width:861px){.ed-row{align-items:start}.ed-lab{position:sticky;top:132px}}
+/* 등장 (JS 켜졌을 때만 숨김) */
+.ed-js .ed [data-rv]{opacity:0;transform:translateY(22px);transition:opacity .9s cubic-bezier(.2,.7,.2,1) var(--d,0s),transform 1s cubic-bezier(.2,.7,.2,1) var(--d,0s)}
+.ed-js .ed [data-rv].on{opacity:1;transform:none}
+.ed-js .ed .ed-h{opacity:1;transform:none;overflow:hidden;padding-bottom:.08em;margin-bottom:-.08em}
+.ed-js .ed .ed-h>span{display:inline-block;transform:translateY(105%);transition:transform 1.05s cubic-bezier(.2,.75,.15,1)}
+.ed-js .ed .ed-h.on>span{transform:none}
+.ed-js .ed .ed-rule{opacity:1;transform:scaleX(0);transition:transform 1.4s cubic-bezier(.65,0,.2,1)}.ed-js .ed .ed-rule.on{transform:scaleX(1)}
+.ed-js .ed .ed-stage{opacity:1;transform:none;clip-path:inset(7% 5% 0 5% round 28px);transition:clip-path 1.3s cubic-bezier(.2,.75,.15,1)}
+.ed-js .ed .ed-stage.on{clip-path:inset(0 0 0 0 round 20px)}
+.ed-js .ed .ed-stage img{transform:translateY(calc(var(--py,0px) + 48px));transition:transform .7s cubic-bezier(.2,.7,.2,1)}
+.ed-js .ed .ed-stage.on img{transform:translateY(var(--py,0px))}
+.ed-js .ed .ed-stage:hover img{transform:translateY(calc(var(--py,0px) - 8px))}
+.ed-js .ed .ed-term{opacity:1;transform:none}
+.ed-js .ed-term div{opacity:0;transform:translateX(-6px);transition:opacity .35s,transform .35s}.ed-js .ed-term div.on{opacity:1;transform:none}
+.ed-term div.on:last-child::after{content:"";display:inline-block;width:8px;height:15px;margin-left:8px;vertical-align:-2px;background:#86cfa3;animation:edBlink 1s steps(2) infinite}
+@keyframes edBlink{50%{opacity:0}}
+/* 링크 밑줄 차오름 */
+.ed-link{border-bottom:0;background:linear-gradient(var(--ink),var(--ink)) 0 100%/0 1px no-repeat,linear-gradient(var(--hr),var(--hr)) 0 100%/100% 1px no-repeat;transition:background-size .45s cubic-bezier(.2,.7,.2,1)}
+.ed-link:hover{background-size:100% 1px,100% 1px}
+/* 목차 줄: 마우스 올리면 이름이 살짝 밀리고 굵기 차이 */
+.ed-index b{transition:transform .45s cubic-bezier(.2,.7,.2,1),font-weight .2s}
+.ed-index button:hover b{transform:translateX(10px)}
+.ed-index button{position:relative}
+.ed-index button::after{content:"";position:absolute;left:0;right:0;top:-1px;height:1px;background:var(--ink);transform:scaleX(0);transform-origin:left;transition:transform .6s cubic-bezier(.65,0,.2,1)}
+.ed-index button:hover::after{transform:scaleX(1)}
+/* 커서 따라다니는 미리보기 · 열어 보기 커서 */
+.ed-peek,.ed-cur{position:fixed;left:0;top:0;z-index:60;pointer-events:none}
+.ed-peek img{display:block;width:300px;aspect-ratio:2000/1164;margin:-96px 0 0 28px;border-radius:10px;object-fit:cover;object-position:top left;box-shadow:0 24px 48px -20px rgba(19,16,20,.35),0 0 0 1px rgba(19,16,20,.06);opacity:0;transform:scale(.85) rotate(-2deg);transition:opacity .3s,transform .5s cubic-bezier(.2,.75,.15,1)}
+.ed-peek.on img{opacity:1;transform:none}
+.ed-cur span{display:grid;place-items:center;width:96px;height:96px;margin:-48px 0 0 -48px;border-radius:50%;background:rgba(19,16,20,.92);font-size:14px;font-weight:600;color:#f7f7f5;opacity:0;transform:scale(.3);transition:opacity .25s,transform .45s cubic-bezier(.2,.75,.15,1)}
+.ed-cur.on span{opacity:1;transform:none}
+@media(hover:hover) and (pointer:fine){.ed .ed-stage{cursor:none}}
+@media(prefers-reduced-motion:reduce){.ed-state .w{color:var(--ink2)}}
