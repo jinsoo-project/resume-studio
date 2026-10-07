@@ -2519,9 +2519,9 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
               "0a3aea35-ccc9-4018-a7a6-e383c303f928": ["−24%", "평균 CPC 절감", "신규 CAC −19% · 구매 전환율 +17%"],
               "3080bc75-d773-490f-9a02-35d83886b418": ["−15%", "평균 CPC 절감", "타 캠페인 대비"],
               "b0aa1d32-82d9-44bc-897d-b558a425c98c": ["+110%", "MAU 상승", "12~3월 · 월 최대 5억 매체 운영"],
-              "731ea8fe-9bb7-41ce-8cc1-687f77f9c49c": ["통합", "전사 지표 자동 대시보드", "일 · 주 · 월 단위 성과 관리"],
-              "8fe4e187-9052-4737-9d1b-d0a158d9e156": ["자동화", "주요 지표 슬랙 리포팅", "실DB 기반 웹훅 · 앱스크립트"],
-              "199815d6-356c-4959-8219-6c9ea7615102": ["2개 툴", "어트리뷰션 택소노미 · QA", "Amplitude · Airbridge"],
+              "731ea8fe-9bb7-41ce-8cc1-687f77f9c49c": ["2022", "전사 지표 대시보드 직접 구축", "실DB · 광고 데이터 연동 · 일/주/월 관리"],
+              "8fe4e187-9052-4737-9d1b-d0a158d9e156": ["2023", "주요 지표 슬랙 자동 리포팅", "웹훅 · 앱스크립트로 수기 공유 대체"],
+              "199815d6-356c-4959-8219-6c9ea7615102": ["2023", "어트리뷰션 택소노미 · QA", "Amplitude · Airbridge 전사 기준"],
               "4d333686-6daa-4c8e-9cd7-3e8309ef9900": ["2배", "노출 상품수 증가", "주 평균 Imp 30만 · CTR 25%"],
               "e5bb7edf-a48d-4752-a0b4-c05df7903051": ["+250만", "구글 노출 증가", "4개월 · 평균 게재 순위 1단계↑"],
               "43ab6811-42cf-4a1f-afca-62bfd67b17f9": ["−30%", "CPI 절감", "타 캠페인 대비 · 인앱액션 +30%"],
@@ -2636,6 +2636,10 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
                 + t.r.map(function (r) { return '<tr>' + r.map(function (x, k) { return '<td' + (k ? ' class="r"' : '') + '>' + esc(x) + '</td>'; }).join("") + '</tr>'; }).join("")
                 + (t.f ? '<tr class="sum">' + t.f.map(function (x, k) { return '<td' + (k ? ' class="r"' : '') + '>' + esc(x) + '</td>'; }).join("") + '</tr>' : '') + '</tbody></table></div>' + (t.note ? '<p class="cs-note">' + esc(t.note) + '</p>' : '') + '</figure>';
             };
+            // AI 도입 전(2022–2023) 직접 만든 데이터 작업 = 당시 강점(2026-10-07 사용자) → 성과 위에 맥락 한 줄
+            var ERA = { "731ea8fe-9bb7-41ce-8cc1-687f77f9c49c": "실DB와 광고 데이터를 직접 연동해 전사가 같은 숫자를 보는 대시보드를 만들었어요.",
+              "8fe4e187-9052-4737-9d1b-d0a158d9e156": "웹훅과 앱스크립트만으로 매번 손으로 공유하던 지표를 슬랙 자동 리포트로 바꿨어요.",
+              "199815d6-356c-4959-8219-6c9ea7615102": "Amplitude · Airbridge 이벤트 기준을 직접 설계하고 QA해 부서마다 다르던 데이터 기준을 하나로 맞췄어요." };
             var caseView = function (a, pv, nx) {
               var it = a.it, co = it.co || {}, g = a.g, S = STORY[it.w.id] || null, id = "cs" + a.k, cc = ABTINT[g.id] || "#4e5968";
               var tp = String(it.title || "").split(/\s+[—–]\s+/), sum = String(it.w.summary || "").trim();
@@ -2657,7 +2661,7 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
               var resH = (kTiles.length ? '<div class="cs-kg">' + kTiles.map(function (r) { return '<div><b>' + escA(r[0]) + '</b><strong>' + escA(r[1]) + '</strong>' + (r[2] ? '<span>' + escA(r[2]) + '</span>' : '') + '</div>'; }).join("") + '</div>' : '')
                 + (!S && !it.parts && resL.length ? '<ul class="cs-ul res">' + resL.map(function (x) { return '<li>' + numB(x) + '</li>'; }).join("") + '</ul>' : '')
                 + (S && S.chart ? csChart(S.chart) : '') + (S && S.table ? csTable(S.table) : '');
-              add("rs", !S && CL[1] && !/성과/.test(CL[1]) ? CL[1] : "성과", resH);
+              add("rs", !S && CL[1] && !/성과/.test(CL[1]) ? CL[1] : "성과", (ERA[it.w.id] ? '<p class="cs-era"><span>AI 도입 전 · 직접 구축</span>' + escA(ERA[it.w.id]) + '</p>' : '') + resH);
               // 자료: PPT 판 그림 · DB 그림 · 원고 그림 → 2열 갤러리(누르면 크게) · 영상 카드 · 링크
               var imgs = [];
               if (S && S.gallery) imgs = S.gallery.map(function (x) { return [PF_DOC + x[0], x[1]]; });
@@ -2694,8 +2698,7 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
             }
             var abNav = '<header class="tp-nav ab-nav"><div class="tp-nav-in"><a class="tp-logo" href="' + ea(homeUrl) + '" target="_top" data-gx="resume">' + esc(nameEn || nameKo || "Portfolio") + '</a>' + gtabs("projects", secLinks(true)) + '</div></header>';
             var abMain = '<section class="ab-hero" id="tp-top"><span class="ab-hero-ey">PROJECTS</span><h1>' + esc(txt("abTitle", "숫자로 증명한 프로젝트")) + '</h1><p>' + esc(txt("abSub", abCos.length + "개 회사 · " + abItems.length + "개 프로젝트 · " + TS.length + "개 분야")) + '</p></section>'
-              + jump + '<div class="ab-secs">' + abSecs + '</div>'
-              + '<section class="ab-cta"><div><h2>' + esc(txt("abCtaT", "함께 성과를 만들어 볼까요?")) + '</h2><p>' + esc(txt("abCtaS", "퍼포먼스 · CRM · 데이터 · AX까지, 편하게 연락 주세요.")) + '</p><div class="ab-cta-b"><a class="ab-btn pri" href="' + ea(mail) + '" target="_top">연락하기 →</a><a class="ab-btn" href="' + ea(homeUrl) + '" target="_top">이력서 보기</a></div></div></section>';
+              + jump + '<div class="ab-secs">' + abSecs + '</div>';
             var ABCSS = 'body.ab{--abw:min(1216px,calc(100vw - 48px));--abg:max(24px,calc((100vw - 1216px) / 2));background:#fff;color:#191f28;letter-spacing:-.015em}.ab .tp-nav{background:rgba(255,255,255,.96);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);box-shadow:0 1px 0 var(--g2)}.ab .tp-logo{color:var(--g9)}.ab .tp-nav .gt{color:var(--g5)}.ab .tp-nav .gt:hover,.ab .tp-nav .gt.on{color:var(--g9)}'
               // 히어로: 파란 작은 머리말 · 큰 제목(굵게 · 촘촘) · 회색 한 줄
               + '.ab-hero{padding:clamp(140px,17vh,180px) 24px clamp(48px,6vh,72px);text-align:center}.ab-hero-ey{font-size:13px;font-weight:700;letter-spacing:.16em;color:var(--bl)}.ab-hero h1{margin-top:14px;font-size:clamp(36px,4.4vw,60px);font-weight:800;line-height:1.18;letter-spacing:-.04em;word-break:keep-all}.ab-hero p{margin-top:16px;font-size:clamp(16px,1.3vw,19px);font-weight:500;color:var(--g6)}'
@@ -2777,6 +2780,7 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
               + '.cs-col>b{font-size:11px;font-weight:700;color:#4e5968;font-variant-numeric:tabular-nums}.cs-st{position:relative;flex:1;width:62%;margin:4px 0}.cs-st i{position:absolute;left:0;right:0;bottom:0;border-radius:4px 4px 0 0}.cs-st i.a{background:var(--cc);opacity:.85}.cs-st i.b{background:#f59e0b}.cs-col>span{font-size:11px;color:#8b95a1;white-space:nowrap}'
               + '.cs-lg{display:flex;flex-wrap:wrap;align-items:center;gap:6px 14px;margin:14px 0 0!important;font-size:13px!important;line-height:1.5!important;color:#6b7684!important}.cs-lg i{display:inline-block;width:10px;height:10px;margin-right:-8px;border-radius:3px}.cs-lg i.a{background:var(--cc)}.cs-lg i.b{background:#f59e0b}.cs-lg em{flex-basis:100%;font-style:normal;color:#8b95a1}'
               + '.cs-tw{overflow-x:auto}.cs-tbl{width:100%;border-collapse:collapse;font-size:14px}.cs-tbl th{padding:8px 10px;border-bottom:1px solid #e5e8eb;font-size:12.5px;font-weight:600;color:#8b95a1;text-align:left;white-space:nowrap}.cs-tbl td{padding:11px 10px;border-bottom:1px solid #f2f4f6;color:#333d4b;white-space:nowrap}.cs-tbl .r{text-align:right;font-variant-numeric:tabular-nums}.cs-tbl td:first-child{font-weight:600;color:#191f28}.cs-tbl tr.sum td{font-weight:700;border-top:1px solid #e5e8eb;border-bottom:0}'
+              + '.cs-era{margin:0 0 20px!important;padding:16px 18px;border-radius:14px;background:color-mix(in srgb,var(--cc) 7%,#fff);font-size:16px!important;color:#191f28!important}.cs-era span{display:block;margin-bottom:4px;font-size:12.5px;font-weight:800;letter-spacing:.02em;color:var(--cc)}'
               + '.cs-note{margin:12px 0 0!important;font-size:13px!important;line-height:1.6!important;color:#8b95a1!important}'
               // 자료: 2열 갤러리(자르지 않음) · 영상 · 링크
               + '.cs-gal{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.cs-gi{display:flex;flex-direction:column;gap:8px}.cs-gi>span{display:flex;align-items:center;justify-content:center;aspect-ratio:4/3;padding:14px;border-radius:14px;background:#f3f4f6;transition:background .2s}.cs-gi:hover>span{background:#eceef1}.cs-gi img{max-width:100%;max-height:100%;border-radius:6px;box-shadow:0 8px 20px -10px rgba(17,24,39,.3)}.cs-gi em{font-style:normal;font-size:13px;color:#6b7684}'
@@ -2789,6 +2793,7 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
               + '.cs-nb.nx{text-align:right;align-items:flex-end}.cs-nb span{font-size:13px;font-weight:600;color:#8b95a1}.cs-nb b{font-size:18px;font-weight:700;letter-spacing:-.025em;color:#191f28}.cs-nb em{font-style:normal;font-size:13px;color:#8b95a1}'
               + '@media(max-width:960px){.cs-hero-in{grid-template-columns:minmax(0,1fr);gap:32px}.cs-hv{max-width:480px}.cs-body{grid-template-columns:minmax(0,1fr);gap:32px}.cs-side{position:static}.cs-toc{display:none}.cs-kg{grid-template-columns:repeat(2,minmax(0,1fr))}}'
               + '@media(max-width:640px){.cs-bar .vw-cnt,.cs-hv{display:none}.cs-back{font-size:14px}.cs-hero-in,.cs-body,.cs-nav{width:calc(100vw - 40px)}.cs-kpis{gap:18px 28px}.cs-art p,.cs-ul li{font-size:16px}.cs-steps li{grid-template-columns:1fr}.cs-steps dl{grid-template-columns:1fr;gap:2px}.cs-steps dt{padding-top:8px}.cs-gal,.cs-vg{grid-template-columns:1fr}.cs-nav{grid-template-columns:1fr}.cs-nb.nx{text-align:left;align-items:flex-start}.cs-bars{height:170px}.cs-col>b{font-size:9.5px}}'
+              + '.ab-secs{padding-bottom:clamp(88px,12vh,140px)}' // 아래 '함께 성과를 만들어 볼까요?' 블록 삭제(2026-10-07 사용자) → 마지막 분야 아래 여백
               // 모션(2026-10-07): 카드 등장(차례로 떠오름) · 숫자 카운트업 · 사례 히어로 등장 · 섹션 떠오름 · 그래프 막대 자람 · 읽기 진행 막대 — 모션 줄이기면 없음
               + '.ab-card.rv,.abs-hd.rv{opacity:0;transform:translateY(22px)}.ab-card.rv.in,.abs-hd.rv.in{opacity:1;transform:none;transition:opacity .7s var(--te) var(--d,0s),transform .8s var(--te) var(--d,0s),border-color .3s,box-shadow .35s var(--te)}'
               + '.ab-hero>*{animation:abUp .9s var(--te) backwards}.ab-hero>:nth-child(2){animation-delay:.08s}.ab-hero>:nth-child(3){animation-delay:.16s}@keyframes abUp{from{opacity:0;transform:translateY(18px)}}'
@@ -2892,7 +2897,7 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
           document.addEventListener("toggle", function (e) { var dd = e.target; if (!dd.classList || !dd.classList.contains("cs-doc") || !dd.open) return; 52273(".sd-if", dd).forEach(function (f) { try { f.contentWindow.postMessage({ klio: "doc-ask" }, "*"); } catch (er) {} }); }, true);
           // 모션: 숫자 카운트업(앞뒤 글자 유지 · 쉼표 · 소수) · 화면에 들어오면 .in
           var cntUp = function (el) {
-            if (reduce || !el || el._cnt) return; var t = el.textContent, m = t.match(/^([^\d]*?)(\d[\d,]*(?:\.\d+)?)(.*)$/); if (!m) return; el._cnt = 1;
+            if (reduce || !el || el._cnt || /^(19|20)\d\d$/.test(el.textContent.trim())) return; var t = el.textContent, m = t.match(/^([^\d]*?)(\d[\d,]*(?:\.\d+)?)(.*)$/); if (!m) return; el._cnt = 1;
             var raw = m[2].replace(/,/g, ""), dec = (raw.split(".")[1] || "").length, to = parseFloat(raw), cm = /,/.test(m[2]), t0 = performance.now(), D = 1100;
             (function st(now) { var p = Math.min(1, (now - t0) / D), e = 1 - Math.pow(1 - p, 3), v = to * e, sv = cm ? v.toLocaleString("en-US", { minimumFractionDigits: dec, maximumFractionDigits: dec }) : v.toFixed(dec); el.textContent = m[1] + sv + m[3]; if (p < 1) requestAnimationFrame(st); else { el.textContent = t; el._cnt = 0; } })(t0);
           };
