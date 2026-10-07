@@ -2503,24 +2503,25 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
           if (d.page === "projects") {
             var abCos = []; abItems.forEach(function (a) { if (a.it.co && abCos.indexOf(a.it.co) < 0) abCos.push(a.it.co); });
             // 분야(챕터)마다 한 줄 카드 슬라이드(2026-10-06 사용자: 회사 필터 없애고 분야별로 구분 · 한 줄로 슬라이딩 · 모바일은 카드 하나씩 옆으로)
-            // 카드 썸네일 통일(2026-10-06 사용자 '깔끔하고 명확하게 · 썸네일·이미지 통일'): 분야 색을 옅게 깐 같은 바탕 + 같은 자리 · 같은 크기 프레임
-            //   가로 그림 = 브라우저 창(위 막대 · 점 3개) · 세로 그림 = 휴대폰(런타임이 그림 비율 보고 .pt) · 그림은 자르지 않고(contain) 흰 바탕 · 그림 없으면 분야 일러스트
-            //   왼쪽 위 = 회사 칩(로고 · 이름) / 아래 = 묶음(NOW는 분야) · 기간 → 제목 2줄 → 숫자 2칸(없으면 한 줄 요약) → 자세히 보기
-            var ABTINT = { "t-recent": "#3182f6", "t-perf": "#2f5f99", "t-data": "#2b6a5f", "t-camp": "#93503c", "t-cont": "#6a4c93" };
+            // 카드(2026-10-07 사용자 'AI 티 안 나게 · 세련되게 · 로고 라벨 예쁘게 · 성과 잘 보이게'): 장식(그라데이션 · 창/휴대폰 테두리 · 흐린 배경 · 회색 상자 · 자세히 보기 글자) 빼고 정리
+            //   썸네일 = 모든 카드 같은 밝은 회색 바탕 + 그림이 아래 가장자리에 붙어 올라온 모양(자르지 않음, 없으면 분야 일러스트) · 왼쪽 위 = 반투명 회사 태그(로고 · 이름)
+            //   본문 = 분야(분야 색) · 기간 + ↗ → 제목 2줄 → 가는 선 위 성과 숫자 2개(분야 색 큰 숫자 + 한 줄 설명, 없으면 요약 2줄)
+            var ABTINT = { "t-recent": "#2272eb", "t-perf": "#2f5f99", "t-data": "#2b6a5f", "t-camp": "#93503c", "t-cont": "#6a4c93" };
             var thSrc = function (f) { return /\.(jpe?g|png|webp)$/i.test(f) ? PF_DOC + f : PPT_IMG + f + ".jpg"; }; // CARD_TH: PPT 그림 이름 또는 pf-doc 파일
             var abCard = function (a) {
               var it = a.it, co = it.co || {}, mets = it.mets.slice(0, 2), cc = ABTINT[a.g.id] || "#4e5968";
               var bs = PPT_BOARDS_OF[it.w.id] || [], b = bs.length && PPT_BOARD[bs[0]], f = CARD_TH[it.w.id] || (b && b.i.length ? b.i[0][0] : ""), src = f ? thSrc(f) : (it.main ? it.main.src : "");
-              var shot = src ? '<span class="ab-im" style="--img:url(&quot;' + ea(src) + '&quot;)"><img src="' + ea(src) + '" alt="" loading="lazy" decoding="async"></span>' : '<span class="ab-im art" style="--c:' + it.cm.c + '">' + coverArt(it.w, it.m0) + '</span>';
+              var shot = src ? '<span class="ab-sh"><img src="' + ea(src) + '" alt="" loading="lazy" decoding="async"></span>' : '<span class="ab-sh art"><i style="--c:' + it.cm.c + '">' + coverArt(it.w, it.m0) + '</i></span>';
               var ey = (a.g.id === "t-recent" ? (it.w.category || "") : a.ct) || "";
               var sum = String(it.w.summary || whyOf(it) || "").trim();
               return '<button class="ab-card" type="button" data-vw="' + a.k + '" style="--cc:' + cc + '" aria-label="' + ea(it.title) + ' 자세히 보기">'
-                + '<span class="ab-cv"><span class="ab-co">' + (co.logo ? '<img src="' + ea(co.logo) + '" alt="">' : '') + '<b>' + esc(dispName(co)) + '</b></span>'
-                + '<span class="ab-fr"><i class="ab-bar" aria-hidden="true"><i></i><i></i><i></i></i>' + shot + '</span></span>'
-                + '<span class="ab-bd"><span class="ab-ey">' + (ey ? '<b>' + esc(ey) + '</b>' : '') + '<span>' + esc(when(it)) + '</span></span><b class="ab-t">' + esc(it.title) + '</b>'
+                + '<span class="ab-cv"><span class="ab-co">' + (co.logo ? '<img src="' + ea(co.logo) + '" alt="">' : '') + '<b>' + esc(dispName(co)) + '</b></span>' + shot + '</span>'
+                + '<span class="ab-bd"><span class="ab-ey"><span>' + (ey ? '<b>' + esc(ey) + '</b>' : '') + '<em>' + esc(when(it)) + '</em></span>'
+                + '<svg class="ab-ar" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 17L17 7M9 7h8v8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>'
+                + '<b class="ab-t">' + esc(it.title) + '</b>'
                 + (mets.length ? '<span class="ab-ms" style="--n:' + mets.length + '">' + mets.map(function (m) { return '<span><b>' + esc(m.value) + '</b><i>' + esc(m.label || "") + '</i></span>'; }).join("") + '</span>'
                   : '<span class="ab-ms sum"><span>' + esc(sum) + '</span></span>')
-                + '<span class="ab-go">자세히 보기<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M12 5l7 7-7 7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span></span></button>';
+                + '</span></button>';
             };
             var arw = function (dir) { return '<button class="abs-arw" type="button" data-dir="' + dir + '" aria-label="' + (dir < 0 ? '이전' : '다음') + '"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="' + (dir < 0 ? 'M15 18l-6-6 6-6' : 'M9 18l6-6-6-6') + '" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>'; };
             var abSecs = TS.map(function (x, si) {
@@ -2548,32 +2549,33 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
               + '.abs-ctl{flex:none;display:flex;gap:8px}.abs-arw{display:grid;place-items:center;width:44px;height:44px;border:1px solid #e5e8eb;border-radius:50%;background:#fff;color:var(--g8);transition:background .2s,opacity .2s,border-color .2s}.abs-arw:hover:not(:disabled){background:#f2f4f6;border-color:#d1d6db}.abs-arw:disabled{opacity:.3;cursor:default}.abs-arw svg{width:20px;height:20px}.abs.fit .abs-ctl{visibility:hidden}'
               + '.abs-track{display:grid;grid-auto-flow:column;grid-auto-columns:calc((var(--abw) - 48px) / 3);gap:24px;margin-top:24px;padding:4px var(--abg) 28px;overflow-x:auto;scroll-snap-type:x mandatory;scroll-padding:0 var(--abg);overscroll-behavior-x:contain;scrollbar-width:none}.abs-track::-webkit-scrollbar{display:none}'
               + '.abs-dots{display:none;justify-content:center;gap:6px;margin-top:-8px}.abs-dots i{width:6px;height:6px;border-radius:999px;background:#d1d6db;transition:width .3s,background .3s}.abs-dots i.on{width:18px;background:#191f28}'
-              // 카드(썸네일 통일): 흰 카드 · 얇은 테두리 · 둥근 20 / 커버 16:10 = 분야 색 옅은 바탕 + 회사 칩 + 아래에서 올라온 프레임(창 · 휴대폰)
-              + '.ab-card{scroll-snap-align:start;display:flex;flex-direction:column;min-width:0;border:1px solid #eceef1;border-radius:20px;overflow:hidden;background:#fff;text-align:left;transition:transform .3s var(--te),box-shadow .3s var(--te),border-color .3s}.ab-card:hover{transform:translateY(-4px);border-color:#e1e4e8;box-shadow:0 24px 48px -28px rgba(17,24,39,.35)}'
-              + '.ab-cv{position:relative;display:block;aspect-ratio:16/10;overflow:hidden;background:linear-gradient(165deg,color-mix(in srgb,var(--cc) 5%,#f8f9fb) 0%,color-mix(in srgb,var(--cc) 13%,#eff1f4) 100%)}'
-              + '.ab-cv::before{content:"";position:absolute;inset:0;background:radial-gradient(70% 60% at 50% 100%,rgba(255,255,255,.7),transparent 70%);pointer-events:none}'
-              + '.ab-co{position:absolute;left:16px;top:14px;z-index:2;display:inline-flex;align-items:center;gap:7px;max-width:calc(100% - 32px);height:30px;padding:0 11px 0 4px;border-radius:10px;background:rgba(255,255,255,.88);box-shadow:0 1px 2px rgba(0,0,0,.06);font-size:13px;line-height:1;color:#191f28}'
-              + '.ab-co img{width:22px;height:22px;border-radius:7px;object-fit:contain;background:#fff;box-shadow:inset 0 0 0 1px rgba(0,0,0,.05)}.ab-co b{overflow:hidden;font-weight:700;letter-spacing:-.02em;white-space:nowrap;text-overflow:ellipsis}.ab-co:not(:has(img)){padding-left:11px}'
-              // 프레임: 가로 = 창(위 막대 20 + 점) · 아래 가장자리 밖으로 살짝 넘겨 '올라온' 느낌 / 세로(.pt) = 가운데 휴대폰(검은 테두리)
-              + '.ab-fr{position:absolute;left:10%;right:10%;top:62px;bottom:0;display:flex;flex-direction:column;border-radius:12px 12px 0 0;overflow:hidden;background:#fff;box-shadow:0 0 0 1px rgba(17,24,39,.06),0 22px 40px -18px rgba(17,24,39,.32);transition:transform .45s var(--te)}'
-              + '.ab-bar{flex:none;display:flex;align-items:center;gap:5px;height:20px;padding:0 10px;background:#f5f6f8;border-bottom:1px solid #eceef1}.ab-bar i{width:6px;height:6px;border-radius:50%;background:#d6dae0}'
-              + '.ab-im{position:relative;flex:1;min-height:0;display:flex;align-items:center;justify-content:center;overflow:hidden;background:#fff}.ab-im img{position:relative;display:block;max-width:100%;max-height:100%;width:auto;height:auto;object-fit:contain}'
-              + '.ab-im[style]::before{content:"";position:absolute;inset:-24px;background:var(--img) center/cover no-repeat;filter:blur(20px) saturate(1.15);opacity:.55}' // 그림 옆 빈 곳 = 같은 그림을 흐리게(자르지 않고 채운 느낌)
-              + '.ab-im.art{background:color-mix(in srgb,var(--cc) 7%,#fff)}.ab-im.art svg{width:100%;height:100%}'
-              + '.ab-fr.pt{left:50%;right:auto;top:48px;width:31%;border:5px solid #1b1e24;border-bottom:0;border-radius:22px 22px 0 0;transform:translateX(-50%);box-shadow:0 22px 40px -18px rgba(17,24,39,.4)}.ab-fr.pt .ab-bar{display:none}'
-              + '.ab-card:hover .ab-fr{transform:translateY(-6px)}.ab-card:hover .ab-fr.pt{transform:translate(-50%,-6px)}'
-              // 본문: 묶음 · 기간 → 제목 2줄(높이 고정) → 숫자 2칸(높이 고정, 없으면 한 줄 요약) → 자세히 보기
-              + '.ab-bd{flex:1;display:flex;flex-direction:column;padding:20px 22px 22px}.ab-ey{display:flex;align-items:center;gap:8px;min-width:0;font-size:13px;font-weight:500;color:var(--g5);white-space:nowrap}.ab-ey b{overflow:hidden;font-weight:700;color:color-mix(in srgb,var(--cc) 80%,#191f28);text-overflow:ellipsis}.ab-ey b+span::before{content:"";display:inline-block;width:1px;height:10px;margin-right:8px;background:var(--g3);vertical-align:-1px}'
-              + '.ab-t{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;min-height:2.9em;margin-top:8px;font-size:19px;font-weight:700;line-height:1.45;letter-spacing:-.025em;color:#191f28;word-break:keep-all}'
-              + '.ab-ms{display:grid;grid-template-columns:repeat(var(--n,2),minmax(0,1fr));gap:8px;margin-top:16px}.ab-ms>span{display:flex;flex-direction:column;justify-content:center;min-width:0;height:66px;padding:10px 13px;border-radius:12px;background:#f5f6f8}'
-              + '.ab-ms b{overflow:hidden;font-size:19px;font-weight:700;line-height:1.3;letter-spacing:-.02em;color:#191f28;white-space:nowrap;text-overflow:ellipsis;font-variant-numeric:tabular-nums}.ab-ms i{overflow:hidden;margin-top:2px;font-style:normal;font-size:12.5px;line-height:1.35;color:var(--g6);white-space:nowrap;text-overflow:ellipsis}'
-              + '.ab-ms.sum{grid-template-columns:1fr}.ab-ms.sum span{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;padding:12px 14px;line-clamp:2;font-size:14px;line-height:1.5;color:var(--g7);word-break:keep-all}'
-              + '.ab-go{display:inline-flex;align-items:center;gap:6px;margin-top:auto;padding-top:18px;font-size:14px;font-weight:600;color:var(--bl)}.ab-go svg{width:16px;height:16px;transition:transform .3s}.ab-card:hover .ab-go svg{transform:translateX(4px)}'
+              // 카드: 흰 카드 · 얇은 테두리 · 둥근 18 / 커버 16:10 = 같은 밝은 회색 + 회사 태그 + 아래에서 올라온 그림 / 본문 = 분야 · 기간 ↗ → 제목 → 선 위 성과 숫자
+              + '.ab-card{scroll-snap-align:start;display:flex;flex-direction:column;min-width:0;border:1px solid #e9ebee;border-radius:18px;overflow:hidden;background:#fff;text-align:left;transition:border-color .3s,box-shadow .35s var(--te)}.ab-card:hover{border-color:#d9dde2;box-shadow:0 20px 44px -28px rgba(17,24,39,.38)}'
+              + '.ab-cv{position:relative;display:block;aspect-ratio:16/10;overflow:hidden;background:#f3f4f6;border-bottom:1px solid #eef0f2}'
+              // 회사 태그: 반투명 흰 바탕 · 얇은 선 · 그림자 없음 · 로고(흰 칸 둥근 7) + 이름
+              + '.ab-co{position:absolute;left:14px;top:14px;z-index:2;display:inline-flex;align-items:center;gap:8px;max-width:calc(100% - 28px);height:32px;padding:0 12px 0 4px;border-radius:10px;background:rgba(255,255,255,.78);-webkit-backdrop-filter:blur(10px) saturate(1.4);backdrop-filter:blur(10px) saturate(1.4);box-shadow:inset 0 0 0 1px rgba(17,24,39,.06)}'
+              + '.ab-co img{flex:none;width:24px;height:24px;border-radius:7px;object-fit:contain;background:#fff;box-shadow:inset 0 0 0 1px rgba(17,24,39,.07)}.ab-co b{overflow:hidden;font-size:13px;font-weight:700;letter-spacing:-.02em;color:#333d4b;white-space:nowrap;text-overflow:ellipsis}.ab-co:not(:has(img)){padding-left:12px}'
+              // 그림: 아래 가장자리에 붙어 올라온 모양 · 자르지 않음 · 위 모서리만 둥글게 · 호버 때 살짝 커짐
+              + '.ab-sh{position:absolute;left:9%;right:9%;top:62px;bottom:0;display:flex;align-items:flex-end;justify-content:center;transform-origin:50% 100%;transition:transform .5s var(--te)}'
+              + '.ab-sh img{display:block;max-width:100%;max-height:100%;width:auto;height:auto;border-radius:10px 10px 0 0;background:#fff;box-shadow:0 0 0 1px rgba(17,24,39,.06),0 14px 34px -14px rgba(17,24,39,.3)}'
+              + '.ab-sh.art i{display:block;width:100%;height:100%;border-radius:10px 10px 0 0;overflow:hidden;background:#fff;box-shadow:0 0 0 1px rgba(17,24,39,.06),0 14px 34px -14px rgba(17,24,39,.22)}.ab-sh.art svg{display:block;width:100%;height:100%}'
+              + '.ab-card:hover .ab-sh{transform:scale(1.035)}'
+              + '.ab-bd{flex:1;display:flex;flex-direction:column;padding:18px 22px 22px}'
+              + '.ab-ey{display:flex;align-items:center;justify-content:space-between;gap:12px;min-width:0}.ab-ey>span{display:flex;align-items:center;gap:8px;min-width:0;font-size:13px;white-space:nowrap}'
+              + '.ab-ey b{overflow:hidden;font-weight:700;color:var(--cc);text-overflow:ellipsis}.ab-ey em{font-style:normal;font-weight:500;color:#8b95a1;font-variant-numeric:tabular-nums}.ab-ey b+em::before{content:"";display:inline-block;width:3px;height:3px;margin:0 8px 0 0;border-radius:50%;background:#c4c9d0;vertical-align:middle}'
+              + '.ab-ar{flex:none;width:18px;height:18px;color:#c4c9d0;transition:color .25s,transform .25s var(--te)}.ab-card:hover .ab-ar{color:#191f28;transform:translate(2px,-2px)}'
+              + '.ab-t{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;min-height:2.9em;margin-top:8px;font-size:19px;font-weight:700;line-height:1.45;letter-spacing:-.03em;color:#191f28;word-break:keep-all}'
+              // 성과: 가는 선 위 숫자 2개(분야 색 · 크게) + 한 줄 설명 · 두 칸 사이 세로 선
+              + '.ab-ms{display:grid;grid-template-columns:repeat(var(--n,2),minmax(0,1fr));margin-top:auto;padding-top:18px;border-top:1px solid #f0f1f3}.ab-t{margin-bottom:20px}'
+              + '.ab-ms>span{display:flex;flex-direction:column;min-width:0}.ab-ms>span+span{padding-left:18px;margin-left:18px;border-left:1px solid #f0f1f3}'
+              + '.ab-ms b{overflow:hidden;font-size:26px;font-weight:800;line-height:1.15;letter-spacing:-.04em;color:var(--cc);white-space:nowrap;text-overflow:ellipsis;font-variant-numeric:tabular-nums}'
+              + '.ab-ms i{overflow:hidden;margin-top:5px;font-style:normal;font-size:13px;font-weight:500;line-height:1.35;color:#8b95a1;white-space:nowrap;text-overflow:ellipsis}'
+              + '.ab-ms.sum{grid-template-columns:1fr}.ab-ms.sum span{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;min-height:3em;font-size:14.5px;line-height:1.55;color:#4e5968;word-break:keep-all}'
               + '.ab-cta{width:var(--abw);margin:clamp(88px,12vh,128px) auto clamp(64px,8vh,96px);padding:clamp(56px,8vw,96px) 24px;border-radius:28px;background:linear-gradient(135deg,#f2f6ff,#f7f2ff);text-align:center}.ab-cta h2{font-size:clamp(28px,3vw,42px);font-weight:800;letter-spacing:-.035em}.ab-cta p{margin-top:14px;font-size:18px;color:var(--g6)}'
               + '.ab-cta-b{display:flex;flex-wrap:wrap;justify-content:center;gap:10px;margin-top:32px}.ab-btn{display:inline-flex;align-items:center;height:50px;padding:0 24px;border-radius:14px;background:#fff;font-size:16px;font-weight:600;color:var(--g8);box-shadow:inset 0 0 0 1px var(--g2)}.ab-btn.pri{background:var(--bl);color:#fff;box-shadow:none}'
               // 화면 폭별: 1100 이하 = 2장 보임 · 680 이하 = 카드 한 장씩 옆으로(점 표시) · 바로가기 칩 왼쪽 정렬
               + '@media(max-width:1100px){.abs-track{grid-auto-columns:calc((var(--abw) - 24px) / 2)}}'
-              + '@media(max-width:680px){body.ab{--abw:calc(100vw - 40px);--abg:20px}.ab-hero{padding-top:116px}.ab-jump-in{justify-content:flex-start;width:100%;padding:10px 20px}.abs-ctl{display:none}.abs-track{grid-auto-columns:var(--abw);gap:12px;padding-bottom:20px}.abs-dots{display:flex}.ab-t{font-size:18px}.ab-fr{top:56px}.ab-fr.pt{top:44px}}';
+              + '@media(max-width:680px){body.ab{--abw:calc(100vw - 40px);--abg:20px}.ab-hero{padding-top:116px}.ab-jump-in{justify-content:flex-start;width:100%;padding:10px 20px}.abs-ctl{display:none}.abs-track{grid-auto-columns:var(--abw);gap:12px;padding-bottom:20px}.abs-dots{display:flex}.ab-t{font-size:18px}.ab-sh{top:56px}.ab-ms b{font-size:24px}}';
             return '<!doctype html><html lang="ko"><head><script>document.documentElement.classList.add("js")<\/script><meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>'
               + '<title>' + esc(nameKo || nameEn || "포트폴리오") + ' — Projects</title><link rel="icon" href="data:,"/>' + fontHead
               + '<style>' + PSCSS + fontVars + TCSS + ABCSS + '</style></head><body class="tp ab ft-' + FKEY + '"' + (d.hostStudio ? ' data-host="studio"' : '') + '>'
@@ -2681,8 +2683,6 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
             arws.forEach(function (b) { b.addEventListener("click", function () { tr.scrollBy({ left: +b.getAttribute("data-dir") * step(), behavior: reduce ? "auto" : "smooth" }); }); });
             addEventListener("resize", upd); later(upd, 60);
           });
-          // 카드 썸네일 프레임: 세로로 긴 그림(소재·앱 화면)은 휴대폰 모양(.pt), 나머지는 창
-          $$(".ab-im img").forEach(function (im) { var f = function () { if (im.naturalWidth && im.naturalHeight > im.naturalWidth * 1.15) im.closest(".ab-fr").classList.add("pt"); }; if (im.complete) f(); else im.addEventListener("load", f); });
           var jcs = $$(".ab-jc"), abSecs = $$(".abs");
           if (jcs.length) addEventListener("scroll", function () { var m = abSecs.length ? abSecs[0].getAttribute("data-m") : ""; abSecs.forEach(function (x) { if (x.getBoundingClientRect().top < innerHeight * .45) m = x.getAttribute("data-m"); }); jcs.forEach(function (c) { var on = c.getAttribute("data-m") === m; if (on !== c.classList.contains("on")) { c.classList.toggle("on", on); if (on && c.parentNode.scrollWidth > c.parentNode.clientWidth) c.parentNode.scrollTo({ left: c.offsetLeft - 20, behavior: "smooth" }); } }); }, { passive: true });
           document.addEventListener("click", function (e) {
