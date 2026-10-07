@@ -87,11 +87,26 @@
     var m = $("#mdrawer .sb"); if (m) m.outerHTML = sidebar("drawer");
     var t = $(".tb"), k = $(".tk"); if (k) k.remove(); if (t) t.outerHTML = topbar();
   }
+  /* 대시보드 화면 = 숫자 흐리게(기본) + 눈에 띄는 '데모 데이터' 안내 바 · '숫자 보기' 토글 (흐림은 html.nw-blur — 숫자 클릭 목록 창까지) */
+  var BLUR = { "total-dashboard": 1, "kpi-okr": 1, "catalog": 1 };
+  var blurOn = function () { return store.get("blur", true) !== false; };
+  function demoNote(main) {
+    if (!BLUR[route()]) return;
+    var w = main.querySelector(".wrap"), hero = w && w.querySelector(":scope > .hero"); if (!w) return;
+    var html = '<div class="dn" role="note"><span class="dn-tag">DEMO DATA</span><p><b>이 화면의 숫자는 모두 가상 데이터예요.</b> <span>실제 운영 수치로 오해하지 않도록 흐리게 가려 뒀어요. 화면 구성과 동작만 봐 주세요.</span></p><button type="button" class="dn-btn" data-blur-tg>' + (blurOn() ? "숫자 보기" : "다시 가리기") + '</button></div>';
+    if (hero) hero.insertAdjacentHTML("afterend", html); else w.insertAdjacentHTML("afterbegin", html);
+  }
+  document.addEventListener("click", function (e) {
+    var b = e.target.closest("[data-blur-tg]"); if (!b) return;
+    var next = !blurOn(); store.set("blur", next); document.documentElement.classList.toggle("nw-blur", next && !!BLUR[route()]);
+    NW.$$("[data-blur-tg]").forEach(function (x) { x.textContent = next ? "숫자 보기" : "다시 가리기"; });
+  });
   NW.rerender = function (keep) {
     var y = window.scrollY, main = $("#main"); if (!main) return;
     NW.charts.length = 0;
     if (route() === OV) { main.innerHTML = '<div class="wrap ov-wrap">' + NW.OVERVIEW.render() + '</div>'; NW.OVERVIEW.mount(); }
-    else { main.innerHTML = '<div class="wrap">' + NW.PAGES[route()].render() + '</div>'; NW.drawCharts(); }
+    else { main.innerHTML = '<div class="wrap">' + NW.PAGES[route()].render() + '</div>'; NW.drawCharts(); demoNote(main); }
+    document.documentElement.classList.toggle("nw-blur", !!BLUR[route()] && blurOn());
     if (keep !== false) window.scrollTo(0, y);
   };
   var lastMode = null;
