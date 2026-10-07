@@ -416,13 +416,6 @@ html.embed .ed-end{display:none}
 .ed-index button{position:relative}
 .ed-index button::after{content:"";position:absolute;left:0;right:0;top:-1px;height:1px;background:var(--ink);transform:scaleX(0);transform-origin:left;transition:transform .6s cubic-bezier(.65,0,.2,1)}
 .ed-index button:hover::after{transform:scaleX(1)}
-/* 커서 따라다니는 미리보기 · 열어 보기 커서 */
-.ed-peek,.ed-cur{position:fixed;left:0;top:0;z-index:60;pointer-events:none}
-.ed-peek img{display:block;width:300px;aspect-ratio:2000/1164;margin:-96px 0 0 28px;border-radius:10px;object-fit:cover;object-position:top left;box-shadow:0 24px 48px -20px rgba(19,16,20,.35),0 0 0 1px rgba(19,16,20,.06);opacity:0;transform:scale(.85) rotate(-2deg);transition:opacity .3s,transform .5s cubic-bezier(.2,.75,.15,1)}
-.ed-peek.on img{opacity:1;transform:none}
-.ed-cur span{display:grid;place-items:center;width:96px;height:96px;margin:-48px 0 0 -48px;border-radius:50%;background:rgba(19,16,20,.92);font-size:14px;font-weight:600;color:#f7f7f5;opacity:0;transform:scale(.3);transition:opacity .25s,transform .45s cubic-bezier(.2,.75,.15,1)}
-.ed-cur.on span{opacity:1;transform:none}
-@media(hover:hover) and (pointer:fine){.ed .ed-stage{cursor:none}}
 @media(prefers-reduced-motion:reduce){.ed-state .w{color:var(--ink2)}}
 /* 2026-10-07 대시보드 데모 표시 강화 — 숫자 흐림(html.nw-blur, 숫자 클릭 목록 창 · 차트 툴팁까지) + 노란 'DEMO DATA' 안내 바 · 숫자 보기 토글 */
 .nw-blur #main .kv,.nw-blur #main .bk-v,.nw-blur #main .nclk,.nw-blur #main .tnum:not(table):not(thead):not(tbody):not(tr),.nw-blur td.r,.nw-blur #main svg text.ax,.nw-blur .tip div,.nw-blur .md .tnum:not(table),.nw-blur #main .ks,.nw-blur #main .dlt,.nw-blur #main .db-foot,.nw-blur #main .bk-sub,.nw-blur #main .mk-ct span,.nw-blur #main .gl-n,.nw-blur .md-h .tt span{filter:blur(7px);-webkit-user-select:none;user-select:none;transition:filter .35s}
@@ -433,7 +426,6 @@ html.embed .ed-end{display:none}
 .dn-tag::before{content:"";width:7px;height:7px;border-radius:50%;background:#ffd84d;animation:dnPulse 1.6s ease-in-out infinite}
 @keyframes dnPulse{50%{opacity:.25}}
 .dn p{flex:1;min-width:0;margin:0;font-size:14px;line-height:1.5}.dn p b{font-weight:800}.dn p span{opacity:.75}
-.dn-btn{flex:none;height:36px;padding:0 14px;border:0;border-radius:10px;background:#1a1500;font:inherit;font-size:13px;font-weight:700;color:#fff;cursor:pointer}.dn-btn:hover{background:#000}
 .dark .dn{background:#f5c518}
-@media(max-width:640px){.dn{flex-wrap:wrap;gap:10px}.dn p{flex-basis:100%;order:2}.dn-btn{margin-left:auto}}
+@media(max-width:640px){.dn{flex-wrap:wrap;gap:10px}.dn p{flex-basis:100%}}
 @media(prefers-reduced-motion:reduce){.dn-tag::before{animation:none}}
