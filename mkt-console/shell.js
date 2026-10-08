@@ -96,7 +96,7 @@
   function demoNote(main) {
     if (!BLUR[route()]) return;
     var w = main.querySelector(".wrap"), hero = w && w.querySelector(":scope > .hero"); if (!w) return;
-    var html = '<div class="dn" role="note"><span class="dn-tag">DEMO</span><p><b>데모 환경으로 구현한 화면이에요.</b> <span>숫자는 모두 가상 데이터라 흐리게 처리했어요. 화면 구성과 동작을 봐 주세요.</span></p></div>';
+    var html = '<div class="demo-note" role="note"><span class="demo-note-tag">DEMO</span><p><b>데모 환경으로 구현한 화면이에요.</b> <span>숫자는 모두 가상 데이터라 흐리게 처리했어요. 화면 구성과 동작을 봐 주세요.</span></p></div>';
     if (hero) hero.insertAdjacentHTML("afterend", html); else w.insertAdjacentHTML("afterbegin", html);
   }
   NW.rerender = function (keep) {

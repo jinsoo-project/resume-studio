@@ -283,33 +283,183 @@
       + '<div class="lbl">첫 유입 매체별</div><div class="card tw"><table class="t tnum"><thead><tr><th>채널</th><th class="r">사용자</th><th class="r">비중</th><th class="r">가입</th><th class="r">가입률</th><th class="r">결제</th></tr></thead><tbody>' + SRC.map(function (x, i) { var u = Math.round(users * x[1]), su = Math.round(s("sign_up") * x[1] * (1 + (2 - i) * .08)); return '<tr><td><b>' + x[0] + '</b></td><td class="r">' + ko(u) + '</td><td class="r">' + (x[1] * 100).toFixed(1) + '%</td><td class="r">' + ko(su) + '</td><td class="r">' + pct(su, u) + '</td><td class="r">' + ko(Math.round(s("purchase") * x[1])) + '</td></tr>'; }).join("") + '</tbody></table></div>';
   }
 
-  /* ── KPI & OKR Tracker ──────────────────────────────── */
-  var OK = NW.store.get("okr", { tab: "real", weeks: 26 });
-  function okr() {
+  /* ── KPI & OKR Tracker ──────────────────────────────────
+     현황판(KR 카드 · 기간별 추이 일/주/월 · 광고 효율 채널별) · 분석(왜 움직였나: 원인 후보 · 요인/채널 기여도 · 퍼널) · 목표 역산(시뮬레이터).
+     지표는 전부 데모 데이터로 계산. 목표 = 분기 직전 30일 값에서 15% 개선(이하 지표는 15% 낮게). */
+  var OK = NW.store.get("okr", { tab: "board", weeks: 26 });
+  if (OK.tab === "real") OK.tab = "board";
+  var KS = NW.store.get("kr", { gran: "week", view: "table", more: false, kr: "dcac" });
+  var HSH = 0.25; // 광고비 중 호스트 모집 캠페인 비중(가정)
+  var PASSED = { APPROVED: 1, COMPLETED: 1, EXPIRED: 1, CANCELED_NOPAY: 1, CANCELED: 1 };
+  var hCh = function (h) { return h._ch || (h._ch = chOf(parseInt(String(h.host_key).slice(1), 10) * 13 + 3)); };
+  var PCH = ["meta", "google", "naver", "kakao"];
+  function mets(r) {
+    var o = { spend: 0, sp: {}, imp: {}, clk: {}, g: 0, gp: 0, gBy: {}, h: 0, hp: 0, hBy: {}, view: 0, req: 0, appr: 0, payC: 0, pc: 0, pcBy: {}, rev: 0, revBy: {}, seg: { "직영": { req: 0, appr: 0, pay: 0 }, "일반": { req: 0, appr: 0, pay: 0 } } };
+    ACH.forEach(function (k) { o.sp[k] = 0; o.imp[k] = 0; o.clk[k] = 0; o.gBy[k] = 0; o.hBy[k] = 0; o.pcBy[k] = 0; o.revBy[k] = 0; });
+    D.ads.forEach(function (a) { if (inR(a.date, r)) { o.spend += a.spend; o.sp[a.channel] += a.spend; o.imp[a.channel] += a.impressions; o.clk[a.channel] += a.clicks; } });
+    D.guests.forEach(function (g) { if (inR(g.joined_at, r)) { var k = gCh(g); o.g++; o.gBy[k]++; if (PAID[k]) o.gp++; } });
+    D.hosts.forEach(function (h) { if (inR(h.joined_at, r)) { var k = hCh(h); o.h++; o.hBy[k]++; if (PAID[k]) o.hp++; } });
+    D.ga4.forEach(function (x) { if (inR(x.date, r)) o.view += x.view_item; });
+    D.contracts.forEach(function (c) {
+      if (inR(c.created_at, r)) { var s = o.seg[c.seg] || o.seg["일반"]; o.req++; s.req++; if (PASSED[c.status]) { o.appr++; s.appr++; } if (c.status === "COMPLETED") { o.payC++; s.pay++; } }
+      if (c.status === "COMPLETED" && inR(c.completed_at, r)) { var k = cCh(c); o.pcBy[k]++; o.revBy[k] += c.commission; if (PAID[k]) { o.pc++; o.rev += c.commission; } }
+    });
+    var q = function (a, b, m) { return b ? a / b * (m || 1) : null; };
+    o.v = { dcac: q(o.spend * (1 - HSH), o.gp), scac: q(o.spend * HSH, o.hp), cpa: q(o.spend, o.pc), roas: q(o.rev, o.spend, 100), v2r: q(o.req, o.view, 100), r2p: q(o.payC, o.req, 100), appr: q(o.appr, o.req, 100), pay: q(o.payC, o.appr, 100) };
+    return o;
+  }
+  var wonR = function (v) { return v == null ? "—" : won(Math.round(v / 100) * 100); };
+  var KR = [
+    { k: "dcac", n: "수요 확보 CAC", s: "게스트 1명을 데려오는 광고비", f: "게스트 대상 광고비(75%) ÷ 광고로 가입한 게스트", low: 1, fmt: wonR, grp: "획득" },
+    { k: "scac", n: "공급 확보 CAC", s: "호스트 1명을 데려오는 광고비", f: "호스트 모집 광고비(25%) ÷ 광고로 가입한 호스트", low: 1, fmt: wonR, grp: "획득" },
+    { k: "cpa", n: "결제 CPA", s: "광고 기여 결제 1건당 광고비", f: "광고비 ÷ 광고 기여 결제 건수", low: 1, fmt: wonR, grp: "획득" },
+    { k: "roas", n: "페이드 ROAS", s: "광고비 대비 광고 기여 매출", f: "광고 기여 매출(수수료) ÷ 광고비", fmt: function (v) { return v == null ? "—" : v.toFixed(0) + "%"; }, grp: "효율" },
+    { k: "v2r", n: "상세 조회 → 신청율", s: "상세를 본 사람 중 계약 신청", f: "계약 신청 ÷ 상세페이지 조회(view_item)", fmt: function (v) { return v == null ? "—" : v.toFixed(2) + "%"; }, grp: "전환" },
+    { k: "r2p", n: "신청 → 결제율", s: "기간에 들어온 신청 중 결제 완료", f: "결제 완료 ÷ 계약 신청 = 승인율 × 결제율", fmt: function (v) { return v == null ? "—" : v.toFixed(1) + "%"; }, grp: "전환" }
+  ];
+  var SUP = [{ k: "appr", n: "승인율", fmt: function (v) { return v == null ? "—" : v.toFixed(1) + "%"; } }, { k: "pay", n: "결제율", fmt: function (v) { return v == null ? "—" : v.toFixed(1) + "%"; } }];
+  var dR = function (a, b) { return { s: NW.dstr(a), e: NW.dstr(b) }; };
+  var T = NW.TODAY, L30 = dR(NW.addD(T, -29), T), P30 = dR(NW.addD(T, -59), NW.addD(T, -30));
+  var QS = new Date(T.getFullYear(), Math.floor(T.getMonth() / 3) * 3, 1), QE = new Date(QS.getFullYear(), QS.getMonth() + 3, 0), BASE = dR(NW.addD(QS, -30), NW.addD(QS, -1));
+  var QN = Math.floor(QS.getMonth() / 3) + 1;
+  var _cache = {}; function M(r) { var k = r.s + r.e; return _cache[k] || (_cache[k] = mets(r)); }
+  function targets() {
+    var b = M(BASE).v, t = {};
+    KR.forEach(function (x) { var v = b[x.k] || 0; t[x.k] = x.low ? Math.round(v * .85 / 1000) * 1000 : x.k === "v2r" ? Math.round(v * 1.15 * 100) / 100 : Math.round(v * 1.15 * 10) / 10; });
+    SUP.forEach(function (x) { t[x.k] = Math.min(95, Math.round((b[x.k] || 0) * 1.08 * 10) / 10); });
+    return t;
+  }
+  var lowK = function (k) { return KR.some(function (x) { return x.k === k && x.low; }); };
+  var better = function (k, a, b) { return a != null && b != null && (lowK(k) ? a < b : a > b); };
+  var meets = function (k, v, t) { return v != null && (lowK(k) ? v <= t : v >= t); };
+  function status(k, cur, start, tg) {
+    if (meets(k, cur, tg)) return ["달성", "p-em", "ok"];
+    if (better(k, cur, start)) return ["순항", "p-sky", "go"];
+    var gap = start ? Math.abs(cur - start) / start : 0;
+    return gap > .15 ? ["미달 위험", "p-red", "bad"] : ["주의", "p-amber", "warn"];
+  }
+  function isoW(d) { var t = new Date(d); t.setHours(0, 0, 0, 0); t.setDate(t.getDate() + 3 - (t.getDay() + 6) % 7); var w1 = new Date(t.getFullYear(), 0, 4); return 1 + Math.round(((t - w1) / 864e5 - 3 + (w1.getDay() + 6) % 7) / 7); }
+  function periods() {
+    var g = KS.gran, n = g === "day" ? 14 : g === "week" ? 10 : 6, from = g === "day" ? NW.addD(T, -13) : g === "week" ? NW.addD(NW.monday(T), -63) : new Date(T.getFullYear(), T.getMonth() - 5, 1);
+    return NW.buckets(dR(from, T), g).slice(-n).reverse().map(function (b) {
+      var s = NW.parseD(b.s), e = NW.parseD(b.e), live = e >= T;
+      var lab = g === "day" ? md(b.s) + " (" + "일월화수목금토"[s.getDay()] + ")" : g === "week" ? "W" + isoW(s) + " (" + md(b.s) + "~" + md(b.e) + ")" : (s.getMonth() + 1) + "월";
+      return { r: { s: b.s, e: live ? NW.dstr(T) : b.e }, lab: lab, live: live };
+    });
+  }
+  var cls = function (k, v, tg, st) { return v == null ? "" : meets(k, v, tg) ? "kr-g" : better(k, st, v) ? "kr-r" : ""; };
+
+  function board() {
+    var tg = targets(), cur = M(L30).v, st = M(BASE).v, P = periods(), qProg = Math.round((T - QS) / (QE - QS) * 100);
+    var card = function (x, i) {
+      var s = status(x.k, cur[x.k], st[x.k], tg[x.k]), span = tg[x.k] - st[x.k], p = span ? Math.max(0, Math.min(1, (cur[x.k] - st[x.k]) / span)) : 0;
+      return '<div class="card kr"><div class="kr-h"><span class="kr-no">KR' + (i + 1) + '</span><b>' + x.n + '</b><span class="pill sm ' + s[1] + '">' + s[0] + '</span></div>'
+        + '<div class="kr-t"><span class="tnum">' + x.fmt(tg[x.k]) + '</span><small>' + (x.low ? "이하" : "목표") + '</small></div>'
+        + '<div class="kr-c"><span>지금 · 최근 30일</span><b class="tnum ' + (s[2] === "ok" ? "kr-g" : s[2] === "bad" ? "kr-r" : "") + '">' + x.fmt(cur[x.k]) + '</b><small class="tnum">시작 ' + x.fmt(st[x.k]) + '</small></div>'
+        + '<div class="kr-bar"><i class="' + s[2] + '" style="width:' + Math.max(3, p * 100).toFixed(0) + '%"></i><em style="left:' + qProg + '%" title="분기 경과 ' + qProg + '%"></em></div>'
+        + '<p class="kr-f">' + x.f + '</p></div>';
+    };
+    var cols = KR.concat(SUP);
+    var row = function (lab, v, cl, live) { return '<tr class="' + cl + '"><td>' + lab + (live ? ' <small class="kr-live">진행 중</small>' : '') + '</td>' + cols.map(function (x) { var val = v[x.k]; return '<td class="r tnum ' + (cl === "kr-tg" ? "" : cls(x.k, val, tg[x.k], st[x.k])) + '">' + x.fmt(val) + (cl === "kr-tg" && x.low ? ' <small>이하</small>' : '') + '</td>'; }).join("") + '</tr>'; };
+    var shown = KS.more ? P : P.slice(0, 6);
+    var table = '<div class="card tw"><table class="t kr-tb" style="min-width:1100px"><thead><tr><th>기간</th>' + cols.map(function (x) { return '<th class="r">' + x.n + '</th>'; }).join("") + '</tr></thead><tbody>'
+      + row("목표", tg, "kr-tg") + row("최근 30일 (" + md(L30.s) + "~" + md(L30.e) + ")", cur, "kr-now") + shown.map(function (p) { return row(p.lab, M(p.r).v, "", p.live); }).join("") + '</tbody></table>'
+      + (P.length > 6 ? '<button class="kr-more" data-kr-more>' + (KS.more ? "접기" : "더보기 (" + (P.length - 6) + "개 더)") + '</button>' : '') + '</div>';
+    var chr = P.slice().reverse();
+    var graphs = '<div class="g3">' + KR.map(function (x) { return NW.chartCard(x.n, { labels: chr.map(function (p) { return p.lab.split(" (")[0]; }), h: 170, fmt: function (v) { return x.fmt(v); }, series: [{ name: "실적", type: "line", color: "var(--accent)", values: chr.map(function (p) { return M(p.r).v[x.k] || 0; }) }, { name: "목표", type: "line", dash: true, color: "#e8590c", values: chr.map(function () { return tg[x.k]; }) }] }); }).join("") + '</div>';
+    /* 광고 효율 · 채널별 (최근 30일 vs 직전 30일) */
+    var A = M(L30), B = M(P30);
+    var dlt = function (a, b, low) { if (a == null || b == null || !b) return ''; var d = (a - b) / b * 100, good = low ? d < 0 : d > 0; return ' <span class="dlt ' + (Math.abs(d) < .5 ? "eq" : good ? "up" : "dn") + '">' + (d >= 0 ? "▲" : "▼") + Math.abs(d).toFixed(0) + '%</span>'; };
+    var ch = function (o, k) { var sp = o.sp[k]; return { sp: sp, ctr: o.imp[k] ? o.clk[k] / o.imp[k] * 100 : null, cpc: o.clk[k] ? sp / o.clk[k] : null, g: o.gBy[k], cac: o.gBy[k] ? sp * (1 - HSH) / o.gBy[k] : null, pc: o.pcBy[k], cpa: o.pcBy[k] ? sp / o.pcBy[k] : null, roas: sp ? o.revBy[k] / sp * 100 : null }; };
+    var adT = '<div class="card tw"><table class="t" style="min-width:980px"><thead><tr><th>채널</th><th class="r">광고비</th><th class="r">CTR</th><th class="r">CPC</th><th class="r">광고 가입</th><th class="r">CAC</th><th class="r">광고 결제</th><th class="r">CPA</th><th class="r">ROAS</th></tr></thead><tbody>'
+      + PCH.map(function (k) { var a = ch(A, k), b = ch(B, k); return '<tr><td><i class="tdot" style="display:inline-block;margin-right:8px;background:' + ACHC[k] + '"></i><b>' + ACHN[k] + '</b></td><td class="r tnum">' + won(a.sp) + dlt(a.sp, b.sp) + '</td><td class="r tnum">' + (a.ctr == null ? "—" : a.ctr.toFixed(2) + "%") + dlt(a.ctr, b.ctr) + '</td><td class="r tnum">' + (a.cpc == null ? "—" : won(Math.round(a.cpc))) + dlt(a.cpc, b.cpc, 1) + '</td><td class="r tnum">' + ko(a.g) + '명</td><td class="r tnum ' + cls("dcac", a.cac, tg.dcac, st.dcac) + '">' + wonR(a.cac) + dlt(a.cac, b.cac, 1) + '</td><td class="r tnum">' + ko(a.pc) + '건</td><td class="r tnum ' + cls("cpa", a.cpa, tg.cpa, st.cpa) + '">' + wonR(a.cpa) + dlt(a.cpa, b.cpa, 1) + '</td><td class="r tnum ' + cls("roas", a.roas, tg.roas, st.roas) + '">' + (a.roas == null ? "—" : a.roas.toFixed(0) + "%") + dlt(a.roas, b.roas) + '</td></tr>'; }).join("")
+      + '</tbody></table></div>';
+    return '<div class="kr-o"><span class="kr-ob">O</span><div><b>' + T.getFullYear() % 100 + 'Q' + QN + ' · 광고 효율을 지키면서 매달 결제를 늘린다</b><small>KR 6개 · 분기 ' + qProg + '% 지남 · 목표 ' + md(NW.dstr(QE)) + ' · 시작값 = 분기 직전 30일 (' + md(BASE.s) + '~' + md(BASE.e) + ')</small></div></div>'
+      + '<div class="kr-grid">' + KR.map(card).join("") + '</div>'
+      + '<div class="sec-h" style="margin-top:28px"><h2>기간별 추이</h2><span class="hint">초록 = 목표 달성 · 빨강 = 시작값보다 나쁨 · 주 = 월~일</span><span style="margin-left:auto;display:flex;gap:8px">' + NW.segHtml([["day", "일"], ["week", "주"], ["month", "월"]], KS.gran, "data-kr-gran") + NW.segHtml([["table", "표"], ["graph", "그래프"]], KS.view, "data-kr-view") + '</span></div>'
+      + (KS.view === "graph" ? graphs : table)
+      + '<div class="sec-h" style="margin-top:28px"><h2>광고 효율 · 채널별</h2><span class="hint">최근 30일 · 괄호 안 화살표 = 직전 30일 대비 · CAC/CPA/ROAS 색은 KR 목표 기준</span></div>' + adT;
+  }
+
+  /* 분석 · 왜 움직였나 — 최근 30일 vs 직전 30일. 비율 지표(분자/분모)를 요인·채널별 '그대로였다면' 값으로 나눠 기여도를 계산 */
+  function parts(k, o) {
+    if (k === "dcac") return { n: o.spend * (1 - HSH), d: o.gp, nC: function (c) { return o.sp[c] * (1 - HSH); }, dC: function (c) { return o.gBy[c]; }, nN: "광고비", dN: "광고 가입 게스트" };
+    if (k === "scac") return { n: o.spend * HSH, d: o.hp, nC: function (c) { return o.sp[c] * HSH; }, dC: function (c) { return o.hBy[c]; }, nN: "호스트 모집 광고비", dN: "광고 가입 호스트" };
+    if (k === "cpa") return { n: o.spend, d: o.pc, nC: function (c) { return o.sp[c]; }, dC: function (c) { return o.pcBy[c]; }, nN: "광고비", dN: "광고 기여 결제" };
+    if (k === "roas") return { n: o.rev * 100, d: o.spend, nC: function (c) { return o.revBy[c] * 100; }, dC: function (c) { return o.sp[c]; }, nN: "광고 기여 매출", dN: "광고비" };
+    if (k === "v2r") return { n: o.req * 100, d: o.view, nN: "계약 신청", dN: "상세 조회" };
+    return { n: o.payC * 100, d: o.req, nN: "결제 완료", dN: "계약 신청" };
+  }
+  function drivers(k) {
+    var a = M(L30), b = M(P30), pa = parts(k, a), pb = parts(k, b), v1 = pa.d ? pa.n / pa.d : 0, v0 = pb.d ? pb.n / pb.d : 0, out = [];
+    var cf = function (n, d) { return d ? n / d : v1; };
+    out.push({ nm: pa.nN, a: pa.n, b: pb.n, imp: v1 - cf(pb.n, pa.d), kind: "n" }, { nm: pa.dN, a: pa.d, b: pb.d, imp: v1 - cf(pa.n, pb.d), kind: "d" });
+    if (pa.nC) PCH.forEach(function (c) { out.push({ nm: ACHN[c], ch: c, a: pa.dC(c) ? pa.nC(c) / pa.dC(c) : null, b: pb.dC(c) ? pb.nC(c) / pb.dC(c) : null, imp: v1 - cf(pa.n - pa.nC(c) + pb.nC(c), pa.d - pa.dC(c) + pb.dC(c)), kind: "c" }); });
+    if (k === "r2p") { out.push({ nm: "승인율", a: a.v.appr, b: b.v.appr, imp: (a.v.appr - b.v.appr) * (b.v.pay || 0) / 100, kind: "s" }, { nm: "결제율", a: a.v.pay, b: b.v.pay, imp: (a.v.pay - b.v.pay) * (a.v.appr || 0) / 100, kind: "s" });
+      ["직영", "일반"].forEach(function (s) { var x = a.seg[s], y = b.seg[s]; out.push({ nm: s + " 지점", a: x.req ? x.pay / x.req * 100 : null, b: y.req ? y.pay / y.req * 100 : null, imp: v1 - cf(a.payC * 100 - x.pay * 100 + y.pay * 100, a.req - x.req + y.req), kind: "c" }); }); }
+    var X = KR.filter(function (z) { return z.k === k; })[0], p1 = function (v) { return v == null ? "—" : v.toFixed(1) + "%"; };
+    out.forEach(function (r) {
+      var f = r.kind === "c" ? (k === "r2p" ? p1 : X.fmt) : r.kind === "s" ? p1 : /광고비|매출/.test(r.nm) ? function (v) { return won(v / (k === "roas" && r.kind === "n" ? 100 : 1)); } : function (v) { return ko(v / ((k === "v2r" || k === "r2p") && r.kind === "n" ? 100 : 1)); };
+      r.tb = f(r.b); r.ta = f(r.a);
+    });
+    return { v1: v1, v0: v0, list: out };
+  }
+  var LINK = { meta: ["#/meta-ads", "META 빌더에서 소재 · 타겟 점검"], naver: ["#/naver-sa", "NAVER SA에서 키워드 입찰 점검"], google: ["#/search-kw", "키워드 도구에서 검색 수요 확인"], kakao: ["#/ad-requests", "소재 교체 요청 만들기"] };
+  function causes() {
+    var out = [];
+    KR.forEach(function (x) {
+      var d = drivers(x.k), ch = d.v1 - d.v0; if (!d.v0 || Math.abs(ch) / d.v0 < .02) return;
+      var bad = lowK(x.k) ? ch > 0 : ch < 0;
+      var same = d.list.filter(function (r) { return r.kind === "c" && r.ch && Math.sign(r.imp) === Math.sign(ch); }), tot = same.reduce(function (t, r) { return t + Math.abs(r.imp); }, 0);
+      same.sort(function (p, q) { return Math.abs(q.imp) - Math.abs(p.imp); }).slice(0, 1).forEach(function (r) {
+        var share = tot ? Math.abs(r.imp) / tot * 100 : 0, up = r.a > r.b;
+        out.push({ w: Math.abs(ch) / d.v0 * share, bad: bad, kr: x, txt: '<b>' + ACHN[r.ch] + '</b> 채널의 ' + ({ dcac: "게스트 CAC", scac: "호스트 CAC", cpa: "CPA", roas: "ROAS" }[x.k]) + '가 ' + (up ? "올라" : "내려") + ' ' + x.n + '를 ' + (bad ? "목표에서 밀어낸" : "목표 쪽으로 당긴") + ' 가장 큰 요인이에요 <span class="faint">(같은 방향 영향 중 <b class="tnum">' + share.toFixed(0) + '%</b>)</span>', ev: [x.fmt(r.b) + " → " + x.fmt(r.a)], link: LINK[r.ch] });
+      });
+      if (x.k === "r2p") { var s = d.list.filter(function (r) { return r.kind === "s"; }).sort(function (p, q) { return Math.abs(q.imp) - Math.abs(p.imp); })[0]; if (s) out.push({ w: Math.abs(ch) / d.v0 * 80, bad: bad, kr: x, txt: '<b>' + s.nm + '</b>이 ' + (s.a > s.b ? "올라" : "떨어져") + ' 신청 → 결제율이 ' + (ch > 0 ? "좋아졌어요" : "나빠졌어요"), ev: [s.b.toFixed(1) + "% → " + s.a.toFixed(1) + "%"], link: s.nm === "승인율" ? ["#/total-dashboard", "호스트 탭에서 응답 지연 확인"] : ["#/total-dashboard", "결제 대기 건 확인"] }); }
+      if (x.k === "v2r") { var vw = d.list[1], rq = d.list[0], gv = vw.b ? (vw.a - vw.b) / vw.b * 100 : 0, gr = rq.b ? (rq.a - rq.b) / rq.b * 100 : 0; out.push({ w: Math.abs(ch) / d.v0 * 70, bad: bad, kr: x, txt: '계약 신청 증가율이 상세 조회 증가율보다 ' + (gr > gv ? "높아" : "낮아") + ' 상세 조회 → 신청율이 ' + (ch > 0 ? "올랐어요" : "떨어졌어요"), ev: ["조회 " + (gv >= 0 ? "+" : "") + gv.toFixed(1) + "%", "신청 " + (gr >= 0 ? "+" : "") + gr.toFixed(1) + "%"], link: ["#/catalog", "카탈로그 · 상세 정보 품질 점검"] }); }
+    });
+    return out.sort(function (p, q) { return (q.bad - p.bad) || (q.w - p.w); }).slice(0, 5);
+  }
+  function why() {
+    var tg = targets(), x = KR.filter(function (k) { return k.k === KS.kr; })[0] || KR[0], d = drivers(x.k), ch = d.v1 - d.v0, bad = lowK(x.k) ? ch > 0 : ch < 0, C = causes();
+    var mx = Math.max.apply(null, d.list.map(function (r) { return Math.abs(r.imp); }).concat([1e-9]));
+    var bar = function (r) { var good = lowK(x.k) ? r.imp < 0 : r.imp > 0, w = Math.abs(r.imp) / mx * 50; return '<div class="kd-row"><span class="kd-n">' + r.nm + '</span><span class="kd-v tnum">' + r.tb + ' → ' + r.ta + '</span><span class="kd-bar"><i class="' + (good ? "g" : "r") + '" style="' + (r.imp < 0 ? "right:50%" : "left:50%") + ';width:' + w.toFixed(1) + '%"></i></span><span class="kd-i tnum ' + (good ? "kr-g" : "kr-r") + '">' + (r.imp >= 0 ? "+" : "−") + x.fmt(Math.abs(r.imp)).replace("—", "0") + '</span></div>'; };
+    var A = M(L30), B = M(P30);
+    var fun = [["상세 조회", A.view, B.view], ["계약 신청", A.req, B.req], ["승인", A.appr, B.appr], ["결제 완료", A.payC, B.payC]];
+    return '<div class="kr-cause"><div class="sec-h" style="margin-top:0"><h2>원인 후보</h2><span class="hint">최근 30일 (' + md(L30.s) + '~' + md(L30.e) + ') vs 직전 30일 · 목표에서 멀어지게 한 것부터</span></div>'
+      + (C.length ? '<ol class="kc">' + C.map(function (c, i) { return '<li class="' + (c.bad ? "bad" : "good") + '"><i>' + (i + 1) + '</i><div><span class="kc-kr">' + c.kr.n + ' · ' + (c.bad ? "목표에서 멀어짐" : "목표에 가까워짐") + '</span><p>' + c.txt + '</p><div class="mchips">' + c.ev.map(function (e) { return '<span class="tag tnum">' + e + '</span>'; }).join("") + '</div></div>' + (c.link ? '<a class="ov-go" href="' + c.link[0] + '">' + c.link[1] + ' <span>→</span></a>' : '') + '</li>'; }).join("") + '</ol>' : '<p class="faint">직전 30일과 비교해 크게 움직인 지표가 없어요.</p>') + '</div>'
+      + '<div class="sec-h" style="margin-top:28px"><h2>KR별로 쪼개 보기</h2><span class="hint">막대 = 그 요인만 직전 30일 값이었다면 KR이 얼마나 달랐을지</span></div>'
+      + '<div style="margin-bottom:12px">' + NW.segHtml(KR.map(function (k) { return [k.k, k.n]; }), x.k, "data-kr-pick", true) + '</div>'
+      + '<div class="g2 kd-g"><div class="card kd"><div class="kd-top"><div><small>' + x.n + ' · 직전 30일 → 최근 30일</small><b class="tnum">' + x.fmt(d.v0) + ' → ' + x.fmt(d.v1) + '</b></div><span class="pill ' + (bad ? "p-red" : "p-em") + '">' + (bad ? "목표에서 멀어짐" : "목표에 가까워짐") + '</span></div>'
+      + '<div class="kd-sec">요인</div>' + d.list.filter(function (r) { return r.kind === "n" || r.kind === "d" || r.kind === "s"; }).map(bar).join("")
+      + (d.list.some(function (r) { return r.kind === "c"; }) ? '<div class="kd-sec">' + (x.k === "r2p" ? "지점 유형별" : "채널별") + '</div>' + d.list.filter(function (r) { return r.kind === "c"; }).map(bar).join("") : '')
+      + '<p class="kr-f" style="margin-top:12px">' + x.f + ' · 목표 ' + x.fmt(tg[x.k]) + (x.low ? " 이하" : "") + '</p></div>'
+      + '<div class="card kd"><div class="kd-top"><div><small>퍼널 · 직전 30일 → 최근 30일</small><b>어디서 새고 있나</b></div></div>'
+      + fun.map(function (f, i) { var r1 = i ? f[1] / fun[i - 1][1] * 100 : 100, r0 = i ? f[2] / fun[i - 1][2] * 100 : 100, w = f[1] / fun[0][1] * 100; return '<div class="kf"><div class="kf-h"><b>' + f[0] + '</b><span class="tnum">' + ko(f[1]) + '</span>' + (i ? '<em class="tnum ' + (r1 >= r0 ? "kr-g" : "kr-r") + '">전 단계의 ' + r1.toFixed(i === 1 ? 2 : 1) + '% (' + (r1 >= r0 ? "▲" : "▼") + Math.abs(r1 - r0).toFixed(i === 1 ? 2 : 1) + '%p)</em>' : '') + '</div><div class="kf-b"><i style="width:' + Math.max(1.5, Math.sqrt(w) * 10).toFixed(1) + '%"></i></div></div>'; }).join("") + '</div></div>';
+  }
+
+  function model() {
     var W = OK.weeks, mon = NW.monday(NW.TODAY), wk = []; for (var i = W - 1; i >= 0; i--) { var s = NW.addD(mon, -7 * i); wk.push({ s: NW.dstr(s), e: NW.dstr(NW.addD(s, 6)), label: md(NW.dstr(s)) }); }
     var pub = wk.map(function (w) { return D.listings.filter(function (l) { return l.registered_at <= w.e && l.operation_status === "PUBLISHED"; }).length; }), net = pub.map(function (v, i) { return i ? v - pub[i - 1] : 0; });
-    var req = wk.map(function (w) { return D.contracts.filter(function (c) { return inR(c.created_at, w); }).length; }), pay = wk.map(function (w) { return D.contracts.filter(function (c) { return c.status === "COMPLETED" && inR(c.completed_at, w); }).length; });
     var avgNet = net.slice(-8).reduce(function (t, v) { return t + v; }, 0) / 8, acc = (net.slice(-4).reduce(function (t, v) { return t + v; }, 0) - net.slice(-8, -4).reduce(function (t, v) { return t + v; }, 0)) / 4;
-    var labels = wk.map(function (w) { return w.label; });
-    var head = NW.hero("okr", "DASHBOARD · 목표", "KPI & OKR Tracker", "실측 페이스로 목표 달성 시점을 역산해요. 슬라이더를 움직이면 바로 다시 계산돼요.", NW.segHtml([["real", "실측 추이"], ["model", "모델"]], OK.tab, "data-okr-tab", true));
-    if (OK.tab === "real") {
-      return head + '<div style="margin-top:18px;display:flex;gap:8px">' + NW.segHtml([["12", "12주"], ["26", "26주"], ["52", "52주"]], String(W), "data-okr-w") + '</div>'
-        + '<div style="display:grid;gap:12px;margin-top:12px;grid-template-columns:minmax(220px,280px) 1fr">' + '<div style="display:flex;flex-direction:column;gap:10px">' + kpi("현재 게시 룸카드", ko(pub[pub.length - 1]) + "개", "이번 주 기준", "big") + kpi("주간 평균 순증", avgNet.toFixed(1) + "개", "최근 8주") + kpi("가속도", (acc >= 0 ? "+" : "") + acc.toFixed(1) + "개/주", "최근 4주 − 이전 4주", acc >= 0 ? "acc" : "bad") + '</div>'
-        + '<div class="g2">' + NW.chartCard("룸카드 추이", { labels: labels, h: 190, series: [{ name: "게시 룸카드", type: "line", color: "var(--accent)", values: pub }] }) + NW.chartCard("주간 순증", { labels: labels, h: 190, series: [{ name: "순증", color: "var(--host)", values: net }] }) + NW.chartCard("계약신청", { labels: labels, h: 190, series: [{ name: "신청", color: "var(--c2)", values: req }] }) + NW.chartCard("결제", { labels: labels, h: 190, series: [{ name: "결제", color: "var(--good)", values: pay }] }) + '</div></div>';
-    }
-    var M = NW.store.get("okr-model", null) || { net: +avgNet.toFixed(1), acc: +acc.toFixed(1), reqR: 2.1, appr: 74, payR: 64, goal: 60, goalDate: NW.dstr(NW.addD(NW.TODAY, 180)) };
-    var weeksLeft = Math.max(1, Math.round((NW.parseD(M.goalDate) - NW.TODAY) / (7 * 864e5))), P = pub[pub.length - 1], proj = [], cur = P, n = M.net;
-    for (var k = 0; k < weeksLeft; k++) { n += M.acc / 4; cur += Math.max(0, n); proj.push(cur); }
-    var monthPay = cur * M.reqR * 4.3 / 10 * (M.appr / 100) * (M.payR / 100) * 10 / 4.3 * 4.3 / 10 * 10;
-    var need = M.goal / Math.max(.0001, M.reqR * 4.3 / 10 * (M.appr / 100) * (M.payR / 100));
-    var sl = function (k2, l, min, max, step, u) { return '<label class="fld"><span>' + l + ' <b class="tnum" style="color:var(--text)">' + M[k2] + u + '</b></span><input type="range" min="' + min + '" max="' + max + '" step="' + step + '" value="' + M[k2] + '" data-okr-m="' + k2 + '" style="accent-color:var(--accent)"></label>'; };
+    var M2 = NW.store.get("okr-model", null) || { net: +avgNet.toFixed(1), acc: +acc.toFixed(1), reqR: 2.1, appr: 74, payR: 64, goal: 60, goalDate: NW.dstr(NW.addD(NW.TODAY, 180)) };
+    var weeksLeft = Math.max(1, Math.round((NW.parseD(M2.goalDate) - NW.TODAY) / (7 * 864e5))), P = pub[pub.length - 1], proj = [], cur = P, n = M2.net;
+    for (var k = 0; k < weeksLeft; k++) { n += M2.acc / 4; cur += Math.max(0, n); proj.push(cur); }
+    var need = M2.goal / Math.max(.0001, M2.reqR * 4.3 / 10 * (M2.appr / 100) * (M2.payR / 100));
+    var sl = function (k2, l, min, max, step, u) { return '<label class="fld"><span>' + l + ' <b class="tnum" style="color:var(--text)">' + M2[k2] + u + '</b></span><input type="range" min="' + min + '" max="' + max + '" step="' + step + '" value="' + M2[k2] + '" data-okr-m="' + k2 + '" style="accent-color:var(--accent)"></label>'; };
     var chip = function (t, v, kind) { return '<span class="pill ' + (kind === "var" ? "p-blue" : kind === "fix" ? "p-gray" : "p-em") + '">' + t + ' <b class="tnum">' + v + '</b></span>'; };
-    return head + '<div style="display:grid;gap:12px;margin-top:18px;grid-template-columns:minmax(260px,340px) 1fr"><div class="card" style="padding:16px;display:flex;flex-direction:column;gap:14px">'
+    return '<p class="fl-note" style="margin:0 0 12px">실측 페이스(게시 룸카드 순증 · 신청률 · 승인율 · 결제율)로 목표 월 결제를 언제 달성할지 역산해요. 슬라이더를 움직이면 바로 다시 계산돼요.</p><div style="display:grid;gap:12px;grid-template-columns:minmax(260px,340px) 1fr"><div class="card" style="padding:16px;display:flex;flex-direction:column;gap:14px">'
       + sl("net", "주간 순증", 0, 20, .1, "개") + sl("acc", "가속(주당 변화)", -3, 3, .1, "") + sl("reqR", "방당 월 신청률", .5, 5, .1, "건/10개") + sl("appr", "승인율", 30, 100, 1, "%") + sl("payR", "결제율", 30, 100, 1, "%")
       + '<button class="btn" data-okr-reset style="align-self:flex-start">' + ic("refresh") + '전부 실측으로</button><hr style="border:0;border-top:1px solid var(--border);margin:0">'
-      + '<label class="fld"><span>목표일</span><input class="inp" type="date" value="' + M.goalDate + '" data-okr-m="goalDate"></label><label class="fld"><span>목표 월 결제(건)</span><input class="inp" type="number" value="' + M.goal + '" data-okr-m="goal"></label></div>'
+      + '<label class="fld"><span>목표일</span><input class="inp" type="date" value="' + M2.goalDate + '" data-okr-m="goalDate"></label><label class="fld"><span>목표 월 결제(건)</span><input class="inp" type="number" value="' + M2.goal + '" data-okr-m="goal"></label></div>'
       + '<div style="display:flex;flex-direction:column;gap:12px"><div class="card" style="padding:14px 16px;display:flex;flex-wrap:wrap;gap:8px">' + chip("목표일까지", weeksLeft + "주", "fix") + chip("예상 룸카드", ko(cur) + "개", "var") + chip("목표 달성에 필요한 룸카드", ko(need) + "개", "meas") + chip("판정", cur >= need ? "달성 가능 ✓" : "부족 " + ko(need - cur) + "개", cur >= need ? "meas" : "var") + '</div>'
       + NW.chartCard("룸카드 예상 경로", { labels: proj.map(function (v, i) { return md(NW.dstr(NW.addD(mon, 7 * (i + 1)))); }), h: 260, series: [{ name: "예상 룸카드", type: "line", color: "var(--accent)", values: proj }, { name: "필요 룸카드", type: "line", dash: true, color: "var(--danger)", values: proj.map(function () { return need; }) }] }, "파란 칩 = 조정값 · 회색 = 고정 · 초록 = 실측 기반") + '</div></div>';
+  }
+  function okr() {
+    _cache = {};
+    var head = NW.hero("okr", "DASHBOARD · 목표", "KPI & OKR Tracker", "분기 목표(OKR) 대비 지금 어디쯤인지, 왜 움직였는지를 일 · 주 · 월로 봐요. 광고 CAC · CPA · ROAS와 전환 퍼널을 같은 기준으로 묶었어요.");
+    var tabs = '<div class="kr-tabs">' + [["board", "현황판"], ["why", "분석 · 왜 움직였나"], ["model", "목표 역산"]].map(function (t) { return '<button type="button" class="' + (OK.tab === t[0] ? "on" : "") + '" data-okr-tab="' + t[0] + '">' + t[1] + '</button>'; }).join("") + '</div>';
+    return head + tabs + (OK.tab === "why" ? why() : OK.tab === "model" ? model() : board());
   }
 
   /* ── 이벤트 ─────────────────────────────────────────── */
@@ -326,8 +476,12 @@
     if ((b = e.target.closest("[data-margin]"))) { NW.layer('<div class="ov"><div class="md sm"><div class="md-h"><div class="tt"><b>실마진율 설정</b><span>ROI(실마진) = (결제금액 × 마진율 − 광고비) ÷ 광고비</span></div><button class="xb" data-close>' + ic("x") + '</button></div><div style="padding:18px 20px"><label class="fld"><span>마진율(%)</span><input class="inp" type="number" id="nwMargin" value="' + NW.store.get("margin", 18) + '"></label></div><div class="md-f"><button class="btn" data-close>취소</button><button class="btn-p" data-margin-save>저장</button></div></div></div>'); return; }
     if ((b = e.target.closest("[data-margin-save]"))) { NW.store.set("margin", Math.max(0, +document.getElementById("nwMargin").value || 0)); NW.closeLayer(); NW.rerender(); NW.toast("마진율을 저장했어요"); return; }
     if ((b = e.target.closest("[data-spend-add]"))) { NW.layer('<div class="dw"><div class="bd"></div><aside><div class="dw-h"><b>광고비 수기 입력</b><button class="xb" data-close>' + ic("x") + '</button></div><div class="dw-b"><label class="fld"><span>날짜</span><input class="inp" type="date" value="' + NW.dstr(NW.TODAY) + '"></label><label class="fld"><span>채널</span><select class="inp"><option>Meta</option><option>Google</option><option>Naver</option><option>Kakao</option><option>기타</option></select></label><label class="fld"><span>금액(원)</span><input class="inp" type="number" placeholder="예: 350000"></label><p style="margin:0;font-size:11.5px;color:var(--faint)">데모에서는 저장되지 않아요.</p></div><div class="dw-f"><button class="btn" data-close>닫기</button><button class="btn-p" data-close onclick="NW.toast(\'데모: 입력 내용은 저장되지 않아요\')">행 추가</button></div></aside></div>'); return; }
-    if ((b = e.target.closest("[data-okr-tab]"))) { OK.tab = b.getAttribute("data-okr-tab"); NW.store.set("okr", OK); NW.rerender(); return; }
+    if ((b = e.target.closest("[data-okr-tab]"))) { OK.tab = b.getAttribute("data-okr-tab"); NW.store.set("okr", OK); NW.rerender(true); return; }
     if ((b = e.target.closest("[data-okr-w]"))) { OK.weeks = +b.getAttribute("data-okr-w"); NW.store.set("okr", OK); NW.rerender(); return; }
+    if ((b = e.target.closest("[data-kr-gran]"))) { KS.gran = b.getAttribute("data-kr-gran"); KS.more = false; NW.store.set("kr", KS); NW.rerender(true); return; }
+    if ((b = e.target.closest("[data-kr-view]"))) { KS.view = b.getAttribute("data-kr-view"); NW.store.set("kr", KS); NW.rerender(true); return; }
+    if ((b = e.target.closest("[data-kr-pick]"))) { KS.kr = b.getAttribute("data-kr-pick"); NW.store.set("kr", KS); NW.rerender(true); return; }
+    if (e.target.closest("[data-kr-more]")) { KS.more = !KS.more; NW.store.set("kr", KS); NW.rerender(true); return; }
     if ((b = e.target.closest("[data-okr-reset]"))) { NW.store.set("okr-model", null); NW.rerender(); return; }
     if ((b = e.target.closest("[data-w4]")) && e.target.tagName === "SUMMARY") { setTimeout(function () { NW.store.set("w4", b.open); }, 0); }
   });
