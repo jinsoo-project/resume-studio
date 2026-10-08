@@ -3,30 +3,92 @@
   "cleanUrls": true,
   "trailingSlash": false,
   "redirects": [
-    { "source": "/", "destination": "/studio.html", "permanent": false },
-    { "source": "/:slug/projects-airbridge", "destination": "/:slug/projects", "permanent": false },
-    { "source": "/p/:slug/projects-airbridge", "destination": "/p/:slug/projects", "permanent": false }
+    {
+      "source": "/",
+      "destination": "/studio.html",
+      "permanent": false
+    },
+    {
+      "source": "/:slug/projects-airbridge",
+      "destination": "/:slug/projects",
+      "permanent": false
+    },
+    {
+      "source": "/p/:slug/projects-airbridge",
+      "destination": "/p/:slug/projects",
+      "permanent": false
+    }
   ],
   "rewrites": [
-    { "source": "/r/:slug", "destination": "/view?slug=:slug" },
-    { "source": "/p/:slug", "destination": "/view?slug=:slug" },
-    { "source": "/portfolio", "destination": "/view" },
-    { "source": "/mkt/portfolio", "destination": "/view" },
-    { "source": "/mkt/portfolio/projects", "destination": "/view" },
-    { "source": "/p/:slug/projects", "destination": "/view" },
-    { "source": "/r/:slug/projects", "destination": "/view" },
-    { "source": "/:slug/projects", "destination": "/view" },
-    { "source": "/p/:slug/projects-test", "destination": "/view" },
-    { "source": "/mkt/portfolio/projects-test", "destination": "/view" },
-    { "source": "/:slug/projects-test", "destination": "/view" },
-    { "source": "/:slug/projects/test", "destination": "/view" }
+    {
+      "source": "/portfolio/projects",
+      "destination": "/portfolio"
+    },
+    {
+      "source": "/portfolio/projects-test",
+      "destination": "/portfolio"
+    },
+    {
+      "source": "/portfolio/projects/test",
+      "destination": "/portfolio"
+    },
+    {
+      "source": "/mkt/portfolio",
+      "destination": "/portfolio"
+    },
+    {
+      "source": "/mkt/portfolio/projects",
+      "destination": "/portfolio"
+    },
+    {
+      "source": "/mkt/portfolio/projects-test",
+      "destination": "/portfolio"
+    },
+    {
+      "source": "/r/:slug",
+      "destination": "/view?slug=:slug"
+    },
+    {
+      "source": "/p/:slug",
+      "destination": "/view?slug=:slug"
+    },
+    {
+      "source": "/p/:slug/projects",
+      "destination": "/view"
+    },
+    {
+      "source": "/r/:slug/projects",
+      "destination": "/view"
+    },
+    {
+      "source": "/:slug/projects",
+      "destination": "/view"
+    },
+    {
+      "source": "/p/:slug/projects-test",
+      "destination": "/view"
+    },
+    {
+      "source": "/:slug/projects-test",
+      "destination": "/view"
+    },
+    {
+      "source": "/:slug/projects/test",
+      "destination": "/view"
+    }
   ],
   "headers": [
     {
       "source": "/(.*)",
       "headers": [
-        { "key": "X-Content-Type-Options", "value": "nosniff" },
-        { "key": "Referrer-Policy", "value": "strict-origin-when-cross-origin" }
+        {
+          "key": "X-Content-Type-Options",
+          "value": "nosniff"
+        },
+        {
+          "key": "Referrer-Policy",
+          "value": "strict-origin-when-cross-origin"
+        }
       ]
     }
   ]
