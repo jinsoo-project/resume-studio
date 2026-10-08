@@ -1603,8 +1603,16 @@ function renderAXAdmin(){
   const ppCard=()=>card('전체 프로젝트 페이지',
     `<div class="kd-seg" style="margin-bottom:12px"><button class="kd-btn${axPvPage!=='projects'?' on':''}" data-kpv="main">메인 화면</button><button class="kd-btn${axPvPage==='projects'?' on':''}" data-kpv="projects">전체 프로젝트 페이지</button><a class="kd-btn" href="${ppUrl}" target="_blank" rel="noopener" title="${axAttr(ppUrl)}">새 탭 ↗</a></div>`
     +`<p class="kd-note">주소 <code>${axText(ppUrl.replace(/^https:\/\//,''))}</code> — 프로젝트 ${ppN}개가 원형 휠로 펼쳐져요. <b>카드 이름·순서·묶음·썸네일과 페이지 문구</b>는 <button class="kd-link" data-kd-tab="groups">‘전체 프로젝트’ 탭</button>에서 편집해요.</p>`,'새 URL');
+  // 메인 03 Projects 칸별 프로젝트(klio.mosaic) — 전체 프로젝트 페이지에만 있는 프로젝트(웨이브 등 PPT 추가분)도 고를 수 있음
+  const MZ_SLOT=['작은 칸 (왼쪽 위)','세로 긴 칸 (오른쪽)','작은 칸 (왼쪽)','가로 긴 칸','아래 줄 왼쪽','아래 줄 오른쪽'];
+  const mzCard=()=>{ const mz=Array.isArray(kd.mosaic)?kd.mosaic:[], opts=[];
+    (LIB.companies||[]).forEach(c=>(c.works||[]).forEach(w=>{ if(w&&w.id&&!kHidden('works',w.id)) opts.push([w.id,coName(c)+' · '+(w.title||'(제목 없음)')]); }));
+    ((TEMPLATES.PPT_PATCH||{}).add||[]).forEach(a=>{ if(a&&a.w&&!opts.some(o=>o[0]===a.w.id)){ const c=(LIB.companies||[]).find(x=>x.id===a.company)||{}; opts.push([a.w.id,coName(c)+' · '+a.w.title+' (전체 프로젝트 페이지)']); } });
+    return card('메인 대표 칸 (03 Projects)',MZ_SLOT.map((l,i)=>F(`${i+1}. ${l}`,`<select class="kd-in" data-kmz="${i}" data-pv="projects"><option value="">(비움)</option>${opts.map(([id,t])=>`<option value="${axAttr(id)}"${mz[i]===id?' selected':''}>${axText(t)}</option>`).join('')}</select>`)).join('')
+      +`<p class="kd-note">칸마다 보여줄 프로젝트를 골라요. 하나라도 고르면 아래 ‘대표’ 스위치 대신 이 순서를 써요(빈 칸은 건너뜀). 5·6번까지 채우면 모자이크 아래 한 줄이 더 생겨요. 모두 비우면 ‘대표’ 스위치로 돌아가요. 이미지가 없는 프로젝트는 전체 프로젝트 페이지 카드와 같은 그림을 써요.</p>`,'칸별로 고르기'); };
   const P_projects=()=>intro('회사를 눌러 작업을 편집해요. <b>노출</b> = 포트폴리오·전체 프로젝트 페이지에 표시 · <b>대표</b> = 상단 모자이크(최대 5개). 타일 배지는 첫 번째 지표, 썸네일은 첫 번째 이미지(없으면 유튜브 링크)예요.')
     +ppCard()
+    +mzCard()
     +cos.map((c,ci)=>{
       const ws=c.works||[]; if(!ws.length)return '';
       const key=c.id||String(ci), open=axOpenPj===key;
@@ -1959,6 +1967,7 @@ function renderAXAdmin(){
       if(t.dataset&&t.dataset.kcKpi!=null){ const id=t.dataset.kcKpi, c=kcCard(id); if(t.value==='')delete c.kpi; else c.kpi=+t.value; kcClean(id); rerender(); return; } // 카드 대표 지표
       if(t.dataset&&t.dataset.kgLead!=null){ const g=(axDoc().klio.groups||[])[+t.dataset.kgLead]; if(g){ if(t.value)g.lead=t.value; else delete g.lead; } rerender(); return; } // 묶음 대표 프로젝트
       if(t.dataset&&t.dataset.kgW!=null){ const k=axDoc().klio; if(!k.groupOf||typeof k.groupOf!=='object')k.groupOf={}; if(t.value)k.groupOf[t.dataset.kgW]=t.value; else delete k.groupOf[t.dataset.kgW]; rerender(); return; } // 프로젝트별 묶음 예외
+      if(t.dataset&&t.dataset.kmz!=null){ const k=axDoc().klio, a=Array.isArray(k.mosaic)?k.mosaic.slice():[], i=+t.dataset.kmz; while(a.length<=i)a.push(''); a[i]=t.value; while(a.length&&!a[a.length-1])a.pop(); if(a.length)k.mosaic=a; else delete k.mosaic; rerender(); return; } // 메인 대표 칸
       if(t.dataset.ksel){ kSet(t.dataset.ksel,t.value); axSchedule(); return; }
       if(t.tagName==='SELECT'&&t.dataset.p){ axSet(t.dataset.p,t.value); axSchedule(); return; }
       const up=t.dataset&&t.dataset.axUpload; if(!up||!t.files||!t.files.length)return;
