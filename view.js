@@ -1,0 +1,98 @@
+// 공개 보기(view.html · portfolio.html 공용): 슬러그 문서를 불러와 iframe(srcdoc)에 그리고, 섹션·카드 딥링크 · 조회수를 처리
+function decodeDoc(s){return JSON.parse(decodeURIComponent(escape(atob(s.replace(/-/g,'+').replace(/_/g,'/')))));}
+function printDoc(){var f=document.getElementById('frame');if(f&&f.contentWindow){f.contentWindow.focus();f.contentWindow.print();}}
+// 섹션 해시(#projects 등) — 문서 인코딩 해시(base64 JSON, 대문자 포함·긴 문자열)와 구분
+var SEC_RE=/^[a-z][a-z0-9-]{0,30}$/;
+// 전체 프로젝트 페이지(/portfolio/projects) 카드 딥링크 #p-<작업 id>
+var CARD_RE=/^p-[A-Za-z0-9._~%-]{1,120}$/;
+var PAGE='';
+function cardOf(h){try{return CARD_RE.test(h)?decodeURIComponent(h.slice(2)):'';}catch(e){return '';}}
+function gotoSec(id,instant){var f=document.getElementById('frame');try{if(f&&f.contentWindow)f.contentWindow.postMessage({klio:'goto',id:id,instant:!!instant},'*');}catch(e){}}
+function gotoCard(id){var f=document.getElementById('frame');try{if(f&&f.contentWindow)f.contentWindow.postMessage({klio:'goto-card',id:id},'*');}catch(e){}}
+// 전체 프로젝트 페이지 계열: projects(기존) · projects-test(토스식 레이아웃 실험, /{slug}/projects-test 또는 /{slug}/projects/test)
+function isPP(){return PAGE==='projects'||PAGE==='projects-test';}
+function render(doc,sec,card){
+  var f=document.getElementById('frame');
+  if(isPP()) doc.page=PAGE;
+  document.title=(doc.profile&&doc.profile.nameKo?doc.profile.nameKo+' — ':'')+(isPP()?'Projects':(doc.title||'이력서'));
+  if(sec||card){ f.addEventListener('load',function once(){ f.removeEventListener('load',once); if(card) gotoCard(card); else gotoSec(sec,true); }); }
+  f.setAttribute('srcdoc', window.TEMPLATES.render(doc));
+  document.getElementById('bar').style.display = (doc.template==='ax'||doc.template==='klio'||doc.template==='web') ? 'none' : 'flex';
+  document.getElementById('msg').style.display='none';
+  f.style.display='block';
+}
+function fail(t){var f=document.getElementById('frame');f.style.display='none';var m=document.getElementById('msg');m.style.display='grid';m.textContent=t;}
+// 조회수: 브라우저 세션당 1회 +1 (?kilo-owner=1 로 연 브라우저는 '내 방문'으로 영구 제외, =0 해제) → 누적·오늘을 포트폴리오로 전달
+async function trackViews(slug){
+  var q=new URLSearchParams(location.search), owner=false, seen=false, key='kv:'+slug;
+  try{
+    if(q.get('kilo-owner')==='1')localStorage.setItem('kilo-owner','1');
+    if(q.get('kilo-owner')==='0')localStorage.removeItem('kilo-owner');
+    owner=localStorage.getItem('kilo-owner')==='1';
+    if(q.has('kilo-owner')){ q.delete('kilo-owner'); history.replaceState(null,'',location.pathname+(q.toString()?'?'+q:'')+location.hash); }
+  }catch(e){}
+  try{ seen=sessionStorage.getItem(key)==='1'; }catch(e){}
+  if(!owner&&!seen){ try{ await window.CLOUD.trackView(slug); try{ sessionStorage.setItem(key,'1'); }catch(e){} }catch(e){} }
+  var v=null; try{ v=await window.CLOUD.getViews(slug); }catch(e){}
+  var f=document.getElementById('frame');
+  var post=function(){ try{ f.contentWindow.postMessage({klio:'views',total:v?v.total:null,today:v?v.today:null},'*'); }catch(e){} };
+  if(f.contentDocument&&f.contentDocument.readyState==='complete'&&f.contentDocument.querySelector('.page')) post(); else f.addEventListener('load',post,{once:true});
+}
+// 포트폴리오 하단 독 이동 → 주소창 해시 동기화(공유 가능한 /portfolio#projects), 해시 변경 → 해당 섹션 이동
+// 전체 프로젝트 페이지에서 카드 넘김 → 주소창 #p-<id> (그 카드로 바로 공유 가능)
+window.addEventListener('message',function(e){var f=document.getElementById('frame');if(!f||e.source!==f.contentWindow)return;var m=e.data;
+  if(m&&m.klio==='sec'&&typeof m.id==='string'&&SEC_RE.test(m.id)){try{history.replaceState(null,'',location.pathname+location.search+(m.id==='home'?'':'#'+m.id));}catch(_){}}
+  else if(m&&m.klio==='card-close'&&isPP()){try{history.replaceState(null,'',location.pathname+location.search);}catch(_){}}
+  else if(m&&m.klio==='card'&&isPP()&&typeof m.id==='string'&&m.id&&m.id.length<=120){try{history.replaceState(null,'',location.pathname+location.search+'#p-'+encodeURIComponent(m.id));}catch(_){}}
+});
+window.addEventListener('hashchange',function(){var h=location.hash.slice(1),c=isPP()?cardOf(h):'';if(c)gotoCard(c);else if(SEC_RE.test(h))gotoSec(h,false);});
+
+(async function(){
+  var msg=document.getElementById('msg');
+  // slug: ?slug= 또는 /r/<slug> 경로
+  var params=new URLSearchParams(location.search);
+  // /{slug}/projects (또는 ?page=projects) = 전체 프로젝트 페이지 (/p/projects 처럼 슬러그가 projects인 경우는 제외)
+  var segs=location.pathname.split('/').filter(Boolean);
+  if(params.get('page')==='projects') PAGE='projects';
+  if(params.get('page')==='projects-test') PAGE='projects-test';
+  if(params.get('page')==='projects-airbridge') PAGE='projects'; // 옛 주소 = /projects
+  if(segs.length>1&&segs[segs.length-1]==='projects'&&!(segs.length===2&&/^[rp]$/.test(segs[0]))){ PAGE='projects'; segs.pop(); }
+  else if(segs.length>1&&segs[segs.length-1]==='projects-test'){ PAGE='projects-test'; segs.pop(); }
+  else if(segs.length>1&&segs[segs.length-1]==='projects-airbridge'){ PAGE='projects'; segs.pop(); }
+  else if(segs.length>2&&segs[segs.length-1]==='test'&&segs[segs.length-2]==='projects'){ PAGE='projects-test'; segs.splice(-2,2); }
+  var slug=params.get('slug');
+  if(!slug){var m=location.pathname.match(/\/[rp]\/([^/?#]+)/);if(m)slug=decodeURIComponent(m[1]);}
+  if(!slug&&segs.length)slug=decodeURIComponent(segs[segs.length-1]);
+  var hash=location.hash.slice(1);
+  var cardHash=isPP()?cardOf(hash):'';
+  var secHash=!cardHash&&SEC_RE.test(hash)?hash:'';
+
+  // 1) hash 인코딩 모드 (오프라인/자체완결) 우선 — 단, #projects 같은 섹션 해시·#p-카드 해시는 제외(딥링크)
+  if(hash&&!secHash&&!cardHash&&!CARD_RE.test(hash)){
+    try{ render(decodeDoc(hash)); return; }
+    catch(e){ fail('링크가 손상되었어요.'); return; }
+  }
+  // 2) slug → 클라우드 조회
+  if(slug){
+    document.getElementById('frame').style.display='none'; msg.style.display='grid'; msg.textContent='불러오는 중…';
+    try{
+      var row=await window.CLOUD.fetchPublic(slug);
+      // 슬러그별 템플릿 강제 (DB 재발행 없이 표시 템플릿 교체). ?tpl= 로도 override 가능.
+      var FORCE_TPL={portfolio:"klio"};
+      var tplOverride=params.get('tpl')||FORCE_TPL[slug];
+      if(row&&row.snapshot){
+        if(tplOverride) row.snapshot.template=tplOverride;
+        if(isPP()&&row.snapshot.template!=='klio') PAGE=''; // 전체 프로젝트 페이지는 klio 전용
+        // 타일(→ …/projects)·돌아가기 링크는 지금 연 주소 기준 (/portfolio · /p/x · /mkt/portfolio). /view?slug= 경유면 슬러그 기준
+        row.snapshot.slug=slug;
+        var base=location.pathname.replace(/\/+$/,''); if(isPP()) base=base.replace(/\/projects(-test|-airbridge|\/test)?$/,'');
+        if(!base||/^\/view(\.html)?$/.test(base)) base='/'+encodeURIComponent(slug);
+        row.snapshot.homePath=base; row.snapshot.pjPath=base+'/projects';
+        render(row.snapshot,secHash,cardHash); if(row.snapshot.template==='klio') trackViews(slug); return;
+      }
+      fail('해당 주소의 이력서를 찾을 수 없어요. (비공개이거나 삭제됨)');
+    }catch(e){ fail('불러오지 못했어요: '+(e.message||e)); }
+    return;
+  }
+  fail('열 문서가 없습니다. 스튜디오에서 발행한 링크로 접속하세요.');
+})();
