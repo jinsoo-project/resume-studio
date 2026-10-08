@@ -16,6 +16,16 @@
     return { acct: "데모 광고 계정 01", camps: [{ id: uid(), name: "가을 이사철 — 판매", obj: "판매", budgetAt: "campaign", budget: 150000, sets: [s1, s2] }, { id: uid(), name: "리타게팅 — 트래픽", obj: "트래픽", budgetAt: "set", budget: 0, sets: [s3] }], sel: null, made: [] };
   }
   var B = store.get("builder", null) || seedB();
+  var catSet = function (a) { return NW.CAT.sets.filter(function (s) { return s.id === a.pset; })[0] || NW.CAT.sets[0]; };
+  /* 카탈로그 화면 '이 세트로 카탈로그 광고 만들기' → 판매 캠페인 · 세트 · 다이내믹 소재 초안 */
+  NW.metaCatalog = function (s) {
+    var set = newSet(1), ad = newAd(1);
+    set.name = s.aud; set.interests = s.rt ? ["리타게팅 · ViewContent 14일", "Purchase 제외"] : ["Advantage+ 오디언스"]; set.regions = s.id === "ps-seoul" ? ["서울"] : []; set.place = ["피드", "스토리", "릴스"];
+    ad.name = "카탈로그 · " + s.name; ad.media = "catalog"; ad.pset = s.id; ad.title = "{{product.name}}"; ad.body = s.rt ? "보던 방, 아직 비어 있어요. 1주부터 계약할 수 있어요." : "가구 · 가전 다 있는 방, 1주부터 바로 입주."; ad.cta = "지금 예약하기"; ad.link = "{{product.link}}?utm_source=meta&utm_medium=paid_social&utm_campaign=catalog_" + s.id;
+    set.ads = [ad];
+    var c = { id: uid(), name: "카탈로그 — " + s.name, obj: "판매", budgetAt: "campaign", budget: 100000, catalog: s.id, sets: [set] };
+    B.camps.unshift(c); B.sel = { id: ad.id }; saveB();
+  };
   if (!B.sel) B.sel = { t: "c", id: B.camps[0].id };
   var saveB = function () { store.set("builder", B); };
   function find(id) { var r = null; B.camps.forEach(function (c) { if (c.id === id) r = { t: "c", o: c, c: c }; c.sets.forEach(function (s) { if (s.id === id) r = { t: "s", o: s, c: c, s: s }; s.ads.forEach(function (a) { if (a.id === id) r = { t: "a", o: a, c: c, s: s }; }); }); }); return r; }
@@ -25,15 +35,16 @@
     var add = function (lvl, attr, id, t) { return '<button class="tadd" style="margin-left:' + (10 + lvl * 18) + 'px" ' + attr + '="' + id + '">＋ ' + t + '</button>'; };
     return B.camps.map(function (c) {
       return row(0, c.id, "▤", c.name, c.obj + " · " + (c.budgetAt === "campaign" ? "캠페인 예산 " + won(c.budget) : "세트 예산")) + c.sets.map(function (s) {
-        return row(1, s.id, "▣", s.name, s.age[0] + "~" + s.age[1] + "세 · " + (s.regions.join("·") || "전국")) + s.ads.map(function (a) { return row(2, a.id, a.media === "video" ? "▶" : "▢", a.name, a.cta); }).join("") + add(2, "data-badd-a", s.id, "광고 추가");
+        return row(1, s.id, "▣", s.name, s.age[0] + "~" + s.age[1] + "세 · " + (s.regions.join("·") || "전국")) + s.ads.map(function (a) { return row(2, a.id, a.media === "video" ? "▶" : a.media === "catalog" ? "▦" : "▢", a.name, a.media === "catalog" ? "카탈로그 · " + catSet(a).name : a.cta); }).join("") + add(2, "data-badd-a", s.id, "광고 추가");
       }).join("") + add(1, "data-badd-s", c.id, "광고세트 추가");
     }).join("") + '<button class="tadd" style="margin:6px 10px 0" data-badd-c>＋ 캠페인 추가</button>';
   }
   function chips(list, on, attr) { return '<div class="mchips">' + list.map(function (x) { return '<button type="button" class="chip2' + (on.indexOf(x) > -1 ? ' on' : '') + '" ' + attr + '="' + esc(x) + '">' + esc(x) + '</button>'; }).join("") + '</div>'; }
   function adPreview(a) {
     return '<div class="fb"><div class="fb-h"><span class="fb-av">김</span><div><b>' + NW.BRAND + '</b><small>광고 · 🌐</small></div></div><div class="fb-t" data-pv="body">' + esc(a.body) + '</div>'
-      + '<div class="fb-img" style="background:' + grad(a.id) + '">' + (a.media === "video" ? '<span class="play">▶</span>' : '') + '</div>'
-      + '<div class="fb-c"><div><small>DEMO.EXAMPLE</small><b data-pv="title">' + esc(a.title) + '</b></div><button type="button" data-pv="cta">' + esc(a.cta) + '</button></div><div class="fb-a"><span>♡ 좋아요</span><span>💬 댓글</span><span>➤ 공유</span><span style="margin-left:auto">🔖</span></div></div>';
+      + (a.media === "catalog" ? '<div class="cf-car">' + NW.CAT.items(catSet(a).id).slice(0, 3).map(function (x) { return '<div class="cf-card"><div class="cf-ci" style="background:' + NW.CAT.thumb(x) + '"></div><b>' + esc(a.title.indexOf("{{product.name}}") > -1 ? a.title.replace("{{product.name}}", NW.CAT.title(x)) : a.title) + '</b><span>' + NW.CAT.price(x) + '</span><button type="button">' + esc(a.cta) + '</button></div>'; }).join("") + '</div><div class="fb-a"><span>♡ 좋아요</span><span>💬 댓글</span><span>➤ 공유</span><span style="margin-left:auto">🔖</span></div></div>' : '')
+      + (a.media === "catalog" ? '' : '<div class="fb-img" style="background:' + grad(a.id) + '">' + (a.media === "video" ? '<span class="play">▶</span>' : '') + '</div>'
+      + '<div class="fb-c"><div><small>DEMO.EXAMPLE</small><b data-pv="title">' + esc(a.title) + '</b></div><button type="button" data-pv="cta">' + esc(a.cta) + '</button></div><div class="fb-a"><span>♡ 좋아요</span><span>💬 댓글</span><span>➤ 공유</span><span style="margin-left:auto">🔖</span></div></div>');
   }
   function editor() {
     var f = find(B.sel.id); if (!f) { B.sel = { t: "c", id: B.camps[0] ? B.camps[0].id : "" }; f = find(B.sel.id); }
@@ -43,7 +54,8 @@
     var body;
     if (f.t === "c") body = '<section class="bsec"><h3>캠페인 설정</h3>' + inp("name", "캠페인 이름") + fld("목표", NW.segHtml(OBJ.map(function (x) { return [x, x]; }), o.obj, "data-bobj", true))
       + fld("예산 위치 <small>캠페인·세트 중 한 곳만 쓸 수 있어요 ⛔</small>", NW.segHtml([["campaign", "캠페인 예산(CBO)"], ["set", "광고세트 예산"]], o.budgetAt, "data-bbat", true))
-      + (o.budgetAt === "campaign" ? inp("budget", "캠페인 일 예산(원)", "number") : '<p class="faint">예산은 각 광고세트에서 정해요.</p>') + '</section>';
+      + (o.budgetAt === "campaign" ? inp("budget", "캠페인 일 예산(원)", "number") : '<p class="faint">예산은 각 광고세트에서 정해요.</p>')
+      + (o.catalog ? '<div class="cf-link"><b>카탈로그 연결</b><span>데모 카탈로그 · 상품 세트 ‘' + esc(catSet({ pset: o.catalog }).name) + '’ (' + NW.CAT.items(o.catalog).length + '개)</span><a href="#/catalog" data-cat-tab="sets">카탈로그에서 보기 ←</a></div>' : '') + '</section>';
     else if (f.t === "s") body = '<section class="bsec"><h3>광고세트</h3>' + inp("name", "세트 이름")
       + '<div class="g2x">' + (f.c.budgetAt === "set" ? inp("daily", "일 예산(원)", "number") : fld("일 예산", '<input class="inp" disabled value="캠페인 예산 사용 중">')) + '<div class="g2x">' + inp("start", "시작", "date") + inp("end", "종료", "date") + '</div></div>'
       + fld("연령 <b class='tnum' id='bAge'>" + o.age[0] + " ~ " + o.age[1] + "세</b>", '<div class="rng2"><input type="range" min="18" max="65" value="' + o.age[0] + '" data-bage="0"><input type="range" min="18" max="65" value="' + o.age[1] + '" data-bage="1"></div>')
@@ -51,8 +63,9 @@
       + fld("지역 <small>비우면 전국</small>", chips(REG, o.regions, "data-breg"))
       + fld("관심사", '<div class="tagin">' + o.interests.map(function (x, i) { return '<span class="tag">' + esc(x) + '<button data-bint-x="' + i + '">×</button></span>'; }).join("") + '<input placeholder="입력 후 Enter" data-bint></div>')
       + fld("노출 위치", chips(PLACE, o.place, "data-bpl")) + '</section>';
-    else body = '<div class="badl"><section class="bsec"><h3>소재</h3>' + inp("name", "광고 이름") + fld("형식", NW.segHtml([["image", "이미지"], ["video", "영상"]], o.media, "data-bmed"))
-      + '<div class="thumb1" style="background:' + grad(o.id) + '">' + (o.media === "video" ? '<span class="play">▶</span>' : ic("image")) + '<button class="btn sm" data-toast="데모에서는 가상 썸네일을 써요">교체</button></div>'
+    else body = '<div class="badl"><section class="bsec"><h3>소재</h3>' + inp("name", "광고 이름") + fld("형식", NW.segHtml([["image", "이미지"], ["video", "영상"], ["catalog", "카탈로그"]], o.media, "data-bmed"))
+      + (o.media === "catalog" ? fld("상품 세트 <small>카탈로그 화면에서 만든 세트</small>", NW.segHtml(NW.CAT.sets.map(function (s) { return [s.id, s.name]; }), catSet(o).id, "data-bpset")) + '<div class="cf-dyn"><b>다이내믹 필드</b><span>{{product.name}} · {{product.price}} · {{product.link}} 가 상품마다 피드 값으로 바뀌어요</span><a href="#/catalog" data-cat-tab="items">피드 편집 →</a></div>'
+        : '<div class="thumb1" style="background:' + grad(o.id) + '">' + (o.media === "video" ? '<span class="play">▶</span>' : ic("image")) + '<button class="btn sm" data-toast="데모에서는 가상 썸네일을 써요">교체</button></div>')
       + fld("기본 문구", '<textarea class="inp" rows="3" data-bf="body">' + esc(o.body) + '</textarea>') + inp("title", "제목") + fld("CTA", NW.segHtml(CTA.map(function (x) { return [x, x]; }), o.cta, "data-bcta")) + inp("link", "링크") + '</section>'
       + '<div class="bprev"><div class="lbl2" style="margin-top:0">실시간 미리보기 · 피드</div>' + adPreview(o) + '</div></div>';
     return '<div class="card sheet">' + top + body + '</div>';
@@ -89,7 +102,8 @@
     if ((b = t.closest("[data-bobj]"))) { f.o.obj = b.getAttribute("data-bobj"); bRe(); return; }
     if ((b = t.closest("[data-bbat]"))) { f.o.budgetAt = b.getAttribute("data-bbat"); bRe(); return; }
     if ((b = t.closest("[data-bgen]"))) { f.o.gender = b.getAttribute("data-bgen"); bRe(); return; }
-    if ((b = t.closest("[data-bmed]"))) { f.o.media = b.getAttribute("data-bmed"); bRe(); return; }
+    if ((b = t.closest("[data-bmed]"))) { f.o.media = b.getAttribute("data-bmed"); if (f.o.media === "catalog" && !f.o.pset) f.o.pset = NW.CAT.sets[0].id; bRe(); return; }
+    if ((b = t.closest("[data-bpset]"))) { f.o.pset = b.getAttribute("data-bpset"); bRe(); return; }
     if ((b = t.closest("[data-bcta]"))) { f.o.cta = b.getAttribute("data-bcta"); bRe(); return; }
     if ((b = t.closest("[data-breg]")) || (b = t.closest("[data-bpl]"))) { var key = b.hasAttribute("data-breg") ? "regions" : "place", v = b.getAttribute(key === "regions" ? "data-breg" : "data-bpl"), L = f.o[key], i = L.indexOf(v); if (i > -1) L.splice(i, 1); else L.push(v); bRe(); return; }
     if ((b = t.closest("[data-bint-x]"))) { f.o.interests.splice(+b.getAttribute("data-bint-x"), 1); bRe(); return; }
