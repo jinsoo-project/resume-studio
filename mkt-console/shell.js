@@ -33,17 +33,21 @@
   }
   function hasCur(kids) { var cur = route(); return (kids || []).some(function (k) { return k.sub ? hasCur(k.kids) : k[0] === cur; }); }
   function firstLive(kids) { for (var i = 0; i < (kids || []).length; i++) { var k = kids[i]; if (k.sub) { var f = firstLive(k.kids); if (f) return f; } else if (k[0]) return k[0]; } return null; }
+  /* 사이드바: 데모에서 열리는 메뉴를 위로 · 진하게, 비활성 메뉴는 묶음 안에서 아래로 · 흐리게, 비활성 묶음은 맨 아래 '데모 비활성' 구역 */
+  var isLive = function (k) { return k.sub ? !k.off && (k.kids || []).some(function (x) { return x[0]; }) : !!k[0]; };
   function sidebar(variant) {
-    var nav = NAV.map(function (g) {
+    var grp = function (g) {
       if (g.off) return '<button class="sb-g off" aria-disabled="true" title="' + OFF_TIP + '">' + ic(g.ic, "sb-ic") + '<span class="sb-lbl">' + esc(g.g) + '</span>' + ic("chev", "sb-chev") + '</button>';
-      var open = !!OPEN[g.g] || hasCur(g.kids), act = hasCur(g.kids);
-      return '<button class="sb-g' + (act ? ' act' : '') + '" aria-expanded="' + open + '" data-sb-g="' + esc(g.g) + '" data-first="' + firstLive(g.kids) + '" title="' + esc(g.g) + '">' + ic(g.ic, "sb-ic") + '<span class="sb-lbl">' + esc(g.g) + '</span>' + ic("chev", "sb-chev") + '</button>'
-        + (open ? '<div class="sb-kids">' + g.kids.map(function (k) {
+      var open = !!OPEN[g.g] || hasCur(g.kids), act = hasCur(g.kids), kids = g.kids.filter(isLive).concat(g.kids.filter(function (k) { return !isLive(k); }));
+      return '<button class="sb-g live' + (act ? ' act' : '') + '" aria-expanded="' + open + '" data-sb-g="' + esc(g.g) + '" data-first="' + firstLive(g.kids) + '" title="' + esc(g.g) + '">' + ic(g.ic, "sb-ic") + '<span class="sb-lbl">' + esc(g.g) + '</span><span class="sb-n">' + g.kids.reduce(function (t, k) { return t + (k.sub ? (k.kids || []).filter(function (x) { return x[0]; }).length : k[0] ? 1 : 0); }, 0) + '</span>' + ic("chev", "sb-chev") + '</button>'
+        + (open ? '<div class="sb-kids">' + kids.map(function (k) {
           if (!k.sub) return leaf(k);
           if (k.off) return '<span class="sb-sub off" aria-disabled="true" title="' + OFF_TIP + '">' + ic("chev", "") + esc(k.sub) + '</span>';
           return '<span class="sb-sub">' + ic("chev", "rot") + esc(k.sub) + '</span>' + k.kids.map(function (x) { return leaf(x, true); }).join("");
         }).join("") + '</div>' : '');
-    }).join("");
+    };
+    var nav = '<div class="sb-cap">데모에서 열리는 메뉴</div>' + NAV.filter(function (g) { return !g.off; }).map(grp).join("")
+      + '<div class="sb-cap off">운영 메뉴 · 데모 비활성</div>' + NAV.filter(function (g) { return g.off; }).map(grp).join("");
     return '<aside class="sb' + (variant === "desktop" && COL ? ' col' : '') + '">'
       + (variant === "desktop" ? '<button class="sb-tog" data-sb-col aria-label="사이드바 접기">' + ic("left") + '</button>' : '')
       + '<div class="sb-logo"><div class="sb-mark">' + ic("user") + '</div><div class="sb-t"><h1>' + NW.BRAND + '</h1><p>Agent Dashboard · 데모 데이터</p></div></div>'
@@ -88,7 +92,7 @@
     var t = $(".tb"), k = $(".tk"); if (k) k.remove(); if (t) t.outerHTML = topbar();
   }
   /* 대시보드 화면 = 숫자 항상 흐리게(html.nw-blur — 숫자 클릭 목록 창까지) + 눈에 띄는 '데모 환경' 안내 바 */
-  var BLUR = { "total-dashboard": 1, "kpi-okr": 1, "catalog": 1 };
+  var BLUR = { "total-dashboard": 1, "kpi-okr": 1 };
   function demoNote(main) {
     if (!BLUR[route()]) return;
     var w = main.querySelector(".wrap"), hero = w && w.querySelector(":scope > .hero"); if (!w) return;

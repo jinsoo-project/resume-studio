@@ -4,42 +4,152 @@
   var esc = NW.esc, ko = NW.ko, won = NW.won, ic = NW.ic, md = NW.md, store = NW.store, dstr = NW.dstr, TODAY = NW.TODAY, fld = NW.fld, uid = NW.uid, grad = NW.grad, D = NW.D;
   var hhmm = function () { var d = new Date(); return ("0" + d.getHours()).slice(-2) + ":" + ("0" + d.getMinutes()).slice(-2); };
 
-  /* ── 1. Catalog — 상품 카탈로그 피드 ─────────────────── */
+  /* ── 1. Catalog — 상품 카탈로그 광고 ────────────────────
+     흐름: 운영 DB 게시 룸타입 → 피드 편집(이미지·제목·설명·라벨·제외) → 피드 파일(URL) → 매체 수집(Meta 매시 · Google 매일 · 네이버 EP)
+          → 매체 심사 → 상품 세트 → META 빌더 카탈로그 광고(초안 생성 후 빌더로 이동). 편집은 이 브라우저에만 저장돼요. */
   var ISSUES = ["이미지 해상도 부족 (최소 600×600)", "설명 5,000자 초과", "가격 형식 오류", "랜딩 URL 응답 지연", "재고 0 · 품절 처리 필요"];
-  var ITEMS = D.listings.filter(function (l) { return l.operation_status === "PUBLISHED"; }).map(function (l) {
-    var r = NW.hashRng("cat" + l.type_id), x = r(), st = x < .78 ? "ok" : x < .92 ? "warn" : "err";
-    return { id: "NW-" + l.type_id, title: l.branch_name + " · " + l.roomtype_name, price: l.weekly_rent, stock: l.unit_count, sido: l.sido, seg: l.seg, st: st, issue: st === "ok" ? "" : ISSUES[Math.floor(r() * ISSUES.length)], at: l.registered_at };
-  });
-  var CF = store.get("cat-f", { feed: "meta", st: "all" });
-  var FEED = { meta: ["Meta 카탈로그", "Advantage+ 카탈로그 광고 · 다이내믹 리타게팅"], google: ["Google 머천트 센터", "PMax · 쇼핑 광고"], naver: ["네이버 쇼핑", "쇼핑검색 광고 · EP 피드"] };
+  var MEDIA = { meta: { n: "Meta 카탈로그", d: "Advantage+ 카탈로그 광고 · 다이내믹 리타게팅", f: "XML (RSS 2.0)", sch: "매시 정각 예약 수집" }, google: { n: "Google 머천트 센터", d: "PMax · 쇼핑 광고", f: "XML (RSS 2.0)", sch: "매일 06:00 예약 수집" }, naver: { n: "네이버 쇼핑", d: "쇼핑검색 광고 · EP 3.0", f: "EP 3.0 (TSV)", sch: "전체 매일 04:00 · 요약 매시" } };
   var ST = { ok: ["승인", "p-em"], warn: ["경고", "p-amber"], err: ["오류", "p-red"] };
+  var IMGL = ["대표", "침실", "주방 · 거실", "건물 외관"];
+  var band = function (p) { return p <= 300000 ? "주 30만 이하" : p <= 500000 ? "주 30~50만" : "주 50만 이상"; };
+  var ITEMS = D.listings.filter(function (l) { return l.operation_status === "PUBLISHED"; }).map(function (l) {
+    var r = NW.hashRng("cat" + l.type_id), st = {}; ["meta", "google", "naver"].forEach(function (m) { var x = r(); st[m] = x < .8 ? "ok" : x < .93 ? "warn" : "err"; });
+    var bad = ["meta", "google", "naver"].filter(function (m) { return st[m] !== "ok"; });
+    return { id: "NW-" + l.type_id, base: l.branch_name + " · " + l.roomtype_name, branch: l.branch_name, room: l.roomtype_name, price: l.weekly_rent, stock: l.unit_count, sido: l.sido, seg: l.seg, st: st, issue: bad.length ? ISSUES[Math.floor(r() * ISSUES.length)] : "", seen: r() < .22, at: l.registered_at };
+  });
+  var EDIT = store.get("cat-edit", {});
+  var CF = store.get("cat-f", { tab: "items", feed: "meta", st: "all", q: "all" });
+  if (!CF.tab) CF.tab = "items"; if (!CF.q) CF.q = "all";
+  var LOG = store.get("cat-log", []), BUILT = store.get("cat-built", "06:00");
+  var ed = function (i) { return EDIT[i.id] || {}; };
+  var titleOf = function (i) { return ed(i).title || i.base; };
+  var descOf = function (i) { return ed(i).desc || (i.branch + " " + i.room + " — 가구·가전 풀옵션, 1주부터 계약. 보증금 부담 없이 " + i.sido + "에서 바로 입주할 수 있어요."); };
+  var imgOf = function (i) { return ed(i).img || 0; };
+  var inFeed = function (i) { return !ed(i).excl; };
+  var edited = function (i) { var e = ed(i); return !!(e.title || e.desc || e.img || e.lab || e.excl); };
+  var thumb = function (i, k) { return grad(i.id + ":" + (k == null ? imgOf(i) : k)); };
+  var fmtW = function (v) { return v >= 10000 ? (v / 10000).toLocaleString("ko-KR") + "만" : ko(v); };
+  /* 상품 세트 = 피드 상품을 조건으로 묶은 것 → 카탈로그 광고의 대상 */
+  var SETS = [
+    { id: "ps-all", name: "전체 상품", rule: ["피드 포함 상품 전체"], f: function () { return true; }, aud: "브로드 · Advantage+ 오디언스" },
+    { id: "ps-seoul", name: "서울 · 주 50만 이하", rule: ["custom_label_1 = 서울", "price ≤ 500,000"], f: function (i) { return i.sido === "서울" && i.price <= 500000; }, aud: "서울 · 20~34세 · 자취 · 이사" },
+    { id: "ps-direct", name: "직영 지점", rule: ["custom_label_0 = 직영"], f: function (i) { return i.seg === "직영"; }, aud: "브로드 · Advantage+ 오디언스" },
+    { id: "ps-rt", name: "리타게팅 · 지난 14일 조회", rule: ["ViewContent 14일", "Purchase 제외"], f: function (i) { return i.seen; }, aud: "리타게팅 · 지난 14일 조회 · 미결제", rt: true }
+  ];
+  var setItems = function (sid) { var s = SETS.filter(function (x) { return x.id === sid; })[0] || SETS[0]; return ITEMS.filter(function (i) { return inFeed(i) && s.f(i); }); };
+  NW.CAT = { sets: SETS, items: setItems, title: titleOf, thumb: thumb, price: function (i) { return "주 " + won(i.price); } };
+
+  function xmlOf(i, hi) {
+    var e = ed(i), h = function (k, v) { return (hi && e[k] ? '<mark>' : '') + v + (hi && e[k] ? '</mark>' : ''); };
+    var lab = [i.seg, i.sido, band(i.price)].concat(e.lab ? [e.lab] : []);
+    return '&lt;item&gt;\n  &lt;g:id&gt;' + i.id + '&lt;/g:id&gt;\n  &lt;g:title&gt;' + h("title", esc(titleOf(i))) + '&lt;/g:title&gt;\n  &lt;g:description&gt;' + h("desc", esc(descOf(i).slice(0, 38)) + '…') + '&lt;/g:description&gt;\n  &lt;g:image_link&gt;' + h("img", 'https://demo.example/img/' + i.id + '_' + imgOf(i) + '.jpg') + '&lt;/g:image_link&gt;\n  &lt;g:price&gt;' + i.price + ' KRW&lt;/g:price&gt;\n  &lt;g:availability&gt;' + (i.stock ? "in stock" : "out of stock") + '&lt;/g:availability&gt;\n  &lt;g:link&gt;https://demo.example/rooms/' + i.id + '&lt;/g:link&gt;\n'
+      + lab.map(function (v, k) { return '  &lt;g:custom_label_' + k + '&gt;' + (k === 3 ? h("lab", esc(v)) : esc(v)) + '&lt;/g:custom_label_' + k + '&gt;'; }).join("\n") + '\n&lt;/item&gt;';
+  }
+  /* 수집 기록: 오늘 정각마다 Meta, 06:00 Google, 04:00 네이버 + 편집 저장 기록 */
+  function pulls() {
+    var h = new Date().getHours(), out = [], n = ITEMS.filter(inFeed).length;
+    for (var k = h; k >= Math.max(0, h - 6); k--) out.push({ t: ("0" + k).slice(-2) + ":00", m: "meta", ok: k % 5 !== 2, n: n, ch: (k * 7) % 5 });
+    if (h >= 6) out.push({ t: "06:00", m: "google", ok: true, n: n, ch: 4 });
+    if (h >= 4) out.push({ t: "04:00", m: "naver", ok: true, n: n, ch: 6 });
+    return LOG.slice(0, 6).map(function (l) { return { t: l.t, m: "edit", ok: true, n: n, ch: 1, txt: l.txt }; }).concat(out.sort(function (a, b) { return a.t < b.t ? 1 : -1; }));
+  }
+
+  function flow() {
+    var all = ITEMS.length, inF = ITEMS.filter(inFeed).length, nEd = ITEMS.filter(edited).length, nEx = all - inF, m = CF.feed, ok = ITEMS.filter(function (i) { return inFeed(i) && i.st[m] === "ok"; }).length, err = ITEMS.filter(function (i) { return inFeed(i) && i.st[m] === "err"; }).length;
+    var made = (store.get("builder", null) || { camps: [] }).camps.filter(function (c) { return c.catalog; }).length;
+    var S = [["items", "운영 DB", "게시 룸타입 " + all + "개", "매시 정각 동기화"], ["items", "피드 편집", "수정 " + nEd + " · 제외 " + nEx, "이미지 · 제목 · 설명 · 라벨"], ["file", "피드 파일", "상품 " + inF + "개 · 3종", "마지막 생성 " + BUILT], ["file", "매체 수집", "Meta 매시 · Google 매일", "네이버 EP 매일 04:00"], ["diag", "매체 심사", "승인 " + (inF ? Math.round(ok / inF * 100) : 0) + "%", "오류 " + err + "개 · " + MEDIA[m].n.split(" ")[0]], ["sets", "상품 세트 → 광고", "세트 " + SETS.length + " · 광고 " + made, "META 빌더로 초안 생성"]];
+    return '<ol class="cf">' + S.map(function (s, k) { return '<li><button type="button" class="cf-s' + (CF.tab === s[0] ? ' on' : '') + '" data-cat-tab="' + s[0] + '"><i>' + (k + 1) + '</i><b>' + s[1] + '</b><span class="tnum">' + s[2] + '</span><small>' + s[3] + '</small></button></li>'; }).join("") + '</ol>';
+  }
+  function tabItems() {
+    var q = CF.q, list = ITEMS.filter(function (i) { return q === "all" || (q === "ed" && edited(i)) || (q === "ex" && !inFeed(i)) || (q === "bad" && i.issue); });
+    var dot = function (i, m) { return '<i class="cf-dot d-' + i.st[m] + '" title="' + MEDIA[m].n + ' · ' + ST[i.st[m]][0] + '"></i>'; };
+    return '<div class="fline">' + NW.segHtml([["all", "전체 " + ITEMS.length], ["ed", "수정됨 " + ITEMS.filter(edited).length], ["ex", "제외 " + ITEMS.filter(function (i) { return !inFeed(i); }).length], ["bad", "문제 " + ITEMS.filter(function (i) { return i.issue; }).length]], q, "data-cat-q") + '<span class="fl-note">행을 누르면 피드 편집기가 열려요 · 저장하면 피드 파일에 바로 반영돼요</span></div>'
+      + '<div class="card tw"><table class="t cf-t" style="min-width:860px"><thead><tr><th></th><th>상품 ID</th><th>피드 제목</th><th class="r">주간 가격</th><th class="r">재고</th><th>라벨</th><th>Meta · Google · 네이버</th><th>피드 포함</th></tr></thead><tbody>'
+      + list.slice(0, 60).map(function (i) { return '<tr class="clk' + (inFeed(i) ? '' : ' cf-ex') + '" data-cat="' + i.id + '"><td><span class="cth" style="background:' + thumb(i) + '"></span></td><td class="mono">' + i.id + '</td><td><b>' + esc(titleOf(i)) + '</b>' + (edited(i) && inFeed(i) ? ' <span class="pill sm p-sky">수정됨</span>' : '') + '</td><td class="r tnum">' + won(i.price) + '</td><td class="r tnum">' + i.stock + '</td><td><span class="faint">' + i.seg + ' · ' + i.sido + (ed(i).lab ? ' · ' + esc(ed(i).lab) : '') + '</span></td><td>' + dot(i, "meta") + dot(i, "google") + dot(i, "naver") + '</td><td><button type="button" class="tgl' + (inFeed(i) ? ' on' : '') + '" data-cat-inc="' + i.id + '" aria-label="피드 포함"><i></i></button></td></tr>'; }).join("")
+      + '</tbody></table>' + (list.length > 60 ? '<div class="faint" style="padding:10px 12px">상위 60개 표시 · 전체 ' + list.length + '개</div>' : '') + '</div>';
+  }
+  function tabFile() {
+    var n = ITEMS.filter(inFeed).length, sample = ITEMS.filter(inFeed).sort(function (a, b) { return edited(b) - edited(a); }).slice(0, 2);
+    return '<div class="card tw"><table class="t" style="min-width:820px"><thead><tr><th>매체</th><th>형식</th><th>피드 URL</th><th class="r">상품</th><th>수집 일정</th><th>마지막 생성</th></tr></thead><tbody>'
+      + Object.keys(MEDIA).map(function (m) { var u = "https://demo.example/api/catalog/feed" + (m === "naver" ? ".tsv" : ".xml") + "?ch=" + m; return '<tr><td><b>' + MEDIA[m].n + '</b><div class="faint" style="font-size:12px">' + MEDIA[m].d + '</div></td><td>' + MEDIA[m].f + '</td><td><button type="button" class="cf-url mono" data-copy="' + u + '" title="복사">' + u + '</button></td><td class="r tnum">' + n + '</td><td>' + MEDIA[m].sch + '</td><td class="tnum">오늘 ' + BUILT + '</td></tr>'; }).join("") + '</tbody></table></div>'
+      + '<div class="g2 cf-g"><div><div class="lbl2">수집 기록 <small>오늘</small></div><div class="card tw"><table class="t"><thead><tr><th>시각</th><th>내용</th><th class="r">상품</th><th class="r">변경</th><th>결과</th></tr></thead><tbody>'
+      + pulls().map(function (p) { return '<tr' + (p.m === "edit" ? ' class="cf-new"' : '') + '><td class="tnum">' + p.t + '</td><td>' + (p.m === "edit" ? '<b>피드 재생성</b> · ' + esc(p.txt) : MEDIA[p.m].n + ' 예약 수집') + '</td><td class="r tnum">' + p.n + '</td><td class="r tnum">' + p.ch + '</td><td><span class="pill sm ' + (p.ok ? "p-em" : "p-amber") + '">' + (p.m === "edit" ? "반영" : p.ok ? "성공" : "경고 2") + '</span></td></tr>'; }).join("") + '</tbody></table></div></div>'
+      + '<div><div class="lbl2">피드 미리보기 · XML <small>수정한 칸은 노란색</small></div><div class="card" style="padding:14px"><pre class="code-b cf-xml">&lt;rss version="2.0" xmlns:g="http://base.google.com/ns/1.0"&gt;\n&lt;channel&gt;\n' + sample.map(function (i) { return xmlOf(i, true); }).join("\n") + '\n…\n&lt;/channel&gt;</pre></div></div></div>';
+  }
+  function tabDiag() {
+    var m = CF.feed, F = ITEMS.filter(inFeed), n = function (s) { return F.filter(function (i) { return i.st[m] === s; }).length; };
+    var list = F.filter(function (i) { return (CF.st === "all" ? i.st[m] !== "ok" : i.st[m] === CF.st); });
+    return '<div class="fline">' + NW.segHtml(Object.keys(MEDIA).map(function (k) { return [k, MEDIA[k].n]; }), m, "data-cat-feed", true) + '<span class="fl-note">' + MEDIA[m].d + '</span></div>'
+      + '<div class="kg">' + NW.kpi("심사 대상", ko(F.length) + "개", "피드 포함 상품") + NW.kpi("승인", ko(n("ok")) + "개", (F.length ? (n("ok") / F.length * 100).toFixed(1) : 0) + "%", "acc") + NW.kpi("경고", ko(n("warn")) + "개", "노출은 되지만 품질 저하") + NW.kpi("오류", ko(n("err")) + "개", "노출 중단 — 우선 수정", "bad") + '</div>'
+      + '<div class="fline">' + NW.segHtml([["all", "문제 전체"], ["warn", "경고"], ["err", "오류"]], CF.st, "data-cat-st") + '<span class="fl-note">편집기에서 고친 뒤 저장하면 다음 수집 때 다시 심사돼요</span></div>'
+      + '<div class="card tw"><table class="t" style="min-width:700px"><thead><tr><th></th><th>상품 ID</th><th>피드 제목</th><th>상태</th><th>문제</th><th></th></tr></thead><tbody>'
+      + (list.length ? list.slice(0, 40).map(function (i) { return '<tr class="clk" data-cat="' + i.id + '"><td><span class="cth" style="background:' + thumb(i) + '"></span></td><td class="mono">' + i.id + '</td><td><b>' + esc(titleOf(i)) + '</b></td><td><span class="pill sm ' + ST[i.st[m]][1] + '">' + ST[i.st[m]][0] + '</span></td><td class="faint">' + esc(i.issue) + '</td><td><button class="btn sm" data-cat-fix="' + i.id + '">자동 수정 요청</button></td></tr>'; }).join("") : '<tr><td colspan="6" class="faint" style="padding:18px">이 매체에 남은 문제가 없어요</td></tr>') + '</tbody></table></div>';
+  }
+  function tabSets() {
+    var camps = (store.get("builder", null) || { camps: [] }).camps;
+    return '<p class="fl-note" style="margin:0 0 12px">상품 세트는 피드 상품을 라벨 · 가격 · 행동 조건으로 묶은 거예요. 세트를 고르면 META 빌더에 <b>카탈로그 광고 초안</b>(캠페인 · 세트 · 다이내믹 소재)이 만들어지고 빌더로 넘어가요.</p>'
+      + '<div class="cf-sets">' + SETS.map(function (s) {
+        var its = setItems(s.id), used = camps.filter(function (c) { return c.catalog === s.id; });
+        return '<div class="card cf-set"><div class="cf-set-h"><b>' + esc(s.name) + '</b><span class="tnum">' + its.length + '개 상품</span></div><div class="mchips">' + s.rule.map(function (r) { return '<span class="tag mono">' + esc(r) + '</span>'; }).join("") + '</div>'
+          + '<div class="cf-strip">' + its.slice(0, 6).map(function (i) { return '<span style="background:' + thumb(i) + '" title="' + esc(titleOf(i)) + '"></span>'; }).join("") + (its.length > 6 ? '<em>+' + (its.length - 6) + '</em>' : '') + '</div>'
+          + '<div class="cf-set-f"><small>' + (used.length ? '연결된 광고 ' + used.length + '개 · <a href="#/meta-ads">빌더에서 보기</a>' : '아직 연결된 광고 없음') + '</small><button class="btn btn-p sm" data-cat-ad="' + s.id + '">이 세트로 카탈로그 광고 만들기 →</button></div></div>';
+      }).join("") + '</div>';
+  }
   function catalog() {
-    var list = ITEMS.filter(function (i) { return CF.st === "all" || i.st === CF.st; }), n = function (s) { return ITEMS.filter(function (i) { return i.st === s; }).length; };
-    var sync = store.get("cat-sync", "오늘 06:00");
-    var xml = ITEMS.slice(0, 3).map(function (i) { return '&lt;item&gt;\n  &lt;id&gt;' + i.id + '&lt;/id&gt;\n  &lt;title&gt;' + esc(i.title) + '&lt;/title&gt;\n  &lt;price&gt;' + i.price + ' KRW&lt;/price&gt;\n  &lt;availability&gt;' + (i.stock ? "in stock" : "out of stock") + '&lt;/availability&gt;\n  &lt;link&gt;https://demo.example/rooms/' + i.id + '&lt;/link&gt;\n  &lt;custom_label_0&gt;' + i.seg + '&lt;/custom_label_0&gt;\n&lt;/item&gt;'; }).join("\n");
-    return NW.hero("catalog", "대시보드 · 상품 피드", "Catalog", "게시 중인 룸타입이 광고 매체의 상품 카탈로그로 자동 동기화돼요. 매체별 승인·경고·오류를 한 화면에서 보고 고쳐요.", '<button class="btn" data-cat-sync>' + ic("refresh") + '지금 동기화 <span style="color:var(--faint);font-weight:400">· 마지막 ' + sync + '</span></button>')
-      + '<div style="margin-top:20px;display:flex;flex-wrap:wrap;gap:8px;align-items:center">' + NW.segHtml(Object.keys(FEED).map(function (k) { return [k, FEED[k][0]]; }), CF.feed, "data-cat-feed", true) + '<span class="fl-note" style="margin-left:8px">' + FEED[CF.feed][1] + '</span></div>'
-      + '<div class="kg" style="margin-top:14px">' + NW.kpi("피드 상품", ko(ITEMS.length) + "개", "게시 중 룸타입 = 피드 1:1") + NW.kpi("승인", ko(n("ok")) + "개", ((n("ok") / ITEMS.length) * 100).toFixed(1) + "%", "acc") + NW.kpi("경고", ko(n("warn")) + "개", "노출은 되지만 품질 저하") + NW.kpi("오류", ko(n("err")) + "개", "노출 중단 — 우선 수정", "bad") + NW.kpi("동기화 주기", "매일 06:00", "가격·재고 변경 시 즉시") + '</div>'
-      + '<div class="fline">' + NW.segHtml([["all", "전체"], ["ok", "승인"], ["warn", "경고"], ["err", "오류"]], CF.st, "data-cat-st") + '<span class="fl-note">행을 누르면 피드 필드와 광고 미리보기가 열려요</span></div>'
-      + '<div class="g2 cat-g"><div class="card tw"><table class="t" style="min-width:720px"><thead><tr><th></th><th>상품 ID</th><th>상품명</th><th class="r">주간 가격</th><th class="r">재고(호실)</th><th>지역</th><th>상태</th><th>문제</th></tr></thead><tbody>'
-      + list.slice(0, 60).map(function (i) { return '<tr class="clk" data-cat="' + i.id + '"><td><span class="cth" style="background:' + grad(i.id) + '"></span></td><td class="mono">' + i.id + '</td><td><b>' + esc(i.title) + '</b></td><td class="r tnum">' + won(i.price) + '</td><td class="r tnum">' + i.stock + '</td><td>' + i.sido + '</td><td><span class="pill sm ' + ST[i.st][1] + '">' + ST[i.st][0] + '</span></td><td class="ell faint" title="' + esc(i.issue) + '">' + esc(i.issue || "—") + '</td></tr>'; }).join("") + '</tbody></table>' + (list.length > 60 ? '<div class="faint" style="padding:10px 12px">상위 60개 표시 · 전체 ' + list.length + '개</div>' : '') + '</div>'
-      + '<div class="card" style="padding:16px;align-self:start"><div class="lbl2" style="margin:0 0 10px">피드 미리보기 · XML <small>상위 3개</small></div><pre class="code-b">' + xml + '</pre></div></div>';
+    var body = CF.tab === "file" ? tabFile() : CF.tab === "diag" ? tabDiag() : CF.tab === "sets" ? tabSets() : tabItems();
+    return NW.hero("catalog", "대시보드 · 상품 카탈로그 광고", "Catalog", "운영 DB의 게시 룸타입이 피드가 되어 Meta · Google · 네이버 상품광고로 넘어가는 과정을 한 화면에서 관리해요. 단계를 누르면 그 화면으로 가요.", '<button class="btn" data-cat-build>' + ic("refresh") + '피드 다시 만들기 <span style="color:var(--faint);font-weight:400">· 오늘 ' + BUILT + '</span></button>')
+      + flow()
+      + '<div class="cf-tabs">' + NW.segHtml([["items", "피드 상품"], ["file", "피드 파일 · 수집"], ["diag", "매체 심사"], ["sets", "상품 세트 · 광고"]], CF.tab, "data-cat-tab", true) + '</div>' + body;
+  }
+
+  /* 피드 편집기 */
+  var DR = null;
+  function preview(i, d) {
+    return '<div class="fb cf-fb"><div class="fb-h"><span class="fb-av">김</span><div><b>' + NW.BRAND + '</b><small>광고 · 카탈로그</small></div></div><div class="fb-t">지금 비어 있는 방, 1주부터 계약해요.</div><div class="cf-car">'
+      + [i].concat(ITEMS.filter(function (x) { return x.id !== i.id && inFeed(x) && x.sido === i.sido; }).slice(0, 2)).map(function (x, k) { var me = !k; return '<div class="cf-card"><div class="cf-ci" style="background:' + (me ? grad(i.id + ":" + d.img) : thumb(x)) + '"></div><b data-cf-pt="' + (me ? 1 : 0) + '">' + esc(me ? (d.title || i.base) : titleOf(x)) + '</b><span>주 ' + fmtW(x.price) + '원</span><button type="button">지금 예약하기</button></div>'; }).join("") + '</div></div>';
   }
   function openCat(id) {
-    var i = ITEMS.filter(function (x) { return x.id === id; })[0];
-    var kv = [["id", i.id], ["title", i.title], ["price", i.price + " KRW / 주"], ["availability", i.stock ? "in stock" : "out of stock"], ["inventory", i.stock], ["link", "https://demo.example/rooms/" + i.id], ["image_link", "(가상 이미지)"], ["custom_label_0", i.seg], ["custom_label_1", i.sido]];
-    NW.drawer(esc(i.title), '<div class="kv2">' + kv.map(function (r) { return '<span class="mono">' + r[0] + '</span><b class="mono">' + esc(r[1]) + '</b>'; }).join("") + '</div>'
-      + (i.issue ? '<div class="warn"><b>⚠ ' + ST[i.st][0] + '</b><div>' + esc(i.issue) + '</div></div>' : '<div class="okb">✓ 모든 매체에서 승인됐어요</div>')
-      + '<div class="lbl2">카탈로그 광고 미리보기 (캐러셀 한 칸)</div><div class="fb" style="max-width:260px"><div class="fb-img" style="background:' + grad(i.id) + '"></div><div class="fb-c"><div><b>' + esc(i.title) + '</b><span>주 ' + won(i.price) + '</span></div></div></div>',
-      (i.issue ? '<button class="btn btn-p" data-cat-fix="' + i.id + '">자동 수정 요청</button>' : '') + '<button class="btn" data-close>닫기</button>', 500);
+    var i = ITEMS.filter(function (x) { return x.id === id; })[0], e = ed(i);
+    DR = { id: id, img: e.img || 0, title: e.title || "", desc: e.desc || "", lab: e.lab || "", excl: !!e.excl };
+    var cnt = function (k, max) { return '<small class="tnum cf-cnt" id="cfc-' + k + '">' + ((DR[k] || (k === "title" ? i.base : descOf(i))).length) + ' / ' + max + '</small>'; };
+    NW.drawer("피드 편집 · " + esc(i.id), '<div class="cf-ed"><div>'
+      + '<div class="lbl2" style="margin-top:0">이미지 선택 <small>매체에 나갈 대표 이미지 · 1080×1080 이상</small></div><div class="cf-imgs">' + IMGL.map(function (l, k) { return '<button type="button" class="cf-img' + (DR.img === k ? ' on' : '') + '" data-cf-img="' + k + '" style="background:' + grad(i.id + ":" + k) + '"><span>' + l + '</span></button>'; }).join("") + '</div>'
+      + fld("피드 제목 " + cnt("title", 150), '<input class="inp" data-cf="title" maxlength="150" placeholder="' + esc(i.base) + '" value="' + esc(DR.title) + '">') + '<p class="cf-hint">검색어를 앞에 두면 클릭률이 올라가요 — 예) 선릉역 1분 · 풀옵션 스튜디오</p>'
+      + fld("설명 " + cnt("desc", 5000), '<textarea class="inp" rows="4" data-cf="desc" maxlength="5000" placeholder="' + esc(descOf(i)) + '">' + esc(DR.desc) + '</textarea>')
+      + '<div class="lbl2">커스텀 라벨 <small>상품 세트를 나눌 때 써요</small></div><div class="cf-labs"><span class="tag mono">0 · ' + i.seg + '</span><span class="tag mono">1 · ' + i.sido + '</span><span class="tag mono">2 · ' + band(i.price) + '</span><input class="inp" data-cf="lab" placeholder="3 · 직접 입력 (예: 가을 프로모션)" value="' + esc(DR.lab) + '"></div>'
+      + '<label class="cf-ex-row"><span><b>피드에서 제외</b><small>체크하면 모든 매체 피드에서 빠지고 광고에 안 나가요</small></span><button type="button" class="tgl' + (DR.excl ? ' on' : '') + '" data-cf-ex><i></i></button></label>'
+      + '</div><div><div class="lbl2" style="margin-top:0">광고 미리보기 · Meta 카탈로그 캐러셀</div><div id="cfPrev">' + preview(i, DR) + '</div>'
+      + '<div class="lbl2">피드에 나갈 값</div><div class="kv2"><span class="mono">g:id</span><b class="mono">' + i.id + '</b><span class="mono">g:price</span><b class="mono">' + i.price + ' KRW</b><span class="mono">g:availability</span><b class="mono">' + (i.stock ? "in stock" : "out of stock") + '</b><span class="mono">매체 상태</span><b>' + Object.keys(MEDIA).map(function (m) { return '<span class="pill sm ' + ST[i.st[m]][1] + '">' + MEDIA[m].n.split(" ")[0] + ' ' + ST[i.st[m]][0] + '</span>'; }).join(" ") + '</b></div>'
+      + (i.issue ? '<div class="warn" style="margin-top:12px"><b>⚠ ' + esc(i.issue) + '</b><div>고쳐서 저장하면 다음 수집 때 다시 심사돼요</div></div>' : '') + '</div></div>',
+      '<button class="btn" data-cf-reset>원래대로</button><span style="flex:1"></span><button class="btn" data-close>닫기</button><button class="btn btn-p" data-cf-save>저장 → 피드 반영</button>', 980, '<span class="pill sm p-gray" style="margin-left:8px">' + esc(i.base) + '</span>');
   }
+  function stamp(txt) { BUILT = hhmm(); store.set("cat-built", BUILT); LOG.unshift({ t: BUILT, txt: txt }); LOG = LOG.slice(0, 20); store.set("cat-log", LOG); }
+  document.addEventListener("input", function (e) {
+    var k = e.target.dataset && e.target.dataset.cf; if (!k || !DR) return;
+    DR[k] = e.target.value; var c = document.getElementById("cfc-" + k); if (c) c.textContent = (e.target.value || e.target.placeholder).length + c.textContent.slice(c.textContent.indexOf(" /"));
+    if (k === "title") { var pt = NW.$('[data-cf-pt="1"]'); if (pt) pt.textContent = e.target.value || e.target.placeholder; }
+  });
   document.addEventListener("click", function (e) {
-    var b;
-    if ((b = e.target.closest("[data-cat-feed]"))) { CF.feed = b.getAttribute("data-cat-feed"); store.set("cat-f", CF); NW.rerender(); return; }
-    if ((b = e.target.closest("[data-cat-st]"))) { CF.st = b.getAttribute("data-cat-st"); store.set("cat-f", CF); NW.rerender(); return; }
-    if ((b = e.target.closest("tr[data-cat]"))) { openCat(b.getAttribute("data-cat")); return; }
-    if ((b = e.target.closest("[data-cat-fix]"))) { var it = ITEMS.filter(function (x) { return x.id === b.getAttribute("data-cat-fix"); })[0]; it.st = "ok"; it.issue = ""; NW.closeLayer(); NW.rerender(); NW.toast("수정 반영 → 다음 동기화에 재심사돼요 (데모)"); return; }
-    if (e.target.closest("[data-cat-sync]")) { store.set("cat-sync", "오늘 " + hhmm()); NW.rerender(); NW.toast("피드 동기화 완료 — 변경 " + ((Date.now() / 1000 | 0) % 7 + 2) + "건 (데모)"); return; }
+    var b, i;
+    if ((b = e.target.closest("[data-cat-tab]"))) { CF.tab = b.getAttribute("data-cat-tab"); store.set("cat-f", CF); NW.rerender(true); return; }
+    if ((b = e.target.closest("[data-cat-q]"))) { CF.q = b.getAttribute("data-cat-q"); store.set("cat-f", CF); NW.rerender(true); return; }
+    if ((b = e.target.closest("[data-cat-feed]"))) { CF.feed = b.getAttribute("data-cat-feed"); store.set("cat-f", CF); NW.rerender(true); return; }
+    if ((b = e.target.closest("[data-cat-st]"))) { CF.st = b.getAttribute("data-cat-st"); store.set("cat-f", CF); NW.rerender(true); return; }
+    if ((b = e.target.closest("[data-cat-inc]"))) { e.stopPropagation(); var id = b.getAttribute("data-cat-inc"), x = EDIT[id] || {}; x.excl = !x.excl; EDIT[id] = x; store.set("cat-edit", EDIT); stamp(id + (x.excl ? " 피드 제외" : " 피드 포함")); NW.rerender(true); NW.toast(x.excl ? "피드에서 뺐어요 — 다음 수집부터 광고에 안 나가요 (데모)" : "피드에 다시 넣었어요 (데모)"); return; }
+    if ((b = e.target.closest("[data-copy]"))) { NW.copy(b.getAttribute("data-copy")); return; }
+    if ((b = e.target.closest("tr[data-cat]")) && !e.target.closest("[data-cat-fix]")) { openCat(b.getAttribute("data-cat")); return; }
+    if ((b = e.target.closest("[data-cf-img]")) && DR) { DR.img = +b.getAttribute("data-cf-img"); NW.$$("[data-cf-img]").forEach(function (x) { x.classList.toggle("on", x === b); }); i = ITEMS.filter(function (x) { return x.id === DR.id; })[0]; document.getElementById("cfPrev").innerHTML = preview(i, DR); return; }
+    if ((b = e.target.closest("[data-cf-ex]")) && DR) { DR.excl = !DR.excl; b.classList.toggle("on", DR.excl); return; }
+    if (e.target.closest("[data-cf-reset]") && DR) { delete EDIT[DR.id]; store.set("cat-edit", EDIT); var rid = DR.id; NW.closeLayer(); NW.rerender(true); openCat(rid); NW.toast("원래 값으로 되돌렸어요"); return; }
+    if (e.target.closest("[data-cf-save]") && DR) {
+      var o = {}; if (DR.img) o.img = DR.img; if (DR.title.trim()) o.title = DR.title.trim(); if (DR.desc.trim()) o.desc = DR.desc.trim(); if (DR.lab.trim()) o.lab = DR.lab.trim(); if (DR.excl) o.excl = true;
+      if (Object.keys(o).length) EDIT[DR.id] = o; else delete EDIT[DR.id]; store.set("cat-edit", EDIT);
+      stamp(DR.id + " " + (o.excl ? "제외" : "수정")); NW.closeLayer(); DR = null; NW.rerender(true);
+      NW.toast("저장 → 피드 파일에 바로 반영했어요 · Meta는 다음 정각 수집 때 업데이트 (데모)"); return;
+    }
+    if ((b = e.target.closest("[data-cat-fix]"))) { e.stopPropagation(); i = ITEMS.filter(function (x) { return x.id === b.getAttribute("data-cat-fix"); })[0]; i.st[CF.feed] = "ok"; if (!["meta", "google", "naver"].some(function (m) { return i.st[m] !== "ok"; })) i.issue = ""; NW.closeLayer(); stamp(i.id + " 자동 수정"); NW.rerender(true); NW.toast("수정 반영 → 다음 수집 때 재심사돼요 (데모)"); return; }
+    if (e.target.closest("[data-cat-build]")) { stamp("수동 재생성 · 상품 " + ITEMS.filter(inFeed).length + "개"); NW.rerender(true); NW.toast("피드 3종을 다시 만들었어요 (데모)"); return; }
+    if ((b = e.target.closest("[data-cat-ad]"))) { var s = SETS.filter(function (x) { return x.id === b.getAttribute("data-cat-ad"); })[0]; if (NW.metaCatalog) { NW.metaCatalog(s); NW.toast("META 빌더에 ‘" + s.name + "’ 카탈로그 광고 초안을 만들었어요"); location.hash = "#/meta-ads"; } return; }
   });
 
   /* ── 2. 검색광고 키워드 API — 키워드 도구 + 예상실적 ─────── */
