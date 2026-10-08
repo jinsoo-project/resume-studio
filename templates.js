@@ -745,6 +745,12 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
   var PPT_BOARDS_OF = { "0a3aea35-ccc9-4018-a7a6-e383c303f928": [10], "3080bc75-d773-490f-9a02-35d83886b418": [12], "b0aa1d32-82d9-44bc-897d-b558a425c98c": [14], "2c1ddb7a-e1a3-4adb-a18e-e1b43ad8f731": [16, 18],
     "43ab6811-42cf-4a1f-afca-62bfd67b17f9": [19], "574f26d3-1fff-49fb-a302-b8c12253df61": [20], "53845c2b-3618-4e8d-968c-1edfabdf4912": [21], "4d333686-6daa-4c8e-9cd7-3e8309ef9900": [23], "e5bb7edf-a48d-4752-a0b4-c05df7903051": [24],
     "731ea8fe-9bb7-41ce-8cc1-687f77f9c49c": [26], "8fe4e187-9052-4737-9d1b-d0a158d9e156": [27], "199815d6-356c-4959-8219-6c9ea7615102": [28] }; // 영상 PD(29쪽)는 영상 2편씩 모은 그림이라 판 대신 영상 목록을 크게
+  // 카드 대표 썸네일(전체 프로젝트 페이지 · 메인 모자이크 공통): PPT 그림 이름 또는 pf-doc 파일(확장자 있음)
+  var CARD_THUMB = { "0a3aea35-ccc9-4018-a7a6-e383c303f928": "s10_02", "3080bc75-d773-490f-9a02-35d83886b418": "s12_01", "b0aa1d32-82d9-44bc-897d-b558a425c98c": "s14_00", "2c1ddb7a-e1a3-4adb-a18e-e1b43ad8f731": "s16_01",
+            "43ab6811-42cf-4a1f-afca-62bfd67b17f9": "s19_00", "574f26d3-1fff-49fb-a302-b8c12253df61": "s20_00", "53845c2b-3618-4e8d-968c-1edfabdf4912": "s21_00", "4d333686-6daa-4c8e-9cd7-3e8309ef9900": "s23_00", "e5bb7edf-a48d-4752-a0b4-c05df7903051": "s24_00",
+            "731ea8fe-9bb7-41ce-8cc1-687f77f9c49c": "s26_01", "8fe4e187-9052-4737-9d1b-d0a158d9e156": "s27_01", "199815d6-356c-4959-8219-6c9ea7615102": "s28_02",
+            "dff32975-e504-47e3-8ee1-744f2267ac91": "urbanstay-cover.jpg", "60f3fcee-e8b2-4499-b7d1-71e4f91ad2f5": "platt/hosting.jpg", "5c1e8a52-7b4d-4f0e-9a63-2d8f1b7c4e90": "wavve/01.jpg" };
+  var cardThSrc = function (f) { return /\.(jpe?g|png|webp)$/i.test(f) ? PF_DOC + f : PPT_IMG + f + ".jpg"; };
   function pptPatch(d) {
     var P = PPT_PATCH, x = JSON.parse(JSON.stringify(d)), byId = {}, n = 0;
     var mets = function (L) { return L.map(function (a) { return { id: "ppt" + (n++), value: a[0], label: a[1] }; }); };
@@ -997,6 +1003,20 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
     var feat = works.filter(function (x) { return x.w.featured; });
     var featM = feat.filter(function (x) { return (x.w.metrics || []).length; });
     var pick = (featM.length >= 4 ? featM : feat.length ? feat : works).slice(0, 4); // 대표작 4 (작게·세로 길게·작게·가로 길게)
+    // 칸별 직접 고르기(KILO 대시보드 Projects → '메인 대표 칸' = klio.mosaic, 작업 id 순서 · 최대 6칸) — 있으면 '대표' 스위치 대신 이 순서
+    //    DB에 없고 전체 프로젝트 페이지에만 있는 프로젝트(웨이브 등 PPT 추가분)도 같은 데이터(pptPatch)로 가져옴
+    var MZ = Array.isArray(K.mosaic) ? K.mosaic.filter(Boolean) : [];
+    if (MZ.length) {
+      var mzById = {}, mzPpt = null;
+      works.forEach(function (x) { mzById[x.w.id] = x; });
+      var mzPick = MZ.map(function (id) {
+        if (mzById[id]) return mzById[id];
+        if (isHidden("works", id)) return null;
+        if (!mzPpt) { mzPpt = {}; (pptPatch(d).companies || []).forEach(function (co) { (co.works || []).forEach(function (w) { mzPpt[w.id] = { co: co, w: w }; }); }); }
+        return mzPpt[id] || null;
+      }).filter(Boolean).slice(0, 6);
+      if (mzPick.length) pick = mzPick;
+    }
     // 카드 표시값 — KILO 대시보드 카드별 설정(klio.cards: 이름 · 썸네일 번호(-1=색 카드) · 대표 지표 번호(-1=없음))을 메인 타일에도 똑같이
     var KCARD = K.cards || {};
     var cardView = function (w) {
@@ -1017,6 +1037,7 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
     // 타일 = 전체 프로젝트 휠과 같은 상품카드: 흰 카드 안 썸네일(작은·세로 타일은 위, 가로 타일은 왼쪽) + 분야 · 제목 · 회사·연도 · 대표 지표
     var tileHtml = function (x, span, j) {
       var w = x.w, co = x.co, cm = catMeta(w.category), v = cardView(w), md = v.main, m0 = v.m0, yr = yearOf(w);
+      if (!md && CARD_THUMB[w.id] && !((KCARD[w.id] || {}).thumb < 0)) md = { src: cardThSrc(CARD_THUMB[w.id]) }; // 이미지 없는 프로젝트 = 전체 프로젝트 페이지 카드와 같은 그림(일러스트를 고른 카드는 그대로)
       var th = md
         ? '<span class="pc-th img" style="--img:url(\'' + esc(md.src) + '\')">' + thumbImg(md.src, fitOf(w)) + (md.yt ? '<i class="t-play" aria-hidden="true"></i>' : '') + '</span>'
         : '<span class="pc-th art">' + coverArt(w, m0) + '</span>'; // 이미지 없으면 자동 일러스트
@@ -1025,7 +1046,7 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
         + (m0 ? '<span class="pc-p"><b>' + esc(m0.value) + '</b>' + (m0.label ? ' ' + esc(m0.label) : '') + '</span>' : '') + '</span><span class="t-go" aria-hidden="true">→</span></a>';
     };
     var mosaic = pick.map(function (x, i) {
-      var span = i === 1 ? " tall" : i === 3 ? " wide" : "";
+      var span = i === 1 ? " tall" : i === 3 ? " wide" : i === 4 && pick.length === 5 ? " wide" : ""; // 5·6번 칸 = 아래 한 줄(하나뿐이면 가로 길게)
       return tileHtml(x, span, i);
     }).join("");
     // 전체 보기 버튼(→ /projects, 타일도 그 페이지에서 해당 프로젝트 보기 창으로): 썸네일 4개 겹침 + 제목/부제 + 화살표 (문구는 KILO 대시보드에서)
@@ -2293,10 +2314,7 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
           var CYCLE = { "t-perf": [["KPI · 타겟 정의", "세그먼트 분류"], ["미디어 믹스", "예산 & 매체"], ["캠페인 구조", "웹&앱 · UA & 리타게팅"], ["소재 제작", "이미지 · 영상 · 텍스트"], ["세팅 · 운영", "A/B 테스트"], ["성과 모니터링", "자동화 대시보드"], ["분석", "인사이트 도출"], ["개선", "매체·캠페인 구조 · 소재"]] };
           var thumbOf = function (it) { var bs = PPT_BOARDS_OF[it.w.id] || [], b = bs.length && PPT_BOARD[bs[0]]; return b && b.i.length ? PPT_IMG + b.i[0][0] + ".jpg" : it.main ? it.main.src : (it.co && it.co.logo) || ""; }; // 판 첫 그림 → 대표 그림 → 회사 로고
           // 카드 썸네일 = 고른 PPT 그림(CARD_TH) → 판 첫 그림 → 대표 그림(영상은 썸네일) → 분야 일러스트
-          var CARD_TH = { "0a3aea35-ccc9-4018-a7a6-e383c303f928": "s10_02", "3080bc75-d773-490f-9a02-35d83886b418": "s12_01", "b0aa1d32-82d9-44bc-897d-b558a425c98c": "s14_00", "2c1ddb7a-e1a3-4adb-a18e-e1b43ad8f731": "s16_01",
-            "43ab6811-42cf-4a1f-afca-62bfd67b17f9": "s19_00", "574f26d3-1fff-49fb-a302-b8c12253df61": "s20_00", "53845c2b-3618-4e8d-968c-1edfabdf4912": "s21_00", "4d333686-6daa-4c8e-9cd7-3e8309ef9900": "s23_00", "e5bb7edf-a48d-4752-a0b4-c05df7903051": "s24_00",
-            "731ea8fe-9bb7-41ce-8cc1-687f77f9c49c": "s26_01", "8fe4e187-9052-4737-9d1b-d0a158d9e156": "s27_01", "199815d6-356c-4959-8219-6c9ea7615102": "s28_02",
-            "dff32975-e504-47e3-8ee1-744f2267ac91": "urbanstay-cover.jpg", "60f3fcee-e8b2-4499-b7d1-71e4f91ad2f5": "platt/hosting.jpg", "5c1e8a52-7b4d-4f0e-9a63-2d8f1b7c4e90": "wavve/01.jpg" }; // 카드 썸네일로 잘 보이는 PPT 그림(소재·배너 위주) · 확장자 있으면 pf-doc 파일(성과 리포트 캡처 · 웨이브 가이드 이미지)
+          var CARD_TH = CARD_THUMB; // 카드 썸네일로 잘 보이는 PPT 그림(소재·배너 위주) · 확장자 있으면 pf-doc 파일(성과 리포트 캡처 · 웨이브 가이드 이미지)
           var cardThumb = function (it) {
             var bs = PPT_BOARDS_OF[it.w.id] || [], b = bs.length && PPT_BOARD[bs[0]], f = CARD_TH[it.w.id] || (b && b.i.length ? b.i[0][0] : "");
             if (f) return '<img src="' + (/\.(jpe?g|png|webp)$/i.test(f) ? PF_DOC + f : PPT_IMG + f + '.jpg') + '" alt="" loading="lazy" decoding="async">';
