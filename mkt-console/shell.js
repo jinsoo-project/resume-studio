@@ -23,13 +23,20 @@
   var FOOT = [["image", "이미지 업로드"], ["home", "Agent List"], ["gear", "탭 설정"]];
   var OV = "overview", DEF = "total-dashboard";
   var route = function () { if (NW.EMBED) return OV; var h = location.hash.replace(/^#\/?/, ""); return h === OV || !h ? OV : NW.PAGES[h] ? h : DEF; };
-  var OPEN = store.get("sb-open2", null) || { "DASHBOARD": 1, "MKT": 1, "Ads builder": 1, "SEO": 1, "콘텐츠 파이프라인": 1 };
+  var OPEN = store.get("sb-open3", null) || {}; // 1 = 펼침 · 0 = 접힘 · 없음 = 지금 화면이 있는 묶음(과 DASHBOARD)만 펼침
+  var OFFSHOW = !!store.get("sb-offshow", false); // 묶음 안 비활성 메뉴 보기
+  /* 둘러보기: 방문자가 핵심 화면을 차례로 눌러 보도록 — 본 화면 ✓ · 진행 수 · 다음 화면 */
+  var TOUR = [["total-dashboard", "Total Dashboard", "거래액 · 매출 · 광고 기여를 한 화면에"], ["kpi-okr", "KPI & OKR", "목표 대비 진행 · 왜 움직였나"], ["meta-ads", "META Ads 빌더", "캠페인 → 세트 → 소재를 트리로 짜고 집행"], ["catalog", "Catalog", "피드 편집 → 상품 세트 → 카탈로그 광고"], ["naver-sa", "NAVER SA 빌더", "검색광고 캠페인 · 키워드 일괄 생성"], ["search-kw", "검색광고 키워드 API", "검색량 · 입찰가 · 예상 실적"], ["keyword-trend", "Keyword Trend", "검색 추이와 연관어로 주제 찾기"], ["competitor-ads", "경쟁사 광고", "경쟁사 소재 · 소구점 분석"], ["blog-journey", "블로그 파이프라인", "키워드에서 발행까지 9단계 자동화"], ["ad-requests", "광고 & 디자인 요청", "소재 요청 · 코멘트 보드"], ["utm", "UTM 생성기", "규칙대로 만들고 기록"], ["meetings", "회의 캘린더", "회의 · 할 일 한 달 보기"], ["ga4", "GA4 대시보드", "유입 · 활성 사용자 · 이벤트"]];
+  var SEEN = store.get("seen", {});
+  var tourIdx = function (r) { for (var i = 0; i < TOUR.length; i++) if (TOUR[i][0] === r) return i; return -1; };
+  var seenN = function () { return TOUR.filter(function (t) { return SEEN[t[0]]; }).length; };
+  function nextOf(r) { var i = tourIdx(r), n = TOUR.length; for (var k = 1; k <= n; k++) { var t = TOUR[(i + k + n) % n]; if (!SEEN[t[0]] && t[0] !== r) return t; } return TOUR[(i + 1 + n) % n]; }
   var COL = !!store.get("sidebar-collapsed", false);
 
   function leaf(k, sub) {
     var cur = route();
     if (!k[0]) return '<span class="sb-l off' + (sub ? ' sub' : '') + '" aria-disabled="true" title="' + OFF_TIP + '">' + esc(k[1]) + '</span>';
-    return '<a class="sb-l' + (sub ? ' sub' : '') + (k[0] === cur ? ' act' : '') + '" href="#/' + k[0] + '">' + esc(k[1]) + '</a>';
+    return '<a class="sb-l' + (sub ? ' sub' : '') + (k[0] === cur ? ' act' : '') + (SEEN[k[0]] ? ' seen' : '') + '" href="#/' + k[0] + '">' + esc(k[1]) + '</a>';
   }
   function hasCur(kids) { var cur = route(); return (kids || []).some(function (k) { return k.sub ? hasCur(k.kids) : k[0] === cur; }); }
   function firstLive(kids) { for (var i = 0; i < (kids || []).length; i++) { var k = kids[i]; if (k.sub) { var f = firstLive(k.kids); if (f) return f; } else if (k[0]) return k[0]; } return null; }
@@ -38,15 +45,17 @@
   function sidebar(variant) {
     var grp = function (g) {
       if (g.off) return '<button class="sb-g off" aria-disabled="true" title="' + OFF_TIP + '">' + ic(g.ic, "sb-ic") + '<span class="sb-lbl">' + esc(g.g) + '</span>' + ic("chev", "sb-chev") + '</button>';
-      var open = !!OPEN[g.g] || hasCur(g.kids), act = hasCur(g.kids), kids = g.kids.filter(isLive).concat(g.kids.filter(function (k) { return !isLive(k); }));
+      var act = hasCur(g.kids), open = OPEN[g.g] == null ? act || g.g === "DASHBOARD" : !!OPEN[g.g], live = g.kids.filter(isLive), dead = g.kids.filter(function (k) { return !isLive(k); }), kids = OFFSHOW ? live.concat(dead) : live;
       return '<button class="sb-g live' + (act ? ' act' : '') + '" aria-expanded="' + open + '" data-sb-g="' + esc(g.g) + '" data-first="' + firstLive(g.kids) + '" title="' + esc(g.g) + '">' + ic(g.ic, "sb-ic") + '<span class="sb-lbl">' + esc(g.g) + '</span><span class="sb-n">' + g.kids.reduce(function (t, k) { return t + (k.sub ? (k.kids || []).filter(function (x) { return x[0]; }).length : k[0] ? 1 : 0); }, 0) + '</span>' + ic("chev", "sb-chev") + '</button>'
         + (open ? '<div class="sb-kids">' + kids.map(function (k) {
           if (!k.sub) return leaf(k);
           if (k.off) return '<span class="sb-sub off" aria-disabled="true" title="' + OFF_TIP + '">' + ic("chev", "") + esc(k.sub) + '</span>';
           return '<span class="sb-sub">' + ic("chev", "rot") + esc(k.sub) + '</span>' + k.kids.map(function (x) { return leaf(x, true); }).join("");
-        }).join("") + '</div>' : '');
+        }).join("") + (dead.length ? '<button type="button" class="sb-offt" data-sb-off>' + (OFFSHOW ? "비활성 메뉴 숨기기" : "비활성 메뉴 " + dead.length + "개 보기") + '</button>' : '') + '</div>' : '');
     };
-    var nav = '<div class="sb-cap">데모에서 열리는 메뉴</div>' + NAV.filter(function (g) { return !g.off; }).map(grp).join("")
+    var sn = seenN(), nx = nextOf(route());
+    var nav = '<a class="sb-tour" href="#/' + nx[0] + '"><span><b>핵심 화면 둘러보기</b><em class="tnum">' + sn + ' / ' + TOUR.length + '</em></span><i><s style="width:' + (sn / TOUR.length * 100).toFixed(0) + '%"></s></i><small>' + (sn >= TOUR.length ? "모두 둘러봤어요 · 처음부터 다시" : "다음 · " + esc(nx[1]) + " →") + '</small></a>'
+      + '<div class="sb-cap">데모에서 열리는 메뉴</div>' + NAV.filter(function (g) { return !g.off; }).map(grp).join("")
       + '<div class="sb-cap off">운영 메뉴 · 데모 비활성</div>' + NAV.filter(function (g) { return g.off; }).map(grp).join("");
     return '<aside class="sb' + (variant === "desktop" && COL ? ' col' : '') + '">'
       + (variant === "desktop" ? '<button class="sb-tog" data-sb-col aria-label="사이드바 접기">' + ic("left") + '</button>' : '')
@@ -69,7 +78,7 @@
       + (onOv ? '' : '<button class="xb tb-menu" data-mnav aria-label="메뉴 열기">' + ic("menu") + '</button>')
       + '<a class="tb-brand" href="#/overview"><span class="sb-mark">' + ic("base") + '</span><b>AX-MKT 콘솔</b></a>'
       + '<nav class="tb-tabs" role="tablist"><a role="tab" class="' + (onOv ? 'on' : '') + '" href="#/overview">개요</a><a role="tab" class="' + (onOv ? '' : 'on') + '" href="#/' + (store.get("last", DEF)) + '">데모 콘솔</a></nav>'
-      + '<span class="tb-sp"></span><span class="demo-pill tb-pill"><i></i>모든 수치는 예시 · 가상 데이터</span>'
+      + '<span class="tb-sp"></span>' + (onOv ? '' : (function () { var nx = nextOf(r); return '<a class="tb-next" href="#/' + nx[0] + '" title="다음으로 볼 화면"><em class="tnum">' + seenN() + '/' + TOUR.length + '</em><span>다음 · ' + esc(nx[1]) + '</span> →</a>'; })()) + '<span class="demo-pill tb-pill"><i></i>모든 수치는 예시 · 가상 데이터</span>'
       + '<button class="xb" data-dark title="' + (dark ? "라이트 모드" : "다크 모드") + '">' + ic("moon") + '</button></header>'
       + (onOv ? '' : ticker());
   }
@@ -87,7 +96,7 @@
     document.documentElement.classList.toggle("is-ov", onOv);
   }
   function paintNav() {
-    var d = $(".body > .sb"); if (d) d.outerHTML = sidebar("desktop");
+    var d = $(".body > .sb"), y = d && d.querySelector(".sb-nav") ? d.querySelector(".sb-nav").scrollTop : 0; if (d) { d.outerHTML = sidebar("desktop"); var n2 = $(".body > .sb .sb-nav"); if (n2) n2.scrollTop = y; }
     var m = $("#mdrawer .sb"); if (m) m.outerHTML = sidebar("drawer");
     var t = $(".tb"), k = $(".tk"); if (k) k.remove(); if (t) t.outerHTML = topbar();
   }
@@ -99,11 +108,19 @@
     var html = '<div class="demo-note" role="note"><span class="demo-note-tag">DEMO</span><p><b>데모 환경으로 구현한 화면이에요.</b> <span>숫자는 모두 가상 데이터라 흐리게 처리했어요. 화면 구성과 동작을 봐 주세요.</span></p></div>';
     if (hero) hero.insertAdjacentHTML("afterend", html); else w.insertAdjacentHTML("afterbegin", html);
   }
+  function tourNext() {
+    if (NW.EMBED) return "";
+    var r = route(), nx = nextOf(r), left = TOUR.filter(function (t) { return !SEEN[t[0]] && t[0] !== r && t[0] !== nx[0]; }), i = tourIdx(r), pv = i > 0 ? TOUR[i - 1] : null;
+    return '<section class="tn"><div class="tn-h"><b>이어서 둘러보기</b><span class="tnum">핵심 화면 ' + seenN() + ' / ' + TOUR.length + ' 봤어요</span></div>'
+      + '<div class="tn-g">' + (pv ? '<a class="tn-c prev" href="#/' + pv[0] + '"><small>← 이전</small><b>' + esc(pv[1]) + '</b><span>' + esc(pv[2]) + '</span></a>' : '<a class="tn-c prev" href="#/overview"><small>← 개요</small><b>콘솔 소개</b><span>무엇을 하는 콘솔인지</span></a>')
+      + '<a class="tn-c next" href="#/' + nx[0] + '"><small>다음으로 볼 화면 →</small><b>' + esc(nx[1]) + '</b><span>' + esc(nx[2]) + '</span></a></div>'
+      + (left.length ? '<div class="tn-left"><span>아직 안 본 화면</span>' + left.map(function (t) { return '<a href="#/' + t[0] + '">' + esc(t[1]) + '</a>'; }).join("") + '</div>' : '') + '</section>';
+  }
   NW.rerender = function (keep) {
     var y = window.scrollY, main = $("#main"); if (!main) return;
     NW.charts.length = 0;
     if (route() === OV) { main.innerHTML = '<div class="wrap ov-wrap">' + NW.OVERVIEW.render() + '</div>'; NW.OVERVIEW.mount(); }
-    else { main.innerHTML = '<div class="wrap">' + NW.PAGES[route()].render() + '</div>'; NW.drawCharts(); demoNote(main); }
+    else { main.innerHTML = '<div class="wrap">' + NW.PAGES[route()].render() + tourNext() + '</div>'; NW.drawCharts(); demoNote(main); }
     document.documentElement.classList.toggle("nw-blur", !!BLUR[route()]);
     if (keep !== false) window.scrollTo(0, y);
   };
@@ -112,6 +129,7 @@
     var r = route(), h = location.hash.replace(/^#\/?/, ""); if (r === "paid-dashboard") { NW.PAGES[r].render(); r = "total-dashboard"; }
     if (!NW.EMBED && h !== r) history.replaceState(null, "", "#/" + r);
     NW.OVERVIEW.unmount(); closeM(); NW.closeLayer();
+    if (tourIdx(r) > -1 && !SEEN[r]) { SEEN[r] = 1; store.set("seen", SEEN); } // 방문 기록 먼저 → 사이드바 · 상단 '다음 화면'에 바로 반영
     var mode = r === OV ? "ov" : "con";
     document.documentElement.classList.toggle("dark", mode === "con" && !!store.get("dark", false)); // 개요 = 포트폴리오처럼 밝게 · 다크 모드는 데모 콘솔에서만
     if (mode !== lastMode || !$("#main")) { layout(); lastMode = mode; } else paintNav();
@@ -149,7 +167,9 @@
     if (!t.closest(".gt-w")) NW.$$(".gt-w.open").forEach(function (x) { x.classList.remove("open"); });
     if ((b = t.closest("[data-sb-g]"))) {
       if (b.closest(".sb.col")) { location.hash = "#/" + b.getAttribute("data-first"); return; }
-      var g = b.getAttribute("data-sb-g"); OPEN[g] = b.getAttribute("aria-expanded") === "true" ? 0 : 1; store.set("sb-open2", OPEN); paintNav(); return;
+      var g = b.getAttribute("data-sb-g"); OPEN[g] = b.getAttribute("aria-expanded") === "true" ? 0 : 1; store.set("sb-open3", OPEN); paintNav(); return;
+    }
+    if (t.closest("[data-sb-off]")) { OFFSHOW = !OFFSHOW; store.set("sb-offshow", OFFSHOW); paintNav(); return;
     }
     if (t.closest("[data-sb-col]")) { COL = !COL; store.set("sidebar-collapsed", COL); paintNav(); setTimeout(NW.drawCharts, 220); return; }
     if (t.closest("[data-mnav]")) { openM(); return; }
