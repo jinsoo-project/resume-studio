@@ -11,6 +11,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@800&family=Newsreader:ital,opsz,wght@0,6..72,400;1,6..72,400&display=swap" rel="stylesheet">
 <link href="https://fonts.googleapis.com/css2?family=Mr+Dafoe&family=Qwitcher+Grypen:wght@700&family=Kaushan+Script&family=Ma+Shan+Zheng&family=Caveat:wght@600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/sun-typeface/SUIT@2/fonts/variable/woff2/SUIT-Variable.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/wanteddev/wanted-sans@v1.0.3/packages/wanted-sans/fonts/webfonts/variable/split/WantedSansVariable.min.css">
 <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
 <style>
 :root{
@@ -1529,8 +1530,8 @@ function renderAXAdmin(){
   // ── 구성: 섹션 순서·노출·이름 + 모션·효과
   const P_layout=()=>intro('섹션 순서·노출·이름과 전체 효과를 정해요. 이름을 비우면 기본 이름(About 등)으로 보여요. 하단 바도 같은 순서·이름을 써요.')
     +card('섹션',kd.sections.map((s,i)=>`<div class="kd-item${s.on===false?' off':''}" data-row data-pv="${axAttr(s.key)}"><div class="kd-row">${sw(`data-ax-klio-on="${i}"`,s.on!==false,'','노출')}<input class="kd-in" data-ax-klio-label="${i}" value="${axAttr(s.label||'')}" placeholder="${axAttr(KL[s.key]||s.key)}">${upDown('data-ax-moveklio',i,i===0,i===kd.sections.length-1)}</div></div>`).join(''),'스위치 = 노출 · ⠿ 끌어서 순서')
-    +card('글꼴',(()=>{ const cur=(kd.ui||{}).font||'editorial';
-      const OPTS=[['editorial','에디토리얼','제목 세리프(Newsreader) + 본문 프리텐다드','Newsreader,Georgia,serif',400],['modern','모던','프리텐다드 굵게','"Pretendard Variable",Pretendard,sans-serif',800],['soft','소프트','SUIT 둥근 고딕','"SUIT Variable",sans-serif',800],['classic','이전','Figtree + 프리텐다드','Figtree,sans-serif',800]];
+    +card('글꼴',(()=>{ const cur=(kd.ui||{}).font||'gothic';
+      const OPTS=[['gothic','고딕','원티드 산스 — 제목·본문 모두 고딕','"Wanted Sans Variable",sans-serif',700],['editorial','에디토리얼','제목 세리프(Newsreader) + 본문 프리텐다드','Newsreader,Georgia,serif',400],['modern','모던','프리텐다드 굵게','"Pretendard Variable",Pretendard,sans-serif',800],['soft','소프트','SUIT 둥근 고딕','"SUIT Variable",sans-serif',800],['classic','이전','Figtree + 프리텐다드','Figtree,sans-serif',800]];
       return `<div class="kd-fonts">${OPTS.map(([k,l,dsc,ff,wt])=>`<button class="kd-font${cur===k?' on':''}" data-kfont="${k}"><b style="font-family:${axAttr(ff)};font-weight:${wt}">Work that <i style="font-style:${k==='editorial'?'italic':'normal'};${k==='editorial'?'':'opacity:.45'}">moved</i></b><span>${l}</span><small>${dsc}</small></button>`).join('')}</div><p class="kd-note">포트폴리오와 전체 프로젝트 페이지에 함께 적용돼요.</p>`; })(),'고르면 바로 미리보기')
     +card('모션 · 효과',`<div class="kd-sws">${showSw('fx','intro',true,'등장 애니메이션')}${showSw('fx','aura',true,'배경 오로라')}${showSw('fx','tilt',true,'3D 기울기·자석 버튼')}${showSw('fx','progress',true,'스크롤 진행바')}</div>`);
 
@@ -1557,6 +1558,9 @@ function renderAXAdmin(){
     +`<div class="kd-acts"><a class="kd-btn" href="https://kimjinsoo-mkt-ax.vercel.app/portfolio?kilo-owner=1" target="_blank" rel="noopener" title="이 브라우저에서 여는 포트폴리오 방문은 집계하지 않아요">이 브라우저 방문 제외</a><button class="kd-btn" data-kview-reset>보정 지우기</button><button class="kd-btn" data-kview-refresh>새로 고침</button></div>`
     +G2(F('누적 라벨',kt('viewsTotal','누적')),F('오늘 라벨',kt('viewsToday','오늘'))));
   const P_home=()=>intro('맨 위 첫 화면이에요. 비워 둔 칸은 기본값으로 보여요.')
+    +card('상단 헤더 (좌상단 이름)',`<div class="kd-sws" style="margin-bottom:12px">${showSw('gh','photo',true,'사진 (없으면 이니셜)')}${showSw('gh','sub',true,'보조 문구')}</div>`
+      +G2(F('헤더 이름',kt('ghName',nmEn||nmKo||'Portfolio'),'비우면 영문 이름'),F('보조 문구',kt('ghSub',LIB.profile.title||'예: 그로스 마케터'),'이름 옆 회색 글씨 · 비우면 직함'))
+      +`<p class="kd-note">메인과 전체 프로젝트 페이지 맨 위 고정 바에 함께 보여요. 사진은 ‘사진 카드’의 대표 사진을 써요. 모바일에선 보조 문구가 숨겨져요.</p>`)
     +card('서명 (좌상단)',`<div class="kd-fonts kd-sigs" style="margin-bottom:12px">${SIGF.map(([k,l,dsc,ff,wt,px])=>`<button class="kd-font${sgCur===k?' on':''}" data-ksigfont="${k}"><b style="font-family:${axAttr(ff)};font-weight:${wt};font-size:${px}px">${axText(sgName)}</b><span>${l}</span><small>${dsc}</small></button>`).join('')}</div>`
       +G2(F('크기',`<div class="kd-row" style="height:36px"><input type="range" min="70" max="160" step="5" value="${sgV}" data-knum="ui.sigSize" style="flex:1;accent-color:var(--acc)"><b data-knum-out="ui.sigSize" style="font-size:12px;min-width:40px;text-align:right">${sgV}%</b></div>`),
           F('서명 문구',kt('sig',nmEn||'Kim Jinsoo'),'비우면 영문 이름'))

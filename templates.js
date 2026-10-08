@@ -788,13 +788,16 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
     var sigPct = parseFloat((K.ui || {}).sigSize); sigPct = isNaN(sigPct) ? 100 : Math.max(70, Math.min(160, sigPct));
     var sigFs = Math.round(SIG.fs * sigPct / 100);
     var GF = "https://fonts.googleapis.com/css2?family=" + SIG.q;
+    var WANTED = "https://cdn.jsdelivr.net/gh/wanteddev/wanted-sans@v1.0.3/packages/wanted-sans/fonts/webfonts/variable/split/WantedSansVariable.min.css";
     var FONTS = {
+      // gothic(기본) = 원티드 산스 — 제목·본문 모두 고딕(한글·영문 한 글꼴), 없는 글자는 프리텐다드
+      gothic: { body: '"Wanted Sans Variable","Wanted Sans",' + SANS_KR, disp: '"Wanted Sans Variable","Wanted Sans",' + SANS_KR, w: 700, ls: "-.04em", css: [GF + "&display=swap", WANTED, PRET] },
       editorial: { body: SANS_KR, disp: '"Newsreader","Noto Serif KR",Georgia,serif', w: 400, ls: "-.02em", css: [GF + "&family=Newsreader:ital,opsz,wght@0,6..72,300..600;1,6..72,300..600&family=Noto+Serif+KR:wght@400;500&display=swap", PRET] },
       modern: { body: SANS_KR, disp: SANS_KR, w: 800, ls: "-.05em", css: [GF + "&display=swap", PRET] },
       soft: { body: '"SUIT Variable",' + SANS_KR, disp: '"SUIT Variable",' + SANS_KR, w: 800, ls: "-.045em", css: [GF + "&display=swap", "https://cdn.jsdelivr.net/gh/sun-typeface/SUIT@2/fonts/variable/woff2/SUIT-Variable.css", PRET] },
       classic: { body: '"Figtree",' + SANS_KR, disp: '"Figtree",' + SANS_KR, w: 800, ls: "-.055em", css: [GF + "&family=Figtree:wght@400;500;600;700;800&display=swap", PRET] }
     };
-    var FKEY = FONTS[(K.ui || {}).font] ? (K.ui || {}).font : "editorial", FNT = FONTS[FKEY];
+    var FKEY = FONTS[(K.ui || {}).font] ? (K.ui || {}).font : "gothic", FNT = FONTS[FKEY];
     var fontHead = '<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>'
       + FNT.css.map(function (h) { return '<link rel="stylesheet" href="' + h + '"/>'; }).join("");
     var fontVars = ':root{--font:' + FNT.body + ';--disp:' + FNT.disp + ';--dispw:' + FNT.w + ';--displs:' + FNT.ls + ';--sgf:"' + SIG.n + '",cursive;--sgw:' + SIG.w + ';--sgfs:' + sigFs + 'px;--ssw:' + SIG.sw + 'em}';
@@ -945,6 +948,12 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
     // 상단 큰 메뉴(메인·프로젝트 페이지 공통 헤더, 순서 이력서 · AX · 프로젝트): 이력서 = 메인 · AX = AX-MKT 콘솔 · 프로젝트 = /projects(2026-10-06 projects-airbridge 내용으로 교체) · data-gx(스튜디오 미리보기에선 이동 대신 전환/새 탭)
     var tpUrl = d.tpPath || homeUrl + "/projects", axUrl = (K0.text || {}).axLink || "https://kimjinsoo-mkt-ax.vercel.app/ax";
     var gtabs = function (cur, dd) { return '<nav class="gtabs" aria-label="메뉴">' + [["resume", "이력서", homeUrl], ["ax", "AX", axUrl], ["projects", "프로젝트", tpUrl]].map(function (x) { var a = '<a class="gt' + (x[0] === cur ? ' on" aria-current="page' : '') + '" href="' + esc(x[2]) + '" target="_top" data-gx="' + x[0] + '">' + x[1] + '</a>'; return x[0] === "resume" && dd ? '<div class="gt-w">' + a + '<div class="gdd">' + dd + '</div></div>' : a; }).join("") + '</nav>'; };
+    // 헤더 왼쪽(메인·프로젝트 페이지 공통): 사진(없으면 이니셜) + 이름 + 보조 문구 — KILO 대시보드 Home '상단 헤더'(klio.text.ghName/ghSub · show.gh.photo/sub)
+    var ghName = txt("ghName", nameEn || nameKo || "Portfolio"), ghSub = txt("ghSub", P.title || "");
+    var ghBrand = function () {
+      var av = shown("gh", "photo", true) ? (PHOTOS[0] ? '<span class="gh-av"><img src="' + esc(PHOTOS[0]) + '" alt=""></span>' : '<span class="gh-av fb">' + esc(initials) + '</span>') : '';
+      return av + '<span class="gh-t"><b>' + esc(ghName) + '</b>' + (shown("gh", "sub", true) && ghSub ? '<small>' + esc(ghSub) + '</small>' : '') + '</span>';
+    };
     // 이력서 섹션 목록(헤더 '이력서' 아래) — 메인 밖(프로젝트 페이지)에선 메인 주소#섹션으로
     var secLinks = function (outside) { return (typeof visibleSec !== "undefined" ? visibleSec : []).filter(function (s) { return s.key !== "projects" && s.key !== "ax"; }).map(function (s) { return '<a href="' + (outside ? esc(homeUrl) : '') + '#' + s.key + '"' + (outside ? ' target="_top"' : '') + ' data-sec="' + s.key + '">' + esc(s.label) + '</a>'; }).join(""); };
     // 이미지 없는 프로젝트의 썸네일 일러스트(SVG): 분야별 미니 화면(상승 차트 · 막대+쿠폰 · 앱 자동화 흐름 · 미디어) + 대표 지표
@@ -1206,7 +1215,7 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
     DEFORDER.forEach(function (k) { if (!seenK[k]) order.push({ key: k, label: SECDEF[k].label, on: true }); });
     var visibleSec = order.filter(function (s) { return s.on; });
     var sectionsHtml = visibleSec.map(function (s, si) { var def = SECDEF[s.key]; return '<section class="row' + def.cls + '" id="' + s.key + '"><h2 class="rv rv-l"><span class="sn">' + (si < 9 ? "0" : "") + (si + 1) + '</span>' + esc(s.label) + '</h2>' + def.inner + '</section>'; }).join("");
-    var dock = '<header class="gh"><div class="gh-in"><a class="gh-nm" href="#home">' + esc(nameEn || nameKo || "Portfolio") + '</a>'
+    var dock = '<header class="gh"><div class="gh-in"><a class="gh-nm" href="#home">' + ghBrand() + '</a>'
       + gtabs("resume", '<nav class="dock" aria-label="섹션 이동"><span class="dock-pill" aria-hidden="true"></span>' + secLinks(false) + '</nav>') + '</div></header>';
 
     var KCSS = ':root{--ink:#222;--ink50:rgba(34,34,34,.55);--gray:#909090;--light:#d6d6d6;--bd:rgba(144,144,144,.2);--bd2:rgba(144,144,144,.1);--mint:#abdcd1;--beige:#e6e1d5;--sand:#eae6da;--coral:#dd8e6e;--lav:#c3cde4;--font:"Figtree","Pretendard Variable",Pretendard,-apple-system,system-ui,"Apple SD Gothic Neo",sans-serif;--ez:cubic-bezier(.25,.6,.3,1);--ez2:cubic-bezier(.16,1,.3,1)}'
@@ -1286,11 +1295,15 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
       + '[tabindex="-1"]:focus{outline:none}'
       // 상단 고정 헤더(하단 독 대체): 1줄 = 이름 | 큰 메뉴(이력서 · 프로젝트 · AX) · 2줄 = 메인 섹션 이동
       + '.gh{position:fixed;left:0;right:0;top:0;z-index:120;background:rgba(255,255,255,.92);-webkit-backdrop-filter:blur(16px) saturate(160%);backdrop-filter:blur(16px) saturate(160%);border-bottom:1px solid rgba(144,144,144,.16)}'
-      + '.gh-in{display:flex;align-items:center;justify-content:space-between;gap:16px;width:min(832px,calc(100vw - 40px));height:60px;margin:0 auto}.gh-nm{font-size:16px;font-weight:700;letter-spacing:-.02em;color:var(--ink);white-space:nowrap}'
-      + '.gtabs{display:flex;align-items:stretch;gap:30px;height:100%}.gt{position:relative;display:flex;align-items:center;font-size:15.5px;font-weight:600;letter-spacing:-.01em;color:#8b95a1;white-space:nowrap;transition:color .2s}.gt:hover,.gt.on{color:#191f28}.gt.on::after{content:"";position:absolute;left:0;right:0;bottom:-1px;height:2px;border-radius:2px;background:#191f28}'
+      + '.gh-in{display:flex;align-items:center;justify-content:space-between;gap:16px;width:min(832px,calc(100vw - 40px));height:60px;margin:0 auto}.gh-nm{display:flex;align-items:center;gap:10px;min-width:0;color:var(--ink);white-space:nowrap}'
+      // 헤더 왼쪽: 사진(얇은 테) + 이름 · 가는 세로선 · 회색 보조 문구 / 메뉴 밑줄은 가운데서 펼쳐짐
+      + '.gh-av{flex:none;width:30px;height:30px;border-radius:50%;overflow:hidden;background:#191f28;box-shadow:0 0 0 1px rgba(25,31,40,.1),0 0 0 3px #fff,0 0 0 4px rgba(25,31,40,.08)}.gh-av img{display:block;width:100%;height:100%;object-fit:cover}.gh-av.fb{display:grid;place-items:center;font-size:11px;font-weight:700;letter-spacing:.02em;color:#fff}'
+      + '.gh-t{display:flex;align-items:baseline;gap:10px;min-width:0}.gh-t b{font-size:16px;font-weight:700;letter-spacing:-.025em}.gh-t small{position:relative;padding-left:11px;overflow:hidden;text-overflow:ellipsis;font-size:12.5px;font-weight:500;letter-spacing:-.01em;color:#8b95a1}.gh-t small::before{content:"";position:absolute;left:0;top:50%;width:1px;height:11px;margin-top:-5px;background:#d1d6db}'
+      + '.gh::after{content:"";position:absolute;left:0;right:0;bottom:-1px;height:1px;background:linear-gradient(90deg,transparent,rgba(25,31,40,.14) 20%,rgba(25,31,40,.14) 80%,transparent);pointer-events:none}'
+      + '.gtabs{display:flex;align-items:stretch;gap:30px;height:100%}.gt{position:relative;display:flex;align-items:center;font-size:15.5px;font-weight:600;letter-spacing:-.01em;color:#8b95a1;white-space:nowrap;transition:color .2s}.gt:hover,.gt.on{color:#191f28}.gt::after{content:"";position:absolute;left:0;right:0;bottom:-1px;height:2px;border-radius:2px;background:#191f28;transform:scaleX(0);transition:transform .3s var(--ez2)}.gt:hover::after{transform:scaleX(.4)}.gt.on::after{transform:none}'
       + '.gt-w{position:relative;display:flex}.gdd{position:absolute;top:100%;left:50%;min-width:176px;padding:6px;border:1px solid #eceef1;border-radius:12px;background:#fff;box-shadow:0 12px 32px -12px rgba(0,0,0,.18);opacity:0;visibility:hidden;transform:translate(-50%,-4px);transition:opacity .18s,transform .18s,visibility .18s}.gt-w:hover .gdd,.gt-w:focus-within .gdd,.gt-w.open .gdd{opacity:1;visibility:visible;transform:translate(-50%,0)}'
       + '.gdd .dock,.gdd nav{position:static;left:auto;bottom:auto;transform:none;display:flex;flex-direction:column;gap:0;max-width:none;margin:0;padding:0;border-radius:0;background:none;-webkit-backdrop-filter:none;backdrop-filter:none;box-shadow:none}.gdd .dock-pill{display:none}.gdd a{display:block;padding:10px 12px;border-radius:8px;font-size:14px;font-weight:500;line-height:1.2;color:#4e5968;white-space:nowrap;transition:background .15s,color .15s}.gdd a:hover{background:#f5f6f8;color:#191f28}.gdd a[aria-current="true"]{color:#191f28;font-weight:700}'
-      + '.page{padding-top:48px}.prog{top:0;z-index:130}@media(max-width:720px){.gh-in{width:calc(100vw - 32px);height:56px}.gh-nm{font-size:15px}.gtabs{gap:20px}.gt{font-size:15px}.page{padding-top:40px}}'
+      + '.page{padding-top:48px}.prog{top:0;z-index:130}@media(max-width:720px){.gh-in{width:calc(100vw - 32px);height:56px}.gh-t b{font-size:15px}.gh-t small{display:none}.gh-av{width:26px;height:26px}.gtabs{gap:20px}.gt{font-size:15px}.page{padding-top:40px}}'
       + '.ax-cnt{max-width:440px}.ax-cores{display:flex;flex-direction:column;gap:12px;margin:22px 0 20px}'
       // AX 카드: 썸네일(이미지 또는 미니 화면 일러스트) + 번호·제목·설명, 등장 시 그래프 선이 그려짐
       + '.ax-core{display:grid;grid-template-columns:148px minmax(0,1fr);gap:16px;align-items:center;padding:12px 16px 12px 12px;border:1px solid var(--bd);border-radius:18px;background:#fff}.ax-core:hover{border-color:rgba(34,34,34,.26)}'
@@ -2366,7 +2379,7 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
           var aHtml = '<span class="tp-al1">' + aWords.map(function (w, k) { return '<span class="tp-aw" style="--i:' + k + '">' + emph(w, "b") + '</span>'; }).join(" ") + '</span>'
             + '<span class="tp-al2" style="--i:' + aWords.length + '">' + emph(heroA2, "em") + '</span>';
           var aTxt = (heroA1 + " " + heroA2).replace(/\*/g, "");
-          var nav = '<header class="tp-nav"><div class="tp-nav-in"><a class="tp-logo" href="' + ea(homeUrl) + '" target="_top" data-gx="resume">' + esc(nameEn || nameKo || "Portfolio") + '</a>'
+          var nav = '<header class="tp-nav"><div class="tp-nav-in"><a class="tp-logo" href="' + ea(homeUrl) + '" target="_top" data-gx="resume">' + ghBrand() + '</a>'
             + gtabs("projects", secLinks(true)) + '</div><div class="tp-nav-sub"><nav class="tp-ntabs" aria-label="챕터">' + tabsHtml + '</nav></div></header>';
           var hero = '<section class="tp-hero" id="tp-top">' + wall
             + '<div class="tp-hc"><h1 class="tp-hh" aria-label="' + ea(aTxt) + '">'
@@ -2379,15 +2392,18 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
           var cta = '<section class="tp-ctas"><div class="tp-ctas-in tp-rv"><div><p class="tp-ctat">' + esc(txt("tpCtaT", "더 궁금한 점이 있다면\n편하게 연락 주세요")).replace(/\n/g, "<br>") + '</p><div class="tp-ctab"><a class="tp-sb l" href="' + ea(mail) + '" target="_top">' + esc(P.email || "연락처 보기") + '</a><a class="tp-sb p" href="' + ea(homeUrl) + '" target="_top">포트폴리오 보기</a></div></div>'
             + (me ? '<img class="tp-me" src="' + ea(me) + '" alt="' + ea(nameKo || nameEn || "") + '">' : '') + '</div></section>';
           var foot = '<footer class="tp-foot"><div class="tp-foot-in"><span><b>' + esc(nameKo || nameEn) + '</b>' + (P.email ? ' · ' + esc(P.email) : '') + '</span></div></footer>';
-          var TCSS = 'body.tp{--g9:#191f28;--g8:#333d4b;--g7:#4e5968;--g6:#6b7684;--g5:#8b95a1;--g4:#b0b8c1;--g2:#e5e8eb;--g1:#f2f4f6;--bl:#3182f6;--bl1:#e8f3ff;--te:cubic-bezier(.2,.8,.2,1);--tw:min(1080px,calc(100vw - 48px));--tw2:min(1200px,calc(100vw - 48px));--tw3:min(832px,calc(100vw - 48px));--tws:min(1440px,calc(100vw - 48px));background:#fff;color:var(--g9);font-family:' + SANS_KR + ';letter-spacing:-.01em}'
+          var TCSS = 'body.tp{--g9:#191f28;--g8:#333d4b;--g7:#4e5968;--g6:#6b7684;--g5:#8b95a1;--g4:#b0b8c1;--g2:#e5e8eb;--g1:#f2f4f6;--bl:#3182f6;--bl1:#e8f3ff;--te:cubic-bezier(.2,.8,.2,1);--tw:min(1080px,calc(100vw - 48px));--tw2:min(1200px,calc(100vw - 48px));--tw3:min(832px,calc(100vw - 48px));--tws:min(1440px,calc(100vw - 48px));background:#fff;color:var(--g9);font-family:var(--font);letter-spacing:-.01em}'
             + '.tp :focus-visible{outline:2px solid var(--bl);outline-offset:3px}'
                         // 상단 바(첫 화면 위 투명 → 지나면 흰 바탕)
             + '.tp-nav{position:fixed;left:0;right:0;top:0;z-index:50;transition:background .3s,box-shadow .3s}.tp-nav-in{width:min(832px,var(--tw));height:60px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:20px}'
-            + '.tp-nav .gtabs{display:flex;align-items:stretch;gap:30px;height:100%}.tp-nav .gt{position:relative;display:flex;align-items:center;font-size:15.5px;font-weight:600;color:rgba(255,255,255,.62);white-space:nowrap;transition:color .2s}.tp-nav .gt:hover,.tp-nav .gt.on{color:#fff}.tp-nav .gt.on::after{content:"";position:absolute;left:0;right:0;bottom:-1px;height:2px;border-radius:2px;background:currentColor}'
+            + '.tp-nav .gtabs{display:flex;align-items:stretch;gap:30px;height:100%}.tp-nav .gt{position:relative;display:flex;align-items:center;font-size:15.5px;font-weight:600;color:rgba(255,255,255,.62);white-space:nowrap;transition:color .2s}.tp-nav .gt:hover,.tp-nav .gt.on{color:#fff}.tp-nav .gt::after{content:"";position:absolute;left:0;right:0;bottom:-1px;height:2px;border-radius:2px;background:currentColor;transform:scaleX(0);transition:transform .3s var(--te)}.tp-nav .gt:hover::after{transform:scaleX(.4)}.tp-nav .gt.on::after{transform:none}'
             + '.tp-nav .gt-w{position:relative;display:flex}.tp-nav .gdd{position:absolute;top:100%;left:50%;min-width:176px;padding:6px;border:1px solid var(--g2);border-radius:12px;background:#fff;box-shadow:0 12px 32px -12px rgba(0,0,0,.25);opacity:0;visibility:hidden;transform:translate(-50%,-4px);transition:opacity .18s,transform .18s,visibility .18s}.tp-nav .gt-w:hover .gdd,.tp-nav .gt-w:focus-within .gdd{opacity:1;visibility:visible;transform:translate(-50%,0)}.tp-nav .gdd a{display:block;padding:10px 12px;border-radius:8px;font-size:14px;font-weight:500;color:var(--g7);white-space:nowrap}.tp-nav .gdd a:hover{background:var(--g1);color:var(--g9)}'
             + '.tp-nav.solid .gt{color:var(--g5)}.tp-nav.solid .gt:hover,.tp-nav.solid .gt.on{color:var(--g9)}'
             + '.tp-nav-sub{display:none;border-top:1px solid var(--g2)}.tp-nav.solid .tp-nav-sub{display:block}'
-            + '.tp-logo{display:inline-flex;align-items:center;font-size:16px;font-weight:800;letter-spacing:-.03em;color:#fff;white-space:nowrap}.tp-logo small{margin-left:10px;padding-left:10px;border-left:1px solid currentColor;font-size:11px;font-weight:600;opacity:.7}'
+            + '.tp-logo{display:inline-flex;align-items:center;gap:10px;min-width:0;color:#fff;white-space:nowrap}.tp-logo .gh-t{display:flex;align-items:baseline;gap:10px;min-width:0}.tp-logo .gh-t b{font-size:16px;font-weight:700;letter-spacing:-.025em}.tp-logo .gh-t small{padding-left:11px;border-left:1px solid currentColor;line-height:1;overflow:hidden;text-overflow:ellipsis;font-size:12.5px;font-weight:500;opacity:.62}'
+            + '.tp-logo .gh-av{flex:none;width:30px;height:30px;border-radius:50%;overflow:hidden;background:#191f28;box-shadow:0 0 0 1px rgba(255,255,255,.35)}.tp-logo .gh-av img{display:block;width:100%;height:100%;object-fit:cover}.tp-logo .gh-av.fb{display:grid;place-items:center;font-size:11px;font-weight:700;color:#fff}.tp-nav.solid .tp-logo .gh-av{box-shadow:0 0 0 1px rgba(25,31,40,.1),0 0 0 3px #fff,0 0 0 4px rgba(25,31,40,.08)}.tp-nav.solid .tp-logo .gh-t small{border-left-color:#d1d6db;color:var(--g5);opacity:1}'
+            + '@media(max-width:720px){.tp-logo .gh-t small{display:none}.tp-logo .gh-av{width:26px;height:26px}}'
+            + '.ft-gothic .ab-hero-ey{font-style:normal;font-weight:500;letter-spacing:-.02em}'
             + '.tp-nback{display:inline-flex;align-items:center;height:40px;padding:0 12px;border-radius:8px;font-size:15px;font-weight:600;color:rgba(255,255,255,.85);transition:background .2s}.tp-nback:hover{background:rgba(255,255,255,.12)}.tp-nr{margin-left:auto;display:flex;align-items:center;gap:6px}'
             + '.tp-nav.solid{background:rgba(255,255,255,.96);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);box-shadow:0 1px 0 var(--g2)}.tp-nav.solid .tp-logo{color:var(--g9)}.tp-nav.solid .tp-nback{color:var(--g7)}.tp-nav.solid .tp-nback:hover{background:var(--g1)}'
             // 첫 화면: 어두운 배경 + 비스듬히 흐르는 썸네일 벽 · 문장 A → B
@@ -2718,7 +2734,7 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
                 + '<button class="cs-x" type="button" data-vw-x aria-label="닫기" title="닫기 (Esc)"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg></button></div>'
                 + '<div class="vw-sc">' + casePages.join("") + '</div></div>';
             }
-            var abNav = '<header class="tp-nav ab-nav"><div class="tp-nav-in"><a class="tp-logo" href="' + ea(homeUrl) + '" target="_top" data-gx="resume">' + esc(nameEn || nameKo || "Portfolio") + '</a>' + gtabs("projects", secLinks(true)) + '</div></header>';
+            var abNav = '<header class="tp-nav ab-nav"><div class="tp-nav-in"><a class="tp-logo" href="' + ea(homeUrl) + '" target="_top" data-gx="resume">' + ghBrand() + '</a>' + gtabs("projects", secLinks(true)) + '</div></header>';
             // 첫 화면(2026-10-07 사용자): 세리프 이탤릭 'Projects' → 큰 제목 → '저는 이런 업무들을 해왔어요' → 업무 흐름(영상 촬영·편집 → … → AX, 차례로 등장 · 강조가 흘러 AX에서 멈춤 · 누르면 그 분야로) → 회사 · 프로젝트 · 분야 수
             var FLOW = [["영상 촬영 · 편집", "t-cont"], ["콘텐츠", "t-cont"], ["퍼포먼스", "t-perf"], ["CRM", "t-perf"], ["브랜딩", "t-camp"], ["그로스", "t-recent"], ["AX", "t-recent"]].filter(function (f) { return TS.some(function (x) { return x.g.id === f[1]; }); });
             var flowH = '<ol class="ab-flow" aria-label="해온 업무">' + FLOW.map(function (f, k) { return '<li style="--i:' + k + '">' + (k ? '<i class="ab-fa" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></i>' : '') + '<button type="button" class="ab-fc' + (k === FLOW.length - 1 ? ' last' : '') + '" data-abgo="ab-' + f[1] + '">' + esc(f[0]) + '</button></li>'; }).join("") + '</ol>';
