@@ -2645,7 +2645,7 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
             var abCard = function (a) {
               var it = a.it, co = it.co || {}, mets = it.mets.slice(0, 2), cc = ABTINT[a.g.id] || "#4e5968";
               var bs = PPT_BOARDS_OF[it.w.id] || [], b = bs.length && PPT_BOARD[bs[0]], f = CARD_TH[it.w.id] || (b && b.i.length ? b.i[0][0] : ""), src = f ? thSrc(f) : (it.main ? it.main.src : "");
-              var shot = src ? '<span class="ab-sh"><img src="' + ea(src) + '" alt="" loading="lazy" decoding="async"></span>' : '<span class="ab-sh art"><i style="--c:' + it.cm.c + '">' + coverArt(it.w, it.m0) + '</i></span>';
+              var shot = src ? '<span class="ab-sh"><img src="' + ea(src) + '" alt="" loading="lazy" decoding="async" onload="if(this.naturalWidth/this.naturalHeight>2.3)this.classList.add(\'wd\')"></span>' : '<span class="ab-sh art"><i style="--c:' + it.cm.c + '">' + coverArt(it.w, it.m0) + '</i></span>';
               var sum = String(it.w.summary || "").trim(), why = String(whyOf(it) || "").trim();
               var tp = String(it.title || "").split(/\s+[—–]\s+/), t1 = tp[0], t2 = ABSUB[it.w.id] || tp.slice(1).join(" — ") || sum; // 부제 = ' — ' 뒤, 없으면 한 줄 요약
               var kp = kpiOf(it);
@@ -2966,6 +2966,7 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
               // 카드 고도화(2026-10-09 사용자 '성과명 위 · 숫자 아래 · 썸네일 크게 · 이쁘게'): 한 줄 3.8장(조금 넓게) · 표지 그림 크게(좌우 8% · 위 10%) · 성과 = 이름 → 숫자(+보조) → 어떻게
               + '.abs-track{grid-auto-columns:calc((var(--abw) - 60px) / 3.8)}'
               + '.ab-sh{left:8%;right:8%;top:10%;border-radius:12px 12px 0 0}.ab-sh img{object-position:50% 0}'
+              + '.ab-sh img.wd{object-fit:contain;object-position:50% 38%}' // 가로로 긴 배너는 글자가 잘리지 않게 통째로
               + '.ab-bd{padding:16px 20px 20px}.ab-tt{margin-top:8px}'
               + '.ab-kp{height:auto;min-height:0;margin-top:14px;padding-top:14px}.ab-kp strong{order:0;margin:0;font-size:13px;font-weight:650;letter-spacing:-.02em;color:#4e5968}'
               + '.ab-kn{display:flex;align-items:baseline;gap:8px;min-width:0;margin-top:4px}.ab-kn b{font-size:30px;font-weight:800;line-height:1.15;letter-spacing:-.045em;color:var(--cc)}.ab-kn em{overflow:hidden;font-style:normal;font-size:12.5px;font-weight:600;letter-spacing:-.01em;color:#6b7684;white-space:nowrap;text-overflow:ellipsis;font-variant-numeric:tabular-nums}'
