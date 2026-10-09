@@ -2879,6 +2879,15 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
               + '.cs-kg>div{transition:transform .3s var(--te),box-shadow .3s}.cs-kg>div:hover{transform:translateY(-3px);box-shadow:inset 0 0 0 1px #d9dde2,0 14px 30px -20px rgba(17,24,39,.35)}'
               + '.cs-gi>span{overflow:hidden}.cs-gi img{transition:transform .5s var(--te)}.cs-gi:hover img{transform:scale(1.04)}'
               + '@media(prefers-reduced-motion:reduce){.ab-hero>*,.cs.go .cs-hl>*,.cs.go .cs-hv,.cs.go .cs-quote p{animation:none}.cs-prog{transition:none}}'
+              // 다듬기: 바탕을 아주 옅은 회색으로 → 흰 카드가 또렷하게. 카드 선·그림자, 글자 위계(장 번호 < 장 제목 / 회사·기간 < 카드 제목 < 부제 · 수치 > 이름 > 맥락)
+              + 'body.ab{background:#f5f6f8}.ab-jump{background:rgba(245,246,248,.92);box-shadow:0 1px 0 rgba(17,24,39,.06)}.ab-jc{background:#fff;box-shadow:inset 0 0 0 1px #e3e6ea}.ab-jc:hover{background:#fff;box-shadow:inset 0 0 0 1px #c4c9d0}.ab-jc.on{background:#191f28;box-shadow:none}'
+              + '.ab-hero h1{color:#111827}.ab-lead{color:#4e5968}.ab-fc{box-shadow:inset 0 0 0 1px #e1e4e8,0 1px 2px rgba(17,24,39,.04)}'
+              + '.abs-hd{padding-top:26px;border-top:1px solid #e3e6ea}.abs-no{font-size:13px;letter-spacing:.06em}.abs-hd h2{margin-top:10px;font-size:clamp(28px,2.6vw,36px);color:#111827}.abs-hd p{margin-top:10px;font-size:15.5px;color:#6b7684}.abs-hd p i{font-size:13.5px;color:#a3abb5}'
+              + '.ab-card{border-color:#e3e6ea;box-shadow:0 1px 2px rgba(17,24,39,.04),0 10px 26px -20px rgba(17,24,39,.22);transition:border-color .3s,box-shadow .35s var(--te),transform .35s var(--te)}.ab-card:hover{border-color:#d3d8de;transform:translateY(-4px);box-shadow:0 2px 4px rgba(17,24,39,.04),0 24px 44px -24px rgba(17,24,39,.32)}'
+              + '.ab-cv{background:color-mix(in srgb,var(--cc,#8b95a1) 7%,#f1f3f5);border-bottom-color:#e9ecef}.ab-sh{box-shadow:0 0 0 1px rgba(17,24,39,.08),0 16px 34px -16px rgba(17,24,39,.34)}'
+              + '.ab-bd{padding:17px 18px 18px}.ab-ey{font-size:12px}.ab-ey b{font-weight:650;color:#4e5968}.ab-ey em{color:#9aa3ae}.ab-t{font-size:17px;font-weight:750;color:#111827}.ab-st{color:#6b7684}'
+              + '.ab-kp{position:relative;border-top-color:#eceef1}.ab-kp:before{content:"";position:absolute;top:-1px;left:0;width:22px;height:2px;border-radius:2px;background:var(--cc,#3182f6)}.ab-kp b{font-size:28px;font-weight:800}.ab-kp strong{color:#191f28}.ab-kp i{color:#9aa3ae}'
+              + '@media(hover:none){.ab-card:hover{transform:none}}'
               // 화면 폭별: 1100 이하 = 2장 보임 · 680 이하 = 카드 한 장씩 옆으로(점 표시) · 바로가기 칩 왼쪽 정렬
               + '@media(max-width:1100px){.abs-track{grid-auto-columns:calc((var(--abw) - 40px) / 3.3)}}@media(max-width:860px){.abs-track{grid-auto-columns:calc((var(--abw) - 20px) / 2.3)}}'
               + '@media(max-width:680px){body.ab{--abw:calc(100vw - 40px);--abg:20px}.ab-hero{padding-top:116px}.ab-jump-in{justify-content:flex-start;width:100%;padding:10px 20px}.abs-ctl{display:none}.abs-track{grid-auto-columns:min(66vw,260px);gap:12px;padding-bottom:20px}.abs-dots{display:flex}}';
