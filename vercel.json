@@ -5,6 +5,39 @@
   "redirects": [
     {
       "source": "/",
+      "has": [
+        {
+          "type": "host",
+          "value": "kimjinsoo-mkt-ax.vercel.app"
+        }
+      ],
+      "destination": "/portfolio",
+      "permanent": false
+    },
+    {
+      "source": "/studio",
+      "has": [
+        {
+          "type": "host",
+          "value": "kimjinsoo-mkt-ax.vercel.app"
+        }
+      ],
+      "destination": "/portfolio",
+      "permanent": false
+    },
+    {
+      "source": "/studio.html",
+      "has": [
+        {
+          "type": "host",
+          "value": "kimjinsoo-mkt-ax.vercel.app"
+        }
+      ],
+      "destination": "/portfolio",
+      "permanent": false
+    },
+    {
+      "source": "/",
       "destination": "/studio.html",
       "permanent": false
     },
