@@ -2550,28 +2550,29 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
             // 대표 성과(2026-10-07 사용자 '딱 보고 무슨 성과인지 · 영역 단위로 통일'): 카드마다 하나 = [큰 숫자, 무엇이 어떻게 됐는지, 근거 한 줄]
             //   영역 기준 — NOW: 사업 성과 · 퍼포먼스: 비용 효율·성장률 · 데이터: 노출·자동화(숫자 없는 3개는 원문 사실 그대로) · 캠페인: CPI·판매 · 콘텐츠: 조회·제작
             //   표에 없으면(새 프로젝트) 첫 성과 숫자 + 둘째 숫자를 근거로
-            // 2026-10-09 사용자 '부연 말고 진짜 성과가 뭔지 · 어떻게 했는지 명확하게': [큰 숫자, 무엇이 바뀌었나(한 줄), 어떻게 했나(자연스러운 한 문장, 두 줄까지)]
+            // 2026-10-09 사용자 '부연 말고 진짜 성과가 뭔지 · 어떻게 했는지 명확하게' → 같은 날 '성과명을 위로, 숫자를 아래로'
+            //   [큰 숫자, 성과 이름(위 한 줄), 어떻게 했나(아래 한 문장, 두 줄까지), 숫자 옆 보조(선택)]
             var ABKPI = {
-              "77afd48a-668b-4ab1-b385-32fa41400211": ["20+", "팀이 매일 쓰는 운영 탭", "AI와 4개월 만에 혼자 만들어, 손으로 하던 리포팅을 없앴어요"],
-              "dff32975-e504-47e3-8ee1-744f2267ac91": ["+86%", "월 매출 5.2억 → 9.7억", "광고비를 성수기에 모으고, 볼륨은 Meta에서 효율은 네이버에서 냈어요"],
-              "5c1e8a52-7b4d-4f0e-9a63-2d8f1b7c4e90": ["5.8만", "직접 만든 가이드 페이지 유입", "쿠폰 발급 로직을 기획하고, 발급 현황은 슬랙 자동 리포트로 만들었어요"],
-              "60f3fcee-e8b2-4499-b7d1-71e4f91ad2f5": ["5.4배", "광고비 대비 수수료 매출", "전환 추적부터 고치고, 게스트와 호스트 캠페인을 나눠 돌렸어요"],
-              "0a3aea35-ccc9-4018-a7a6-e383c303f928": ["−24%", "평균 CPC 절감", "MMP로 전환을 다시 잡고 쿠폰팩을 붙여 신규 CAC도 19% 낮췄어요"],
-              "3080bc75-d773-490f-9a02-35d83886b418": ["−15%", "평균 CPC, 다른 캠페인 대비", "상품 정보를 시트로 자동 갱신하고 소재를 템플릿으로 만들어 손을 덜었어요"],
-              "b0aa1d32-82d9-44bc-897d-b558a425c98c": ["+110%", "MAU 증가, 신규 설치 55만", "월 최대 5억을 적정 CPI 기준으로 나눠 써서 단가 상승을 막았어요"],
-              "731ea8fe-9bb7-41ce-8cc1-687f77f9c49c": ["2022", "전사가 같은 숫자로 판단", "AI 없던 때, 실DB와 광고 데이터를 직접 이어 모두가 같은 숫자를 봤어요"],
-              "8fe4e187-9052-4737-9d1b-d0a158d9e156": ["2023", "수기 공유 → 자동 보고", "매번 손으로 공유하던 지표를 웹훅과 앱스크립트로 자동화했어요"],
-              "199815d6-356c-4959-8219-6c9ea7615102": ["2023", "전사 데이터 기준 통일", "부서마다 다르던 이벤트 기준을 직접 설계하고 QA까지 맡았어요"],
-              "4d333686-6daa-4c8e-9cd7-3e8309ef9900": ["2배", "주간 노출 상품 수", "피드 생성과 갱신 시간을 줄여 빠지던 상품까지 노출되게 했어요"],
-              "e5bb7edf-a48d-4752-a0b4-c05df7903051": ["+250만", "구글 검색 노출, 4개월", "어드민의 SEO 값이 바로 반영되게 고쳐 평균 순위를 한 단계 올렸어요"],
-              "43ab6811-42cf-4a1f-afca-62bfd67b17f9": ["−30%", "CPI, 다른 캠페인 대비", "실제 유저의 부작용 사연으로 신뢰를 얻어 인앱 행동도 30% 늘었어요"],
-              "53845c2b-3618-4e8d-968c-1edfabdf4912": ["5분", "굿즈 1,000세트 완판", "기부런 굿즈로 참여를 모아 기부금 2,000만 원을 전달했어요"],
-              "574f26d3-1fff-49fb-a302-b8c12253df61": ["−40%", "CPI, 다른 소재 대비", "'대리수술 안심존'이라는 신뢰 포인트를 박나래 영상으로 알렸어요"],
-              "2c1ddb7a-e1a3-4adb-a18e-e1b43ad8f731": ["2주", "예상보다 빠른 완판", "혜택을 쉽게 짜고 3억 원을 매체별로 나눠 선착순 1,000장을 소진했어요"],
-              "2380b3b4-8dba-4b9d-9f96-38568a79936b": ["36회", "주 1회 특가, 매번 완판", "명품 50% 특가로 설치 단가 5,809원, 당시 평균 8천 원대보다 낮췄어요"],
-              "5afefe01-835b-48eb-9568-e6f51f6650ce": ["1위", "네이버 뷰티 핫딜", "스마트스토어와 소셜커머스 특가로 재고 3,000개를 8개월에 다 팔았어요"],
-              "ea1d35c1-b9f4-4420-8d35-b26ec4709a10": ["20만", "대표 영상 조회수", "검색 상위 키워드로 기획해 6개월 만에 구독자 1,000명을 모았어요"],
-              "e68c8938-fbb0-4a88-a9a1-dbb3d8c71243": ["6편", "대표 영상 직접 제작", "LG디스플레이, 식약처, 다이소 등의 광고 영상을 직접 찍고 편집했어요"]
+              "77afd48a-668b-4ab1-b385-32fa41400211": ["20+", "팀이 매일 쓰는 운영 탭", "개발을 기다리지 않고 AI와 직접 만들어, 손으로 하던 리포팅을 없앴어요", "4개월 · 1인 구축"],
+              "dff32975-e504-47e3-8ee1-744f2267ac91": ["+86%", "월평균 매출 증가", "광고비를 성수기에 모으고, 볼륨은 Meta에서 효율은 네이버에서 냈어요", "5.2억 → 9.7억"],
+              "5c1e8a52-7b4d-4f0e-9a63-2d8f1b7c4e90": ["5.8만", "직접 만든 가이드 페이지 유입", "쿠폰 발급 로직을 기획하고, 발급 현황은 슬랙 자동 리포트로 만들었어요", "쿠폰 7,880장"],
+              "60f3fcee-e8b2-4499-b7d1-71e4f91ad2f5": ["5.4배", "광고비 대비 수수료 매출", "전환 추적부터 고치고, 게스트와 호스트 캠페인을 나눠 돌렸어요", "Meta 전환 52 → 90%"],
+              "0a3aea35-ccc9-4018-a7a6-e383c303f928": ["−24%", "평균 CPC 절감", "MMP로 전환을 다시 잡고 신규 쿠폰팩과 리타게팅을 붙였어요", "신규 CAC −19%"],
+              "3080bc75-d773-490f-9a02-35d83886b418": ["−15%", "다른 캠페인보다 낮은 CPC", "상품 정보를 시트로 자동 갱신하고 소재를 템플릿으로 만들어 손을 덜었어요", ""],
+              "b0aa1d32-82d9-44bc-897d-b558a425c98c": ["+110%", "MAU 증가", "월 최대 5억을 적정 CPI 기준으로 나눠 써서 단가 상승을 막았어요", "신규 설치 55만"],
+              "731ea8fe-9bb7-41ce-8cc1-687f77f9c49c": ["2022", "전사가 같은 숫자로 판단", "실DB와 광고 데이터를 직접 이어 일 · 주 · 월 대시보드로 만들었어요", "AI 도입 전"],
+              "8fe4e187-9052-4737-9d1b-d0a158d9e156": ["2023", "수기 공유 → 자동 보고", "매번 손으로 공유하던 지표를 웹훅과 앱스크립트로 자동화했어요", "AI 도입 전"],
+              "199815d6-356c-4959-8219-6c9ea7615102": ["2023", "전사 데이터 기준 통일", "부서마다 다르던 이벤트 기준을 직접 설계하고 QA까지 맡았어요", "AI 도입 전"],
+              "4d333686-6daa-4c8e-9cd7-3e8309ef9900": ["2배", "주간 노출 상품 수", "피드 생성과 갱신 시간을 줄여 빠지던 상품까지 노출되게 했어요", "CTR 25%"],
+              "e5bb7edf-a48d-4752-a0b4-c05df7903051": ["+250만", "구글 검색 노출 증가", "어드민의 SEO 값이 바로 반영되게 고쳐 평균 순위를 한 단계 올렸어요", "4개월"],
+              "43ab6811-42cf-4a1f-afca-62bfd67b17f9": ["−30%", "CPI, 다른 캠페인 대비", "'나에게도 생길 수 있다'는 실제 유저의 사연으로 신뢰를 얻었어요", "인앱 행동 +30%"],
+              "53845c2b-3618-4e8d-968c-1edfabdf4912": ["5분", "굿즈 1,000세트 완판까지", "기부런 굿즈로 참여를 모아 동시 접속이 최대 2만 명까지 몰렸어요", "기부금 2,000만 원"],
+              "574f26d3-1fff-49fb-a302-b8c12253df61": ["−40%", "CPI, 다른 소재 대비", "'대리수술 안심존'이라는 신뢰 포인트를 박나래 영상으로 알렸어요", ""],
+              "2c1ddb7a-e1a3-4adb-a18e-e1b43ad8f731": ["2주", "선착순 1,000장, 예상보다 빨리 완판", "혜택을 쉽게 짜고 3억 원을 매체별로 나눠, 웹 캠페인 단가를 CPI 캠페인보다 낮췄어요", "영상 CTR 3.45%"],
+              "2380b3b4-8dba-4b9d-9f96-38568a79936b": ["5,809원", "앱 설치 단가", "명품 최대 50% 특가를 주 1회, 36회 열고 매번 완판했어요", "당시 평균 8천 원대"],
+              "5afefe01-835b-48eb-9568-e6f51f6650ce": ["1위", "네이버 뷰티 핫딜", "스마트스토어와 소셜커머스 특가로 재고를 8개월 만에 다 팔았어요", "3,000개 완판"],
+              "ea1d35c1-b9f4-4420-8d35-b26ec4709a10": ["20만", "대표 영상 조회수", "검색 상위 키워드로 기획해 6개월 만에 채널을 키웠어요", "구독 1,000명"],
+              "e68c8938-fbb0-4a88-a9a1-dbb3d8c71243": ["6편", "직접 기획 · 촬영 · 편집", "LG디스플레이, 식약처, 다이소 등의 광고 영상을 만들었어요", "대표 영상"]
             };
             // 카드 제목 = 프로젝트명(2026-10-09 사용자 'AX · 어반스테이 같은 이름 말고 업무 · 프로젝트명으로') · 부제 = 무엇을 했는지 한 줄
             var ABTITLE = {
@@ -2653,7 +2654,7 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
                 + '<span class="ab-bd"><span class="ab-ey"><span><b>' + esc(coName(it)) + '</b><em>' + esc(when(it)) + '</em></span>'
                 + '<svg class="ab-ar" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 17L17 7M9 7h8v8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>'
                 + '<span class="ab-tt"><b class="ab-t">' + esc(t1) + '</b>' + (t2 ? '<span class="ab-st">' + esc(String(t2).replace(/\s+—\s+/g, " → ")) + '</span>' : '') + '</span>'
-                + (kp ? '<span class="ab-kp"><b>' + esc(kp[0]) + '</b><strong>' + esc(kp[1]) + '</strong>' + (kp[2] ? '<i>' + esc(kp[2]) + '</i>' : '') + '</span>'
+                + (kp ? '<span class="ab-kp"><strong>' + esc(kp[1]) + '</strong><span class="ab-kn"><b>' + esc(kp[0]) + '</b>' + (kp[3] ? '<em>' + esc(kp[3]) + '</em>' : '') + '</span>' + (kp[2] ? '<i>' + esc(kp[2]) + '</i>' : '') + '</span>'
                   : '<span class="ab-kp sum"><i>' + esc(why || sum) + '</i></span>')
                 + '</span></button>';
             };
@@ -2776,7 +2777,7 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
               var it = a.it, co = it.co || {}, g = a.g, S = STORY[it.w.id] || null, id = "cs" + a.k, cc = ABTINT[g.id] || "#4e5968";
               var tp = String(it.title || "").split(/\s+[—–]\s+/), sum = String(it.w.summary || "").trim();
               var doc = /^[\w-]+\.html$/.test(String(it.w.doc || "")) ? PF_DOC + it.w.doc : "";
-              var ck = ABKPI[it.w.id], kp3 = S ? S.kpis : (ck ? [[ck[0], ck[1], ""]] : []).concat(it.mets.filter(function (m) { return !ck || (m.value !== ck[0] && ck[1].indexOf(m.value) < 0); }).map(function (m) { return [m.value, m.label || "", ""]; })).slice(0, 3);
+              var ck = ABKPI[it.w.id], kp3 = S ? S.kpis : (ck ? [[ck[0], ck[1], ck[3] || ""]] : []).concat(it.mets.filter(function (m) { return !ck || (m.value !== ck[0] && ck[1].indexOf(m.value) < 0); }).map(function (m) { return [m.value, m.label || "", ""]; })).slice(0, 3);
               var bs = PPT_BOARDS_OF[it.w.id] || [], b0 = bs.length && PPT_BOARD[bs[0]], f = CARD_TH[it.w.id] || (b0 && b0.i.length ? b0.i[0][0] : ""), hsrc = f ? thSrc(f) : (it.main && !it.main.yt ? it.main.src : "");
               var chap = g.id === "t-recent" ? "NOW · " + nowCoName : g.ko;
               var tags = [chap, a.ct !== chap && a.g.id !== "t-recent" ? a.ct : "", it.w.category || ""].filter(function (x, k, arr) { return x && arr.indexOf(x) === k; });
@@ -2962,7 +2963,13 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
               + '@media(hover:none){.ab-card:hover{transform:none}}'
               + '.cs-hl h1,.cs-sub,.cs-quote p,.cs-art h3,.cs-kpis span,.ab-t{word-break:keep-all;text-wrap:balance}.cs-out,.cs-steps dd,.cs-kpis small,.cs-kg span,.cs-ul li,.ab-st,.ab-kp i{word-break:keep-all;text-wrap:pretty}'
               + '@media(max-width:680px){.cs-quote p br{display:none}}.ab-tt{height:auto;min-height:68px}.ab-st{-webkit-line-clamp:1}'
-              + '.ab-kp{height:auto;min-height:104px}.ab-kp i{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;margin-top:4px;line-height:1.5;white-space:normal;color:#8b95a1}'
+              // 카드 고도화(2026-10-09 사용자 '성과명 위 · 숫자 아래 · 썸네일 크게 · 이쁘게'): 한 줄 3.8장(조금 넓게) · 표지 그림 크게(좌우 8% · 위 10%) · 성과 = 이름 → 숫자(+보조) → 어떻게
+              + '.abs-track{grid-auto-columns:calc((var(--abw) - 60px) / 3.8)}'
+              + '.ab-sh{left:8%;right:8%;top:10%;border-radius:12px 12px 0 0}.ab-sh img{object-position:50% 0}'
+              + '.ab-bd{padding:16px 20px 20px}.ab-tt{margin-top:8px}'
+              + '.ab-kp{height:auto;min-height:0;margin-top:14px;padding-top:14px}.ab-kp strong{order:0;margin:0;font-size:13px;font-weight:650;letter-spacing:-.02em;color:#4e5968}'
+              + '.ab-kn{display:flex;align-items:baseline;gap:8px;min-width:0;margin-top:4px}.ab-kn b{font-size:30px;font-weight:800;line-height:1.15;letter-spacing:-.045em;color:var(--cc)}.ab-kn em{overflow:hidden;font-style:normal;font-size:12.5px;font-weight:600;letter-spacing:-.01em;color:#6b7684;white-space:nowrap;text-overflow:ellipsis;font-variant-numeric:tabular-nums}'
+              + '.ab-kp i{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;min-height:3em;margin-top:6px;font-size:12.5px;line-height:1.5;white-space:normal;color:#8b95a1}'
               // 화면 폭별: 1100 이하 = 2장 보임 · 680 이하 = 카드 한 장씩 옆으로(점 표시) · 바로가기 칩 왼쪽 정렬
               + '@media(max-width:1100px){.abs-track{grid-auto-columns:calc((var(--abw) - 40px) / 3.3)}}@media(max-width:860px){.abs-track{grid-auto-columns:calc((var(--abw) - 20px) / 2.3)}}'
               + '@media(max-width:680px){body.ab{--abw:calc(100vw - 40px);--abg:20px}.ab-hero{padding-top:116px}.ab-jump-in{justify-content:flex-start;width:100%;padding:10px 20px}.abs-ctl{display:none}.abs-track{grid-auto-columns:min(66vw,260px);gap:12px;padding-bottom:20px}.abs-dots{display:flex}}';
