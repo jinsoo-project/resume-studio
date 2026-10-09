@@ -567,3 +567,16 @@ html.embed .ed-end{display:none}
 .tn-left a{height:30px;display:inline-flex;align-items:center;padding:0 11px;border:1px solid var(--border);border-radius:8px;font-size:12.5px;font-weight:600;color:var(--foreground);text-decoration:none}.tn-left a:hover{border-color:var(--foreground)}
 @media(max-width:640px){.tn-g{grid-template-columns:1fr}.tn-c.prev{order:2}}
 .body>.sb .sb-tog{width:28px;height:28px;right:-14px;top:18px;cursor:pointer}.body>.sb .sb-tog:hover{color:var(--foreground);border-color:var(--foreground)}.sb.col .sb-tog svg{transform:rotate(180deg)}
+
+/* 2026-10-09 공통 헤더 통일 — /portfolio · /portfolio/projects 헤더(templates.js GHCSS)와 같은 값: 사진 + 이름 · 보조 문구 · 원티드 산스 · 흰 유리 바 · 양끝 흐린 밑선 · 밑줄 펼침 */
+.gh2{position:sticky;top:0;z-index:45;height:60px;background:rgba(255,255,255,.92);-webkit-backdrop-filter:blur(16px) saturate(160%);backdrop-filter:blur(16px) saturate(160%);box-shadow:0 1px 0 rgba(144,144,144,.16);border-bottom:0;font-family:"Wanted Sans Variable","Wanted Sans","Pretendard Variable",Pretendard,-apple-system,BlinkMacSystemFont,system-ui,"Apple SD Gothic Neo","Noto Sans KR",sans-serif;letter-spacing:-.02em;-webkit-font-smoothing:antialiased}
+.is-ov .gh2{background:rgba(255,255,255,.92)}
+.gh2::after{content:"";position:absolute;left:0;right:0;bottom:-1px;height:1px;background:linear-gradient(90deg,transparent,rgba(25,31,40,.14) 20%,rgba(25,31,40,.14) 80%,transparent);pointer-events:none}
+.gh2-in{width:min(832px,calc(100vw - 40px));gap:16px}
+.gh2-nm{display:flex;align-items:center;gap:10px;min-width:0;color:#191f28;font-weight:inherit;letter-spacing:inherit}
+.gh2-av{flex:none;width:30px;height:30px;border-radius:50%;overflow:hidden;background:#191f28;box-shadow:0 0 0 1px rgba(25,31,40,.1),0 0 0 3px #fff,0 0 0 4px rgba(25,31,40,.08)}.gh2-av img{display:block;width:100%;height:100%;object-fit:cover}.gh2-av.fb{display:grid;place-items:center;font-size:11px;font-weight:700;letter-spacing:.02em;color:#fff}
+.gh2-t{display:flex;align-items:baseline;gap:10px;min-width:0}.gh2-t b{font-size:16px;font-weight:700;letter-spacing:-.025em}.gh2-t small{position:relative;padding-left:11px;overflow:hidden;text-overflow:ellipsis;font-size:12.5px;font-weight:500;letter-spacing:-.01em;color:#8b95a1}.gh2-t small::before{content:"";position:absolute;left:0;top:50%;width:1px;height:11px;margin-top:-5px;background:#d1d6db}
+.gh2 .gt::after{content:"";position:absolute;left:0;right:0;bottom:-1px;height:2px;border-radius:2px;background:#191f28;transform:scaleX(0);transition:transform .3s cubic-bezier(.16,1,.3,1)}.gh2 .gt:hover::after{transform:scaleX(.4)}.gh2 .gt.on::after{transform:none}
+.dark .gh2{background:rgba(23,23,23,.94);box-shadow:0 1px 0 rgba(255,255,255,.08)}.dark .gh2::after{display:none}.dark .gh2-av{box-shadow:0 0 0 1px rgba(255,255,255,.2)}.dark .gh2-t small{color:#9aa0a6}.dark .gh2-t small::before{background:rgba(255,255,255,.2)}.dark .gh2-nm{color:#fff}
+@media(max-width:720px){.gh2-in{width:calc(100vw - 32px)}.gh2-t b{font-size:15px}.gh2-t small{display:none}.gh2-av{width:26px;height:26px}}
+.gh2-nm{color:#191f28}.gh2-t b,.gh2-t small{line-height:1.3}

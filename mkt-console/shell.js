@@ -67,8 +67,30 @@
   }
   /* 공통 헤더 — /portfolio · /portfolio/projects 와 같은 모양(이름 | 이력서(▾ 섹션) · AX · 프로젝트, 밑줄 탭 · 폭 832) */
   var SECS = [["about", "About"], ["experience", "Experience"], ["techstack", "Stack &amp; Skills"], ["contact", "Contact"]];
+  // 헤더 왼쪽(사진 + 이름 · 보조 문구) = 포트폴리오와 같은 값: KILO 대시보드 Home '상단 헤더'(klio.text.ghName/ghSub · show.gh) · 대표 사진
+  //   공개 스냅샷에서 읽어 이 브라우저에 기억(gh-brand) → 다음 방문엔 바로 같은 모양
+  var GHB = (function () { try { return JSON.parse(localStorage.getItem("gh-brand") || "null"); } catch (e) { return null; } })() || { name: "Kim Jinsoo", sub: "", photo: "", ini: "KJ" };
+  function ghBrand() {
+    var b = GHB, av = b.photo !== false ? (b.photo ? '<span class="gh2-av"><img src="' + esc(b.photo) + '" alt=""></span>' : '<span class="gh2-av fb">' + esc(b.ini || "KJ") + '</span>') : '';
+    return av + '<span class="gh2-t"><b>' + esc(b.name || "Kim Jinsoo") + '</b>' + (b.sub ? '<small>' + esc(b.sub) + '</small>' : '') + '</span>';
+  }
+  function loadBrand() {
+    var C = window.APP_CONFIG || {}; if (!C.SUPABASE_URL || !C.SUPABASE_ANON_KEY || !window.fetch) return;
+    var q = "portfolio_pages?slug=eq.portfolio&select=t:snapshot->klio->text,s:snapshot->klio->show,ph:snapshot->klio->photos,av:snapshot->profile->avatar,ti:snapshot->profile->title,ne:snapshot->profile->nameEn,nk:snapshot->profile->nameKo";
+    fetch(C.SUPABASE_URL + "/rest/v1/" + q, { headers: { apikey: C.SUPABASE_ANON_KEY, Authorization: "Bearer " + C.SUPABASE_ANON_KEY } }).then(function (r) { return r.json(); }).then(function (rows) {
+      var x = rows && rows[0]; if (!x) return;
+      var T = x.t || {}, G = (x.s || {}).gh || {}, val = function (v) { return v != null && String(v).trim() ? String(v).trim() : ""; };
+      var nameEn = val(T.nameEn) || val(x.ne) || val(T.nameKo) || val(x.nk);
+      var photos = (Array.isArray(x.ph) ? x.ph : [x.av]).filter(function (u) { return val(u); });
+      var b = { name: val(T.ghName) || nameEn || "Portfolio", sub: G.sub === false ? "" : (val(T.ghSub) || val(x.ti)), photo: G.photo === false ? false : (photos[0] || x.av || ""),
+        ini: (val(T.initials) || nameEn.split(/\s+/).map(function (w) { return w[0] || ""; }).join("") || "KJ").slice(0, 2).toUpperCase() };
+      if (JSON.stringify(b) === JSON.stringify(GHB)) return;
+      GHB = b; try { localStorage.setItem("gh-brand", JSON.stringify(b)); } catch (e) {}
+      var a = $(".gh2-nm"); if (a) a.innerHTML = ghBrand();
+    }).catch(function () {});
+  }
   function siteHeader() {
-    return '<header class="gh2"><div class="gh2-in"><a class="gh2-nm" href="/portfolio">Kim Jinsoo</a><nav class="gtabs" aria-label="메뉴">'
+    return '<header class="gh2"><div class="gh2-in"><a class="gh2-nm" href="/portfolio">' + ghBrand() + '</a><nav class="gtabs" aria-label="메뉴">'
       + '<div class="gt-w"><a class="gt" href="/portfolio" data-gt-dd>이력서</a><div class="gdd">' + SECS.map(function (x) { return '<a href="/portfolio#' + x[0] + '">' + x[1] + '</a>'; }).join("") + '</div></div>'
       + '<a class="gt on" aria-current="page" href="#/overview" data-ax-top>AX</a><a class="gt" href="/portfolio/projects">프로젝트</a></nav></div></header>';
   }
@@ -188,4 +210,5 @@
 
   if (store.get("dark", false)) document.documentElement.classList.add("dark");
   go();
+  loadBrand(); // 헤더 이름·사진을 포트폴리오 설정과 맞춤
 })(window.NW);
