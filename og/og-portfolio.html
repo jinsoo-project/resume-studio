@@ -1,46 +1,36 @@
 <!doctype html>
-<!-- 공유 미리보기 이미지(og/portfolio.jpg) 원본 — 1200×630. 헤드리스 Chrome으로 캡처해 만듦:
+<!-- 공유 미리보기 이미지(og/portfolio.jpg) 원본 — 1200×630 다크 명함형. 헤드리스 Chrome으로 캡처해 만듦:
      "Google Chrome" --headless=new --hide-scrollbars --force-device-scale-factor=2 --window-size=1200,630 --screenshot=og.png og/og-portfolio.html
-     → sips -Z 1200 -s format jpeg -s formatOptions 88 og.png --out og/portfolio.jpg -->
+     → sips -Z 1200 -s format jpeg -s formatOptions 90 og.png --out og/portfolio.jpg -->
 <html lang="ko">
 <head>
 <meta charset="utf-8">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/wanteddev/wanted-sans@v1.0.3/packages/wanted-sans/fonts/webfonts/variable/split/WantedSansVariable.min.css">
-<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600&display=swap" rel="stylesheet">
 <style>
   *{box-sizing:border-box;margin:0}
   html,body{width:1200px;height:630px;overflow:hidden}
-  body{background:#f6f5f2;color:#191f28;font-family:"Wanted Sans Variable","Wanted Sans","Pretendard",sans-serif;letter-spacing:-.02em;-webkit-font-smoothing:antialiased}
-  .wrap{position:relative;display:grid;grid-template-columns:1fr 360px;gap:64px;height:100%;padding:64px 72px 0}
-  .lb{font-size:15px;font-weight:600;letter-spacing:.14em;color:#8b95a1}
-  .sig{margin-top:30px;font-family:Caveat,cursive;font-size:44px;font-weight:600;line-height:1;letter-spacing:0;color:#4e5968}
-  h1{margin-top:6px;font-size:76px;font-weight:700;line-height:1.05;letter-spacing:-.045em}
-  .tg{margin-top:22px;font-size:29px;font-weight:600;line-height:1.35;letter-spacing:-.03em;color:#333d4b}
-  .sub{margin-top:12px;font-size:20px;font-weight:500;color:#6b7684}
-  .ph{position:relative;align-self:start;width:360px;height:420px;border-radius:36px;overflow:hidden;background:#191f28;box-shadow:0 0 0 1px rgba(25,31,40,.08),0 30px 60px -36px rgba(25,31,40,.55)}
-  .ph img{display:block;width:100%;height:100%;object-fit:cover;object-position:50% 22%}
-  .ft{position:absolute;left:72px;right:72px;bottom:0;display:grid;grid-template-columns:repeat(3,auto) 1fr;align-items:end;gap:44px;padding:26px 0 44px;border-top:1px solid #dcdfe3}
-  .st b{display:block;font-size:34px;font-weight:700;line-height:1;letter-spacing:-.04em}
-  .st span{display:block;margin-top:8px;font-size:15px;font-weight:500;color:#6b7684;letter-spacing:-.01em}
-  .url{justify-self:end;font-size:16px;font-weight:600;color:#8b95a1;letter-spacing:-.01em}
+  body{background:#1b1f27;color:#fff;font-family:"Wanted Sans Variable","Wanted Sans","Pretendard",sans-serif;letter-spacing:-.02em;-webkit-font-smoothing:antialiased}
+  .card{position:relative;display:grid;grid-template-columns:1fr 300px;gap:72px;height:100%;padding:76px 88px 72px}
+  .l{display:flex;flex-direction:column;min-width:0}
+  .lb{font-size:19px;font-weight:500;letter-spacing:.32em;color:rgba(255,255,255,.5)}
+  h1{margin-top:auto;white-space:nowrap;font-size:58px;font-weight:700;line-height:1.24;letter-spacing:-.04em}
+  .ft{display:flex;align-items:center;justify-content:space-between;margin-top:44px}
+  .nm{font-size:25px;font-weight:500;color:rgba(255,255,255,.72);letter-spacing:-.01em}
+  .nm b{margin-right:12px;font-weight:600;color:#fff}
+  .loc{display:flex;align-items:center;gap:12px;font-size:23px;font-weight:500;color:rgba(255,255,255,.72)}
+  .loc i{width:13px;height:13px;border-radius:50%;background:#4fb37b}
+  .ph{align-self:center;width:300px;height:372px;border-radius:30px;overflow:hidden;background:#2a2f38;box-shadow:0 0 0 1px rgba(255,255,255,.08),0 34px 60px -30px rgba(0,0,0,.7)}
+  .ph img{display:block;width:100%;height:100%;object-fit:cover;object-position:50% 20%}
 </style>
 </head>
 <body>
-  <div class="wrap">
-    <div>
-      <p class="lb">MARKETING PORTFOLIO</p>
-      <p class="sig">Kim jinsoo</p>
-      <h1>김진수</h1>
-      <p class="tg">마케팅의 문제를 AI와 코드로 푸는<br>그로스 빌더</p>
-      <p class="sub">퍼포먼스 · 브랜딩 · CRM · 커머스 · AX</p>
+  <div class="card">
+    <div class="l">
+      <p class="lb">MARKETING × AX · PORTFOLIO</p>
+      <h1>마케팅의 문제를 AI와 코드로<br>푸는 그로스 빌더</h1>
+      <div class="ft"><p class="nm"><b>김진수</b>Kim Jinsoo</p><p class="loc"><i></i>Seoul, KR</p></div>
     </div>
     <div class="ph"><img src="https://qmabsrqpzbqvledywxtl.supabase.co/storage/v1/object/public/media/12ca909a-d9ae-4796-89af-57467df61a48/1790341964038-10r14r.jpg" alt=""></div>
-  </div>
-  <div class="ft">
-    <div class="st"><b>+86%</b><span>월 매출 · 어반스테이 10개월</span></div>
-    <div class="st"><b>월 5억</b><span>매체 예산 운영 · 멜리즈</span></div>
-    <div class="st"><b>1인 구축</b><span>사내 마케팅 콘솔 · AX</span></div>
-    <p class="url">kimjinsoo-mkt-ax.vercel.app/portfolio</p>
   </div>
 </body>
 </html>
