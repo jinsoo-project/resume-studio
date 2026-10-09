@@ -1059,7 +1059,7 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
         + (m0 ? '<span class="pc-p"><b>' + esc(m0.value) + '</b>' + (m0.label ? ' ' + esc(m0.label) : '') + '</span>' : '') + '</span><span class="t-go" aria-hidden="true">→</span></a>';
     };
     var mosaic = pick.map(function (x, i) {
-      var span = ""; // 2026-10-09: 크기 섞인 모자이크 대신 같은 크기 카드(썸네일 4:3) — 순서만 칸 번호대로
+      var span = i === 1 ? " tall" : i === 3 ? " wide" : i === 4 && pick.length === 5 ? " wide" : ""; // 5·6번 칸 = 아래 한 줄(하나뿐이면 가로 길게)
       return tileHtml(x, span, i);
     }).join("");
     // 전체 보기 버튼(→ /projects, 타일도 그 페이지에서 해당 프로젝트 보기 창으로): 썸네일 4개 겹침 + 제목/부제 + 화살표 (문구는 KILO 대시보드에서)
@@ -1071,7 +1071,7 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
       + '<span class="pj-all-t"><b>' + esc(txt("pjAllTitle", "전체 프로젝트 보기")) + '</b><small>' + esc(txt("pjAllSub", "분야별 카드로 한눈에 보기")) + '</small></span>'
       + '<span class="pj-deck" aria-hidden="true">' + stack + '</span><span class="pj-all-a" aria-hidden="true">→</span></a>';
     var projectsInner = '<div class="cnt pj-cnt">'
-      + '<div class="mosaic rv rv-g n' + pick.length + '">' + mosaic + '</div>'
+      + '<div class="mosaic rv rv-g">' + mosaic + '</div>'
       + (works.length ? allCta : '')
       + '</div>';
 
@@ -1235,7 +1235,7 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
     // ── 섹션 레지스트리 + 사용자 구성(klio.sections: 순서·표시·라벨). 하단 독도 같은 구성 사용.
     var SECDEF = {
       about: { label: "About", cls: "", inner: aboutInner },
-      projects: { label: "Projects", cls: " pj-row", inner: projectsInner }, // 페이지 폭 갤러리(제목 위 · 카드 3열)
+      projects: { label: "Projects", cls: "", inner: projectsInner },
       experience: { label: "Experience", cls: "", inner: experienceInner },
       ax: { label: "AX", cls: "", inner: axInner },
       techstack: { label: "Techstack", cls: "", inner: techstackInner },
@@ -1404,18 +1404,6 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
       + '.tile .pc-th svg.cv{width:100%;height:100%;transform:none;transition:transform .6s var(--ez)}.tile:hover .pc-th svg.cv{transform:scale(1.04)}.pc-th.art{padding:4px}'
       + '.js .mosaic.in .pc-th .cv .ln{stroke-dasharray:420;animation:cvDraw 1.6s var(--ez) backwards;animation-delay:calc(var(--j,0) * 110ms + 380ms)}@keyframes cvDraw{from{stroke-dashoffset:420}to{stroke-dashoffset:0}}@media(prefers-reduced-motion:reduce){.js .mosaic.in .pc-th .cv .ln{animation:none}}'
       + '@media(max-width:520px){.mosaic{grid-auto-rows:226px}.pc-t{font-size:13px}.tile.tall .pc-t,.tile.wide .pc-t{font-size:14.5px}.pc-m{font-size:11px}.tile.wide .pc-th{width:42%}.pc-p{padding-right:30px}.pc-p b{font-size:15px}.tile.tall .pc-p b,.tile.wide .pc-p b{font-size:18px}}'
-      // 03 Projects = 페이지 폭 갤러리(2026-10-09 사용자 '썸네일 비율 이상'): 제목 위 · 같은 크기 카드 3열(4개면 2열) · 썸네일 4:3 · 글은 썸네일 아래 · 성과는 가는 선 아래
-      + '.row.pj-row{grid-template-columns:1fr}.row.pj-row>h2{position:static;margin-bottom:28px}.pj-row .pj-cnt{max-width:none}'
-      + '.pj-row .mosaic{grid-template-columns:repeat(3,minmax(0,1fr));grid-auto-rows:auto;gap:40px 20px}.pj-row .mosaic.n4,.pj-row .mosaic.n2{grid-template-columns:repeat(2,minmax(0,1fr))}'
-      + '.pj-row .tile.pc{display:flex;flex-direction:column;align-items:stretch;justify-content:flex-start;height:auto;padding:0;border-radius:0;overflow:visible;background:none;box-shadow:none;transition:transform .45s var(--ez)}.pj-row .tile.pc::after{display:none}.pj-row .tile.pc:hover{transform:translateY(-4px)}'
-      + '.pj-row .pc-th{width:100%;height:auto;aspect-ratio:4/3;border-radius:16px;box-shadow:0 0 0 1px rgba(25,31,40,.07);transition:box-shadow .45s var(--ez)}.pj-row .tile.pc:hover .pc-th{box-shadow:0 0 0 1px rgba(25,31,40,.1),0 22px 40px -26px rgba(25,31,40,.55)}.pj-row .tile .pc-th svg{width:44px;height:44px}.pj-row .tile .pc-th svg.cv{width:100%;height:100%}'
-      + '.pj-row .pc-bd{flex:none;padding:16px 2px 0}.pj-row .pc-cat{font-size:11px;letter-spacing:.1em}'
-      + '.pj-row .pc-t{margin-top:7px;min-height:2.76em;font-size:17px;font-weight:600;line-height:1.38;letter-spacing:-.03em}'
-      + '.pj-row .pc-m{margin-top:5px;font-size:13px}'
-      + '.pj-row .pc-p{margin-top:14px;padding:12px 0 0;border-top:1px solid rgba(25,31,40,.08);font-size:13px;font-weight:500;color:var(--gray)}.pj-row .pc-p b{margin-right:6px;font-size:20px;font-weight:700;letter-spacing:-.03em}'
-      + '.pj-row .tile.pc .t-go{display:none}.pj-row .pj-all{margin-top:48px}'
-      + '@media(max-width:920px){.pj-row .mosaic{grid-template-columns:repeat(2,minmax(0,1fr));gap:32px 14px}}'
-      + '@media(max-width:520px){.pj-row .mosaic{gap:28px 12px}.pj-row .pc-th{border-radius:12px}.pj-row .pc-bd{padding-top:12px}.pj-row .pc-cat{font-size:10px}.pj-row .pc-t{font-size:14.5px}.pj-row .pc-m{font-size:12px}.pj-row .pc-p{margin-top:10px;padding-top:10px;font-size:12px}.pj-row .pc-p b{font-size:16px}}'
       // 전체 프로젝트 보기의 큰 개수: 애플풍 가는 숫자 + 위→아래 은은한 그라데이션
       + '.ax-all{margin-top:0}.pj-deck .ax-di svg{width:40px;height:40px;display:block}.ax-all .pj-num{letter-spacing:-.04em}'
       + '.pj-num{font-family:var(--font);font-weight:250;font-size:clamp(48px,4.4vw,60px);line-height:.9;letter-spacing:-.06em;font-variant-numeric:tabular-nums;background:linear-gradient(180deg,#fff 35%,rgba(255,255,255,.55));-webkit-background-clip:text;background-clip:text;color:transparent}'
