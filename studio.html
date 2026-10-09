@@ -1165,6 +1165,7 @@ $('#seedBtn').addEventListener('click',async()=>{
   localStorage.setItem(LS_LIB,JSON.stringify(LIB)); localStorage.setItem(LS_DOCS,JSON.stringify(DOCS)); flash();
   if(window.CLOUD&&CLOUD.enabled()&&CLOUD.user()){
     toast('DB에 저장 중…');
+    if(!CLOUD_OK){ toast('⚠ 클라우드 불러오기 전이라 저장을 멈췄어요 — 새로고침해 주세요'); return; }
     try{ await CLOUD.pushAll(LIB,DOCS,resolveAny); toast('DB 저장 완료 ✓ (회사 '+LIB.companies.length+')'); }
     catch(e){ toast('DB 저장 오류: '+(e.message||e)); console.error('pushAll',e); }
   } else { toast('로컬 저장됨 · 로그인하면 DB 반영'); }
@@ -1184,9 +1185,10 @@ if(s)r.setAttribute('data-theme',s);else if(matchMedia('(prefers-color-scheme:da
 $('#themeBtn').addEventListener('click',()=>{var n=r.getAttribute('data-theme')==='dark'?'light':'dark';r.setAttribute('data-theme',n);localStorage.setItem('studio_theme',n);if(curDoc())updatePreview();});})();
 
 /* ============ cloud sync ============ */
-let cloudTimer=null;
+let cloudTimer=null, CLOUD_OK=false; // CLOUD_OK = 이번 접속에서 클라우드 불러오기에 성공했는지(실패 상태로 저장하면 옛 데이터·빈 목록이 DB를 덮어씀 — 2026-10-09 사고)
 function cloudSync(){
   if(!(window.CLOUD&&CLOUD.enabled()&&CLOUD.user())){ setSaveState('local'); return; }
+  if(!CLOUD_OK){ setSaveState('err',new Error('클라우드 불러오기 전이라 저장을 멈췄어요 — 새로고침해 주세요')); return; }
   clearTimeout(cloudTimer); setSaveState('pending');
   cloudTimer=setTimeout(async()=>{
     try{ normalizeIds(); await CLOUD.pushAll(LIB,DOCS,resolveAny); setSaveState('ok'); }
@@ -1223,7 +1225,7 @@ async function publishDoc(d,btn){
   if(!(window.CLOUD&&CLOUD.enabled()&&CLOUD.user())){ setSaveState('local'); showPubBar(u,'로그인이 안 돼 있어 발행 안 됨 · 이 링크는 이 브라우저용이에요',true); return; }
   const label=btn?btn.textContent:''; if(btn){ btn.disabled=true; btn.textContent='발행 중…'; }
   clearTimeout(cloudTimer); setSaveState('pending');
-  try{ normalizeIds(); await CLOUD.pushAll(LIB,DOCS,resolveAny); setSaveState('ok'); }
+  try{ if(!CLOUD_OK) throw new Error('클라우드 불러오기 전이라 발행을 멈췄어요 — 새로고침해 주세요'); normalizeIds(); await CLOUD.pushAll(LIB,DOCS,resolveAny); setSaveState('ok'); }
   catch(e){ setSaveState('err',e); showPubBar('','발행 실패 · '+((e&&e.message)||e||'오류')+' — 다시 로그인 후 눌러 주세요',true); if(btn){ btn.disabled=false; btn.textContent=label; } return; }
   if(btn){ btn.disabled=false; btn.textContent=label; }
   const ok=await copied; showPubBar(u,ok?'발행됨 · 링크 복사됨':'발행됨 · 링크를 복사하세요',false);
@@ -1251,8 +1253,10 @@ async function syncFromCloud(){
     if(r.library){                       // 클라우드에 데이터 있으면 채택
       LIB=Object.assign({},LIB,r.library);
       DOCS=r.docs||[];
+      CLOUD_OK=true;
       normalizeIds(); derive(); klioEnsure();
-    }else{                               // 최초: 로컬 시드를 클라우드로 업로드
+    }else{
+      CLOUD_OK=true;                               // 최초: 로컬 시드를 클라우드로 업로드
       if(!LIB.companies){ LIB.companies=clone((window.RESUME||{}).companies||[]); }
       normalizeIds(); derive(); klioEnsure();
       await CLOUD.pushAll(LIB,DOCS,resolveAny);
@@ -1260,7 +1264,7 @@ async function syncFromCloud(){
     localStorage.setItem(LS_LIB,JSON.stringify(LIB));
     localStorage.setItem(LS_DOCS,JSON.stringify(DOCS));
     renderHome(); toast('클라우드 동기화 완료');
-  }catch(e){ console.warn(e); toast('동기화 오류'); }
+  }catch(e){ console.warn(e); CLOUD_OK=false; toast('⚠ 클라우드 불러오기 실패 — 저장을 멈췄어요. 새로고침해 주세요 ('+((e&&e.message)||e)+')'); }
 }
 function renderAuthBox(){
   const box=$('#authBox'); if(!box)return;

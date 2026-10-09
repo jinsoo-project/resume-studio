@@ -15,8 +15,21 @@
     }
     return sb;
   }
+  // ⚠️ 2026-10-09 사고: 조회 실패로 문서 목록이 빈 채 저장되자 이력서 · 포트폴리오 문서가 전부 지워짐
+  //    → 문서 표는 '빈 목록이면 지우지 않음' + 한 번에 절반 넘게 지우는 저장은 막음(실수 방지)
+  const DOC_TABLES = { resume_docs: 1, portfolio_pages: 1 };
   async function upsertPrune(table, rows) {
     const c = client(), uidv = user.id;
+    if (DOC_TABLES[table]) {
+      if (!rows.length) { console.warn("[cloud] skip prune " + table + " (빈 목록)"); return; }
+      const cur = await c.from(table).select("id").eq("user_id", uidv);
+      const keep = {}; rows.forEach(r => { keep[r.id] = 1; });
+      const gone = (cur.data || []).filter(r => !keep[r.id]);
+      if (cur.error || gone.length > Math.max(1, Math.floor((cur.data || []).length / 2))) {
+        const { error } = await c.from(table).upsert(rows, { onConflict: "id" }); if (error) console.warn("[cloud] upsert " + table, error.message);
+        console.warn("[cloud] skip prune " + table + " (지울 문서 " + gone.length + "개 — 안전을 위해 보류)"); return;
+      }
+    }
     if (rows.length) { const { error } = await c.from(table).upsert(rows, { onConflict: "id" }); if (error) console.warn("[cloud] upsert " + table, error.message); }
     const ids = rows.map(r => r.id);
     let del = c.from(table).delete().eq("user_id", uidv);
@@ -57,6 +70,8 @@
         c.from("ax_screens").select("*").eq("user_id", u).order("sort"),
         c.from("ax_notes").select("*").eq("user_id", u).order("sort")
       ]);
+      const failed = [pf, cos, wks, wm, wl, med, axr, hl, sk, ed, aw, rd, pp, cap, pipe, flow, axl, axs, axn].filter(x => x && x.error);
+      if (failed.length) throw new Error("클라우드 불러오기 실패(" + failed.length + "개 표) — 잠시 후 새로고침해 주세요: " + failed[0].error.message);
       const W = wks.data || [], WM = wm.data || [], WL = wl.data || [], MED = med.data || [];
       const companies = (cos.data || []).map(co => ({
         id: co.id, nameKo: co.name_ko, nameEn: co.name_en, role: co.role, startDate: fromDate(co.start_date), endDate: fromDate(co.end_date), summary: co.summary, logo: co.logo_url,
