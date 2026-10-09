@@ -6,5 +6,7 @@
    ========================================================================= */
 window.APP_CONFIG = {
   SUPABASE_URL: "https://qmabsrqpzbqvledywxtl.supabase.co",
-  SUPABASE_ANON_KEY: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFtYWJzcnFwemJxdmxlZHl3eHRsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODY3ODg0MTEsImV4cCI6MjEwMjM2NDQxMX0.QUi1vXBW_v5ai0tTnmLbKLJf4LPCE46DBbfhoHvCNrM"
+  SUPABASE_ANON_KEY: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFtYWJzcnFwemJxdmxlZHl3eHRsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODY3ODg0MTEsImV4cCI6MjEwMjM2NDQxMX0.QUi1vXBW_v5ai0tTnmLbKLJf4LPCE46DBbfhoHvCNrM",
+  // 공개 화면(/portfolio · /p · /r)은 이 계정이 만든 문서만 불러옴 — 다른 계정이 같은 주소(slug)로 문서를 만들어도 대신 뜨지 않게
+  OWNER_ID: "12ca909a-d9ae-4796-89af-57467df61a48"
 };

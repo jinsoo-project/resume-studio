@@ -564,7 +564,9 @@ function viewURL(d){
   }
   return base+'view.html#'+encodeDoc(resolveAny(d));
 }
-function resolveKlio(d){ var s=resolveAX(d); s.template='klio'; s.title=d.title||'마케팅 포트폴리오'; return s; }
+function resolveKlio(d){ var s=resolveAX(d); s.template='klio'; s.title=d.title||'마케팅 포트폴리오';
+  // 공개 스냅샷은 누구나 받을 수 있음 → klio 화면이 안 쓰는 옛 'ax' 템플릿 데이터(사내 메모 axNotes · axLoop · axScreens · pipeline · flow)는 빼고 발행
+  ['axNotes','axLoop','axScreens','pipeline','flow'].forEach(function(k){ delete s[k]; }); return s; }
 function resolveAny(d){ if(d.template==='klio') return resolveKlio(d); if(d.template==='ax') return resolveAX(d); return d.kind==='portfolio' ? resolvePF(d) : resolve(d); }
 function resolveAX(d){ return { template:'ax', title:d.title||'AX 포트폴리오', slug:d.slug, visibility:d.visibility||'unlisted', profile:LIB.profile, companies:LIB.companies||[], capabilities:LIB.capabilities||[], pipeline:LIB.pipeline||[], flow:LIB.flow||[], highlights:LIB.highlights||[], axLoop:LIB.axLoop||[], axScreens:LIB.axScreens||[], axNotes:LIB.axNotes||[], klio:klioNormalize(d) }; }
 
