@@ -80,6 +80,8 @@ window.addEventListener('hashchange',function(){var h=location.hash.slice(1),c=i
       // 슬러그별 템플릿 강제 (DB 재발행 없이 표시 템플릿 교체). ?tpl= 로도 override 가능.
       var FORCE_TPL={portfolio:"klio"};
       var tplOverride=params.get('tpl')||FORCE_TPL[slug];
+      // 임시 복구(2026-10-09): DB 포트폴리오 문서의 KILO 설정이 초기화된 상태면(Experience 목록 · 헤더 이름 없음) 어제(10/8) 설정으로 그림 — DB 복구되면 자동으로 DB 설정 사용
+      if(row&&row.snapshot&&slug==='portfolio'){ var KL=row.snapshot.klio||{}; if(!Object.keys(KL.expSvc||{}).length&&!((KL.text||{}).ghName)){ try{ var kr=await fetch('/data/klio-restore.json',{cache:'no-store'}); if(kr.ok) row.snapshot.klio=await kr.json(); }catch(_){} } }
       if(row&&row.snapshot){
         if(tplOverride) row.snapshot.template=tplOverride;
         if(isPP()&&row.snapshot.template!=='klio') PAGE=''; // 전체 프로젝트 페이지는 klio 전용
