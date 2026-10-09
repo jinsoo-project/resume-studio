@@ -1041,10 +1041,10 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
     // <img>로 그림: contain이면 이미지 전체가 칸 안에 들어가고 남는 곳은 같은 이미지를 흐리게 깐 배경(::before, --img)으로 채움
     var fitOf = function (w) {
       var C = KCARD[w.id] || {}, z = +C.zoom;
-      return { fit: C.fit === "cover" ? "cover" : "contain", z: z > 100 ? Math.min(300, z) : 100, px: C.px != null && !isNaN(+C.px) ? Math.max(0, Math.min(100, +C.px)) : 50, py: C.py != null && !isNaN(+C.py) ? Math.max(0, Math.min(100, +C.py)) : 50 };
+      return { auto: !C.fit && !(z > 100), fit: C.fit === "cover" ? "cover" : "contain", z: z > 100 ? Math.min(300, z) : 100, px: C.px != null && !isNaN(+C.px) ? Math.max(0, Math.min(100, +C.px)) : 50, py: C.py != null && !isNaN(+C.py) ? Math.max(0, Math.min(100, +C.py)) : 50 };
     };
     var thumbImg = function (src, f) {
-      return '<img class="th-img" src="' + esc(src) + '" alt="" decoding="async" style="object-fit:' // 흐린 배경(::before)이 같은 이미지를 먼저 받으므로 지연 로딩 안 함 + f.fit + ';object-position:' + f.px + '% ' + f.py + '%'
+      return '<img class="th-img" src="' + esc(src) + '" alt="" decoding="async"' + (f.auto ? ' data-af' : '') + ' style="object-fit:' // 흐린 배경(::before)이 같은 이미지를 먼저 받으므로 지연 로딩 안 함 + f.fit + ';object-position:' + f.px + '% ' + f.py + '%'
         + (f.z !== 100 ? ';transform:scale(' + (f.z / 100) + ');transform-origin:' + f.px + '% ' + f.py + '%' : '') + '">';
     };
     // 타일 = 전체 프로젝트 휠과 같은 상품카드: 흰 카드 안 썸네일(작은·세로 타일은 위, 가로 타일은 왼쪽) + 분야 · 제목 · 회사·연도 · 대표 지표
@@ -1055,11 +1055,11 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
         ? '<span class="pc-th img" style="--img:url(\'' + esc(md.src) + '\')">' + thumbImg(md.src, fitOf(w)) + (md.yt ? '<i class="t-play" aria-hidden="true"></i>' : '') + '</span>'
         : '<span class="pc-th art">' + coverArt(w, m0) + '</span>'; // 이미지 없으면 자동 일러스트
       return '<a class="tile pc' + span + (cm.dark ? ' dk' : '') + '" href="' + tpUrl + '#p-' + esc(w.id || "") + '" target="_top" data-ext style="' + (j != null ? '--j:' + j + ';' : '') + '--c:' + cm.c + '">' + th
-        + '<span class="pc-bd"><em class="pc-cat">' + esc(cm.en) + '</em><b class="pc-t">' + esc(v.title) + '</b><span class="pc-m">' + esc(dispName(co)) + (yr ? ' · ' + esc(yr) : '') + '</span>'
+        + '<span class="pc-bd"><em class="pc-cat">' + esc(cm.en) + '</em><b class="pc-t">' + (function (ps) { return ps.map(function (t, k) { if (k === ps.length - 1) return esc(t); var sp = t.lastIndexOf(" "); return esc(sp < 0 ? "" : t.slice(0, sp + 1)) + '<span class="pc-nb">' + esc(sp < 0 ? t : t.slice(sp + 1)) + '<i class="pc-sep" aria-hidden="true"></i></span> '; }).join(""); })(String(v.title).split(/\s+[—–]\s+/)) + '</b><span class="pc-m">' + esc(dispName(co)) + (yr ? ' · ' + esc(yr) : '') + '</span>'
         + (m0 ? '<span class="pc-p"><b>' + esc(m0.value) + '</b>' + (m0.label ? ' ' + esc(m0.label) : '') + '</span>' : '') + '</span><span class="t-go" aria-hidden="true">→</span></a>';
     };
     var mosaic = pick.map(function (x, i) {
-      var span = i === 1 ? " tall" : i === 3 ? " wide" : i === 4 && pick.length === 5 ? " wide" : ""; // 5·6번 칸 = 아래 한 줄(하나뿐이면 가로 길게)
+      var span = ""; // 2026-10-09: 같은 크기 카드 2열(세로·가로 긴 칸은 글 아래가 비고 썸네일 비율이 들쭉날쭉해 없앰) — 순서 = 칸 번호
       return tileHtml(x, span, i);
     }).join("");
     // 전체 보기 버튼(→ /projects, 타일도 그 페이지에서 해당 프로젝트 보기 창으로): 썸네일 4개 겹침 + 제목/부제 + 화살표 (문구는 KILO 대시보드에서)
@@ -1391,11 +1391,12 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
       + '.avail i{position:relative}.avail i::after{content:"";position:absolute;inset:0;border-radius:50%;background:var(--mint);animation:ping 1.9s var(--ez) infinite}@keyframes ping{from{transform:scale(1);opacity:.85}to{transform:scale(2.8);opacity:0}}'
       + '@media(prefers-reduced-motion:reduce){.js .rv{filter:none}.aura i,.avail i::after,.js .fx-intro .sig,.js .sig[data-draw]:not(.go) .sg,.js .fx-intro .hero-h .w,.js .fx-intro .photo .card{animation:none}.js .sig[data-draw]:not(.go) .sg{opacity:1}.js .xp .xp-pj li{opacity:1;transform:none;transition:none}.js .xp .xp-pj li::before{transform:none;transition:none}.dock-pill,.tile::after{transition:none}}'
       // 03 Projects 타일 = 상품카드(전체 프로젝트 휠과 같은 구성): 흰 카드 · 썸네일 · 분야 · 제목 · 회사·연도 · 대표 지표 — 크기별 배치
-      // 썸네일 칸 비율(2026-10-09): 작은 칸 3:2 · 세로 긴 칸 = 높이 57% · 가로 긴 칸 = 왼쪽 50% (예전 작은 칸 2:1 띠는 화면 캡처가 너무 작게 보였음)
-      + '.mosaic{grid-auto-rows:262px}.tile.pc{justify-content:flex-start;padding:7px;background:#fff;box-shadow:0 0 0 1px rgba(0,0,0,.06),0 14px 30px -22px rgba(0,0,0,.42)}.tile.pc::after{background:linear-gradient(110deg,transparent 35%,rgba(255,255,255,.35) 50%,transparent 65%)}'
-      + '.pc-th{position:relative;flex:none;height:auto;aspect-ratio:3/2;border-radius:17px;overflow:hidden;background:var(--c) center/cover no-repeat;display:grid;place-items:center}.pc-th.img{background-color:#f1f0ec}.pc-th.img::before{content:"";position:absolute;inset:-14%;background:var(--img) center/cover no-repeat;filter:blur(18px) saturate(1.15);opacity:.5}.pc-th .th-img{position:absolute;inset:0;width:100%;height:100%;display:block;z-index:1}.pc-th .t-play{z-index:2}.tile .pc-th svg{width:30px;height:30px}.tile.tall .pc-th{aspect-ratio:auto;height:57%}.tile.tall .pc-th svg{width:46px;height:46px}'
+      // 썸네일 칸 비율(2026-10-09): 카드 썸네일 4:3(세로·가로 긴 칸은 안 씀) (예전 작은 칸 2:1 띠는 화면 캡처가 너무 작게 보였음)
+      + '.mosaic{grid-auto-rows:280px}.tile.pc{justify-content:flex-start;padding:7px;background:#fff;box-shadow:0 0 0 1px rgba(0,0,0,.06),0 14px 30px -22px rgba(0,0,0,.42)}.tile.pc::after{background:linear-gradient(110deg,transparent 35%,rgba(255,255,255,.35) 50%,transparent 65%)}'
+      + '.pc-th{position:relative;flex:none;height:auto;aspect-ratio:4/3;border-radius:17px;overflow:hidden;background:var(--c) center/cover no-repeat;display:grid;place-items:center}.pc-th.img{background-color:#f1f0ec}.pc-th.img::before{content:"";position:absolute;inset:-14%;background:var(--img) center/cover no-repeat;filter:blur(18px) saturate(1.15);opacity:.5}.pc-th .th-img{position:absolute;inset:0;width:100%;height:100%;display:block;z-index:1}.pc-th .t-play{z-index:2}.tile .pc-th svg{width:30px;height:30px}.tile.tall .pc-th{aspect-ratio:auto;height:57%}.tile.tall .pc-th svg{width:46px;height:46px}'
       + '.tile.wide{flex-direction:row}.tile.wide .pc-th{height:auto;aspect-ratio:auto;width:50%;align-self:stretch}.tile.wide .pc-th svg{width:40px;height:40px}.tile.pc .t-play{top:50%}'
       + '.pc-bd{flex:1;min-width:0;min-height:0;display:flex;flex-direction:column;padding:11px 9px 5px}.tile.wide .pc-bd{padding:10px 12px 6px 16px}.tile.tall .pc-bd{padding:14px 11px 7px}'
+      + '.pc-nb{white-space:nowrap}.pc-sep{display:inline-block;width:1px;height:.78em;margin:0 .14em 0 .42em;background:currentColor;opacity:.3;vertical-align:-.02em}'
       + '.pc-cat{font-style:normal;font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--gray);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}'
       + '.pc-t{flex:none;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;margin-top:4px;font-size:14px;font-weight:700;line-height:1.32;letter-spacing:-.025em;color:var(--ink)}.tile.tall .pc-t,.tile.wide .pc-t{font-size:16.5px}'
       + '.pc-m{margin-top:3px;font-size:11.5px;font-weight:500;color:var(--gray);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}'
@@ -1404,7 +1405,7 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
       // 자동 일러스트 썸네일: 칸을 꽉 채우는 SVG(분야 색 바탕 가운데) · 호버 시 살짝 확대 · 등장 시 선 그리기
       + '.tile .pc-th svg.cv{width:100%;height:100%;transform:none;transition:transform .6s var(--ez)}.tile:hover .pc-th svg.cv{transform:scale(1.04)}.pc-th.art{padding:4px}'
       + '.js .mosaic.in .pc-th .cv .ln{stroke-dasharray:420;animation:cvDraw 1.6s var(--ez) backwards;animation-delay:calc(var(--j,0) * 110ms + 380ms)}@keyframes cvDraw{from{stroke-dashoffset:420}to{stroke-dashoffset:0}}@media(prefers-reduced-motion:reduce){.js .mosaic.in .pc-th .cv .ln{animation:none}}'
-      + '@media(max-width:520px){.mosaic{grid-auto-rows:236px}.pc-t{font-size:13px}.tile.tall .pc-t,.tile.wide .pc-t{font-size:14.5px}.pc-m{font-size:11px}.tile.wide .pc-th{width:46%}.pc-p{padding-right:30px}.pc-p b{font-size:15px}.tile.tall .pc-p b,.tile.wide .pc-p b{font-size:18px}}'
+      + '@media(max-width:520px){.mosaic{grid-auto-rows:248px}.pc-t{font-size:13px}.tile.tall .pc-t,.tile.wide .pc-t{font-size:14.5px}.pc-m{font-size:11px}.tile.wide .pc-th{width:46%}.pc-p{padding-right:30px}.pc-p b{font-size:15px}.tile.tall .pc-p b,.tile.wide .pc-p b{font-size:18px}}'
       // 전체 프로젝트 보기의 큰 개수: 애플풍 가는 숫자 + 위→아래 은은한 그라데이션
       + '.ax-all{margin-top:0}.pj-deck .ax-di svg{width:40px;height:40px;display:block}.ax-all .pj-num{letter-spacing:-.04em}'
       + '.pj-num{font-family:var(--font);font-weight:250;font-size:clamp(48px,4.4vw,60px);line-height:.9;letter-spacing:-.06em;font-variant-numeric:tabular-nums;background:linear-gradient(180deg,#fff 35%,rgba(255,255,255,.55));-webkit-background-clip:text;background-clip:text;color:transparent}'
@@ -1461,6 +1462,8 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
       show(0);
     };
     var KJS = '(function(){"use strict";var reduce=matchMedia("(prefers-reduced-motion: reduce)").matches,still=!document.documentElement.classList.contains("js");'
+      // 썸네일 자동 맞춤: 카드 설정(klio.cards fit)이 없으면 — 이미지와 칸 비율 차이 1.25배 이내 = 꽉 채움(cover), 그보다 크면 통째로(contain + 흐린 배경)
+      + '[].forEach.call(document.querySelectorAll("img[data-af]"),function(im){var f=function(){var p=im.parentNode,fr=p.clientWidth/p.clientHeight,ir=im.naturalWidth/im.naturalHeight;if(fr&&ir){var k=ir>fr?ir/fr:fr/ir;im.style.objectFit=k<=1.25?"cover":"contain";}};if(im.complete&&im.naturalWidth)f();else im.addEventListener("load",f);});'
       + 'var rvs=document.querySelectorAll(".rv");if("IntersectionObserver" in window&&!reduce){var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){e.target.classList.add("in");io.unobserve(e.target);}});},{threshold:.12,rootMargin:"0px 0px -8% 0px"});rvs.forEach(function(el){io.observe(el);});}else{rvs.forEach(function(el){el.classList.add("in");});}'
       // 하단 독: srcdoc iframe(라이브 view.html·스튜디오 미리보기)에선 #앵커가 부모 URL로 해석돼 iframe이 통째로 재로드됨 → JS로 스크롤 처리
       + 'var dock=document.querySelector(".dock"),links=[].slice.call(document.querySelectorAll(".dock a[data-sec]")),navLock=0;'
