@@ -151,9 +151,11 @@
 
     async fetchPublic(slug) {
       const c = client(); if (!c) return null;
-      let r = await c.from("resume_docs").select("snapshot,title,template").eq("slug", slug).neq("visibility", "private").maybeSingle();
+      // 주인 계정(config OWNER_ID) 문서만 — 가입한 다른 계정이 같은 slug로 만든 문서가 공개 주소에 대신 뜨는 것 방지
+      const own = (window.APP_CONFIG || {}).OWNER_ID, mine = q => own ? q.eq("user_id", own) : q;
+      let r = await mine(c.from("resume_docs").select("snapshot,title,template").eq("slug", slug).neq("visibility", "private")).maybeSingle();
       if (r.data && r.data.snapshot) return r.data;
-      let p = await c.from("portfolio_pages").select("snapshot,title").eq("slug", slug).neq("visibility", "private").maybeSingle();
+      let p = await mine(c.from("portfolio_pages").select("snapshot,title").eq("slug", slug).neq("visibility", "private")).maybeSingle();
       if (p.data && p.data.snapshot) return p.data;
       return null;
     },
