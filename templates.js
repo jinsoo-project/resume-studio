@@ -858,10 +858,15 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
       { id: "g-brand", label: "Brand & Content", cats: ["브랜딩", "콘텐츠", "영상"], on: true },
       { id: "g-com", label: "Commerce & Partnership", cats: ["커머스", "제휴"], on: true }
     ];
+    // 04 AX 카드 기본값 = /ax 개요(mkt-console/overview.js WORK · AX 방식)와 같은 업무 · 같은 문구 · 같은 실제 화면 캡처(/pf-img/ax) — 누르면 /ax 데모 해당 화면
+    //    (studio.html axCoreSeed와 같은 값 · 개요 문구가 바뀌면 둘 다 맞출 것)
     var DEFAULT_AXCORE = [
-      { num: "01", title: "통합 대시보드", desc: "서비스지표와 마케팅지표를 한 판에서, 같은 정의로 비교·결정." },
-      { num: "02", title: "마케팅 자동화", desc: "기획·집행·최적화를 화면 안에서 — 반복은 규칙과 알림으로 자동화." },
-      { num: "03", title: "히스토리 워크플로우", desc: "메일·회의·배포 기록이 자동으로 남는 업무 구조." }
+      { num: "01", title: "대시보드", desc: "흩어진 성과를 한 장으로", img: "/pf-img/ax/total-dashboard.jpg", bg: "#e3e6df", href: "/ax#/total-dashboard" },
+      { num: "02", title: "광고 자동화", desc: "세팅은 버튼 한 번, 감시는 규칙이", img: "/pf-img/ax/meta-ads.jpg", bg: "#ebe5da", href: "/ax#/meta-ads" },
+      { num: "03", title: "콘텐츠 자동화", desc: "키워드에서 발행까지 9단계", img: "/pf-img/ax/blog-journey.jpg", bg: "#dfe4ea", href: "/ax#/blog-journey" },
+      { num: "04", title: "시장 트래킹", desc: "감 대신 검색 수요와 경쟁사로", img: "/pf-img/ax/keyword-trend.jpg", bg: "#e8e1e3", href: "/ax#/keyword-trend" },
+      { num: "05", title: "협업 · 기록", desc: "요청 · 회의 · 기록을 한 곳에", img: "/pf-img/ax/ad-requests.jpg", bg: "#e4e3dd", href: "/ax#/ad-requests" },
+      { num: "06", title: "AX 방식", desc: "AI와 함께 만들고 배포한 방법", stat: "커밋 300 · AI와 함께 87% · 2개월", href: "/ax#/overview" }
     ];
 
     // ── HOME
@@ -1153,9 +1158,8 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
 
     // ── AX (예전 Archive 자리) — 핵심만: AX 콘솔 대표 3 기능 + 콘솔로 연결 (전체 구조는 /ax)
     var axNotesArr = (d.axNotes || []).filter(function (x) { return x.visible !== false; });
-    var axIntro = (d.klio && d.klio.text && d.klio.text.axIntro) ? d.klio.text.axIntro
-      : (((axNotesArr.filter(function (n) { return n.section === "principle"; })[0]) || {}).body
-        || "흩어진 도구와 지표를 하나의 마케팅 콘솔로 — 통합 대시보드·자동화·히스토리까지 직접 설계·구축·운영합니다.");
+    // 소개 = klio.text.axIntro, 비우면 /ax 개요 첫 문장(옛 axNotes 메모 문장은 더 이상 꺼내 쓰지 않음)
+    var axIntro = txt("axIntro", "마케터가 매일 하는 일을 한 화면에서. 성과 확인, 광고 집행, 콘텐츠 발행, 시장 조사, 협업 기록까지 흩어진 도구 대신 직접 만든 콘솔로 운영했습니다.");
     var axCore = (d.klio && Array.isArray(d.klio.axCore) && d.klio.axCore.length) ? d.klio.axCore : DEFAULT_AXCORE;
     var axCoreArr = axCore.filter(function (x) { return x && x.visible !== false && (x.title || x.desc); });
     // 카드 썸네일: 올린 이미지(axCore[i].img) 또는 기능별 미니 화면 일러스트(대시보드·자동화·히스토리)
@@ -1167,9 +1171,11 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
     var axPick = function (s) { s = String(s || ""); return /대시보드|지표|dashboard/i.test(s) ? "dash" : /히스토리|기록|워크플로|history|timeline/i.test(s) ? "hist" : /자동|automation|규칙/i.test(s) ? "auto" : ""; };
     var axArtOf = function (c, i) { return axPick(c.title) || axPick(c.desc) || ["dash", "auto", "hist"][i % 3]; }; // 제목 기준 우선
     var axCoreHtml = axCoreArr.map(function (c, i) {
-      var art = axArtOf(c, i);
-      var th = c.img ? '<span class="ax-th" style="background-image:url(\'' + esc(c.img) + '\')"></span>' : '<span class="ax-th art ax-' + art + '">' + AXART[art] + '</span>';
-      return '<div class="ax-core" style="--j:' + (i * 2) + '">' + th + '<div class="ax-ctx"><span class="ax-cno">' + esc(c.num || ("0" + (i + 1))) + '</span><h4>' + esc(c.title) + '</h4>' + (c.desc ? '<p>' + esc(c.desc) + '</p>' : '') + '</div></div>';
+      var href = String(c.href || "").trim(), tag = href ? "a" : "div";
+      var th = c.img ? '<span class="ax-th" style="--bg:' + esc(c.bg || "#e9e8e3") + '"><img src="' + esc(c.img) + '" alt="" decoding="async"></span>'
+        : '<span class="ax-th ax-stat">' + String(c.stat || c.title || "").split(/\s*·\s*/).filter(Boolean).map(function (x) { return '<b>' + esc(x) + '</b>'; }).join("") + '</span>'; // 이미지 없으면 어두운 숫자 카드(AX 방식) — '·'로 나눠 한 줄씩
+      return '<' + tag + ' class="ax-core' + (c.img ? '' : ' dk') + '"' + (href ? ' href="' + esc(href) + '" target="_top"' : '') + ' style="--j:' + (i * 2) + '">' + th
+        + '<span class="ax-ctx"><span class="ax-cno">' + esc(c.num || ((i < 9 ? "0" : "") + (i + 1))) + '</span><b class="ax-ct">' + esc(c.title) + '</b>' + (c.desc ? '<span class="ax-cd">' + esc(c.desc) + '</span>' : '') + '</span></' + tag + '>';
     }).join("");
     // AX 콘솔 버튼 = '전체 프로젝트 보기'와 같은 다크 카드(큰 가는 글자 · 제목/보조 문구 · 미니 화면 덱 · 화살표)
     var AXBG = { dash: "var(--mint)", auto: "var(--lav)", hist: "var(--beige)" }, FAN3 = [[-9, 6], [0, 1], [9, 6]];
@@ -1331,6 +1337,13 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
       + GHCSS
       + '.page{padding-top:48px}.prog{top:0;z-index:130}@media(max-width:720px){.gh-in{width:calc(100vw - 32px);height:56px}.gh-t b{font-size:15px}.gh-t small{display:none}.gh-av{width:26px;height:26px}.gtabs{gap:20px}.gt{font-size:15px}.page{padding-top:40px}}'
       + '.ax-cnt{max-width:440px}.ax-cores{display:flex;flex-direction:column;gap:12px;margin:22px 0 20px}'
+      // 2026-10-09: /ax 개요와 같은 다섯 업무 + AX 방식 = 2열 카드 · 썸네일 = 단색 바탕 위 실제 화면 캡처(왼쪽 위부터, 아래·오른쪽은 잘림) · 누르면 /ax 해당 화면
+      + '.ax-cores{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:24px 0 14px}'
+      + '.ax-cores .ax-core{display:flex;flex-direction:column;align-items:stretch;gap:0;padding:7px;border:0;border-radius:24px;background:#fff;box-shadow:0 0 0 1px rgba(0,0,0,.06),0 14px 30px -22px rgba(0,0,0,.42);color:inherit;transition:transform .4s var(--ez),box-shadow .4s var(--ez)}a.ax-core:hover{transform:translateY(-3px);box-shadow:0 0 0 1px rgba(0,0,0,.1),0 22px 40px -24px rgba(0,0,0,.5)}'
+      + '.ax-cores .ax-th{position:relative;display:block;aspect-ratio:16/10;border-radius:17px;overflow:hidden;background:var(--bg,#e9e8e3)}.ax-cores .ax-th img{position:absolute;left:-29%;top:10%;width:150%;max-width:none;height:auto;border-radius:0;box-shadow:0 0 0 1px rgba(0,0,0,.06),0 10px 24px -14px rgba(0,0,0,.35);transition:transform .6s var(--ez)}a.ax-core:hover .ax-th img{transform:translate(-2%,-2%)}'
+      + '.ax-cores .ax-th.ax-stat{display:flex;flex-direction:column;justify-content:flex-end;gap:3px;padding:14px 16px;background:#191f28;color:#fff}.ax-th.ax-stat b{font-size:14px;font-weight:600;line-height:1.3;letter-spacing:-.02em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.ax-th.ax-stat b:first-child{font-size:20px;font-weight:700;letter-spacing:-.03em}.ax-th.ax-stat b+b{color:rgba(255,255,255,.66)}'
+      + '.ax-cores .ax-ctx{display:flex;flex-direction:column;padding:11px 9px 6px}.ax-cores .ax-cno{font-size:10.5px;font-weight:700;letter-spacing:.1em;color:var(--gray)}.ax-cores .ax-ct{margin-top:3px;font-size:14.5px;font-weight:700;line-height:1.3;letter-spacing:-.025em;color:var(--ink)}.ax-cores .ax-cd{margin-top:3px;font-size:12px;font-weight:500;line-height:1.45;color:var(--gray)}'
+      + '@media(max-width:520px){.ax-cores{gap:10px}.ax-cores .ax-ct{font-size:13.5px}.ax-cores .ax-cd{font-size:11.5px}.ax-th.ax-stat b{font-size:13px}}'
       // AX 카드: 썸네일(이미지 또는 미니 화면 일러스트) + 번호·제목·설명, 등장 시 그래프 선이 그려짐
       + '.ax-core{display:grid;grid-template-columns:148px minmax(0,1fr);gap:16px;align-items:center;padding:12px 16px 12px 12px;border:1px solid var(--bd);border-radius:18px;background:#fff}.ax-core:hover{border-color:rgba(34,34,34,.26)}'
       + '.ax-th{display:block;aspect-ratio:16/10;border-radius:12px;overflow:hidden;background-size:cover;background-position:center;background-color:var(--sand)}.ax-th.art{display:grid;place-items:center}.ax-th.ax-dash{background:var(--mint)}.ax-th.ax-auto{background:var(--lav)}.ax-th.ax-hist{background:var(--beige)}'
