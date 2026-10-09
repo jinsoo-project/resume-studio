@@ -1315,10 +1315,14 @@ function techSeedRows(){
   return rows;
 }
 // AX 대표 3 (AX 콘솔 /ax CORE CAPABILITIES) — klio AX 섹션엔 이 핵심만
+// 04 AX 카드 기본값 = /ax 개요와 같은 업무 · 문구 · 실제 화면 캡처 (templates.js DEFAULT_AXCORE와 같은 값)
 function axCoreSeed(){ return [
-  {num:'01',title:'통합 대시보드',desc:'서비스지표와 마케팅지표를 한 판에서, 같은 정의로 비교·결정.',visible:true},
-  {num:'02',title:'마케팅 자동화',desc:'기획·집행·최적화를 화면 안에서 — 반복은 규칙과 알림으로 자동화.',visible:true},
-  {num:'03',title:'히스토리 워크플로우',desc:'메일·회의·배포 기록이 자동으로 남는 업무 구조.',visible:true}
+  {num:'01',title:'대시보드',desc:'흩어진 성과를 한 장으로',img:'/pf-img/ax/total-dashboard.jpg',bg:'#e3e6df',href:'/ax#/total-dashboard',visible:true},
+  {num:'02',title:'광고 자동화',desc:'세팅은 버튼 한 번, 감시는 규칙이',img:'/pf-img/ax/meta-ads.jpg',bg:'#ebe5da',href:'/ax#/meta-ads',visible:true},
+  {num:'03',title:'콘텐츠 자동화',desc:'키워드에서 발행까지 9단계',img:'/pf-img/ax/blog-journey.jpg',bg:'#dfe4ea',href:'/ax#/blog-journey',visible:true},
+  {num:'04',title:'시장 트래킹',desc:'감 대신 검색 수요와 경쟁사로',img:'/pf-img/ax/keyword-trend.jpg',bg:'#e8e1e3',href:'/ax#/keyword-trend',visible:true},
+  {num:'05',title:'협업 · 기록',desc:'요청 · 회의 · 기록을 한 곳에',img:'/pf-img/ax/ad-requests.jpg',bg:'#e4e3dd',href:'/ax#/ad-requests',visible:true},
+  {num:'06',title:'AX 방식',desc:'AI와 함께 만들고 배포한 방법',img:'',stat:'커밋 300 · AI와 함께 87% · 2개월',href:'/ax#/overview',visible:true}
 ]; }
 // 전체 프로젝트 페이지(원형 휠) 분류 묶음 기본 4개 — templates.js DEFAULT_GROUPS와 동일
 function groupsSeed(){ return [
@@ -1351,7 +1355,7 @@ function klioNormalize(d){
     return {label:lb, items:Array.isArray(r.items)?r.items.filter(function(x){return x!=null&&String(x).trim();}).map(String):[], visible:vis}; });
   // AX 대표 3: 없으면 콘솔 대표값 시드, 있으면 정규화
   if(!Array.isArray(d.klio.axCore)) d.klio.axCore=axCoreSeed();
-  d.klio.axCore=d.klio.axCore.map(function(c,i){ c=c||{}; return {num:(c.num!=null&&String(c.num).trim()?String(c.num):'0'+(i+1)), title:(c.title!=null?String(c.title):''), desc:(c.desc!=null?String(c.desc):''), img:(c.img?String(c.img):''), visible:c.visible!==false}; });
+  d.klio.axCore=d.klio.axCore.map(function(c,i){ c=c||{}; return {num:(c.num!=null&&String(c.num).trim()?String(c.num):'0'+(i+1)), title:(c.title!=null?String(c.title):''), desc:(c.desc!=null?String(c.desc):''), img:(c.img?String(c.img):''), href:(c.href?String(c.href):''), stat:(c.stat?String(c.stat):''), bg:(c.bg?String(c.bg):''), visible:c.visible!==false}; });
   // 표시 설정: show(표시 항목 on/off) · hidden(개별 숨김 id 목록) · skills(스킬 카드)
   if(!d.klio.show||typeof d.klio.show!=='object')d.klio.show={};
   if(!d.klio.hidden||typeof d.klio.hidden!=='object'){
@@ -1752,9 +1756,9 @@ function renderAXAdmin(){
   };
 
   // ── AX
-  const P_ax=()=>intro('AX 섹션은 AX 콘솔(/ax)의 대표 기능만 보여주고, 전체 구조는 콘솔로 연결해요. 카드 썸네일은 이미지를 올리면 그 이미지, 아니면 기능에 맞는 미니 화면 일러스트(대시보드·자동화·히스토리)가 자동으로 들어가요.')
-    +card('소개 문구',F('소개',kt('axIntro','흩어진 도구와 지표를 하나의 마케팅 콘솔로…'),'비우면 기본값'))
-    +card('대표 기능 카드',(kd.axCore||[]).map((c,i)=>`<div class="kd-item${c.visible===false?' off':''}" data-row><div class="kd-row">${sw(`data-ax-core-on="${i}"`,c.visible!==false,'','노출')}<input class="kd-in" data-ax-core-num="${i}" value="${axAttr(c.num||'')}" placeholder="01" style="flex:none;width:56px"><input class="kd-in" data-ax-core-title="${i}" value="${axAttr(c.title||'')}" placeholder="대표 기능명">${upDown('data-ax-movecore',i,i===0,i===kd.axCore.length-1)}${delB('data-ax-core-del',i)}</div><textarea class="kd-in" data-ax-core-desc="${i}" rows="2" placeholder="한 줄 설명" style="margin-top:6px">${axText(c.desc||'')}</textarea><div class="kd-row" style="margin-top:6px">${c.img?thumb(c.img,40):`<span class="kd-thumb" style="display:inline-grid;place-items:center;width:40px;height:40px;border-radius:10px;font-size:10px;color:var(--muted)">기본</span>`}<input class="kd-in" data-ax-core-img="${i}" value="${axAttr(c.img||'')}" placeholder="썸네일 이미지 URL (비우면 기본 일러스트)">${upl(`axcore:${i}`,'업로드')}${c.img?`<button class="kd-ib" data-ax-core-imgclear="${i}" title="기본 일러스트로">↺</button>`:''}</div></div>`).join('')
+  const P_ax=()=>intro('AX 섹션은 /ax 개요와 같은 다섯 업무 + AX 방식을 2열 카드로 보여줘요. 썸네일 = 데모 콘솔 실제 화면 캡처(/pf-img/ax), 이미지가 없으면 어두운 숫자 카드. 카드를 누르면 링크(/ax 해당 화면)로 가요. ‘콘솔 대표값으로 초기화’ = /ax 개요와 같은 6장.')
+    +card('소개 문구',F('소개',kt('axIntro','마케터가 매일 하는 일을 한 화면에서…'),'비우면 기본값'))
+    +card('대표 기능 카드',(kd.axCore||[]).map((c,i)=>`<div class="kd-item${c.visible===false?' off':''}" data-row><div class="kd-row">${sw(`data-ax-core-on="${i}"`,c.visible!==false,'','노출')}<input class="kd-in" data-ax-core-num="${i}" value="${axAttr(c.num||'')}" placeholder="01" style="flex:none;width:56px"><input class="kd-in" data-ax-core-title="${i}" value="${axAttr(c.title||'')}" placeholder="대표 기능명">${upDown('data-ax-movecore',i,i===0,i===kd.axCore.length-1)}${delB('data-ax-core-del',i)}</div><textarea class="kd-in" data-ax-core-desc="${i}" rows="2" placeholder="한 줄 설명" style="margin-top:6px">${axText(c.desc||'')}</textarea><div class="kd-g2" style="margin-top:6px"><input class="kd-in" data-ax-core-href="${i}" value="${axAttr(c.href||'')}" placeholder="링크 (예: /ax#/total-dashboard)"><input class="kd-in" data-ax-core-stat="${i}" value="${axAttr(c.stat||'')}" placeholder="이미지 없을 때 카드 숫자 (예: 커밋 300 · 2개월)"></div><div class="kd-row" style="margin-top:6px">${c.img?thumb(c.img,40):`<span class="kd-thumb" style="display:inline-grid;place-items:center;width:40px;height:40px;border-radius:10px;font-size:10px;color:var(--muted)">기본</span>`}<input class="kd-in" data-ax-core-img="${i}" value="${axAttr(c.img||'')}" placeholder="썸네일 이미지 URL (비우면 기본 일러스트)">${upl(`axcore:${i}`,'업로드')}${c.img?`<button class="kd-ib" data-ax-core-imgclear="${i}" title="기본 일러스트로">↺</button>`:''}</div></div>`).join('')
       +`<div class="kd-acts"><button class="kd-add" data-ax-core-add>＋ 대표 기능 추가</button><button class="kd-btn" data-ax-core-reset>콘솔 대표값으로 초기화</button></div>`)
     +card('AX-MKT 콘솔 버튼',`<div class="kd-sws" style="margin-bottom:12px">${showSw('ax','link',true,'버튼 노출')}</div>`+G2(F('버튼 제목',kt('axLinkText','AX-MKT 콘솔 보기')),F('보조 문구',kt('axLinkSub','구조 · 개요와 데모 콘솔(가상 데이터)을 한 곳에서')))+F('링크',kt('axLink','https://kimjinsoo-mkt-ax.vercel.app/ax'))+`<p class="kd-note">/ax 한 주소에 ‘구조 · 개요’와 ‘데모 콘솔’ 탭이 함께 있어요. ‘전체 프로젝트 보기’와 같은 다크 카드이고, 오른쪽 미니 화면은 위 대표 기능 카드의 썸네일이 들어가요.</p>`,'구조 · 개요 + 데모 콘솔로 연결');
 
@@ -1854,6 +1858,8 @@ function renderAXAdmin(){
       if(ds.axTechItems!=null){ if(k.techstack[+ds.axTechItems])k.techstack[+ds.axTechItems].items=t.value.split('\n').map(s=>s.trim()).filter(Boolean); axSchedule(); return; }
       if(ds.axCoreNum!=null){ if(k.axCore[+ds.axCoreNum])k.axCore[+ds.axCoreNum].num=t.value; axSchedule(); return; }
       if(ds.axCoreTitle!=null){ if(k.axCore[+ds.axCoreTitle])k.axCore[+ds.axCoreTitle].title=t.value; axSchedule(); return; }
+      if(ds.axCoreHref!=null){ if(k.axCore[+ds.axCoreHref])k.axCore[+ds.axCoreHref].href=t.value.trim(); axSchedule(); return; }
+      if(ds.axCoreStat!=null){ if(k.axCore[+ds.axCoreStat])k.axCore[+ds.axCoreStat].stat=t.value; axSchedule(); return; }
       if(ds.axCoreDesc!=null){ if(k.axCore[+ds.axCoreDesc])k.axCore[+ds.axCoreDesc].desc=t.value; axSchedule(); return; }
       if(ds.axCoreImg!=null){ if(k.axCore[+ds.axCoreImg])k.axCore[+ds.axCoreImg].img=t.value.trim(); axSchedule(); return; }
       if(ds.kview){ const v=Math.max(0,parseInt(t.value,10)||0), real=axViews.data||{total:0,today:0}; if(!k.views||typeof k.views!=='object')k.views={}; if(ds.kview==='total')k.views.totalAdj=v-real.total; else { k.views.todayAdj=v-real.today; k.views.todayDay=kstToday(); } axSchedule(); return; }
