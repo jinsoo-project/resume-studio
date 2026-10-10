@@ -2657,9 +2657,9 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
             //   s = 서비스 이름(로고는 회사 · Experience 서비스 로고에서 찾음, 없으면 글자만) · k = 줄 이름 · m = 목록
             var ABMETA = {
               "77afd48a-668b-4ab1-b385-32fa41400211": { s: ["핸디즈"], k: "도구", m: ["Next.js", "Supabase", "BigQuery", "Vercel", "Airbridge", "Metabase"] },
-              "dff32975-e504-47e3-8ee1-744f2267ac91": { s: ["어반스테이"], k: "매체", m: ["Meta", "네이버 검색광고", "네이버 브랜드검색", "Google UAC", "네이버 DA"] },
-              "5c1e8a52-7b4d-4f0e-9a63-2d8f1b7c4e90": { s: ["어반스테이", "웨이브"], k: "채널", m: ["체크인 알림톡", "객실 TV QR", "네이버 브랜드검색", "Meta", "카카오", "체험단"] },
-              "60f3fcee-e8b2-4499-b7d1-71e4f91ad2f5": { s: ["플라트라이프"], k: "매체", m: ["네이버 검색광고", "네이버 브랜드검색", "Google Ads", "Meta", "카카오 플친"] },
+              "dff32975-e504-47e3-8ee1-744f2267ac91": { s: ["어반스테이"], k: "매체", m: ["Meta", "네이버 SA", "브랜드검색", "Google UAC", "네이버 DA"] },
+              "5c1e8a52-7b4d-4f0e-9a63-2d8f1b7c4e90": { s: ["어반스테이", "웨이브"], k: "채널", m: ["알림톡", "객실 TV QR", "브랜드검색", "Meta", "카카오", "체험단"] },
+              "60f3fcee-e8b2-4499-b7d1-71e4f91ad2f5": { s: ["플라트라이프"], k: "매체", m: ["네이버 SA", "브랜드검색", "Google Ads", "Meta", "카카오 플친"] },
               "0a3aea35-ccc9-4018-a7a6-e383c303f928": { s: ["와그"], k: "매체", m: ["Meta", "Google Ads", "Airbridge"] },
               "3080bc75-d773-490f-9a02-35d83886b418": { s: ["멜리즈", "와그"], k: "매체", m: ["Meta 카탈로그"] },
               "b0aa1d32-82d9-44bc-897d-b558a425c98c": { s: ["바비톡", "멜리즈", "와그"], k: "매체", m: ["Meta", "Google Ads", "NAVER", "GFA"] },
@@ -2697,7 +2697,7 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
                 + '<span class="ab-cv">' + shot + '</span>'
                 + '<span class="ab-bd"><span class="ab-ey"><span>' + (svLogos(svOf(it)) ? '<span class="ab-lgs">' + svLogos(svOf(it)) + '</span>' : '') + '<b>' + esc(svOf(it).join(" · ")) + '</b><em>' + esc(when(it)) + '</em></span>'
                 + '<svg class="ab-ar" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 17L17 7M9 7h8v8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>'
-                + '<span class="ab-tt"><b class="ab-t">' + esc(t1) + '</b>' + (t2 ? '<span class="ab-st">' + esc(String(t2).replace(/\s+—\s+/g, " → ")) + '</span>' : '') + (ABMETA[it.w.id] && ABMETA[it.w.id].m ? '<span class="ab-md"><i>' + esc(ABMETA[it.w.id].k) + '</i>' + esc(ABMETA[it.w.id].m.join(" · ")) + '</span>' : '') + '</span>'
+                + '<span class="ab-tt"><b class="ab-t">' + esc(t1) + '</b>' + (t2 ? '<span class="ab-st">' + esc(String(t2).replace(/\s+—\s+/g, " → ")) + '</span>' : '') + (ABMETA[it.w.id] && ABMETA[it.w.id].m ? '<span class="ab-md"><i>' + esc(ABMETA[it.w.id].k) + '</i>' + esc(ABMETA[it.w.id].m.slice(0, 3).join(" · ") + (ABMETA[it.w.id].m.length > 3 ? " 외 " + (ABMETA[it.w.id].m.length - 3) : "")) + '</span>' : '') + '</span>'
                 + (kp ? '<span class="ab-kp"><strong>' + esc(kp[1]) + '</strong><span class="ab-kn"><b>' + esc(kp[0]) + '</b>' + (kp[3] ? '<em>' + esc(kp[3]) + '</em>' : '') + '</span>' + (kp[2] ? '<i>' + esc(kp[2]) + '</i>' : '') + '</span>'
                   : '<span class="ab-kp sum"><i>' + esc(why || sum) + '</i></span>')
                 + '</span></button>';
@@ -3022,8 +3022,11 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
               + '@media(max-width:680px){.cs-quote p br{display:none}}.ab-tt{height:auto;min-height:68px}.ab-tt>*{flex-shrink:0}.ab-t:has(+.ab-st){-webkit-line-clamp:2}.ab-st{-webkit-line-clamp:1}'
               // 카드 고도화(2026-10-09 사용자 '성과명 위 · 숫자 아래 · 썸네일 크게 · 이쁘게'): 한 줄 3.8장(조금 넓게) · 표지 그림 크게(좌우 8% · 위 10%) · 성과 = 이름 → 숫자(+보조) → 어떻게
               + '.abs-track{grid-auto-columns:calc((var(--abw) - 60px) / 3.8)}'
+              // 글꼴(2026-10-10 사용자 'AI 같은 고딕 말고 이쁜 고딕 · − 표시가 뚱뚱함'): 목록 · 보기 창만 IBM Plex Sans KR(위 헤더는 세 페이지 통일이라 그대로) · 숫자는 700까지만
+              + '.ab main,.ab .ab-jump,.ab .cs-vw{--plex:"IBM Plex Sans KR","Pretendard Variable",Pretendard,-apple-system,system-ui,sans-serif;font-family:var(--plex);letter-spacing:-.01em}.ab main button,.ab .cs-vw button{font-family:inherit}'
+              + '.ab-t,.abs-hd h2,.ab-hero h1,.cs-hl h1,.cs-art h2,.cs-art h3{letter-spacing:-.025em}.ab-kn b,.cs-kpis b,.cs-kg b,.ab-dm-ls b{font-weight:700}.ab-kn b{letter-spacing:-.03em}.cs-kpis b{letter-spacing:-.03em}'
               + '.ab-ey>span{display:flex;flex-wrap:wrap;align-items:center;gap:4px 6px;min-width:0;line-height:1.35;white-space:normal}.ab-ey b{overflow:visible;white-space:nowrap}.ab-ey em{white-space:nowrap}.ab-ey b+em::before{display:none}.ab-ey b+em{margin-left:2px}.ab-lgs{display:inline-flex;flex:none}.ab-lg{width:18px;height:18px;border-radius:5px;object-fit:cover;background:#fff;box-shadow:0 0 0 1.5px #fff,0 0 0 2.5px #eceef1}.ab-lg+.ab-lg{margin-left:-3px}'
-              + '.ab-md{display:block;overflow:hidden;margin-top:6px;font-size:12px;font-weight:500;color:#8b95a1;white-space:nowrap;text-overflow:ellipsis}.ab-md i{margin-right:6px;font-style:normal;font-weight:700;color:#6b7684}'
+              + '.ab-md{display:block;overflow:hidden;margin-top:6px;font-size:12px;font-weight:500;line-height:1.5;color:#8b95a1;white-space:nowrap;text-overflow:ellipsis}.ab-md i{margin-right:6px;font-style:normal;font-weight:700;color:#6b7684}'
               + '.cs-dl .ab-lgs{margin-right:7px;vertical-align:-4px}.cs-dl .ab-lg{width:20px;height:20px}'
               // 도메인 띠: 위 캡션(대행사 | 인하우스 플랫폼) · 칸마다 가는 윗선(대행사 회색 · 인하우스 파랑) · 기간 → 도메인 → 회사
               + '.ab-pn{width:min(var(--abw),1120px);margin:40px auto 0;padding:4px 32px;border:1px solid #e3e6ea;border-radius:22px;background:#fff;box-shadow:0 1px 2px rgba(17,24,39,.04),0 18px 40px -30px rgba(17,24,39,.25);text-align:left}'
@@ -3044,7 +3047,7 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
               + '@media(max-width:1100px){.abs-track{grid-auto-columns:calc((var(--abw) - 40px) / 3.3)}}@media(max-width:860px){.abs-track{grid-auto-columns:calc((var(--abw) - 20px) / 2.3)}}'
               + '@media(max-width:680px){body.ab{--abw:calc(100vw - 40px);--abg:20px}.ab-hero{padding-top:116px}.ab-jump-in{justify-content:flex-start;width:100%;padding:10px 20px}.abs-ctl{display:none}.abs-track{grid-auto-columns:min(66vw,260px);gap:12px;padding-bottom:20px}.abs-dots{display:flex}}';
             return '<!doctype html><html lang="ko"><head><script>document.documentElement.classList.add("js")<\/script><meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>'
-              + '<title>' + esc(nameKo || nameEn || "포트폴리오") + ' — Projects</title><link rel="icon" href="data:,"/>' + fontHead
+              + '<title>' + esc(nameKo || nameEn || "포트폴리오") + ' — Projects</title><link rel="icon" href="data:,"/>' + fontHead + '<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;600;700&display=swap"/>'
               + '<style>' + PSCSS + fontVars + TCSS + ABCSS + GHCSS + '@media(max-width:720px){.ab .ab-jump{top:56px}.cs-vw .vw-sc{top:56px}}</style></head><body class="tp ab ft-' + FKEY + '"' + (d.hostStudio ? ' data-host="studio"' : '') + '>'
               + abNav + '<main>' + abMain + '</main>' + foot + viewer
               + '<div class="tp-md" hidden role="dialog" aria-modal="true" aria-label="크게 보기"><div class="tp-md-bg" data-md-x></div><div class="tp-md-in"></div><button class="tp-md-nav prev" type="button" aria-label="이전 그림">‹</button><button class="tp-md-nav next" type="button" aria-label="다음 그림">›</button><button class="tp-md-x" type="button" data-md-x aria-label="닫기">✕</button><span class="tp-md-cnt"></span></div>'
