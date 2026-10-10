@@ -1201,9 +1201,11 @@ function cloudSync(){
 let saveStateLast='';
 function setSaveState(s,e){
   const el=document.getElementById('axSaveState'); const t=new Date(), hm=[t.getHours(),t.getMinutes(),t.getSeconds()].map(n=>String(n).padStart(2,'0')).join(':');
-  if(s==='err'&&saveStateLast!=='err') toast('⚠ 클라우드 저장 실패 — 로그인 상태를 확인해 주세요 ('+((e&&e.message)||e||'오류')+')');
+  const stale=!!(e&&e.code==='STALE');
+  if(s==='err'&&stale){ clearTimeout(cloudTimer); showPubBar('','⚠ '+e.message,true); } // 옛 탭 저장 차단 — 매번 크게 알림
+  else if(s==='err'&&saveStateLast!=='err') toast('⚠ 클라우드 저장 실패 — 로그인 상태를 확인해 주세요 ('+((e&&e.message)||e||'오류')+')');
   saveStateLast=s; if(!el)return;
-  el.textContent = s==='pending'?'저장 중…' : s==='ok'?'✓ 클라우드 저장됨 '+hm : s==='err'?'⚠ 클라우드 저장 실패 · 다시 로그인 후 아무 칸이나 수정하면 재저장' : '브라우저에만 저장됨 · 로그인하면 DB 반영';
+  el.textContent = s==='pending'?'저장 중…' : s==='ok'?'✓ 클라우드 저장됨 '+hm : s==='err'?(stale?'⚠ 이 탭은 옛 데이터라 저장 안 됨 · 새로고침(⌘R) 필요':'⚠ 클라우드 저장 실패 · 다시 로그인 후 아무 칸이나 수정하면 재저장') : '브라우저에만 저장됨 · 로그인하면 DB 반영';
   el.style.color = s==='ok'?'var(--ok)' : s==='err'?'#c0392b' : 'var(--muted)';
 }
 // ── 발행 · 링크 복사 (이력서 · 포트폴리오 · KILO 공통)
@@ -1228,7 +1230,7 @@ async function publishDoc(d,btn){
   const label=btn?btn.textContent:''; if(btn){ btn.disabled=true; btn.textContent='발행 중…'; }
   clearTimeout(cloudTimer); setSaveState('pending');
   try{ if(!CLOUD_OK) throw new Error('클라우드 불러오기 전이라 발행을 멈췄어요 — 새로고침해 주세요'); normalizeIds(); await CLOUD.pushAll(LIB,DOCS,resolveAny); setSaveState('ok'); }
-  catch(e){ setSaveState('err',e); showPubBar('','발행 실패 · '+((e&&e.message)||e||'오류')+' — 다시 로그인 후 눌러 주세요',true); if(btn){ btn.disabled=false; btn.textContent=label; } return; }
+  catch(e){ setSaveState('err',e); showPubBar('',(e&&e.code==='STALE')?'⚠ '+e.message:'발행 실패 · '+((e&&e.message)||e||'오류')+' — 다시 로그인 후 눌러 주세요',true); if(btn){ btn.disabled=false; btn.textContent=label; } return; }
   if(btn){ btn.disabled=false; btn.textContent=label; }
   const ok=await copied; showPubBar(u,ok?'발행됨 · 링크 복사됨':'발행됨 · 링크를 복사하세요',false);
 }
@@ -1252,6 +1254,7 @@ function applyPdfPatch(){
 async function syncFromCloud(){
   try{
     const r=await CLOUD.pull(); if(!r)return;
+    CLOUD.setRev(r.rev);                 // 이 탭이 채택한 데이터의 저장 버전(다른 탭이 그 뒤에 저장하면 이 탭은 저장이 막힘)
     if(r.library){                       // 클라우드에 데이터 있으면 채택
       LIB=Object.assign({},LIB,r.library);
       DOCS=r.docs||[];
