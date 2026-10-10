@@ -2719,10 +2719,18 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
             var chIx = function (a) { for (var q = 0; q < TS.length; q++) if (TS[q].g.id === a.g.id) return q; return TS.length; };
             abItems = abItems.map(function (a, q) { return [a, q]; }).sort(function (A, B) { var a = A[0], b = B[0];
               return chIx(a) - chIx(b) || tKey(b.it, "startDate").localeCompare(tKey(a.it, "startDate")) || endKey(b.it).localeCompare(endKey(a.it)) || A[1] - B[1]; }).map(function (x) { return x[0]; });
+            // 분야별 방법론 한 줄(2026-10-11 사용자 '원론적인 방법론으로 한 줄 · 고민해요/일해요 같은 말 말고') — 제목 아래 · klio.text.tpM_{recent|perf|data|camp|cont}로 덮어쓰기
+            var ABMT = {
+              "t-recent": "반복되는 운영을 단계별로 쪼개 규칙으로 만들고, 데이터 수집부터 리포팅 · 집행까지 하나의 흐름으로 자동화해요.",
+              "t-perf": "캠페인 · 세트 · 소재 구조를 먼저 잡고, 예산에 맞는 성과 기준(CPA · ROAS)을 정한 뒤, 세그먼트별 테스트로 효율이 좋은 곳에 예산을 옮겨요.",
+              "t-data": "지표 정의와 이벤트 기준을 먼저 하나로 맞추고, 흩어진 데이터를 한곳에 모은 뒤, 보고는 자동으로 돌아가게 만들어요.",
+              "t-camp": "목표 판매량에서 거꾸로 혜택과 기간을 정하고, 매체별로 예산을 나눈 뒤, 판매 추이를 매일 보며 조정해요.",
+              "t-cont": "검색 수요가 있는 주제를 고르고, 첫 3초 안에 핵심을 보여 주고, 반응을 보고 다음 편을 정해요."
+            };
             var abSecs = TS.map(function (x, si) {
               var g = x.g, list = abItems.filter(function (a) { return a.g.id === g.id; }), now = g.id === "t-recent";
               return '<section class="abs" id="ab-' + ea(g.id) + '" data-m="' + ea(g.id) + '"><div class="abs-hd"><div class="abs-tt"><span class="abs-no">' + pad2(si + 1) + (now ? ' · NOW' : '') + '</span>'
-                + '<h2>' + esc(headOf(x)) + '</h2><p>' + esc(txt("tpD_" + g.id.slice(2), now ? txt("tpNowDesc", CDESC[g.id]) : CDESC[g.id] || "")) + '<i>' + list.length + '개 프로젝트 · ' + esc(spanG(x)) + '</i></p></div>'
+                + '<h2>' + esc(headOf(x)) + '</h2>' + (ABMT[g.id] ? '<p class="abs-mt">' + esc(txt("tpM_" + g.id.slice(2), ABMT[g.id])) + '</p>' : '') + '<p>' + esc(txt("tpD_" + g.id.slice(2), now ? txt("tpNowDesc", CDESC[g.id]) : CDESC[g.id] || "")) + '<i>' + list.length + '개 프로젝트 · ' + esc(spanG(x)) + '</i></p></div>'
                 + '<div class="abs-ctl">' + arw(-1) + arw(1) + '</div></div>'
                 + '<div class="abs-track">' + list.map(abCard).join("") + '</div>'
                 + '<div class="abs-dots" aria-hidden="true">' + list.map(function (a, k) { return '<i' + (k ? '' : ' class="on"') + '></i>'; }).join("") + '</div></section>';
@@ -3113,7 +3121,7 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
               // 다듬기: 바탕을 아주 옅은 회색으로 → 흰 카드가 또렷하게. 카드 선·그림자, 글자 위계(장 번호 < 장 제목 / 회사·기간 < 카드 제목 < 부제 · 수치 > 이름 > 맥락)
               + 'body.ab{background:#f5f6f8}.ab-jump{background:rgba(245,246,248,.92);box-shadow:0 1px 0 rgba(17,24,39,.06)}.ab-jc{background:#fff;box-shadow:inset 0 0 0 1px #e3e6ea}.ab-jc:hover{background:#fff;box-shadow:inset 0 0 0 1px #c4c9d0}.ab-jc.on{background:#191f28;box-shadow:none}'
               + '.ab-hero h1{color:#111827}.ab-lead{color:#4e5968}.ab-fc{box-shadow:inset 0 0 0 1px #e1e4e8,0 1px 2px rgba(17,24,39,.04)}'
-              + '.abs-hd{padding-top:26px;border-top:1px solid #e3e6ea}.abs-no{font-size:13px;letter-spacing:.06em}.abs-hd h2{margin-top:10px;font-size:clamp(28px,2.6vw,36px);color:#111827}.abs-hd p{margin-top:10px;font-size:15.5px;color:#6b7684}.abs-hd p i{font-size:13.5px;color:#a3abb5}'
+              + '.abs-hd{padding-top:26px;border-top:1px solid #e3e6ea}.abs-no{font-size:13px;letter-spacing:.06em}.abs-hd h2{margin-top:10px;font-size:clamp(28px,2.6vw,36px);color:#111827}.abs-hd p{margin-top:10px;font-size:15.5px;color:#6b7684}.abs-hd p i{font-size:13.5px;color:#a3abb5}.abs-hd .abs-mt{display:block;max-width:860px;margin-top:12px;font-size:17px;font-weight:500;line-height:1.6;color:#333d4b;text-wrap:pretty}.abs-hd .abs-mt+p{margin-top:6px}'
               + '.ab-card{border-color:#e3e6ea;box-shadow:0 1px 2px rgba(17,24,39,.04),0 10px 26px -20px rgba(17,24,39,.22);transition:border-color .3s,box-shadow .35s var(--te),transform .35s var(--te)}.ab-card:hover{border-color:#d3d8de;transform:translateY(-4px);box-shadow:0 2px 4px rgba(17,24,39,.04),0 24px 44px -24px rgba(17,24,39,.32)}'
               + '.ab-cv{background:color-mix(in srgb,var(--cc,#8b95a1) 7%,#f1f3f5);border-bottom-color:#e9ecef}.ab-sh{box-shadow:0 0 0 1px rgba(17,24,39,.08),0 16px 34px -16px rgba(17,24,39,.34)}'
               + '.ab-bd{padding:17px 18px 18px}.ab-ey{font-size:12px}.ab-ey b{font-weight:650;color:#4e5968}.ab-ey em{color:#9aa3ae}.ab-t{font-size:17px;font-weight:750;color:#111827}.ab-st{color:#6b7684}'
