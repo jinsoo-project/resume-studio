@@ -4,6 +4,10 @@
 (function () {
   const cfg = window.APP_CONFIG || {};
   let sb = null, user = null;
+  // ⚠️ 2026-10-10: 오래 열어 둔 탭이 옛 데이터를 통째로 저장해 최신 내용을 덮어쓴 사고가 반복됨(3회)
+  //    → 저장 버전(portfolio_pages.config._rev). 불러온(채택한) 버전 = rev. 저장 직전 클라우드 버전이 다르면 어떤 표에도 쓰지 않고 멈춤(STALE)
+  let rev = null;
+  const revOf = rows => (rows || []).reduce((m, r) => Math.max(m, +(((r && r.config) || {})._rev) || 0), 0);
   const listeners = [];
   const emit = () => listeners.forEach(f => { try { f(user); } catch (e) {} });
   const toDate = s => s ? (String(s).length === 7 ? s + "-01" : String(s).slice(0, 10)) : null; // "2019-06"→"2019-06-01"
@@ -105,12 +109,22 @@
         ...(rd.data || []).map(r => Object.assign({}, r.config, { id: r.id, slug: r.slug, title: r.title, template: r.template, visibility: r.visibility })),
         ...(pp.data || []).map(r => Object.assign({}, r.config, { id: r.id, slug: r.slug, title: r.title, visibility: r.visibility, kind: "portfolio" }))
       ];
-      return { library: companies.length > 0 ? lib : null, docs };
+      return { library: companies.length > 0 ? lib : null, docs, rev: revOf(pp.data) };
     },
 
+    // 화면에 실제로 불러온(채택한) 데이터의 버전 — 스튜디오 syncFromCloud에서만 부름(조회만 하는 pull로는 바뀌지 않음)
+    setRev(n) { rev = (typeof n === "number" && n >= 0) ? n : null; },
+    rev() { return rev; },
     async pushAll(lib, docs, resolveFn) {
       if (!user) return;
       const c = client(), u = user.id, now = new Date().toISOString();
+      // 저장 전 버전 확인 — 다른 탭·기기가 그 사이 저장했으면 이 탭의 데이터는 옛 것 → 아무것도 쓰지 않음
+      if (rev === null) { const e = new Error("클라우드에서 불러오기 전이라 저장하지 않았어요 — 새로고침(⌘R)해 주세요"); e.code = "STALE"; throw e; }
+      const cur = await c.from("portfolio_pages").select("config").eq("user_id", u);
+      if (cur.error) throw new Error("저장 전 버전 확인 실패 — 저장하지 않았어요: " + cur.error.message);
+      const cloudRev = revOf(cur.data);
+      if (cloudRev !== rev) { const e = new Error("다른 탭·기기에서 더 최신 내용이 저장돼 있어요(버전 " + cloudRev + " ≠ 이 탭 " + rev + ") — 이 탭은 저장하지 않았어요. 새로고침(⌘R) 후 다시 편집해 주세요"); e.code = "STALE"; throw e; }
+      const next = rev + 1;
       if (lib.profile) {
         const p = lib.profile;
         const { error } = await c.from("profile").upsert({ user_id: u, name_ko: p.nameKo, name_en: p.nameEn, title: p.title, tagline: p.tagline, summary: p.summary, email: p.email, phone: p.phone, location: p.location, avatar_url: p.avatar, links: p.links || [], role_tags: lib.roleTags || [], rot_words: p.rotWords || [], stack: p.stack || [], hero_headline: p.heroHeadline || null, nav_order: p.navOrder || [], updated_at: now });
@@ -146,7 +160,8 @@
       await upsertPrune("ax_notes", (lib.axNotes || []).map((x, i) => ({ id: x.id, user_id: u, section: x.section, title: x.title, body: x.body, visible: x.visible !== false, sort: i })));
       const resumes = (docs || []).filter(d => d.kind !== "portfolio"), pfs = (docs || []).filter(d => d.kind === "portfolio");
       await upsertPrune("resume_docs", resumes.map(d => ({ id: d.id, user_id: u, slug: d.slug, title: d.title, template: d.template, config: d, snapshot: resolveFn ? resolveFn(d) : null, visibility: d.visibility || "unlisted", updated_at: now })));
-      await upsertPrune("portfolio_pages", pfs.map(d => ({ id: d.id, user_id: u, slug: d.slug, title: d.title, subtitle: d.subtitle, intro: d.intro, cover_url: d.cover, config: d, snapshot: resolveFn ? resolveFn(d) : null, visibility: d.visibility || "unlisted", updated_at: now })));
+      await upsertPrune("portfolio_pages", pfs.map(d => ({ id: d.id, user_id: u, slug: d.slug, title: d.title, subtitle: d.subtitle, intro: d.intro, cover_url: d.cover, config: Object.assign({}, d, { _rev: next }), snapshot: resolveFn ? resolveFn(d) : null, visibility: d.visibility || "unlisted", updated_at: now })));
+      if (pfs.length) { rev = next; pfs.forEach(d => { d._rev = next; }); } // 저장 성공 → 이 탭이 최신
     },
 
     async fetchPublic(slug) {
