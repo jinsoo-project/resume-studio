@@ -2703,6 +2703,12 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
                 + '</span></button>';
             };
             var arw = function (dir) { return '<button class="abs-arw" type="button" data-dir="' + dir + '" aria-label="' + (dir < 0 ? '이전' : '다음') + '"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="' + (dir < 0 ? 'M15 18l-6-6 6-6' : 'M9 18l6-6-6-6') + '" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>'; };
+            // 분야 안 카드 순서(2026-10-10 사용자 '분야별로 모두 시간순 · 최신이 왼쪽'): 시작 늦은 순 → 같으면 끝난 시점 늦은 순(진행 중 먼저) → 같으면 원래 순서 · 보기 창 이전/다음도 같은 순서
+            var tKey = function (it, k) { return String(it.w[k] || "").slice(0, 7); };
+            var endKey = function (it) { return tKey(it, "endDate") || (it.co && !it.co.endDate ? "9999-99" : tKey(it, "startDate")); };
+            var chIx = function (a) { for (var q = 0; q < TS.length; q++) if (TS[q].g.id === a.g.id) return q; return TS.length; };
+            abItems = abItems.map(function (a, q) { return [a, q]; }).sort(function (A, B) { var a = A[0], b = B[0];
+              return chIx(a) - chIx(b) || tKey(b.it, "startDate").localeCompare(tKey(a.it, "startDate")) || endKey(b.it).localeCompare(endKey(a.it)) || A[1] - B[1]; }).map(function (x) { return x[0]; });
             var abSecs = TS.map(function (x, si) {
               var g = x.g, list = abItems.filter(function (a) { return a.g.id === g.id; }), now = g.id === "t-recent";
               return '<section class="abs" id="ab-' + ea(g.id) + '" data-m="' + ea(g.id) + '"><div class="abs-hd"><div class="abs-tt"><span class="abs-no">' + pad2(si + 1) + (now ? ' · NOW' : '') + '</span>'
