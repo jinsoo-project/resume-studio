@@ -776,6 +776,8 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
     "ea1d35c1-b9f4-4420-8d35-b26ec4709a10": ["20만", "대표 영상 조회수", "검색 상위 키워드로 기획해 6개월 만에 채널을 키웠어요", "구독 1,000명"],
     "e68c8938-fbb0-4a88-a9a1-dbb3d8c71243": ["6편", "직접 기획 · 촬영 · 편집", "LG디스플레이, 식약처, 다이소 등의 광고 영상을 만들었어요", "대표 영상"]
   };
+  // 메인 03 카드는 칸이 좁아 성과 이름을 한 줄로 — 쉼표 앞까지 쓰고, 그래도 긴 것만 짧게(같은 뜻)
+  var PJ_KPI_SHORT = { "77afd48a-668b-4ab1-b385-32fa41400211": "운영 탭", "5c1e8a52-7b4d-4f0e-9a63-2d8f1b7c4e90": "가이드 유입", "2c1ddb7a-e1a3-4adb-a18e-e1b43ad8f731": "조기 완판" };
   var PJ_TITLE = {
     "77afd48a-668b-4ab1-b385-32fa41400211": "AX 마케팅 콘솔 자체 구축",
     "dff32975-e504-47e3-8ee1-744f2267ac91": "어반스테이 퍼포먼스 마케팅",
@@ -1092,7 +1094,7 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
       var CC = KCARD[w.id] || {}, md = mediaOf(w), ti = CC.thumb != null ? +CC.thumb : 0, ki = CC.kpi != null ? +CC.kpi : 0;
       var mets = (w.metrics || []).filter(function (m) { return m && m.value; }), pk = PJ_KPI[w.id];
       // 제목 · 대표 성과 = 카드별 설정(klio.cards) → 전체 프로젝트 페이지 카드(PJ_TITLE · PJ_KPI) → 작업 원문
-      var m0 = CC.kpi != null ? (ki >= 0 ? (mets[ki] || mets[0] || null) : null) : pk ? { value: pk[0], label: pk[1] } : (mets[0] || null);
+      var m0 = CC.kpi != null ? (ki >= 0 ? (mets[ki] || mets[0] || null) : null) : pk ? { value: pk[0], label: PJ_KPI_SHORT[w.id] || String(pk[1]).split(/,\s*/)[0] } : (mets[0] || null);
       return { title: (CC.title && String(CC.title).trim()) || PJ_TITLE[w.id] || w.title || "", main: ti >= 0 ? (md[ti] || md[0] || null) : null, m0: m0 };
     };
     // 썸네일 맞춤(KILO 대시보드 카드 세부 → klio.cards[id]: fit 'contain'(기본·잘림 없음)|'cover', zoom 100~300(%), px·py 0~100(위치 %))
