@@ -1,6 +1,6 @@
 /* AX-MKT 콘솔 · 개요 탭 — 에디토리얼 레이아웃(왼쪽 작은 라벨 · 오른쪽 본문, 가는 구분선, 단색 배경 위 실제 데모 화면 캡처).
    업무 5가지 + 이 콘솔을 AI(Claude Code)로 만든 방식. 화면 이미지는 /pf-img/ax/*.jpg(데모 콘솔 실제 캡처 · 가상 데이터),
-   'AX 방식'의 커밋 수 등은 저장소 실제 기록(2026-10-07 기준)이에요. */
+   'AX 방식'의 커밋 수 등은 저장소 실제 기록(2026-10-11 기준)이에요. */
 (function (NW) {
   "use strict";
 
@@ -25,8 +25,8 @@
       + '<figcaption><span>그림 ' + (i + 1) + ' · ' + w.cap + '</span><span>데모 콘솔 실제 화면 · 가상 데이터</span></figcaption></figure></section>';
   }
 
-  /* AX 방식 — 저장소 실제 기록(2026-10-07): 커밋 300 · Claude 공동 작성 260 · 머지 114 · 첫 커밋 2026-08-09 */
-  var FACTS = [["300", "커밋", "2026년 8월 9일 첫 커밋부터"], ["87%", "AI와 함께 쓴 커밋", "300개 중 260개"], ["114", "브랜치 머지", "작업 하나에 브랜치 하나"], ["2개월", "만든 기간", "포트폴리오 · 이력서 · 이 콘솔까지"]];
+  /* AX 방식 — 저장소 실제 기록(2026-10-11): 커밋 405 · Claude 공동 작성 327 · 머지 165 · 첫 커밋 2026-08-09 */
+  var FACTS = [["405", "커밋", "2026년 8월 9일 첫 커밋부터"], ["81%", "AI와 함께 쓴 커밋", "405개 중 327개"], ["165", "브랜치 머지", "작업 하나에 브랜치 하나"], ["2개월", "만든 기간", "포트폴리오 · 이력서 · 이 콘솔까지"]];
   var FLOW = [["요청", "하고 싶은 걸 한국어 한 줄로 말해요."], ["탐색", "AI가 코드와 메모리(작업 규칙 · 배포 주소)를 읽고 계획을 세워요."], ["구현", "작업마다 브랜치를 따로 만들어 그 안에서만 고쳐요."], ["검증", "로컬 서버를 띄우고 데스크톱 · 모바일 화면을 캡처해 눈으로 확인해요."], ["배포", "main에 머지하고 push하면 Vercel이 자동으로 배포해요."], ["확인", "라이브 파일이 main과 같은지 대조하고, 화면까지 본 뒤에 '반영 완료'라고 보고해요."]];
   var TOOLS = [["Claude Code", "터미널에서 대화로 코드를 읽고, 고치고, 실행하는 개발 파트너"], ["병렬 세션", "맥 로컬과 클라우드 세션을 작업별로 동시에 — 머지 전 git fetch로 충돌을 막아요"], ["서브에이전트", "넓은 코드 탐색이나 리뷰는 별도 에이전트에 나눠 맡겨요"], ["메모리", "작업 규칙 · 배포 좌표 · 디자인 취향을 기억해, 세션이 바뀌어도 그대로 이어가요"], ["MCP 연결", "브라우저 · GitHub · DB를 AI가 직접 열고 확인해요"], ["헤드리스 캡처", "크롬을 화면 없이 띄워 데스크톱 · 모바일 폭으로 찍고 비교해요"], ["코드 리뷰", "머지 전에 버그와 중복 코드를 한 번 더 걸러요"], ["예약 루틴", "매주 월요일 09:00, 무료 DB가 잠들지 않게 자동으로 깨워요"]];
   var RULES = [["push로 끝내지 않는다", "라이브 화면까지 확인해야 끝"], ["로컬 문서는 올리지 않는다", "파일을 하나씩 지정해서 커밋"], ["남의 작업을 덮어쓰지 않는다", "작업 전에 항상 최신부터"], ["비밀값은 서버에만 둔다", "공개 저장소에 키 · 비밀번호 0"]];
@@ -44,7 +44,7 @@
   ];
   function axSec() {
     var row = function (lab, body) { return '<div class="ed-row ed-sub"><div class="ed-lab">' + lab + '</div><div class="ed-main">' + body + '</div></div>'; };
-    return '<section class="ed-sec ed-ax" id="ov-how">' + rule + '<div class="ed-row"><div class="ed-lab"><span>(06)</span>AX 방식</div><div class="ed-main">' + hd("개발자 없이, *AI와 둘이서* 만들었어요") + '<p data-rv style="--d:.12s">Claude Code를 개발 파트너로 두고, 요청 한 줄에서 라이브 확인까지 한 흐름으로 돌렸어요. 아래 숫자는 이 콘솔이 들어 있는 포트폴리오 저장소의 실제 기록이에요.</p></div></div>'
+    return '<section class="ed-sec ed-ax" id="ov-how">' + rule + '<div class="ed-row"><div class="ed-lab"><span>(06)</span>AX 방식</div><div class="ed-main">' + hd("개발자 없이, *AI와 둘이서* 만들었어요") + '<p data-rv style="--d:.12s">Claude Code를 개발 파트너로 두고, 요청 한 줄에서 라이브 확인까지 한 흐름으로 돌렸어요. 아래 숫자는 이 콘솔이 들어 있는 포트폴리오 저장소의 실제 기록이에요. <small class="ed-asof">2026.10.11 기준</small></p></div></div>'
       + '<dl class="ed-facts">' + FACTS.map(function (f, i) { var m = /^(\d+)(.*)$/.exec(f[0]); return '<div data-rv style="--d:' + (i * 0.08) + 's"><dt>' + f[1] + '</dt><dd><b class="tnum"><span data-cnt="' + m[1] + '">' + m[1] + '</span><small>' + m[2] + '</small></b><span>' + f[2] + '</span></dd></div>'; }).join("") + '</dl>'
       + row("작업 흐름", '<ol class="ed-list ed-flow">' + FLOW.map(function (f, i) { return '<li data-rv style="--d:' + (i * 0.06) + 's"><i>' + n2(i) + '</i><b>' + f[0] + '</b><span>' + f[1] + '</span></li>'; }).join("") + '</ol>')
       + row("실제 세션", '<div class="ed-term" data-rv data-type role="img" aria-label="Claude Code 작업 세션 예시">' + SESSION.map(function (l) { return '<div class="t-' + l[0] + '"><i>' + l[1] + '</i>' + l[2] + '</div>'; }).join("") + '</div><p class="ed-note">이 페이지를 고칠 때의 세션을 옮겨 적었어요.</p>')
@@ -58,9 +58,9 @@
   function stage() {
     var img = function (k) { return '<span class="ovs-t"><img src="/pf-img/ppt/' + WALL[k % WALL.length] + '.jpg" alt="" loading="lazy" decoding="async"></span>'; };
     var row = function (off) { var h = ""; for (var q = 0; q < 8; q++) h += img(off + q * 3); return h + h; };
-    var A1 = [["콘텐츠·영상,", 1], ["퍼포먼스", 1], ["부터", 0], ["CRM·데이터", 1], ["까지", 0]];
+    var A1 = [["콘텐츠·영상,", 1], ["퍼포먼스", 1, "부터"], ["CRM·데이터", 1, "까지"]]; // [단어, 굵게, 붙여 쓰는 조사]
     return '<section class="ovs" id="ov-top" aria-label="진단하고, 설계하고, 실행합니다"><div class="ovs-wall" aria-hidden="true">' + [0, 1, 2].map(function (x) { return '<div class="ovs-row' + (x % 2 ? ' rev' : '') + '" style="--dur:' + [90, 110, 80][x] + 's">' + row(x) + '</div>'; }).join("") + '</div>'
-      + '<div class="ovs-c"><h1 class="ovs-h"><span class="ovs-p a" aria-hidden="true"><span class="ovs-l1">' + A1.map(function (w, k) { return '<span class="ovs-w" style="--i:' + k + '">' + (w[1] ? '<b>' + w[0] + '</b>' : w[0]) + '</span>'; }).join(" ") + '</span><span class="ovs-l2" style="--i:' + A1.length + '"><em>AX</em>로 자동화합니다</span></span>'
+      + '<div class="ovs-c"><h1 class="ovs-h"><span class="ovs-p a" aria-hidden="true"><span class="ovs-l1">' + A1.map(function (w, k) { return '<span class="ovs-w" style="--i:' + k + '">' + (w[1] ? '<b>' + w[0] + '</b>' : w[0]) + (w[2] || '') + '</span>'; }).join(" ") + '</span><span class="ovs-l2" style="--i:' + A1.length + '"><em>AX</em>로 자동화합니다</span></span>'
       + '<span class="ovs-p b">진단하고, 설계하고, 실행합니다</span></h1>'
       + '<div class="ovs-b"><a class="ovs-btn pri" href="#/total-dashboard">데모 콘솔 열기 →</a><button class="ovs-btn" type="button" data-ov-to="ov-intro">무엇을 하는지 보기 ↓</button></div></div>'
       + '<button class="ovs-cue" type="button" data-ov-to="ov-intro" aria-label="아래로"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M6 9l6 6 6-6" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button></section>';

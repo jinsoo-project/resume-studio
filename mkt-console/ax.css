@@ -357,6 +357,7 @@ html.is-ov body{background:#f7f7f5}
 .ed-facts dt{font-size:14px;font-weight:500;color:var(--ink2)}
 .ed-facts dd{margin:0}.ed-facts b{display:block;margin-top:28px;font-size:clamp(40px,4.4vw,60px);font-weight:500;line-height:1.05;letter-spacing:-.045em;color:var(--ink)}
 .ed-facts dd>span{display:block;margin-top:10px;font-size:13px;font-weight:500;color:var(--ink3)}
+.ed-asof{margin-left:6px;font-size:12px;font-weight:500;color:var(--ink3);white-space:nowrap}
 .ed-sub{margin-top:80px}
 .ed-list{margin:0;padding:0;list-style:none;border-bottom:1px solid var(--hr)}
 .ed-flow li{display:grid;grid-template-columns:56px minmax(140px,220px) 1fr;align-items:baseline;padding:18px 0;border-top:1px solid var(--hr);font-size:15.5px;line-height:1.6}
