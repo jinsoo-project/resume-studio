@@ -1569,8 +1569,8 @@ function renderAXAdmin(){
   const vState=axViews.loading?'실제 집계 불러오는 중…':axViews.err?`<b style="color:#c0392b">트래커 미연결</b> — Supabase에서 <code>supabase/schema_v5_views.sql</code>을 한 번 실행해야 방문이 집계돼요. (지금은 아래 숫자만 표시)`:`<b style="color:var(--ok)">트래커 연결됨</b> · 실제 집계 누적 ${vReal.total.toLocaleString('ko-KR')} · 오늘 ${vReal.today.toLocaleString('ko-KR')}`;
   const viewsCard=()=>card('조회수',`<div class="kd-sws" style="margin-bottom:12px">${showSw('home','views',true,'조회수 표시')}</div>`
     +G2(F('누적 (화면에 보일 숫자)',`<input class="kd-in" type="number" min="0" data-kview="total" value="${vReal.total+vTa}">`),F('오늘 (화면에 보일 숫자)',`<input class="kd-in" type="number" min="0" data-kview="today" value="${vReal.today+vTda}">`))
-    +`<p class="kd-note">${vState}</p><p class="kd-note">숫자를 고치면 “실제 집계 + 보정값”으로 저장돼요 — 이후 방문도 이어서 더해져요. 오늘 보정은 오늘 하루만 적용돼요.</p>`
-    +`<div class="kd-acts"><a class="kd-btn" href="https://kimjinsoo-mkt-ax.vercel.app/portfolio?kilo-owner=1" target="_blank" rel="noopener" title="이 브라우저에서 여는 포트폴리오 방문은 집계하지 않아요">이 브라우저 방문 제외</a><button class="kd-btn" data-kview-reset>보정 지우기</button><button class="kd-btn" data-kview-refresh>새로 고침</button></div>`
+    +`<p class="kd-note">${vState}</p><p class="kd-note">숫자를 고치면 “실제 집계 + 보정값”으로 저장돼요 — 이후 방문도 이어서 더해져요. 오늘 보정은 오늘 하루만 적용돼요. ‘0으로 초기화’는 지금 숫자를 0으로 맞추고 이후 방문부터 다시 세요 — ‘보정 지우기’로 되돌릴 수 있어요.</p>`
+    +`<div class="kd-acts"><a class="kd-btn" href="https://kimjinsoo-mkt-ax.vercel.app/portfolio?kilo-owner=1" target="_blank" rel="noopener" title="이 브라우저에서 여는 포트폴리오 방문은 집계하지 않아요">이 브라우저 방문 제외</a><button class="kd-btn" data-kview-zero title="누적 · 오늘을 지금부터 0으로 다시 세요 (방문 기록은 지우지 않음)">0으로 초기화</button><button class="kd-btn" data-kview-reset>보정 지우기</button><button class="kd-btn" data-kview-refresh>새로 고침</button></div>`
     +G2(F('누적 라벨',kt('viewsTotal','누적')),F('오늘 라벨',kt('viewsToday','오늘'))));
   const P_home=()=>intro('맨 위 첫 화면이에요. 비워 둔 칸은 기본값으로 보여요.')
     +card('상단 헤더 (좌상단 이름)',`<div class="kd-sws" style="margin-bottom:12px">${showSw('gh','photo',true,'사진 (없으면 이니셜)')}${showSw('gh','sub',true,'보조 문구')}</div>`
@@ -1958,6 +1958,10 @@ function renderAXAdmin(){
       if((el=q('[data-ax-core-del]'))){ k.axCore.splice(+el.dataset.axCoreDel,1); rerender(); return; }
       if((el=q('[data-ax-core-reset]'))){ k.axCore=axCoreSeed(); rerender(); return; }
       if((el=q('[data-ax-core-imgclear]'))){ const c=k.axCore[+el.dataset.axCoreImgclear]; if(c)c.img=''; rerender(); return; }
+      if((el=q('[data-kview-zero]'))){ // 누적 · 오늘을 0으로: 실제 집계는 그대로 두고 보정값 = −실제 집계 (이후 방문은 0부터 쌓임)
+        const real=axViews.data; if(!real){ alert('실제 집계를 아직 못 불러왔어요. ‘새로 고침’을 누른 뒤 다시 해 주세요.'); return; }
+        if(!confirm('조회수를 0으로 초기화할까요?\n누적 '+real.total.toLocaleString('ko-KR')+' · 오늘 '+real.today.toLocaleString('ko-KR')+' → 0\n(방문 기록은 지우지 않아요 · ‘보정 지우기’로 되돌릴 수 있어요)')) return;
+        k.views={totalAdj:-real.total,todayAdj:-real.today,todayDay:kstToday()}; rerender(); return; }
       if((el=q('[data-kview-reset]'))){ k.views={}; rerender(); return; }
       if((el=q('[data-kview-refresh]'))){ axFetchViews(true); return; }
       if((el=q('[data-ax-movecore]'))){ const [i,dir]=el.dataset.axMovecore.split(':'); axMove(k.axCore,+i,dir); rerender(); return; }
