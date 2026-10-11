@@ -1299,6 +1299,23 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
       // 2026-10-09 사용자: 'Available for work' 와 메일·사이트·전화 아이콘 줄은 공개 화면에서 뺌(연락처는 위 글자 링크로 충분)
       + '</div>';
 
+    // ── Education · Awards(2026-10-11 사용자 '원티드 이력서의 학력 · 수상/자격증/기타를 화면에') — 내용 = 빌더 라이브러리 '학력' · '수상 · 기타'
+    //    학력 아래 점 목록 = KILO 대시보드 Education 탭(klio.text.eduNote_<id>, 한 줄 = 한 점) · 디자인은 Experience(xp-)와 같은 결
+    var ym7 = function (s) { return s ? String(s).slice(0, 7).replace("-", ".") : ""; };
+    var eduList = (d.education || []).filter(function (e) { return e && (e.school || e.field); });
+    var educationInner = eduList.length ? '<div class="cnt">' + eduList.map(function (e) {
+      var a = ym7(e.startDate), b = ym7(e.endDate), per = a && b ? a + " — " + b : (a || b);
+      var notes = String(txt("eduNote_" + e.id, "")).split("\n").map(function (x) { return x.trim(); }).filter(Boolean);
+      return '<div class="xp nologo rv"><div class="xp-hd"><div class="xp-tt"><h3>' + esc(e.school || "") + '</h3>'
+        + ([e.field, e.degree].filter(Boolean).length ? '<div class="xp-role">' + esc([e.field, e.degree].filter(Boolean).join(" · ")) + '</div>' : '') + '</div>'
+        + '<div class="xp-when">' + esc(per) + '</div></div>'
+        + (notes.length ? '<div class="xp-bd"><ul class="xp-pj">' + notes.map(function (n) { return '<li><span class="t">' + esc(n) + '</span></li>'; }).join("") + '</ul></div>' : '') + '</div>';
+    }).join("") + '</div>' : "";
+    var awList = (d.awards || []).filter(function (a) { return a && a.title; }).slice().sort(function (x, y) { return String(y.date || "").localeCompare(String(x.date || "")); }); // 최근 것부터
+    var awardsInner = awList.length ? '<div class="cnt"><ul class="aw-ls rv rv-g">' + awList.map(function (a, j) {
+      return '<li style="--j:' + j + '"><div class="aw-t"><b>' + esc(a.title) + '</b>' + (a.org ? '<span>' + esc(a.org) + '</span>' : '') + '</div><span class="aw-d">' + esc(ym7(a.date)) + '</span></li>';
+    }).join("") + '</ul></div>' : "";
+
     // ── 섹션 레지스트리 + 사용자 구성(klio.sections: 순서·표시·라벨). 하단 독도 같은 구성 사용.
     var SECDEF = {
       about: { label: "About", cls: "", inner: aboutInner },
@@ -1307,14 +1324,16 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
       ax: { label: "AX", cls: "", inner: axInner },
       techstack: { label: "Techstack", cls: "", inner: techstackInner },
       skills: { label: "Skills", cls: "", inner: skillsInner },
+      education: { label: "Education", cls: "", inner: educationInner },
+      awards: { label: "Awards & Activities", cls: "", inner: awardsInner },
       contact: { label: "Contact", cls: " contact", inner: contactInner }
     };
-    var DEFORDER = ["about", "projects", "experience", "ax", "techstack", "skills", "contact"];
+    var DEFORDER = ["about", "projects", "experience", "ax", "techstack", "skills", "education", "awards", "contact"];
     var kcfg = (d.klio && Array.isArray(d.klio.sections)) ? d.klio.sections : [];
     var seenK = {}, order = [];
     kcfg.forEach(function (s) { if (!s) return; var k = s.key === "archive" ? "ax" : s.key; if (SECDEF[k] && !seenK[k]) { seenK[k] = 1; order.push({ key: k, label: (s.label != null && s.label !== "") ? s.label : SECDEF[k].label, on: s.on !== false }); } });
-    DEFORDER.forEach(function (k) { if (!seenK[k]) order.push({ key: k, label: SECDEF[k].label, on: true }); });
-    var visibleSec = order.filter(function (s) { return s.on; });
+    DEFORDER.forEach(function (k) { if (seenK[k]) return; var ci = -1; order.forEach(function (o, q) { if (o.key === "contact") ci = q; }); var o = { key: k, label: SECDEF[k].label, on: true }; if (k !== "contact" && ci >= 0) order.splice(ci, 0, o); else order.push(o); }); // 새로 생긴 섹션은 Contact 앞에
+    var visibleSec = order.filter(function (s) { return s.on && !((s.key === "education" || s.key === "awards") && !SECDEF[s.key].inner); }); // 학력 · 수상은 내용이 있을 때만
     var sectionsHtml = visibleSec.map(function (s, si) { var def = SECDEF[s.key]; return '<section class="row' + def.cls + '" id="' + s.key + '"><h2 class="rv rv-l"><span class="sn">' + (si < 9 ? "0" : "") + (si + 1) + '</span>' + esc(s.label) + '</h2>' + def.inner + '</section>'; }).join("");
     var dock = '<header class="gh"><div class="gh-in"><a class="gh-nm" href="#home">' + ghBrand() + '</a>'
       + gtabs("resume", '<nav class="dock" aria-label="섹션 이동"><span class="dock-pill" aria-hidden="true"></span>' + secLinks(false) + '</nav>') + '</div></header>';
@@ -1359,6 +1378,8 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
       + '.xp-mets{display:flex;flex-wrap:wrap;gap:4px 16px;margin-top:10px;font-size:12px;color:var(--ink50)}.xp-met b{color:var(--ink);font-weight:700;margin-right:5px}'
       + '.xp-pj{list-style:none;margin:12px 0 0;padding:0}.xp-pj li{position:relative;display:flex;align-items:baseline;gap:12px;padding:4px 0 4px 13px;font-size:13px;line-height:1.55;color:var(--ink)}'
       + '.xp-pj li::before{content:"";position:absolute;left:1px;top:calc(4px + .775em - 2px);width:4px;height:4px;border-radius:50%;background:var(--ink)}.xp-pj .t{flex:1;min-width:0}.xp-pj .p{flex:none;font-size:11px;color:var(--gray);font-variant-numeric:tabular-nums;white-space:nowrap}'
+      + '.aw-ls{list-style:none;margin:0;padding:0}.aw-ls li{display:flex;align-items:baseline;justify-content:space-between;gap:16px;padding:14px 0;border-top:1px solid var(--bd)}.aw-ls li:first-child{padding-top:2px;border-top:0}'
+      + '.aw-t{min-width:0}.aw-t b{display:block;font-size:14.5px;font-weight:600;line-height:1.45;letter-spacing:-.02em}.aw-t span{display:block;margin-top:3px;font-size:13px;line-height:1.6;color:var(--ink50)}.aw-d{flex:none;font-size:12px;font-weight:500;color:var(--ink);font-variant-numeric:tabular-nums;white-space:nowrap}'
       + '.xp-split .xp-tt h3{font-size:17px;font-weight:700;letter-spacing:-.025em}.xp-split .xp-tt h3 small{font-size:12.5px}'
       + '.xp-split:not(.nologo) .xp-svs{margin-top:20px;padding-top:18px;border-top:1px solid var(--bd)}.xp-svs{margin-top:18px}.xp-sv{position:relative;padding:0 0 22px 54px;min-height:40px}.xp-sv:last-child{padding-bottom:0}.xp-sv.nologo{padding-left:0}'
       + '.xp-sv-logo{position:absolute;left:0;top:0;width:40px;height:40px;border-radius:11px;overflow:hidden;background:#fff;box-shadow:0 0 0 1px rgba(0,0,0,.07);display:grid;place-items:center;font-size:12.5px;font-weight:700;color:var(--ink)}.xp-sv-logo img{width:100%;height:100%;object-fit:cover;display:block}.xp-sv-logo.fb{background:var(--sand)}'
