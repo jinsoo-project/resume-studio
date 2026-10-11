@@ -945,8 +945,8 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
     var vTa = +KV.totalAdj || 0, vTda = +KV.todayAdj || 0, vTodA = KV.todayDay === kstToday ? vTda : 0;
     var nfmt = function (n) { try { return Number(n).toLocaleString("ko-KR"); } catch (e) { return String(n); } };
     var viewsHtml = shown("home", "views", true) ? '<div class="vw" data-ta="' + vTa + '" data-tda="' + vTda + '" data-tdd="' + esc(KV.todayDay || "") + '"><i class="vw-dot"></i>'
-      + '<span>' + esc(txt("viewsTotal", "누적")) + ' <b data-vw="total">' + (vTa ? nfmt(vTa) : "—") + '</b></span><i class="vw-sep"></i>'
-      + '<span>' + esc(txt("viewsToday", "오늘")) + ' <b data-vw="today">' + (vTodA ? nfmt(vTodA) : "—") + '</b></span></div>' : '';
+      + '<span>' + esc(txt("viewsTotal", "누적")) + ' <b data-vw="total">—</b></span><i class="vw-sep"></i>'
+      + '<span>' + esc(txt("viewsToday", "오늘")) + ' <b data-vw="today">—</b></span></div>' : '';
     // 모션·효과 (KILO 대시보드 토글) + 사진 딤 방식(bg=배경만·가장자리 / all=사진 전체)
     var FX = { intro: shown("fx", "intro", true), aura: shown("fx", "aura", true), tilt: shown("fx", "tilt", true), progress: shown("fx", "progress", true) };
     var dimMode = (K.ui || {}).photoDimMode === "all" ? "all" : "bg";
@@ -1579,7 +1579,7 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
       + 'var hcnt=document.querySelector(".home .cnt");if(hcnt&&!reduce&&!still&&document.body.classList.contains("fx-intro")){var hT=0,hUp=function(){hT=0;var y=window.pageYOffset||0;if(y>1600)return;var k=Math.min(1,y/700);hcnt.style.transform="translate3d(0,"+(-y*.12).toFixed(1)+"px,0)";hcnt.style.opacity=String(1-k*.55);};addEventListener("scroll",function(){if(!hT)hT=requestAnimationFrame(hUp);},{passive:true});}'
       // 조회수: 부모(라이브 view.html·스튜디오)가 보낸 실제 값 + 보정값(data-ta/tda/tdd) → 카운트업
       + 'var vw=document.querySelector(".vw");function kstD(){return new Date(Date.now()+9*3600e3).toISOString().slice(0,10);}function nf(n){try{return Number(n).toLocaleString("ko-KR");}catch(_){return String(n);}}'
-      + 'function vCount(el,to){if(!el)return;var from=parseInt((el.textContent||"").replace(/[^0-9]/g,""),10)||0;if(reduce||still||Math.abs(to-from)<3){el.textContent=nf(to);return;}var t0=null,done=false;function st(t){if(done)return;if(!t0)t0=t;var k=Math.min((t-t0)/1100,1);k=1-Math.pow(1-k,3);el.textContent=nf(Math.round(from+(to-from)*k));if(k<1)requestAnimationFrame(st);else done=true;}requestAnimationFrame(st);setTimeout(function(){done=true;el.textContent=nf(to);},1300);}'
+      + 'function vCount(el,to){if(!el)return;var from=parseInt((el.textContent||"").replace(/[^0-9]/g,""),10)||0;if(reduce||still||to<=from||Math.abs(to-from)<3){el.textContent=nf(to);return;}var t0=null,done=false;function st(t){if(done)return;if(!t0)t0=t;var k=Math.min((t-t0)/1100,1);k=1-Math.pow(1-k,3);el.textContent=nf(Math.round(from+(to-from)*k));if(k<1)requestAnimationFrame(st);else done=true;}requestAnimationFrame(st);setTimeout(function(){done=true;el.textContent=nf(to);},1300);}'
       + 'window.addEventListener("message",function(e){var m=e.data;if(!vw||!m||m.klio!=="views")return;var ta=+vw.dataset.ta||0,tda=vw.dataset.tdd===kstD()?(+vw.dataset.tda||0):0;if(m.total==null&&!ta&&!tda){vw.classList.add("na");return;}vw.classList.remove("na");vCount(vw.querySelector("[data-vw=total]"),Math.max(0,(+m.total||0)+ta));vCount(vw.querySelector("[data-vw=today]"),Math.max(0,(+m.today||0)+tda));});'
       // 오로라: 마우스 따라 살짝 이동
       + 'var fine=matchMedia("(hover: hover) and (pointer: fine)").matches,aura=document.querySelector(".aura");if(aura&&fine&&!reduce){var aT=0,amx=0,amy=0;addEventListener("pointermove",function(e){amx=e.clientX/innerWidth*2-1;amy=e.clientY/innerHeight*2-1;if(!aT)aT=requestAnimationFrame(function(){aT=0;aura.style.setProperty("--mx",amx.toFixed(3));aura.style.setProperty("--my",amy.toFixed(3));});},{passive:true});}'
