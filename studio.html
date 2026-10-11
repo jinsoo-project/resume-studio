@@ -566,7 +566,9 @@ function viewURL(d){
 }
 function resolveKlio(d){ var s=resolveAX(d); s.template='klio'; s.title=d.title||'마케팅 포트폴리오';
   // 공개 스냅샷은 누구나 받을 수 있음 → klio 화면이 안 쓰는 옛 'ax' 템플릿 데이터(사내 메모 axNotes · axLoop · axScreens · pipeline · flow)는 빼고 발행
-  ['axNotes','axLoop','axScreens','pipeline','flow'].forEach(function(k){ delete s[k]; }); return s; }
+  ['axNotes','axLoop','axScreens','pipeline','flow'].forEach(function(k){ delete s[k]; });
+  s.education=LIB.education||[]; s.awards=LIB.awards||[]; // Education · Awards 섹션(2026-10-11)
+  return s; }
 function resolveAny(d){ if(d.template==='klio') return resolveKlio(d); if(d.template==='ax') return resolveAX(d); return d.kind==='portfolio' ? resolvePF(d) : resolve(d); }
 function resolveAX(d){ return { template:'ax', title:d.title||'AX 포트폴리오', slug:d.slug, visibility:d.visibility||'unlisted', profile:LIB.profile, companies:LIB.companies||[], capabilities:LIB.capabilities||[], pipeline:LIB.pipeline||[], flow:LIB.flow||[], highlights:LIB.highlights||[], axLoop:LIB.axLoop||[], axScreens:LIB.axScreens||[], axNotes:LIB.axNotes||[], klio:klioNormalize(d) }; }
 
@@ -1302,7 +1304,7 @@ function axEnsure(){
   LIB.capabilities=LIB.capabilities||[]; LIB.pipeline=LIB.pipeline||[]; LIB.flow=LIB.flow||[]; LIB.highlights=LIB.highlights||[]; LIB.axLoop=LIB.axLoop||[]; LIB.axScreens=LIB.axScreens||[]; LIB.axNotes=LIB.axNotes||[];
   (LIB.companies||[]).forEach(c=>{ if(!Array.isArray(c.metrics))c.metrics=[]; if(c.periodText==null)c.periodText=''; (c.works||[]).forEach(w=>{ if(!Array.isArray(w.tags))w.tags=[]; }); });
 }
-const KLIO_SEC=[['about','About'],['projects','Projects'],['experience','Experience'],['ax','AX'],['techstack','Techstack'],['skills','Skills'],['contact','Contact']];
+const KLIO_SEC=[['about','About'],['projects','Projects'],['experience','Experience'],['ax','AX'],['techstack','Techstack'],['skills','Skills'],['education','Education'],['awards','Awards & Activities'],['contact','Contact']];
 // Techstack 마퀴 시드: draft 큐레이션 3행 + 현재 조회되는 DB 데이터(작업 stack·profile.stack·역량) 전부 '기타·DB' 행으로 덤프
 function techSeedRows(){
   var CUR=[
@@ -1351,7 +1353,7 @@ function klioNormalize(d){
   var cur=Array.isArray(d.klio.sections)?d.klio.sections:[];
   var seen={},out=[];
   cur.forEach(function(s){ if(!s)return; var k=s.key==='archive'?'ax':s.key; if(KEYS.indexOf(k)>=0&&!seen[k]){ seen[k]=1; out.push({key:k,label:(s.label!=null?s.label:''),on:s.on!==false}); } });
-  KEYS.forEach(function(k){ if(!seen[k]) out.push({key:k,label:'',on:true}); });
+  KEYS.forEach(function(k){ if(seen[k])return; var ci=-1; out.forEach(function(o,q){ if(o.key==='contact')ci=q; }); var o={key:k,label:'',on:true}; if(k!=='contact'&&ci>=0)out.splice(ci,0,o); else out.push(o); }); // 새 섹션(학력 · 수상)은 Contact 앞에
   d.klio.sections=out;
   // Techstack 편집 데이터: 없으면(최초) 시드, 있으면 형태 정규화(사용자가 전부 비운 경우는 존중)
   if(!Array.isArray(d.klio.techstack)) d.klio.techstack=techSeedRows();
@@ -1510,7 +1512,7 @@ function renderAXAdmin(){
   const leftEl=$('#axLeft'); if(!leftEl)return;
   const sameTab=leftEl.dataset.tab===axTab, keepTop=leftEl.scrollTop;
   const kd=axDoc().klio, KT=kd.text||{}, cos=LIB.companies||[];
-  const KL={about:'About',projects:'Projects',experience:'Experience',ax:'AX',techstack:'Techstack',skills:'Skills',contact:'Contact'};
+  const KL={about:'About',projects:'Projects',experience:'Experience',ax:'AX',techstack:'Techstack',skills:'Skills',education:'Education',awards:'Awards & Activities',contact:'Contact'};
   if(axTab!=='layout'&&axTab!=='home'&&axTab!=='groups'&&!kd.sections.some(s=>s.key===axTab)) axTab='layout';
 
   // ── 입력 컴포넌트 (모두 테마 변수 사용)
@@ -1777,13 +1779,20 @@ function renderAXAdmin(){
     +card('카드',(kd.skills||[]).map((s,i)=>`<div class="kd-item${s.visible===false?' off':''}" data-row><div class="kd-row">${sw(`data-kl-on="skills:${i}"`,s.visible!==false,'','노출')}<input class="kd-in" data-kl="skills:${i}:value" value="${axAttr(s.value)}" placeholder="값" style="flex:none;width:64px"><input class="kd-in" data-kl="skills:${i}:label" value="${axAttr(s.label)}" placeholder="라벨"><input class="kd-in" data-kl="skills:${i}:sub" value="${axAttr(s.sub)}" placeholder="보조">${upDown('data-kl-move',`skills:${i}`,i===0,i===kd.skills.length-1)}${delB('data-kl-del',`skills:${i}`)}</div></div>`).join('')
       +`<div class="kd-acts"><button class="kd-add" data-kl-add="skills">＋ 카드 추가</button><button class="kd-btn" data-kl-reset="skills">프로젝트 수로 다시 채우기</button></div>`);
 
+  // ── Education · Awards — 내용은 이력서 라이브러리('학력' · '수상 · 기타')에서, 여기선 학력 아래 점 목록만
+  const libGo=`<div class="kd-acts"><button class="kd-btn" data-kd-golib>이력서 라이브러리에서 편집 →</button></div>`;
+  const P_education=()=>intro('학교 · 전공 · 학위 · 기간은 이력서 라이브러리의 \'학력\'에서 고쳐요. 아래 칸은 학교 아래 작은 점 목록(한 줄 = 한 점)이에요. 학력이 없으면 섹션이 화면에 안 나와요.')
+    +card('학력',(LIB.education||[]).length?(LIB.education||[]).map(e=>F(axText((e.school||'(학교 없음)')+(e.field?' · '+e.field:'')),kta('eduNote_'+e.id,'예) 졸업작품 위원장 역임',3),axText([e.startDate,e.endDate].filter(Boolean).join(' – ')))).join('')+libGo:`<p class="kd-note">라이브러리에 학력이 없어요.</p>`+libGo);
+  const P_awards=()=>intro('수상 · 자격증 · 기타 활동은 이력서 라이브러리의 \'수상 · 기타\'에서 고쳐요(제목 · 주최/설명 · 날짜). 화면엔 최근 날짜부터 나와요.')
+    +card('목록',((LIB.awards||[]).length?`<ul class="kd-note" style="margin:0;padding-left:18px">`+(LIB.awards||[]).slice().sort((a,b)=>String(b.date||'').localeCompare(String(a.date||''))).map(a=>`<li><b>${axText(a.title||'')}</b> · ${axText(a.org||'')} <em>${axText(a.date||'')}</em></li>`).join('')+`</ul>`:`<p class="kd-note">라이브러리에 수상 · 기타 항목이 없어요.</p>`)+libGo);
+
   // ── Contact
   const P_contact=()=>intro('맨 아래 연락처 영역이에요. 위치·이메일·사이트 링크 값은 Home과 공유돼요.')
     +card('문구',F('안내 문구',kt('contactIntro','새 프로젝트나 협업, 채용 문의가 있다면 편하게 연락 주세요.'))+G2(F('전화',ti('profile.phone',LIB.profile.phone,'010-0000-0000')),F('Available 배지',kt('available','Available for work'))))
     +card('노출 항목',`<div class="kd-sws">${showSw('contact','location',true,'위치')}${showSw('contact','email',true,'이메일')}${showSw('contact','phone',true,'전화')}${showSw('contact','site',true,'사이트 링크')}${showSw('contact','avail',true,'Available 배지')}</div>`)
     +card('맨 아래 문구',F('저작권 문구',kt('footer','© '+new Date().getFullYear()+' — '+(LIB.profile.nameEn||LIB.profile.nameKo||'')+', Marketing Portfolio'),'비우면 기본값'));
 
-  const PANES={layout:P_layout,home:P_home,about:P_about,projects:P_projects,groups:P_groups,experience:P_experience,ax:P_ax,techstack:P_techstack,skills:P_skills,contact:P_contact};
+  const PANES={layout:P_layout,home:P_home,about:P_about,projects:P_projects,groups:P_groups,experience:P_experience,ax:P_ax,techstack:P_techstack,skills:P_skills,education:P_education,awards:P_awards,contact:P_contact};
   const TABS=[['layout','구성'],['home','Home']].concat(kd.sections.map(s=>[s.key,s.label||KL[s.key]||s.key]));
   { const pi=TABS.findIndex(t=>t[0]==='projects'); TABS.splice(pi>=0?pi+1:TABS.length,0,['groups','전체 프로젝트']); } // Projects 바로 뒤 — 원형 휠 페이지(묶음·카드·문구)
   const tabs=`<nav class="kd-tabs">`+TABS.map(([k,l])=>`<button class="kd-tab${axTab===k?' on':''}" data-kd-tab="${k}">${axText(l)}${k!=='layout'&&k!=='home'&&!secOn(k)?'<i>숨김</i>':''}</button>`).join('')+`</nav>`;
@@ -1882,6 +1891,7 @@ function renderAXAdmin(){
     });
     left.addEventListener('click',e=>{
       const q=s=>e.target.closest(s), k=axDoc().klio; let el;
+      if((el=q('[data-kd-golib]'))){ show('library'); return; }
       if((el=q('[data-kd-tab]'))){
         axTab=el.dataset.kdTab; try{ localStorage.setItem('kilo-tab',axTab); }catch(_){}
         if(axTab==='groups'){ axPvPage='projects'; renderAXAdmin(); return; } // 묶음 편집 = 전체 프로젝트 페이지를 미리보기로
