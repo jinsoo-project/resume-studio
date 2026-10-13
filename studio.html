@@ -568,6 +568,8 @@ function resolveKlio(d){ var s=resolveAX(d); s.template='klio'; s.title=d.title|
   // 공개 스냅샷은 누구나 받을 수 있음 → klio 화면이 안 쓰는 옛 'ax' 템플릿 데이터(사내 메모 axNotes · axLoop · axScreens · pipeline · flow)는 빼고 발행
   ['axNotes','axLoop','axScreens','pipeline','flow'].forEach(function(k){ delete s[k]; });
   s.education=LIB.education||[]; s.awards=LIB.awards||[]; // Education · Awards 섹션(2026-10-11)
+  // 개인정보 숨김(klio.show.privacy.hide): 화면뿐 아니라 공개 데이터(snapshot)에서도 이메일 · 전화번호를 뺌 — 페이지 소스로도 못 보게
+  if((((d.klio||{}).show||{}).privacy||{}).hide===true) s.profile=Object.assign({},s.profile||{},{email:'',phone:''});
   return s; }
 function resolveAny(d){ if(d.template==='klio') return resolveKlio(d); if(d.template==='ax') return resolveAX(d); return d.kind==='portfolio' ? resolvePF(d) : resolve(d); }
 function resolveAX(d){ return { template:'ax', title:d.title||'AX 포트폴리오', slug:d.slug, visibility:d.visibility||'unlisted', profile:LIB.profile, companies:LIB.companies||[], capabilities:LIB.capabilities||[], pipeline:LIB.pipeline||[], flow:LIB.flow||[], highlights:LIB.highlights||[], axLoop:LIB.axLoop||[], axScreens:LIB.axScreens||[], axNotes:LIB.axNotes||[], klio:klioNormalize(d) }; }
@@ -1543,7 +1545,11 @@ function renderAXAdmin(){
   const secOn=k=>(kd.sections.find(s=>s.key===k)||{}).on!==false;
 
   // ── 구성: 섹션 순서·노출·이름 + 모션·효과
+  const privOn=kShown('privacy','hide',false);
+  const privNote=privOn?`<p class="kd-note" style="color:#d4380d">개인정보 숨김이 켜져 있어 이메일 · 전화번호는 공개 화면에 나오지 않아요(구성 탭에서 끄기).</p>`:'';
   const P_layout=()=>intro('섹션 순서·노출·이름과 전체 효과를 정해요. 이름을 비우면 기본 이름(About 등)으로 보여요. 하단 바도 같은 순서·이름을 써요.')
+    +card('개인정보',`<div class="kd-sws" style="margin-bottom:10px">${showSw('privacy','hide',false,'개인정보 숨김 — 이메일 · 전화번호 X')}</div>`
+      +`<p class="kd-note">켜면 이메일과 전화번호가 <b>모든 공개 화면</b>에서 빠져요: 메인 상단 연락처 · Contact · 전체 프로젝트의 문의 버튼과 맨 아래. 공개 데이터에서도 지워져 페이지 소스로도 볼 수 없어요. 끄면 다시 보여요(값은 그대로 남아 있음).</p>`,privOn?'켜짐 · 숨김 중':'꺼짐 · 공개 중')
     +card('섹션',kd.sections.map((s,i)=>`<div class="kd-item${s.on===false?' off':''}" data-row data-pv="${axAttr(s.key)}"><div class="kd-row">${sw(`data-ax-klio-on="${i}"`,s.on!==false,'','노출')}<input class="kd-in" data-ax-klio-label="${i}" value="${axAttr(s.label||'')}" placeholder="${axAttr(KL[s.key]||s.key)}">${upDown('data-ax-moveklio',i,i===0,i===kd.sections.length-1)}</div></div>`).join(''),'스위치 = 노출 · ⠿ 끌어서 순서')
     +card('글꼴',(()=>{ const cur=(kd.ui||{}).font||'gothic';
       const OPTS=[['gothic','고딕','원티드 산스 — 제목·본문 모두 고딕','"Wanted Sans Variable",sans-serif',700],['editorial','에디토리얼','제목 세리프(Newsreader) + 본문 프리텐다드','Newsreader,Georgia,serif',400],['modern','모던','프리텐다드 굵게','"Pretendard Variable",Pretendard,sans-serif',800],['soft','소프트','SUIT 둥근 고딕','"SUIT Variable",sans-serif',800],['classic','이전','Figtree + 프리텐다드','Figtree,sans-serif',800]];
@@ -1582,7 +1588,7 @@ function renderAXAdmin(){
       +`<div class="kd-sws" style="margin:2px 0 12px">${showSw('fx','sigDraw',true,'붓글씨로 써지는 모션')}</div>`
       +`<div class="kd-acts"><button class="kd-btn" data-ksig-replay>▶ 모션 다시 보기</button></div>`
       +`<p class="kd-note">첫 화면에 들어올 때 한 번 써져요. 구성 탭의 ‘등장 애니메이션’을 끄면 이 모션도 꺼져요.</p>`,'고르면 바로 미리보기')
-    +card('상단 연락처',`<div class="kd-sws" style="margin-bottom:12px">${showSw('home','nameKo',true,'국문 이름')}${showSw('home','nameEn',true,'영문 이름')}${showSw('home','location',true,'위치')}${showSw('home','email',true,'이메일')}${showSw('home','site',true,'사이트 링크')}</div>`
+    +card('상단 연락처',privNote+`<div class="kd-sws" style="margin-bottom:12px">${showSw('home','nameKo',true,'국문 이름')}${showSw('home','nameEn',true,'영문 이름')}${showSw('home','location',true,'위치')}${showSw('home','email',true,'이메일')}${showSw('home','site',true,'사이트 링크')}</div>`
       +G2(F('국문 이름',kt('nameKo',LIB.profile.nameKo||'예: 김진수')),F('영문 이름',kt('nameEn',LIB.profile.nameEn||'예: Kim Jinsoo'),'서명도 이 이름'))
       +G2(F('위치',ti('profile.location',LIB.profile.location,'Seoul, KR')),F('이메일',ti('profile.email',LIB.profile.email,'you@mail.com')))
       +F('사이트 링크',kt('siteUrl','https://kimjinsoo-mkt-ax.vercel.app'),'Contact와 공유 · 비우면 기본 도메인'))
@@ -1788,7 +1794,7 @@ function renderAXAdmin(){
 
   // ── Contact
   const P_contact=()=>intro('맨 아래 연락처 영역이에요. 위치·이메일·사이트 링크 값은 Home과 공유돼요.')
-    +card('문구',F('안내 문구',kt('contactIntro','새 프로젝트나 협업, 채용 문의가 있다면 편하게 연락 주세요.'))+G2(F('전화',ti('profile.phone',LIB.profile.phone,'010-0000-0000')),F('Available 배지',kt('available','Available for work'))))
+    +card('문구',privNote+F('안내 문구',kt('contactIntro','새 프로젝트나 협업, 채용 문의가 있다면 편하게 연락 주세요.'))+G2(F('전화',ti('profile.phone',LIB.profile.phone,'010-0000-0000')),F('Available 배지',kt('available','Available for work'))))
     +card('노출 항목',`<div class="kd-sws">${showSw('contact','location',true,'위치')}${showSw('contact','email',true,'이메일')}${showSw('contact','phone',true,'전화')}${showSw('contact','site',true,'사이트 링크')}${showSw('contact','avail',true,'Available 배지')}</div>`)
     +card('맨 아래 문구',F('저작권 문구',kt('footer','© '+new Date().getFullYear()+' — '+(LIB.profile.nameEn||LIB.profile.nameKo||'')+', Marketing Portfolio'),'비우면 기본값'));
 
