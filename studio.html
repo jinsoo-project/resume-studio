@@ -1542,14 +1542,14 @@ function renderAXAdmin(){
   const thumb=(src,sz)=>src?`<img class="kd-thumb" src="${axAttr(src)}" alt="" style="width:${sz}px;height:${sz}px;border-radius:${Math.round(sz/4)}px">`:`<span class="kd-thumb" style="display:inline-block;width:${sz}px;height:${sz}px;border-radius:${Math.round(sz/4)}px;border-style:dashed"></span>`;
   const upl=(key,label,multi)=>`<label class="kd-btn">${label}<input type="file" accept="image/*"${multi?' multiple':''} data-ax-upload="${key}" hidden></label>`;
   const coName=c=>(c.useService?(c.serviceKo||c.serviceEn):'')||c.nameKo||c.nameEn||'(이름 없음)';
-  const secOn=k=>(kd.sections.find(s=>s.key===k)||{}).on!==false;
+  const secOn=k=>!(k==='contact'&&kShown('privacy','hide',false))&&(kd.sections.find(s=>s.key===k)||{}).on!==false; // 개인정보 숨김이면 Contact 탭에 '숨김' 표시
 
   // ── 구성: 섹션 순서·노출·이름 + 모션·효과
   const privOn=kShown('privacy','hide',false);
-  const privNote=privOn?`<p class="kd-note" style="color:#d4380d">개인정보 숨김이 켜져 있어 이메일 · 전화번호는 공개 화면에 나오지 않아요(구성 탭에서 끄기).</p>`:'';
+  const privNote=privOn?`<p class="kd-note" style="color:#d4380d">개인정보 숨김이 켜져 있어 이메일 · 전화번호는 공개 화면에 나오지 않고, Contact 섹션도 숨겨져요(구성 탭에서 끄기).</p>`:'';
   const P_layout=()=>intro('섹션 순서·노출·이름과 전체 효과를 정해요. 이름을 비우면 기본 이름(About 등)으로 보여요. 하단 바도 같은 순서·이름을 써요.')
     +card('개인정보',`<div class="kd-sws" style="margin-bottom:10px">${showSw('privacy','hide',false,'개인정보 숨김 — 이메일 · 전화번호 X')}</div>`
-      +`<p class="kd-note">켜면 이메일과 전화번호가 <b>모든 공개 화면</b>에서 빠져요: 메인 상단 연락처 · Contact · 전체 프로젝트의 문의 버튼과 맨 아래. 공개 데이터에서도 지워져 페이지 소스로도 볼 수 없어요. 끄면 다시 보여요(값은 그대로 남아 있음).</p>`,privOn?'켜짐 · 숨김 중':'꺼짐 · 공개 중')
+      +`<p class="kd-note">켜면 이메일과 전화번호가 <b>모든 공개 화면</b>에서 빠져요: 메인 상단 연락처 · 전체 프로젝트의 문의 버튼과 맨 아래. <b>Contact 섹션과 상단 메뉴의 Contact도 통째로 숨겨져요.</b> 공개 데이터에서도 지워져 페이지 소스로도 볼 수 없어요. 끄면 다시 보여요(값은 그대로 남아 있음).</p>`,privOn?'켜짐 · 숨김 중':'꺼짐 · 공개 중')
     +card('섹션',kd.sections.map((s,i)=>`<div class="kd-item${s.on===false?' off':''}" data-row data-pv="${axAttr(s.key)}"><div class="kd-row">${sw(`data-ax-klio-on="${i}"`,s.on!==false,'','노출')}<input class="kd-in" data-ax-klio-label="${i}" value="${axAttr(s.label||'')}" placeholder="${axAttr(KL[s.key]||s.key)}">${upDown('data-ax-moveklio',i,i===0,i===kd.sections.length-1)}</div></div>`).join(''),'스위치 = 노출 · ⠿ 끌어서 순서')
     +card('글꼴',(()=>{ const cur=(kd.ui||{}).font||'gothic';
       const OPTS=[['gothic','고딕','원티드 산스 — 제목·본문 모두 고딕','"Wanted Sans Variable",sans-serif',700],['editorial','에디토리얼','제목 세리프(Newsreader) + 본문 프리텐다드','Newsreader,Georgia,serif',400],['modern','모던','프리텐다드 굵게','"Pretendard Variable",Pretendard,sans-serif',800],['soft','소프트','SUIT 둥근 고딕','"SUIT Variable",sans-serif',800],['classic','이전','Figtree + 프리텐다드','Figtree,sans-serif',800]];

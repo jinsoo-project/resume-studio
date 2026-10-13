@@ -1337,7 +1337,7 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
     var seenK = {}, order = [];
     kcfg.forEach(function (s) { if (!s) return; var k = s.key === "archive" ? "ax" : s.key; if (SECDEF[k] && !seenK[k]) { seenK[k] = 1; order.push({ key: k, label: (s.label != null && s.label !== "") ? s.label : SECDEF[k].label, on: s.on !== false }); } });
     DEFORDER.forEach(function (k) { if (seenK[k]) return; var ci = -1; order.forEach(function (o, q) { if (o.key === "contact") ci = q; }); var o = { key: k, label: SECDEF[k].label, on: true }; if (k !== "contact" && ci >= 0) order.splice(ci, 0, o); else order.push(o); }); // 새로 생긴 섹션은 Contact 앞에
-    var visibleSec = order.filter(function (s) { return s.on && !((s.key === "education" || s.key === "awards") && !SECDEF[s.key].inner); }); // 학력 · 수상은 내용이 있을 때만
+    var visibleSec = order.filter(function (s) { return s.on && !((s.key === "education" || s.key === "awards") && !SECDEF[s.key].inner) && !(PRIV && s.key === "contact"); }); // 학력 · 수상은 내용이 있을 때만 · 개인정보 숨김이면 Contact 섹션 · 메뉴도 뺌
     var sectionsHtml = visibleSec.map(function (s, si) { var def = SECDEF[s.key]; return '<section class="row' + def.cls + '" id="' + s.key + '"><h2 class="rv rv-l"><span class="sn">' + (si < 9 ? "0" : "") + (si + 1) + '</span>' + esc(s.label) + '</h2>' + def.inner + '</section>'; }).join("");
     var dock = '<header class="gh"><div class="gh-in"><a class="gh-nm" href="#home">' + ghBrand() + '</a>'
       + gtabs("resume", '<nav class="dock" aria-label="섹션 이동"><span class="dock-pill" aria-hidden="true"></span>' + secLinks(false) + '</nav>') + '</div></header>';
