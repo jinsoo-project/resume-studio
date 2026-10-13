@@ -180,7 +180,26 @@ select.dbin{min-width:120px;cursor:pointer}
 .modalbg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:60;place-items:center;padding:20px}
 .modalcard{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:22px;width:340px;max-width:100%}
 .modalcard input{width:100%;border:1px solid var(--border);background:var(--bg);color:var(--fg);border-radius:8px;padding:10px;font-size:14px;margin-bottom:8px}
-@media(max-width:860px){.app{grid-template-columns:1fr}aside{display:none}.buildwrap{grid-template-columns:1fr;height:auto}.bcol.left{border-right:none;border-bottom:1px solid var(--border)}.previewframe{height:70vh}}
+@media(max-width:860px){.app{grid-template-columns:1fr}aside{display:none}}
+/* 모바일(2026-10-13 사용자 '모바일에서 메뉴가 안 보인다'): 왼쪽 메뉴 = ☰ 버튼으로 여닫는 서랍 · 상단 바 줄바꿈 · KILO 대시보드 위아래 배치 */
+.mnav-btn{display:none;position:fixed;top:10px;left:10px;z-index:310;width:38px;height:38px;border-radius:10px;border:1px solid var(--border);background:var(--card);color:var(--fg);align-items:center;justify-content:center;cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,.18)}
+.mnav-btn svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round}
+.mnav-bg{display:none}
+@media(max-width:860px){
+  aside{display:flex;position:fixed;left:0;top:0;bottom:0;width:min(280px,84vw);height:auto;z-index:300;transform:translateX(-102%);transition:transform .25s ease;box-shadow:0 0 40px rgba(0,0,0,.35);padding-top:60px}
+  body.mnav-open aside{transform:none}
+  .mnav-btn{display:inline-flex}
+  .mnav-bg{display:block;position:fixed;inset:0;z-index:290;background:rgba(0,0,0,.45);opacity:0;visibility:hidden;transition:opacity .2s}
+  body.mnav-open .mnav-bg{opacity:1;visibility:visible}
+  .mtop{flex-wrap:wrap;row-gap:8px;column-gap:8px;padding:10px 12px 10px 58px;min-height:58px}
+  .mtop h1{white-space:nowrap;font-size:16px}
+  .mtop .btn,.mtop .segbtn{white-space:nowrap}
+  .mtop .m-hint{display:none!important}
+  #axSaveState{order:9;flex-basis:100%;margin:0!important;font-size:11px!important}
+  .mwrap{padding:16px 14px 80px}
+  #v-ax .libsplit{grid-template-columns:1fr!important}
+}
+@media(max-width:860px){.buildwrap{grid-template-columns:1fr;height:auto}.bcol.left{border-right:none;border-bottom:1px solid var(--border)}.previewframe{height:70vh}}
 /* ===== KILO 대시보드: 탭 · 카드 · 스위치 · 아코디언 ===== */
 #v-ax .libsplit{grid-template-columns:minmax(440px,50%) 1fr}
 #axLeft{padding:0!important;background:var(--bg)}
@@ -334,6 +353,8 @@ select.kd-catadd{width:auto;max-width:200px;height:28px;padding:0 10px;border-ra
 </head>
 <body>
 <div class="app">
+  <button class="mnav-btn" id="mnavBtn" type="button" aria-label="메뉴 열기"><svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
+  <div class="mnav-bg" id="mnavBg"></div>
   <aside>
     <div class="brand"><span class="lg">JK</span> Resume Studio</div>
     <button class="nv on" data-view="home"><svg viewBox="0 0 24 24"><path d="M3 9.5 12 3l9 6.5V20a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1z"/></svg> 내보낸 이력서</button>
@@ -414,7 +435,7 @@ select.kd-catadd{width:auto;max-width:200px;height:28px;padding:0 10px;border-ra
     <section id="v-resume" class="hidden">
       <div class="mtop"><h1>이력서 관리</h1><div class="sp"></div>
         <div class="seg" style="margin-right:10px"><button data-rlang="ko" class="segbtn on">한글</button><button data-rlang="en" class="segbtn">English</button></div>
-        <span style="font-size:11.5px;color:var(--muted);margin-right:10px">클릭해서 직접 편집 · 저장됨</span>
+        <span class="m-hint" style="font-size:11.5px;color:var(--muted);margin-right:10px">클릭해서 직접 편집 · 저장됨</span>
         <button class="btn sm" id="rReset">원본 복원</button>
         <button class="btn sm" id="rSave">저장</button>
         <button class="btn a sm" id="rPdf">⤓ PDF 내보내기</button>
@@ -2048,6 +2069,16 @@ function renderAXAdmin(){
     renderAuthBox();
     if(CLOUD.user()) await syncFromCloud();
   }else{ renderAuthBox(); }
+})();
+</script>
+<script>
+// 모바일 메뉴 서랍: ☰ 누르면 열고, 메뉴 항목 · 바깥(어두운 배경)을 누르면 닫음
+(function(){ var b=document.getElementById('mnavBtn'), bg=document.getElementById('mnavBg'); if(!b) return;
+  var set=function(o){ document.body.classList.toggle('mnav-open',o); b.setAttribute('aria-label',o?'메뉴 닫기':'메뉴 열기'); };
+  b.addEventListener('click',function(){ set(!document.body.classList.contains('mnav-open')); });
+  bg.addEventListener('click',function(){ set(false); });
+  document.querySelectorAll('aside .nv').forEach(function(n){ n.addEventListener('click',function(){ set(false); }); });
+  document.addEventListener('keydown',function(e){ if(e.key==='Escape') set(false); });
 })();
 </script>
 </body>
