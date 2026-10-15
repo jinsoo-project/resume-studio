@@ -948,9 +948,12 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
     var KV = K.views || {}, kstToday = new Date(Date.now() + 9 * 3600e3).toISOString().slice(0, 10);
     var vTa = +KV.totalAdj || 0, vTda = +KV.todayAdj || 0, vTodA = KV.todayDay === kstToday ? vTda : 0;
     var nfmt = function (n) { try { return Number(n).toLocaleString("ko-KR"); } catch (e) { return String(n); } };
+    // 표시 방식(2026-10-15 · KILO 대시보드 Home → 조회수 = klio.ui.viewsMode): both(누적 + 오늘 · 기본) | today(오늘만, 라벨 기본 'Today') | total(누적만)
+    var vMode = { today: 1, total: 1 }[(K.ui || {}).viewsMode] ? K.ui.viewsMode : "both";
+    var vTot = '<span>' + esc(txt("viewsTotal", "누적")) + ' <b data-vw="total">—</b></span>';
+    var vTod = '<span>' + esc(txt("viewsToday", vMode === "today" ? "Today" : "오늘")) + ' <b data-vw="today">—</b></span>';
     var viewsHtml = shown("home", "views", true) ? '<div class="vw" data-ta="' + vTa + '" data-tda="' + vTda + '" data-tdd="' + esc(KV.todayDay || "") + '"><i class="vw-dot"></i>'
-      + '<span>' + esc(txt("viewsTotal", "누적")) + ' <b data-vw="total">—</b></span><i class="vw-sep"></i>'
-      + '<span>' + esc(txt("viewsToday", "오늘")) + ' <b data-vw="today">—</b></span></div>' : '';
+      + (vMode === "today" ? vTod : vMode === "total" ? vTot : vTot + '<i class="vw-sep"></i>' + vTod) + '</div>' : '';
     // 모션·효과 (KILO 대시보드 토글) + 사진 딤 방식(bg=배경만·가장자리 / all=사진 전체)
     var FX = { intro: shown("fx", "intro", true), aura: shown("fx", "aura", true), tilt: shown("fx", "tilt", true), progress: shown("fx", "progress", true) };
     var dimMode = (K.ui || {}).photoDimMode === "all" ? "all" : "bg";
