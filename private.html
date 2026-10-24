@@ -131,6 +131,27 @@
   .cp b { font-size:19px; }
   .cp .on b { color:var(--acc); }
 
+  /* 선택 · 목표 · 두 축 */
+  .pick { margin:0 0 22px; font-size:30px; line-height:1.35; font-weight:650; letter-spacing:-.02em; }
+  .pick span { margin-left:10px; font-size:18px; font-weight:500; color:var(--muted); letter-spacing:0; }
+  tr.hl th, tr.hl td { background:var(--acc-soft); }
+  tr.hl th { color:var(--acc); padding-left:10px; }
+  .goal { margin:0 0 8px; padding:28px 30px; background:var(--dark); color:#fff; border-radius:14px; }
+  .goal-k { margin:0 0 8px; font-size:14px; color:rgba(255,255,255,.6); }
+  .goal-t { margin:0; font-size:28px; line-height:1.4; font-weight:650; letter-spacing:-.02em; }
+  .goal-s { margin:10px 0 0; font-size:17px; color:rgba(255,255,255,.82); }
+  .ax2 { display:grid; grid-template-columns:1fr 1fr; gap:14px; margin:4px 0 8px; }
+  .ax { padding:24px 24px 18px; background:#fff; border:1px solid var(--line); border-top:3px solid var(--ink); border-radius:12px; }
+  .ax-k { margin:0 0 4px; font-size:14px; font-weight:700; color:var(--acc); }
+  .ax-t { margin:0 0 12px; font-size:22px; line-height:1.4; font-weight:650; letter-spacing:-.015em; }
+  .ax ul, ul.pts { margin:0; padding:0; list-style:none; }
+  .ax li, ul.pts li { position:relative; padding:7px 0 7px 16px; font-size:16px; color:var(--ink2); }
+  .ax li::before, ul.pts li::before { content:""; position:absolute; left:0; top:17px; width:6px; height:6px; border-radius:50%; background:#b3b1ab; }
+  ul.pts { margin:0 0 14px; }
+  ul.pts li { font-size:17px; }
+  table.kw th small { display:block; margin-top:2px; font-size:12.5px; font-weight:500; color:var(--muted); }
+  table.kw td { font-size:15px; }
+
   @media (max-width: 1000px) {
     body.open .wrap { display:block; padding:40px 18px 100px; }
     .toc { display:none; }
@@ -142,7 +163,8 @@
     .ahyp-t, .act h3 { font-size:20px; }
     .msg-t { font-size:24px; }
     .kv { grid-template-columns:92px minmax(0,1fr); }
-    .tl { grid-template-columns:1fr; }
+    .tl, .ax2 { grid-template-columns:1fr; }
+    .pick, .goal-t { font-size:24px; }
     table { font-size:14.5px; }
     .car { grid-auto-columns:236px; }
   }
