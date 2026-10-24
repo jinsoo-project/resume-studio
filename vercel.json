@@ -4,7 +4,7 @@
   "trailingSlash": false,
   "redirects": [
     {
-      "source": "/((?!portfolio|mkt/portfolio|ax|mkt-console|pf-img/|pf-doc/|og/portfolio\\.jpg|templates\\.js|cloud\\.js|config\\.js|view\\.js).*)",
+      "source": "/((?!portfolio|mkt/portfolio|ax|mkt-console|pf-img/|pf-doc/|og/portfolio\\.jpg|templates\\.js|cloud\\.js|config\\.js|view\\.js|a/).*)",
       "has": [
         {
           "type": "host",
@@ -97,6 +97,10 @@
   ],
   "rewrites": [
     {
+      "source": "/a/:slug",
+      "destination": "/private"
+    },
+    {
       "source": "/portfolio/projects",
       "destination": "/portfolio"
     },
@@ -188,6 +192,15 @@
           "value": "resume-custom-studio.vercel.app"
         }
       ],
+      "headers": [
+        {
+          "key": "X-Robots-Tag",
+          "value": "noindex, nofollow, noarchive"
+        }
+      ]
+    },
+    {
+      "source": "/a/(.*)",
       "headers": [
         {
           "key": "X-Robots-Tag",
