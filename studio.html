@@ -171,6 +171,18 @@ select.dbin{min-width:120px;cursor:pointer}
 .urlline{display:flex;align-items:center;border:1px solid var(--border);border-radius:8px;overflow:hidden;margin-top:8px;font-size:11.5px}
 .urlline input{flex:1;border:none;background:var(--surface);color:var(--fg);padding:8px 9px;font-family:ui-monospace,Menlo,monospace;min-width:0}
 .hidden{display:none!important}
+/* 과제 탭 */
+.pg-card{cursor:pointer}
+.pg-card.on{border-color:var(--acc);box-shadow:0 0 0 1px var(--acc) inset}
+.pg-card .badge.off{color:var(--muted);background:var(--panel)}
+.pg-ed{margin-top:22px}
+.pg-url{display:flex;align-items:center;border:1px solid var(--border);border-radius:9px;background:var(--surface);overflow:hidden}
+.pg-url span{padding:0 0 0 12px;font-size:13px;color:var(--muted);white-space:nowrap}
+.pg-url input{border:0!important;padding-left:2px!important;background:transparent!important}
+.pg-ed textarea.code{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12px;line-height:1.5;min-height:260px}
+.pg-share{margin:12px 0 0;padding:12px 14px;border-radius:9px;background:var(--panel);font-size:13px;white-space:pre-wrap;line-height:1.6}
+.pg-acts{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+.pg-chk{display:flex;align-items:center;gap:8px;font-size:13.5px;cursor:pointer}
 .empty{color:var(--muted);font-size:14px;padding:40px 0;text-align:center}
 .toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%);background:var(--primary);color:var(--primary-fg);padding:10px 18px;border-radius:9px;font-size:13px;z-index:50;opacity:0;transition:.2s;pointer-events:none}
 .toast.show{opacity:1}
@@ -363,6 +375,7 @@ select.kd-catadd{width:auto;max-width:200px;height:28px;padding:0 10px;border-ra
     <button class="nv" data-view="portfolio"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg> 포트폴리오</button>
     <button class="nv" data-view="resume"><svg viewBox="0 0 24 24"><path d="M6 2h9l5 5v15H6z"/><path d="M14 2v6h6M9 13h6M9 17h6"/></svg> 이력서 관리</button>
     <button class="nv" data-view="ax"><svg viewBox="0 0 24 24"><path d="M12 2 2 7l10 5 10-5z"/><path d="M2 17l10 5 10-5M2 12l10 5 10-5"/></svg> KILO 대시보드</button>
+    <button class="nv" data-view="pages"><svg viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg> 과제</button>
     <button class="nv" data-view="db"><svg viewBox="0 0 24 24"><ellipse cx="12" cy="5" rx="8" ry="3"/><path d="M4 5v14c0 1.7 3.6 3 8 3s8-1.3 8-3V5M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3"/></svg> 데이터 (DB)</button>
     <div class="rail-sp"></div>
     <div class="railfoot">
@@ -456,6 +469,12 @@ select.kd-catadd{width:auto;max-width:200px;height:28px;padding:0 10px;border-ra
         <div class="libform" id="axLeft" style="padding:18px 20px"></div>
         <div class="libpv"><iframe class="previewframe" id="axPreview" title="KILO 대시보드 미리보기"></iframe></div>
       </div>
+    </section>
+
+    <!-- 과제 (비밀번호로 여는 페이지) -->
+    <section id="v-pages" class="hidden">
+      <div class="mtop"><h1>과제</h1><div class="sp"></div><button class="btn p sm" id="pgNew">+ 새 과제</button></div>
+      <div class="mwrap" id="pgBody"></div>
     </section>
 
     <!-- DB VIEWER -->
@@ -597,7 +616,7 @@ function resolveAX(d){ return { template:'ax', title:d.title||'AX 포트폴리�
 
 /* ============ nav ============ */
 function show(view){
-  ['home','library','builder','portfolio','resume','ax','db'].forEach(v=>$('#v-'+v).classList.toggle('hidden',v!==view));
+  ['home','library','builder','portfolio','resume','ax','pages','db'].forEach(v=>$('#v-'+v).classList.toggle('hidden',v!==view));
   document.querySelectorAll('.nv').forEach(b=>b.classList.toggle('on',b.dataset.view===view));
   if(view==='home')renderHome();
   if(view==='library'){renderLibrary();updateLibPreview();}
@@ -606,6 +625,7 @@ function show(view){
   if(view==='db')renderDbView();
   if(view==='resume')renderResumeManage();
   if(view==='ax')renderAXAdmin();
+  if(view==='pages')renderPages(true);
 }
 const DB_TABLES=[
   {name:'profile', rel:'1행/유저', cols:['name_ko','name_en','title','summary','email','phone','location','links','role_tags']},
@@ -2061,6 +2081,85 @@ function renderAXAdmin(){
   }
   updateAXPreview();
 }
+
+/* ============ 과제 (비밀번호로 여는 페이지) ============ */
+// 스튜디오에서 본문 HTML · 주소 · 비밀번호를 정해 발행 → 공개 주소 /a/<slug>는 비밀번호를 넣어야 열림(private.html + DB 함수 open_private_page)
+const PG_BASE='https://kimjinsoo-mkt-ax.vercel.app/a/';
+let PG_LIST=null, PG_ED=null, PG_ERR='';
+const pgUrl=p=>PG_BASE+p.slug;
+const pgShare=p=>'과제 제출합니다.\n'+pgUrl(p)+'\n비밀번호는 '+p.pass+'입니다.';
+const pgSlug=()=>Array.from({length:6},()=>'abcdefghijkmnpqrstuvwxyz23456789'[Math.random()*32|0]).join('');
+function pgErr(e){ const m=(e&&e.message)||String(e);
+  if(/private_pages/.test(m)&&/(does not exist|schema cache)/.test(m)) return 'DB 표가 아직 없어요 — supabase/schema_v6_private_pages.sql을 SQL Editor에서 한 번 실행해 주세요';
+  if(/duplicate key|unique/.test(m)) return '이미 쓰는 주소예요 — 다른 주소로 바꿔 주세요';
+  if(/slug_check|pass_check/.test(m)) return '주소 또는 비밀번호 형식이 맞지 않아요';
+  return m; }
+async function renderPages(reload){
+  const box=$('#pgBody'); if(!box) return;
+  if(!(window.CLOUD&&CLOUD.enabled()&&CLOUD.user())){ box.innerHTML='<div class="empty">클라우드에 로그인하면 과제 페이지를 만들고 발행할 수 있어요.</div>'; return; }
+  if(reload||!PG_LIST){ PG_ERR=''; try{ PG_LIST=await CLOUD.listPages(); }catch(e){ PG_LIST=[]; PG_ERR=pgErr(e); } }
+  const cards=PG_LIST.map(p=>`<div class="doc pg-card${PG_ED&&PG_ED.id===p.id?' on':''}" data-pgsel="${p.id}">
+      <div class="tt">${esc(p.title||'(제목 없음)')}</div>
+      ${p.label?`<div class="meta">${esc(p.label)}</div>`:''}
+      <span class="badge${p.published?'':' off'}">${p.published?'발행됨':'발행 안 함'}</span>
+      <div class="meta mono">/a/${esc(p.slug)}</div>
+      <div class="acts"><button class="btn sm" data-pgcopy="${p.id}">공유 문구 복사</button><a class="btn sm" href="${esc(pgUrl(p))}" target="_blank" rel="noopener">열기</a></div>
+    </div>`).join('');
+  box.innerHTML=(PG_ERR?`<div class="blockcard" style="color:#dc2626;font-size:13px">${esc(PG_ERR)}</div>`:'')
+    +`<div class="grid">${cards}<div class="newcard" id="pgNewCard">+ 새 과제</div></div>`
+    +(PG_ED?pgEditor(PG_ED):'');
+}
+function pgEditor(p){
+  return `<div class="blockcard pg-ed">
+    <div class="bh"><span class="t">${PG_LIST.some(x=>x.id===p.id)?'과제 편집':'새 과제'}</span></div>
+    <div class="frow"><div class="f"><label>제목</label><input data-pgf="title" value="${esc(p.title)}" placeholder="비우면 본문 첫 제목"></div>
+      <div class="f"><label>메모 (스튜디오에서만 보여요)</label><input data-pgf="label" value="${esc(p.label)}" placeholder="예) 제출처 · 마감일"></div></div>
+    <div class="frow"><div class="f"><label>주소</label><div class="pg-url"><span>…/a/</span><input data-pgf="slug" value="${esc(p.slug)}" spellcheck="false"></div><div class="hint">영문 소문자 · 숫자 · 하이픈 3~64자</div></div>
+      <div class="f"><label>비밀번호</label><input data-pgf="pass" value="${esc(p.pass)}" spellcheck="false"><div class="hint">이 주소로 들어온 사람은 모두 이 비밀번호를 넣어야 열려요</div></div></div>
+    <div class="f"><label>본문 HTML <button class="btn sm" id="pgFileBtn" type="button" style="margin-left:8px">HTML 파일 불러오기</button><input type="file" id="pgFile" accept=".html,.htm,text/html" hidden></label>
+      <textarea class="code" data-pgf="html" spellcheck="false">${esc(p.html)}</textarea></div>
+    <label class="pg-chk"><input type="checkbox" data-pgf="published"${p.published?' checked':''}> 발행 (끄면 비밀번호가 맞아도 열리지 않아요)</label>
+    <div class="pg-share">${esc(pgShare(p))}</div>
+    <div class="pg-acts"><button class="btn a" id="pgSave">저장</button><button class="btn" id="pgCopy">공유 문구 복사</button><a class="btn" href="${esc(pgUrl(p))}" target="_blank" rel="noopener">새 탭에서 열기</a><div style="flex:1"></div><button class="btn" id="pgClose">닫기</button><button class="btn" id="pgDel" style="color:#dc2626">삭제</button></div>
+  </div>`;
+}
+function pgNew(){ const last=(PG_LIST||[])[0]; PG_ED={id:uid(),title:'',label:'',slug:pgSlug(),pass:last?last.pass:'',html:'',published:true}; renderPages(false); setTimeout(()=>{ const t=document.querySelector('[data-pgf="title"]'); if(t)t.focus(); },0); }
+function pgCopy(p){ const t=pgShare(p); (navigator.clipboard?navigator.clipboard.writeText(t):Promise.reject()).then(()=>toast('공유 문구를 복사했어요')).catch(()=>{ prompt('복사해서 쓰세요',t); }); }
+$('#pgNew').addEventListener('click',pgNew);
+$('#pgBody').addEventListener('click',async e=>{
+  const t=e.target;
+  if(t.closest('a')) return;
+  if(t.id==='pgNewCard'){ pgNew(); return; }
+  const cp=t.closest('[data-pgcopy]'); if(cp){ const p=PG_LIST.find(x=>x.id===cp.dataset.pgcopy); if(p)pgCopy(p); return; }
+  const sel=t.closest('[data-pgsel]'); if(sel){ const p=PG_LIST.find(x=>x.id===sel.dataset.pgsel); if(p){ PG_ED=Object.assign({},p); renderPages(false); } return; }
+  if(t.id==='pgFileBtn'){ $('#pgFile').click(); return; }
+  if(t.id==='pgClose'){ PG_ED=null; renderPages(false); return; }
+  if(t.id==='pgCopy'){ pgCopy(PG_ED); return; }
+  if(t.id==='pgDel'){ if(!PG_LIST.some(x=>x.id===PG_ED.id)){ PG_ED=null; renderPages(false); return; }
+    if(!confirm('이 과제 페이지를 삭제할까요? 공유한 주소도 더 이상 열리지 않아요.')) return;
+    try{ await CLOUD.deletePage(PG_ED.id); PG_ED=null; toast('삭제했어요'); renderPages(true); }catch(err){ toast('⚠ '+pgErr(err)); } return; }
+  if(t.id==='pgSave'){
+    const p=PG_ED; p.slug=(p.slug||'').trim().toLowerCase(); p.pass=(p.pass||'').trim();
+    if(!/^[a-z0-9-]{3,64}$/.test(p.slug)){ toast('주소는 영문 소문자 · 숫자 · 하이픈 3~64자'); return; }
+    if(p.pass.length<4){ toast('비밀번호는 4자 이상'); return; }
+    if(!p.title){ const d=document.createElement('div'); d.innerHTML=p.html; const h=d.querySelector('h1'); if(h) p.title=h.innerHTML.replace(/<br\s*\/?>/gi,' ').replace(/<[^>]+>/g,'').replace(/\s+/g,' ').trim(); }
+    t.disabled=true;
+    try{ const row=await CLOUD.savePage(p); PG_ED=Object.assign({},row); toast(row.published?'저장 · 발행했어요':'저장했어요 (발행 안 함)'); await renderPages(true); }
+    catch(err){ toast('⚠ '+pgErr(err)); t.disabled=false; }
+  }
+});
+$('#pgBody').addEventListener('input',e=>{
+  const k=e.target.dataset&&e.target.dataset.pgf; if(!k||!PG_ED) return;
+  PG_ED[k]=e.target.type==='checkbox'?e.target.checked:e.target.value;
+  const sh=document.querySelector('.pg-share'); if(sh) sh.textContent=pgShare(PG_ED);
+});
+$('#pgBody').addEventListener('change',e=>{
+  if(e.target.id!=='pgFile'||!e.target.files[0]||!PG_ED) return;
+  const r=new FileReader();
+  r.onload=()=>{ let h=String(r.result||''); const m=h.match(/<body[^>]*>([\s\S]*)<\/body>/i); if(m) h=m[1]; h=h.replace(/^\s*<!--ok-->\s*/,'').trim();
+    PG_ED.html=h; const ta=document.querySelector('[data-pgf="html"]'); if(ta) ta.value=h; toast('불러왔어요 — 저장해야 반영돼요'); };
+  r.readAsText(e.target.files[0],'utf-8');
+});
 
 /* ============ boot ============ */
 (async function(){

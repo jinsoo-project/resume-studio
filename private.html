@@ -1,0 +1,204 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow, noarchive">
+<meta name="referrer" content="no-referrer">
+<title>비공개 문서</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<style>
+  :root {
+    --page:#fbfaf8; --ink:#1d1d1f; --ink2:#3a3a3c; --muted:#76767b; --line:#e7e4df; --soft:#f3f1ed;
+    --acc:#2f5f99; --acc-soft:#eef3f9;
+  }
+  * { box-sizing:border-box; }
+  html { scroll-behavior:smooth; scroll-padding-top:24px; }
+  body { margin:0; background:var(--page); color:var(--ink); font-family:"Pretendard Variable",Pretendard,system-ui,-apple-system,"Apple SD Gothic Neo",sans-serif; font-size:15.5px; line-height:1.72; -webkit-font-smoothing:antialiased; word-break:keep-all; overflow-wrap:break-word; }
+  a { color:var(--acc); text-decoration:none; }
+  a:hover { text-decoration:underline; }
+
+  /* 잠금 화면 */
+  .gate { min-height:100vh; display:flex; align-items:center; justify-content:center; padding:24px 16px; }
+  .gate form { width:100%; max-width:320px; }
+  .gate h1 { font-size:17px; font-weight:600; margin:0 0 6px; }
+  .gate p { margin:0 0 20px; color:var(--muted); font-size:13.5px; }
+  .gate input { width:100%; height:44px; padding:0 14px; border:1px solid var(--line); border-radius:8px; background:#fff; font:inherit; font-size:15px; color:var(--ink); outline:none; }
+  .gate input:focus { border-color:var(--ink2); }
+  .gate button { margin-top:10px; width:100%; height:44px; border:0; border-radius:8px; background:var(--ink); color:#fff; font:inherit; font-size:14.5px; font-weight:600; cursor:pointer; }
+  .gate button:disabled { opacity:.5; cursor:default; }
+  .gate .err { min-height:20px; margin:10px 0 0; color:#b3261e; font-size:13px; }
+
+  /* 문서 */
+  .wrap { display:none; max-width:1160px; margin:0 auto; padding:56px 24px 120px; }
+  body.open .gate { display:none; }
+  body.open .wrap { display:grid; grid-template-columns:200px minmax(0,1fr); gap:56px; }
+  .toc { position:sticky; top:40px; align-self:start; font-size:13px; line-height:1.5; }
+  .toc p { margin:0 0 10px; color:var(--muted); font-size:12px; }
+  .toc a { display:block; padding:6px 0 6px 12px; color:var(--muted); border-left:1px solid var(--line); }
+  .toc a:hover { color:var(--ink); text-decoration:none; }
+  .toc a.on { color:var(--ink); border-left-color:var(--ink); font-weight:600; }
+  main { max-width:780px; min-width:0; }
+
+  .dh { padding-bottom:28px; border-bottom:1px solid var(--line); margin-bottom:8px; }
+  .eyebrow { margin:0 0 10px; color:var(--muted); font-size:13px; }
+  .dh h1 { margin:0 0 14px; font-size:30px; line-height:1.35; font-weight:600; letter-spacing:-.02em; }
+  .meta { margin:0; color:var(--muted); font-size:13.5px; }
+  .legend { margin:14px 0 0; color:var(--muted); font-size:12.5px; }
+
+  section { padding-top:48px; }
+  h2 { margin:0 0 18px; font-size:22px; line-height:1.4; font-weight:600; letter-spacing:-.015em; display:flex; gap:12px; align-items:baseline; }
+  h2 .no { color:var(--muted); font-weight:500; font-size:16px; min-width:14px; }
+  h3 { margin:36px 0 12px; font-size:16.5px; font-weight:600; letter-spacing:-.01em; }
+  p { margin:0 0 12px; }
+  .lead { color:var(--ink2); }
+  .note { color:var(--muted); font-size:13.5px; }
+  .point { margin:16px 0 0; padding:14px 16px; background:var(--soft); border-radius:8px; color:var(--ink2); }
+  .s { display:inline-block; margin-left:2px; color:var(--muted); font-size:11.5px; white-space:nowrap; }
+  .s::before { content:"["; } .s::after { content:"]"; }
+  .legend .s { margin:0 2px 0 8px; }
+  b { font-weight:600; }
+
+  .kv { display:grid; grid-template-columns:120px minmax(0,1fr); margin:0; border-top:1px solid var(--line); }
+  .kv dt, .kv dd { margin:0; padding:11px 0; border-bottom:1px solid var(--line); }
+  .kv dt { color:var(--muted); font-size:13.5px; padding-right:16px; }
+  .kv dd { color:var(--ink); }
+
+  .tw { overflow-x:auto; margin:4px 0 8px; }
+  table { width:100%; border-collapse:collapse; font-size:14px; line-height:1.6; }
+  th, td { text-align:left; vertical-align:top; padding:10px 12px 10px 0; border-bottom:1px solid var(--line); }
+  thead th { color:var(--muted); font-weight:500; font-size:12.5px; border-bottom:1px solid var(--ink2); }
+  tbody th { font-weight:600; color:var(--ink); min-width:96px; }
+  td.hl, th.hl { background:var(--acc-soft); padding-left:10px; }
+  thead th.hl { color:var(--acc); }
+  table.script td:nth-child(3) { font-weight:600; }
+
+  ol.reasons { margin:0; padding:0; list-style:none; counter-reset:r; border-top:1px solid var(--line); }
+  ol.reasons li { counter-increment:r; display:grid; grid-template-columns:120px minmax(0,1fr); padding:12px 0; border-bottom:1px solid var(--line); }
+  ol.reasons li b { color:var(--ink); font-size:14.5px; padding-right:16px; }
+  ol.reasons li b::before { content:counter(r) ". "; color:var(--muted); font-weight:500; }
+  ol.reasons li p { margin:0; }
+  ul.pending, ul.plain, ol.plain { margin:0 0 12px; padding-left:20px; }
+  ul.pending li, ul.plain li, ol.plain li { margin:4px 0; }
+  ol.plain b { margin-right:6px; }
+
+  .formula { padding:14px 16px; border:1px solid var(--line); border-radius:8px; background:#fff; font-size:14.5px; line-height:1.9; }
+  .formula span { white-space:nowrap; }
+  .big { margin:6px 0 18px; font-size:24px; line-height:1.45; font-weight:600; letter-spacing:-.02em; }
+
+  .init { margin-top:8px; }
+  .init h3 { margin-top:32px; }
+  .init h3 .s { font-weight:400; }
+
+  /* 캐러셀 시안 */
+  .car { display:grid; grid-auto-flow:column; grid-auto-columns:236px; gap:12px; overflow-x:auto; padding:4px 0 14px; scroll-snap-type:x mandatory; }
+  .cd { scroll-snap-align:start; position:relative; margin:0; aspect-ratio:4/5; background:#fff; border:1px solid var(--line); border-radius:6px; padding:22px 20px 40px; display:flex; flex-direction:column; overflow:hidden; }
+  .cd.cv { background:#1f2a37; border-color:#1f2a37; color:#fff; justify-content:center; }
+  .cn { position:absolute; top:14px; right:16px; margin:0; font-size:11px; color:var(--muted); }
+  .cv .cn, .cv .cb { color:rgba(255,255,255,.55); }
+  .cb { position:absolute; left:20px; bottom:14px; margin:0; font-size:11px; font-weight:600; color:var(--muted); }
+  .ct { margin:0; font-size:22px; line-height:1.4; font-weight:600; letter-spacing:-.02em; }
+  .cv .cx { margin-top:14px; color:rgba(255,255,255,.75); }
+  .ch { margin:18px 0 12px; font-size:17.5px; line-height:1.45; font-weight:600; letter-spacing:-.015em; }
+  .cx { margin:0; font-size:13px; line-height:1.6; color:var(--ink2); }
+  .cl { margin:0; padding:0; list-style:none; font-size:13px; line-height:1.5; }
+  .cl li { padding:7px 0; border-top:1px solid var(--line); }
+  .cc p { margin:0 0 10px; font-size:12.5px; line-height:1.55; color:var(--ink2); }
+  .cc b { display:block; font-size:12px; color:var(--ink); margin-bottom:2px; }
+  .cp p { display:flex; flex-direction:column; margin:0 0 10px; padding:10px 0; border-top:1px solid var(--line); }
+  .cp span { font-size:11.5px; color:var(--muted); }
+  .cp b { font-size:17px; }
+  .cp .on b { color:var(--acc); }
+
+  .srcs ul { margin:0; padding-left:18px; font-size:13.5px; color:var(--muted); }
+  .srcs li { margin:4px 0; }
+  .srcs h2 { font-size:16px; }
+
+  @media (max-width: 960px) {
+    body.open .wrap { display:block; padding:32px 16px 96px; }
+    .toc { display:none; }
+    .dh h1 { font-size:24px; }
+    .kv, ol.reasons li { grid-template-columns:96px minmax(0,1fr); }
+    table { font-size:13.5px; }
+  }
+  @media print {
+    body { background:#fff; }
+    .toc { display:none; }
+    body.open .wrap { display:block; padding:0; }
+    section { break-inside:auto; }
+    .car { grid-auto-flow:row; grid-template-columns:repeat(3, 1fr); overflow:visible; }
+  }
+</style>
+</head>
+<body>
+<div class="gate">
+  <form id="gf" autocomplete="off">
+    <h1>비공개 문서</h1>
+    <p>비밀번호를 입력하면 열립니다.</p>
+    <input id="pw" type="password" placeholder="비밀번호" aria-label="비밀번호" required>
+    <button id="go" type="submit">열기</button>
+    <p class="err" id="er" role="alert"></p>
+  </form>
+</div>
+<div class="wrap">
+  <nav class="toc" id="toc" aria-label="목차"></nav>
+  <main id="doc"></main>
+</div>
+<script src="/config.js"></script>
+<script>
+// 스튜디오 '과제' 탭에서 발행한 페이지 — /a/<slug>. 본문은 비밀번호가 맞을 때만 DB 함수(open_private_page)가 돌려줌
+const cfg = window.APP_CONFIG || {};
+const slug = (location.pathname.match(/^\/a\/([a-z0-9-]{3,64})\/?$/) || [])[1] || new URLSearchParams(location.search).get("s") || "";
+const KEY = "pp:" + slug;
+
+async function open_(pw) {
+  const r = await fetch(cfg.SUPABASE_URL + "/rest/v1/rpc/open_private_page", {
+    method: "POST",
+    headers: { apikey: cfg.SUPABASE_ANON_KEY, Authorization: "Bearer " + cfg.SUPABASE_ANON_KEY, "Content-Type": "application/json" },
+    body: JSON.stringify({ p_slug: slug, p_pass: pw })
+  });
+  if (!r.ok) throw new Error("net");
+  return r.json();
+}
+
+function show(page) {
+  const doc = document.getElementById("doc");
+  doc.innerHTML = page.html || "";
+  document.body.classList.add("open");
+  const h1 = doc.querySelector("h1");
+  document.title = page.title || (h1 ? h1.innerHTML.replace(/<br\s*\/?>/g, " ").replace(/<[^>]+>/g, "") : "문서");
+  const toc = document.getElementById("toc"), hs = [...doc.querySelectorAll("section[id] > h2")];
+  if (!hs.length) { toc.style.display = "none"; return; }
+  toc.innerHTML = "<p>목차</p>" + hs.map(h => {
+    const no = h.querySelector(".no"), t = no ? h.textContent.slice(no.textContent.length) : h.textContent;
+    return `<a href="#${h.parentElement.id}">${no ? no.textContent + ". " : ""}${t}</a>`;
+  }).join("");
+  const links = [...toc.querySelectorAll("a")];
+  const io = new IntersectionObserver(es => {
+    es.forEach(e => { if (e.isIntersecting) links.forEach(a => a.classList.toggle("on", a.getAttribute("href") === "#" + e.target.id)); });
+  }, { rootMargin: "-20% 0px -70% 0px" });
+  doc.querySelectorAll("section[id]").forEach(s => io.observe(s));
+  window.scrollTo(0, 0);
+}
+
+const f = document.getElementById("gf"), pw = document.getElementById("pw"), go = document.getElementById("go"), er = document.getElementById("er");
+async function tryOpen(v, quiet) {
+  go.disabled = true; er.textContent = "";
+  try {
+    const page = slug ? await open_(v) : null;
+    if (page && page.html) {
+      show(page);
+      try { sessionStorage.setItem(KEY, v); } catch (e) {}
+    } else if (!quiet) { er.textContent = "비밀번호가 맞지 않습니다."; pw.select(); }
+  } catch (e) {
+    if (!quiet) er.textContent = "잠시 후 다시 시도해 주세요.";
+  }
+  go.disabled = false;
+}
+f.addEventListener("submit", e => { e.preventDefault(); tryOpen(pw.value, false); });
+let saved = null;
+try { saved = sessionStorage.getItem(KEY); } catch (e) {}
+if (saved) tryOpen(saved, true); else pw.focus();
+</script>
+</body>
+</html>

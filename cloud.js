@@ -199,6 +199,25 @@
       (data || []).forEach(r => { const n = Number(r.count) || 0; total += n; if (String(r.day).slice(0, 10) === today) t = n; });
       return { total, today: t };
     },
+    // 비밀번호로 여는 페이지(private_pages · 스튜디오 '과제' 탭) — 주인만 읽고 씀. 공개 주소 /a/<slug>는 open_private_page RPC로만 열림
+    async listPages() {
+      const c = client(); if (!c || !user) return null;
+      const { data, error } = await c.from("private_pages").select("*").eq("user_id", user.id).order("updated_at", { ascending: false });
+      if (error) throw error;
+      return data || [];
+    },
+    async savePage(p) {
+      const c = client(); if (!c || !user) throw new Error("로그인 필요");
+      const row = { id: p.id, user_id: user.id, slug: p.slug, title: p.title || "", label: p.label || "", pass: p.pass, html: p.html || "", published: !!p.published, updated_at: new Date().toISOString() };
+      const { data, error } = await c.from("private_pages").upsert(row, { onConflict: "id" }).select().single();
+      if (error) throw error;
+      return data;
+    },
+    async deletePage(id) {
+      const c = client(); if (!c || !user) throw new Error("로그인 필요");
+      const { error } = await c.from("private_pages").delete().eq("id", id).eq("user_id", user.id);
+      if (error) throw error;
+    },
     async tableRows(table, limit) {
       const c = client(); if (!c || !user) return null;
       const { data, error } = await c.from(table).select("*").limit(limit || 200);
