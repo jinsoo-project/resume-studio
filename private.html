@@ -210,6 +210,26 @@
   code { padding:1px 6px; background:var(--soft); border-radius:5px; font-size:14px; }
   .tag { margin-left:6px; font-size:13.5px; color:var(--muted); }
 
+  /* 4칸 카드 · 운영 대시보드 화면 구성 */
+  .ax3.n4 { grid-template-columns:repeat(4,minmax(0,1fr)); }
+  .ax3.n4 .ax-t { font-size:17.5px; }
+  .ax3.n4 .ax-d { font-size:15px; margin:0; }
+  .dash { margin:12px 0 8px; padding:20px; background:#fff; border:1px solid var(--line); border-radius:14px; }
+  .dash-h { display:flex; justify-content:space-between; align-items:baseline; gap:12px; margin:0 0 14px; }
+  .dash-h b { font-size:16.5px; }
+  .dash-h span { font-size:13.5px; color:var(--muted); }
+  .kpis { display:grid; grid-template-columns:repeat(5,minmax(0,1fr)); gap:10px; }
+  .kpi { padding:14px 14px 12px; background:var(--page); border:1px solid var(--line); border-radius:10px; }
+  .kpi span { display:block; font-size:13px; color:var(--muted); }
+  .kpi b { display:block; margin:4px 0 2px; font-size:22px; font-weight:650; color:var(--ink); }
+  .kpi small { font-size:12.5px; color:var(--muted); }
+  .panels { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:10px; margin-top:10px; }
+  .panel { padding:16px 16px 12px; border:1px solid var(--line); border-radius:10px; }
+  .panel-h { margin:0 0 8px; font-size:15.5px; font-weight:650; }
+  .panel ul { margin:0 0 10px; padding:0; list-style:none; }
+  .panel li { padding:6px 0; border-bottom:1px solid var(--line); font-size:14.5px; color:var(--ink2); }
+  .panel-s { margin:0; font-size:12.5px; color:var(--muted); }
+
   /* 시안 이미지 */
   .shots { display:grid; grid-auto-flow:column; grid-auto-columns:250px; gap:12px; overflow-x:auto; padding:4px 0 14px; margin:8px 0 6px; scroll-snap-type:x mandatory; }
   .shots img { display:block; width:100%; height:auto; border:1px solid var(--line); border-radius:8px; background:#fff; cursor:zoom-in; scroll-snap-align:start; }
@@ -221,7 +241,8 @@
   .lbx img { max-width:100%; max-height:100%; border-radius:8px; }
 
   @media (max-width: 1000px) {
-    .tl.n4, .tl.n3, .ax3 { grid-template-columns:1fr; }
+    .tl.n4, .tl.n3, .ax3, .ax3.n4, .panels { grid-template-columns:1fr; }
+    .kpis { grid-template-columns:1fr 1fr; }
     ul.kwl { grid-template-columns:1fr 1fr; }
     .shots.grid4 { grid-template-columns:1fr 1fr; }
     .shots { grid-auto-columns:200px; }
