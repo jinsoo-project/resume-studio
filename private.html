@@ -152,6 +152,86 @@
   table.kw th small { display:block; margin-top:2px; font-size:12.5px; font-weight:500; color:var(--muted); }
   table.kw td { font-size:15px; }
 
+  /* 탭 문서 (section[data-tab]이 있으면 장마다 탭으로) */
+  .tabs { position:sticky; top:0; z-index:5; display:flex; gap:2px; overflow-x:auto; margin:0 -4px; padding:12px 4px 0; background:var(--page); border-bottom:1px solid var(--line); scrollbar-width:none; }
+  .tabs::-webkit-scrollbar { display:none; }
+  .tabs button { flex:none; padding:10px 8px 13px; border:0; border-bottom:2px solid transparent; background:none; font:inherit; font-size:14.5px; color:var(--muted); white-space:nowrap; cursor:pointer; }
+  .tabs button:hover { color:var(--ink); }
+  .tabs button .tn { margin-right:4px; color:#b3b1ab; font-weight:600; }
+  .tabs button.on { color:var(--ink); font-weight:650; border-bottom-color:var(--ink); }
+  .tabs button.on .tn { color:var(--acc); }
+  body.tabbed section[data-tab] { display:none; padding-top:44px; }
+  body.tabbed section[data-tab].on { display:block; }
+  .pn { display:flex; justify-content:space-between; gap:12px; margin-top:72px; padding-top:22px; border-top:1px solid var(--line); }
+  .pn button { padding:0; border:0; background:none; font:inherit; font-size:17px; font-weight:650; color:var(--ink); text-align:left; cursor:pointer; }
+  .pn button.nx { text-align:right; margin-left:auto; }
+  .pn button small { display:block; margin-bottom:2px; font-size:13px; font-weight:500; color:var(--muted); }
+  .pn button:hover { color:var(--acc); }
+
+  /* 단계 · 카드 */
+  .tl.n4 { grid-template-columns:repeat(4,minmax(0,1fr)); }
+  .tl.n3 { grid-template-columns:repeat(3,minmax(0,1fr)); }
+  .tl.n4 .tl-u, .tl.n3 .tl-u { margin:0; font-size:15px; }
+  .ax3 { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:12px; margin:4px 0 12px; }
+  .ax-d { margin:0 0 10px; font-size:15.5px; color:var(--ink2); }
+  .ax-q { margin:0; padding-top:10px; border-top:1px solid var(--line); font-size:16px; font-weight:650; }
+  .ax3 .ax-t { font-size:19px; }
+  .callout { margin:16px 0 20px; padding:18px 22px; background:var(--soft); border-radius:12px; font-size:16.5px; color:var(--ink2); }
+  .callout.accent { background:var(--acc-soft); }
+  .callout .lb { margin-right:10px; color:var(--acc); }
+
+  /* 키워드 */
+  .kwg { margin:26px 0 0; }
+  .kwg-h { display:flex; gap:10px; align-items:baseline; margin:0 0 8px; }
+  .kwg-h b { font-size:18px; }
+  .kwg-h span { font-size:14px; color:var(--muted); }
+  ul.kwl { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); column-gap:28px; margin:0 0 4px; padding:0; list-style:none; border-top:1px solid var(--line); }
+  ul.kwl li { display:flex; justify-content:space-between; gap:8px; padding:10px 0; border-bottom:1px solid var(--line); font-size:15.5px; }
+  ul.kwl li em { font-style:normal; font-weight:650; color:var(--acc); font-variant-numeric:tabular-nums; }
+
+  /* 펼쳐 보는 예시 */
+  details { margin:18px 0; background:#fff; border:1px solid var(--line); border-radius:12px; }
+  summary { display:flex; gap:12px; align-items:center; padding:16px 20px; font-size:16.5px; font-weight:650; list-style:none; cursor:pointer; }
+  summary::-webkit-details-marker { display:none; }
+  summary::before { content:"+"; flex:none; width:22px; height:22px; display:grid; place-items:center; border:1px solid var(--line); border-radius:6px; color:var(--muted); font-weight:500; }
+  details[open] summary::before { content:"−"; }
+  .ex { padding:6px 22px 22px; border-top:1px solid var(--line); }
+  .exh { margin:20px 0 8px; font-size:13.5px; font-weight:700; color:var(--acc); }
+  .q { margin:0 0 10px; padding:12px 16px; background:var(--soft); border-radius:10px; }
+  .ans { margin:0 0 10px; padding:4px 0 4px 18px; border-left:3px solid var(--acc); font-size:16px; }
+  .ans p { margin:0 0 10px; }
+  .post { margin:14px 0; padding:26px 28px; background:var(--page); border:1px solid var(--line); border-radius:12px; font-size:16px; }
+  .post h4 { margin:0 0 6px; font-size:22px; line-height:1.4; font-weight:650; }
+  .post h5 { margin:24px 0 8px; font-size:17px; font-weight:650; }
+  .post ol, .post ul { margin:0 0 12px; padding-left:22px; }
+  .post li { margin:5px 0; }
+  .kwline { margin:0 0 16px; font-size:14px; color:var(--muted); }
+  .cta { margin:16px 0 0; padding:12px 16px; background:var(--acc-soft); border-radius:10px; color:var(--acc); font-weight:650; }
+  code { padding:1px 6px; background:var(--soft); border-radius:5px; font-size:14px; }
+  .tag { margin-left:6px; font-size:13.5px; color:var(--muted); }
+
+  /* 시안 이미지 */
+  .shots { display:grid; grid-auto-flow:column; grid-auto-columns:250px; gap:12px; overflow-x:auto; padding:4px 0 14px; margin:8px 0 6px; scroll-snap-type:x mandatory; }
+  .shots img { display:block; width:100%; height:auto; border:1px solid var(--line); border-radius:8px; background:#fff; cursor:zoom-in; scroll-snap-align:start; }
+  .shots.grid4 { grid-auto-flow:row; grid-template-columns:repeat(4,minmax(0,1fr)); align-items:start; overflow:visible; }
+  .shots figure { margin:0; }
+  .shots figcaption { margin-top:8px; font-size:13.5px; color:var(--muted); }
+  .lbx { position:fixed; inset:0; z-index:50; display:none; align-items:center; justify-content:center; padding:28px; background:rgba(18,19,22,.86); cursor:zoom-out; }
+  .lbx.on { display:flex; }
+  .lbx img { max-width:100%; max-height:100%; border-radius:8px; }
+
+  @media (max-width: 1000px) {
+    .tl.n4, .tl.n3, .ax3 { grid-template-columns:1fr; }
+    ul.kwl { grid-template-columns:1fr 1fr; }
+    .shots.grid4 { grid-template-columns:1fr 1fr; }
+    .shots { grid-auto-columns:200px; }
+    .post { padding:20px 18px; }
+    .tabs button { font-size:14.5px; padding:10px 10px 12px; }
+  }
+  @media (max-width: 560px) {
+    ul.kwl { grid-template-columns:1fr; }
+  }
+
   @media (max-width: 1000px) {
     body.open .wrap { display:block; padding:40px 18px 100px; }
     .toc { display:none; }
@@ -190,6 +270,7 @@
   <nav class="toc" id="toc" aria-label="목차"></nav>
   <main id="doc"></main>
 </div>
+<div class="lbx" id="lbx" role="dialog" aria-label="이미지 크게 보기"><img alt=""></div>
 <script src="/config.js"></script>
 <script>
 // 스튜디오 '과제' 탭에서 발행한 페이지 — /a/<slug>. 본문은 비밀번호가 맞을 때만 DB 함수(open_private_page)가 돌려줌
@@ -213,6 +294,9 @@ function show(page) {
   document.body.classList.add("open");
   const h1 = doc.querySelector("h1");
   document.title = page.title || (h1 ? h1.innerHTML.replace(/<br\s*\/?>/g, " ").replace(/<[^>]+>/g, "") : "문서");
+  bindZoom(doc);
+  const tabSecs = [...doc.querySelectorAll("section[data-tab]")];
+  if (tabSecs.length) { showTabs(doc, tabSecs); return; }
   const toc = document.getElementById("toc"), hs = [...doc.querySelectorAll("section[id] > h2")];
   if (!hs.length) { toc.style.display = "none"; return; }
   toc.innerHTML = "<p>목차</p>" + hs.map(h => {
@@ -225,6 +309,51 @@ function show(page) {
   }, { rootMargin: "-20% 0px -70% 0px" });
   doc.querySelectorAll("section[id]").forEach(s => io.observe(s));
   window.scrollTo(0, 0);
+}
+
+// 장(section[data-tab])마다 탭 하나. 왼쪽 목차는 지금 탭의 소제목, 주소 #장id로 탭 유지
+function showTabs(doc, secs) {
+  document.body.classList.add("tabbed");
+  document.documentElement.style.scrollPaddingTop = "84px"; // 위에 붙는 탭 막대만큼
+  const bar = document.createElement("nav");
+  bar.className = "tabs"; bar.setAttribute("role", "tablist");
+  bar.innerHTML = secs.map((s, i) => `<button type="button" role="tab" data-i="${i}"><span class="tn">${i + 1}</span>${s.dataset.tab}</button>`).join("");
+  const head = doc.querySelector(".dh");
+  head ? head.after(bar) : doc.prepend(bar);
+  secs.forEach((s, i) => {
+    s.querySelectorAll("h3").forEach((h, j) => { if (!h.id) h.id = s.id + "-" + j; });
+    const pn = document.createElement("div");
+    pn.className = "pn";
+    pn.innerHTML = (i > 0 ? `<button type="button" data-i="${i - 1}"><small>← 이전</small>${secs[i - 1].dataset.tab}</button>` : "")
+      + (i < secs.length - 1 ? `<button type="button" class="nx" data-i="${i + 1}"><small>다음 →</small>${secs[i + 1].dataset.tab}</button>` : "");
+    s.appendChild(pn);
+  });
+  const toc = document.getElementById("toc"), btns = [...bar.querySelectorAll("button")];
+  function go(i, fromUser) {
+    secs.forEach((s, k) => s.classList.toggle("on", k === i));
+    btns.forEach((b, k) => { b.classList.toggle("on", k === i); b.setAttribute("aria-selected", k === i); });
+    btns[i].scrollIntoView({ block: "nearest", inline: "nearest" });
+    toc.innerHTML = `<p>${i + 1}. ${secs[i].dataset.tab}</p>` + [...secs[i].querySelectorAll("h3")].map(h => `<a href="#${h.id}">${h.textContent}</a>`).join("");
+    if (fromUser) {
+      history.replaceState(null, "", "#" + secs[i].id);
+      const top = bar.getBoundingClientRect().top + window.scrollY;
+      if (window.scrollY > top) window.scrollTo(0, top);
+    }
+  }
+  doc.addEventListener("click", e => { const b = e.target.closest(".tabs button, .pn button"); if (b) go(+b.dataset.i, true); });
+  const h = decodeURIComponent(location.hash.slice(1)), el = h && document.getElementById(h);
+  const sec = el && el.closest("section[data-tab]");
+  go(sec ? secs.indexOf(sec) : 0, false);
+  if ("scrollRestoration" in history) history.scrollRestoration = "manual";
+  setTimeout(() => { if (el && el !== sec) el.scrollIntoView(); else window.scrollTo(0, 0); }, 0);
+}
+
+// 시안 이미지 누르면 크게
+function bindZoom(doc) {
+  const box = document.getElementById("lbx"), img = box.querySelector("img");
+  doc.addEventListener("click", e => { const t = e.target.closest(".shots img"); if (!t) return; img.src = t.src; img.alt = t.alt; box.classList.add("on"); });
+  box.addEventListener("click", () => box.classList.remove("on"));
+  document.addEventListener("keydown", e => { if (e.key === "Escape") box.classList.remove("on"); });
 }
 
 const f = document.getElementById("gf"), pw = document.getElementById("pw"), go = document.getElementById("go"), er = document.getElementById("er");
