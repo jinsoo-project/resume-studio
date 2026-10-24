@@ -2142,7 +2142,7 @@ $('#pgBody').addEventListener('click',async e=>{
     const p=PG_ED; p.slug=(p.slug||'').trim().toLowerCase(); p.pass=(p.pass||'').trim();
     if(!/^[a-z0-9-]{3,64}$/.test(p.slug)){ toast('주소는 영문 소문자 · 숫자 · 하이픈 3~64자'); return; }
     if(p.pass.length<4){ toast('비밀번호는 4자 이상'); return; }
-    if(!p.title){ const d=document.createElement('div'); d.innerHTML=p.html; const h=d.querySelector('h1'); if(h) p.title=h.textContent.trim(); }
+    if(!p.title){ const d=document.createElement('div'); d.innerHTML=p.html; const h=d.querySelector('h1'); if(h) p.title=h.innerHTML.replace(/<br\s*\/?>/gi,' ').replace(/<[^>]+>/g,'').replace(/\s+/g,' ').trim(); }
     t.disabled=true;
     try{ const row=await CLOUD.savePage(p); PG_ED=Object.assign({},row); toast(row.published?'저장 · 발행했어요':'저장했어요 (발행 안 함)'); await renderPages(true); }
     catch(err){ toast('⚠ '+pgErr(err)); t.disabled=false; }
