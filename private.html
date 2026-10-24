@@ -261,7 +261,7 @@
   <form id="gf" autocomplete="off">
     <h1>비공개 문서</h1>
     <p>비밀번호를 입력하면 열립니다.</p>
-    <input id="pw" type="password" placeholder="비밀번호" aria-label="비밀번호" required>
+    <input id="pw" type="password" placeholder="비밀번호" aria-label="비밀번호" autocomplete="new-password" required>
     <button id="go" type="submit">열기</button>
     <p class="err" id="er" role="alert"></p>
   </form>
@@ -357,23 +357,22 @@ function bindZoom(doc) {
 }
 
 const f = document.getElementById("gf"), pw = document.getElementById("pw"), go = document.getElementById("go"), er = document.getElementById("er");
-async function tryOpen(v, quiet) {
-  go.disabled = true; er.textContent = "";
+// 매번 비밀번호를 물음 — 열어 본 비밀번호를 저장해 두고 다시 들어올 때 자동으로 여는 동작은 없앰(2026-10-24)
+async function tryOpen(v) {
+  if (!v) { pw.focus(); return; }
+  go.disabled = true; go.textContent = "확인 중"; er.textContent = "";
   try {
     const page = slug ? await open_(v) : null;
-    if (page && page.html) {
-      show(page);
-      try { sessionStorage.setItem(KEY, v); } catch (e) {}
-    } else if (!quiet) { er.textContent = "비밀번호가 맞지 않습니다."; pw.select(); }
+    if (page && page.html) { pw.value = ""; show(page); }
+    else { er.textContent = "비밀번호가 맞지 않습니다."; pw.select(); }
   } catch (e) {
-    if (!quiet) er.textContent = "잠시 후 다시 시도해 주세요.";
+    er.textContent = "잠시 후 다시 시도해 주세요.";
   }
-  go.disabled = false;
+  go.disabled = false; go.textContent = "열기";
 }
-f.addEventListener("submit", e => { e.preventDefault(); tryOpen(pw.value, false); });
-let saved = null;
-try { saved = sessionStorage.getItem(KEY); } catch (e) {}
-if (saved) tryOpen(saved, true); else pw.focus();
+f.addEventListener("submit", e => { e.preventDefault(); tryOpen(pw.value); });
+try { sessionStorage.removeItem(KEY); } catch (e) {} // 예전 버전이 남긴 저장값 지우기
+pw.focus();
 </script>
 </body>
 </html>
