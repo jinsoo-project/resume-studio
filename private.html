@@ -230,6 +230,17 @@
   .panel li { padding:6px 0; border-bottom:1px solid var(--line); font-size:14.5px; color:var(--ink2); }
   .panel-s { margin:0; font-size:12.5px; color:var(--muted); }
 
+  /* 탭 첫머리 요약 · 채널/매체 매트릭스 · 지표 칩 */
+  .kv.sum { margin:4px 0 40px; padding:6px 24px; background:#fff; border:1px solid var(--line); border-left:4px solid var(--acc); border-radius:12px; }
+  .kv.sum dt { color:var(--acc); font-size:14.5px; font-weight:700; }
+  .kv.sum dd { font-size:17.5px; font-weight:550; color:var(--ink); }
+  .kv.sum dt:last-of-type, .kv.sum dd:last-of-type { border-bottom:0; }
+  table.mx { min-width:860px; }
+  table.mx td { font-size:15px; }
+  table.mx td:nth-child(4) { color:var(--ink); font-weight:550; }
+  .chips-line { display:flex; flex-wrap:wrap; gap:8px; margin:8px 0 20px; }
+  .chips-line span { padding:6px 12px; background:#fff; border:1px solid var(--line); border-radius:999px; font-size:14.5px; color:var(--ink2); }
+
   /* 시안 이미지 */
   .shots { display:grid; grid-auto-flow:column; grid-auto-columns:250px; gap:12px; overflow-x:auto; padding:4px 0 14px; margin:8px 0 6px; scroll-snap-type:x mandatory; }
   .shots img { display:block; width:100%; height:auto; border:1px solid var(--line); border-radius:8px; background:#fff; cursor:zoom-in; scroll-snap-align:start; }
@@ -248,6 +259,8 @@
     .shots { grid-auto-columns:200px; }
     .post { padding:20px 18px; }
     .tabs button { font-size:14.5px; padding:10px 10px 12px; }
+    .kv.sum { padding:4px 16px; }
+    .kv.sum dd { font-size:16.5px; }
   }
   @media (max-width: 560px) {
     ul.kwl { grid-template-columns:1fr; }
