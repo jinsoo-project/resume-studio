@@ -2761,6 +2761,7 @@ h2{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
             var chIx = function (a) { for (var q = 0; q < TS.length; q++) if (TS[q].g.id === a.g.id) return q; return TS.length; };
             abItems = abItems.map(function (a, q) { return [a, q]; }).sort(function (A, B) { var a = A[0], b = B[0];
               return chIx(a) - chIx(b) || tKey(b.it, "startDate").localeCompare(tKey(a.it, "startDate")) || endKey(b.it).localeCompare(endKey(a.it)) || A[1] - B[1]; }).map(function (x) { return x[0]; });
+            abItems.forEach(function (a, q) { a.k = q; }); // 정렬 뒤 번호를 다시 매김 — 카드(data-vw) · 보기 창(data-k) · 해시(#p-id)가 같은 장을 가리키게(2026-11-06 카드와 다른 상세가 열리던 문제)
             // 분야별 방법론 한 줄(2026-10-11 사용자 '원론적인 방법론으로 한 줄 · 고민해요/일해요 같은 말 말고') — 제목 아래 · klio.text.tpM_{recent|perf|data|camp|cont}로 덮어쓰기
             var ABMT = {
               "t-recent": "반복되는 운영을 단계별로 쪼개 규칙으로 만들고, 데이터 수집부터 리포팅 · 집행까지 하나의 흐름으로 자동화해요.",
